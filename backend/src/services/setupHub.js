@@ -40,7 +40,9 @@ const ITEMS = [
     note: 'Nothing else can be set up until this is filled in.' },
   // ── Lane 1 ──
   { key: 'jurisdiction', lane: 'compliance', name: "Which state's law this city follows", door: '/jurisdiction-config/identity', deps: ['agency'], section: 'identity' },
-  { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/jurisdiction-config/deadlines', deps: ['jurisdiction'], section: 'deadlines', legal: true },
+  // D1 (Kevin 2026-08-29): deadlines migrates onto the request-rules screen as its 4th tab — the row
+  // stays (its door moves) and the A1 fold covers it: Attest on the tab signs the deadlines section.
+  { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/setup/request-rules?tab=deadlines', deps: ['jurisdiction'], section: 'deadlines', legal: true, foldSections: ['deadlines'] },
   // 'Fee rules' (Kevin 2026-08-27): the fee-law screen absorbs fee waivers; the separate
   // 'Fee waivers and who approves them' row is retired — its content lives on this screen's tabs.
   // F3 (Kevin 2026-08-29): the fee-law screen also absorbs the deposit & payment clock policy; the

@@ -65,7 +65,7 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   SNAP.sections = await db.all("SELECT * FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx'");
   SNAP.proposalIds = (await db.all("SELECT id FROM config_proposals WHERE jurisdiction_id = 'jur-tx'")).map(function (r) { return r.id; });
   SNAP.profile = await db.get("SELECT * FROM jurisdiction_profiles WHERE id = 'jur-tx'");
-  SNAP.signoffs = await db.all("SELECT item_key, marked_by, marked_by_name, marked_at FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility')");
+  SNAP.signoffs = await db.all("SELECT item_key, marked_by, marked_by_name, marked_at FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility','deadlines')");
 
   // Precondition: the fixture ships without the imported template domains (they arrive when a harness or
   // the agency lock imports TX). Import here so this harness holds in any run order.
@@ -199,6 +199,42 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   var elAtt2 = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'eligibility'");
   ok('E6b undoing the mark un-attests the folded section', unmark.status === 200 && (!elAtt2 || elAtt2.attested_by == null), JSON.stringify(unmark.body));
 
+  console.log('\n=== DL. THE DEADLINES TAB (D1, Kevin 2026-08-29) ===');
+  // FIXTURE/ORDER-PROOF: force the deadline domain to a known shape for this section — an empty holiday
+  // calendar and both service targets unset. The wholesale SNAP restore in F puts the fixture row back.
+  var dlSetup = await domain('deadline');
+  dlSetup.holidays = [];
+  if (dlSetup.clocks && dlSetup.clocks.acknowledge) delete dlSetup.clocks.acknowledge.duration;
+  if (dlSetup.clocks && dlSetup.clocks.complete) delete dlSetup.clocks.complete.duration;
+  await writeDomain('deadline', dlSetup);
+  var gD = await callAs(U.dir, 'GET', '/request-rules');
+  var D = gD.body.tabs.deadlines;
+  ok('DL1 the tab reads: the §3 rules exactly, 7 clocks (5 statutory · 2 targets), the suspension shown as unlanded, calendar empty',
+    D.rules.map(function (r) { return r.id; }).join(',') === 'TX-0008,TX-0009,TX-0010,TX-S04' &&
+    D.clocks.length === 7 && D.clocks.filter(function (c) { return c.kind !== 'operational_target'; }).length === 5 &&
+    D.clocks[0].primary === true && D.unlanded.length === 1 && D.unlanded[0].timer === 'suspension' &&
+    D.calendar.holidayCount === 0 && D.unsetTargets === 2 && gD.body.canEdit.deadlines === true,
+    JSON.stringify([D.rules.map(function (r) { return r.id; }), D.clocks.length, D.calendar]));
+  var dlRow = hubItem((await callAs(U.dir, 'GET', '/setup-hub')).body, 'deadlines');
+  ok('DL2 the hub row stays and its door opens the tab', dlRow && dlRow.door === '/setup/request-rules?tab=deadlines' && dlRow.legal === true, JSON.stringify(dlRow));
+  var tStat = await callAs(U.dir, 'POST', '/request-rules/deadlines/target', { clock: 'respond', days: 5 });
+  ok('DL3 a statutory clock refuses a target in words — its figure changes by proposal', tStat.status === 422 && /statutory clock/.test(tStat.body.error), JSON.stringify(tStat.body));
+  var tSet = await callAs(U.dir, 'POST', '/request-rules/deadlines/target', { clock: 'acknowledge', days: 2 });
+  ok('DL4 a service target records and reads back (1 of 2 still unset)', tSet.status === 200 && tSet.body.duration === 2 && tSet.body.screen.tabs.deadlines.unsetTargets === 1, JSON.stringify(tSet.body).slice(0, 120));
+  var tClear = await callAs(U.dir, 'POST', '/request-rules/deadlines/target', { clock: 'acknowledge', days: null });
+  ok('DL5 blank clears it — no target is a valid posture', tClear.status === 200 && tClear.body.duration === null);
+  var hl1 = await callAs(U.dir, 'POST', '/request-rules/deadlines/holidays', {});
+  ok('DL6 the empty calendar loads the US federal set in one act (24 days)', hl1.status === 200 && hl1.body.loaded === 24 && hl1.body.screen.tabs.deadlines.calendar.holidayCount === 24, JSON.stringify(hl1.body).slice(0, 120));
+  var hl2 = await callAs(U.dir, 'POST', '/request-rules/deadlines/holidays', {});
+  ok('DL7 a loaded calendar refuses the one-act load — changing it goes through a proposal', hl2.status === 409 && /proposal/.test(hl2.body.error), JSON.stringify(hl2.body));
+  var tStaff = await callAs(U.staff, 'POST', '/request-rules/deadlines/target', { clock: 'complete', days: 3 });
+  ok('DL8 staff cannot touch the deadlines tab (a legal section — legal_rules only)', tStaff.status === 403 && /legal_rules/.test(tStaff.body.error), JSON.stringify(tStaff.body));
+  var dlMark = await callAs(U.legal, 'POST', '/setup-hub/deadlines/done');
+  var dlAtt = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'deadlines'");
+  ok('DL9 the A1 fold covers the tab: Senior Legal\'s done-mark attests the deadlines section in the same act',
+    dlMark.status === 200 && dlMark.body.attested && dlMark.body.attested.indexOf('deadlines') >= 0 && dlAtt && dlAtt.attested_by === 'RR oro_senior_legal', JSON.stringify(dlMark.body));
+  await callAs(U.legal, 'DELETE', '/setup-hub/deadlines/done');
+
   console.log('\n=== F. CLEANUP — the fixture is left exactly as found ===');
   await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx'");
   for (var rr of SNAP.rules) {
@@ -218,7 +254,7 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
     await db.run('UPDATE jurisdiction_profiles SET ' + pcols.map(function (c) { return c + ' = ?'; }).join(', ') + " WHERE id = 'jur-tx'",
       pcols.map(function (c) { return SNAP.profile[c]; }));
   }
-  await db.run("DELETE FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility')");
+  await db.run("DELETE FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility','deadlines')");
   for (var sg of SNAP.signoffs) {
     await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at) VALUES (?,?,?,?)', [sg.item_key, sg.marked_by, sg.marked_by_name, sg.marked_at]);
   }

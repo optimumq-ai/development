@@ -43,8 +43,19 @@ const CHOICES_DOMAIN = 'clarification_screen';
 const TAB_CONCEPTS = {
   clarification: ['clarification'],
   exemptions: ['appeal', 'denial'],
-  eligibility: ['eligibility']
+  eligibility: ['eligibility'],
+  // D1 (Kevin 2026-08-29): the deadlines tab — production.completion_window carries the produce/certify
+  // rules, response.catastrophe_suspension the § 552.233 suspension. Exactly TX_RULES_READABLE §3's list.
+  deadlines: ['production', 'response']
 };
+
+// The US federal (observed) holiday set 2026–2027 — the same list the fixture seeds
+// (src/db/seed_fixture.sql deadline_rules) and the per-state imports inherited. Loaded onto the
+// deadlines tab in one act when the live calendar is empty; anything beyond it is a proposal.
+const US_FEDERAL_HOLIDAYS = ['2026-01-01', '2026-01-19', '2026-02-16', '2026-05-25', '2026-06-19', '2026-07-03',
+  '2026-09-07', '2026-10-12', '2026-11-11', '2026-11-26', '2026-11-27', '2026-12-25',
+  '2027-01-01', '2027-01-18', '2027-02-15', '2027-05-31', '2027-06-18', '2027-07-05',
+  '2027-09-06', '2027-10-11', '2027-11-11', '2027-11-25', '2027-11-26', '2027-12-24'];
 
 // The clarification tab's five choices (state-generic; TX_RULES_READABLE §4). `key` is the template
 // knob the choice materializes as; kind drives the control the screen renders.
@@ -321,6 +332,13 @@ async function screen(jid) {
   var exChoices = EX_CHOICES.map(function (c) { return choiceRow(c, (exRaw.knobs || {})[c.key]); });
   var redactionRules = await get("SELECT COUNT(*) n FROM redaction_rules WHERE approval_status = 'approved' AND is_active = 1");
 
+  // deadlines (D1): the clock table the BW9b section renders, re-served for the tab. Statutory clocks
+  // read as law (changes are proposals); operational targets are the city's own numbers.
+  var dlRaw = (await JR.read(prof.id, 'deadline')) || {};
+  var cmRaw = (await JR.read(prof.id, 'clock_matrix')) || {};
+  var tt = require('./ruleEditors').timerTable(dlRaw, cmRaw);
+  var holidays = Array.isArray(dlRaw.holidays) ? dlRaw.holidays : [];
+
   // eligibility
   var elRaw = (await JR.read(prof.id, 'eligibility')) || {};
   var dims = Object.keys(elRaw.dimensions || {}).map(function (k) {
@@ -353,6 +371,15 @@ async function screen(jid) {
         rules: rulesForTab(byDomain, 'eligibility'),
         dimensions: dims,
         unconfirmed: dims.filter(function (d) { return d.gated && !d.confirmed; }).length
+      },
+      deadlines: {
+        section: secOut('deadlines'),
+        rules: rulesForTab(byDomain, 'deadlines'),
+        clocks: tt.rows,
+        unlanded: tt.unlandedTimers,
+        calendar: { weekend: dlRaw.weekend || [0, 6], holidayCount: holidays.length,
+          holidayFirst: holidays[0] || null, holidayLast: holidays[holidays.length - 1] || null },
+        unsetTargets: tt.rows.filter(function (r) { return r.kind === 'operational_target' && r.unset; }).length
       }
     },
     letters: {
@@ -361,7 +388,42 @@ async function screen(jid) {
   };
 }
 
+// ---- deadlines tab writes (D1) --------------------------------------------------------------------
+// A SERVICE TARGET is the city's own pacing number on an operational-target clock — never a statutory
+// figure (kindOf polices the line; a statutory clock changes only by proposal with a citation). Writes
+// go straight into the deadline domain, whose configIntegrity checks then band the value.
+async function setServiceTarget(jid, clockKey, days, user) {
+  var CM = require('./clockMatrix');
+  var dl = (await JR.read(jid, 'deadline')) || {};
+  var def = dl.clocks && dl.clocks[clockKey];
+  if (!def) throw Object.assign(new Error('No clock named "' + clockKey + '" — the state load defines them.'), { status: 404 });
+  if (CM.kindOf(def) !== 'operational_target') {
+    throw Object.assign(new Error('"' + (def.label || clockKey) + '" is a statutory clock — its figure changes through a proposal with a citation, never here.'), { status: 422 });
+  }
+  if (days === null || days === undefined || days === '') { delete def.duration; }
+  else {
+    var n = Number(days);
+    if (!Number.isInteger(n) || n < 1 || n > 365) throw Object.assign(new Error('A service target is whole days, 1 to 365 — or blank for no target.'), { status: 422 });
+    def.duration = n;
+  }
+  await JR.write(jid, 'deadline', dl, user.name || user.email || user.sub);
+  return { clock: clockKey, duration: def.duration != null ? def.duration : null };
+}
+
+// One act for the empty-calendar case: load the US federal (observed) set the imports were meant to
+// carry. A calendar that already holds days is edited by proposal, never overwritten here.
+async function loadHolidaySet(jid, user) {
+  var dl = (await JR.read(jid, 'deadline')) || {};
+  if (Array.isArray(dl.holidays) && dl.holidays.length) {
+    throw Object.assign(new Error('The holiday calendar already holds ' + dl.holidays.length + ' day(s) — changing a loaded calendar goes through a proposal.'), { status: 409 });
+  }
+  dl.holidays = US_FEDERAL_HOLIDAYS.slice();
+  await JR.write(jid, 'deadline', dl, user.name || user.email || user.sub);
+  return { loaded: dl.holidays.length };
+}
+
 module.exports = { TAB_CONCEPTS: TAB_CONCEPTS, CHOICES_DOMAIN: CHOICES_DOMAIN, CLAR_CHOICES: CLAR_CHOICES, EX_CHOICES: EX_CHOICES,
+  US_FEDERAL_HOLIDAYS: US_FEDERAL_HOLIDAYS, setServiceTarget: setServiceTarget, loadHolidaySet: loadHolidaySet,
   APPROVAL_GROUPS: APPROVAL_GROUPS, collectRules: collectRules, rulesForTab: rulesForTab,
   statutoryGraceDays: statutoryGraceDays, screen: screen, setEnabled: setEnabled,
   confirmChoice: confirmChoice, setPosture: setPosture };

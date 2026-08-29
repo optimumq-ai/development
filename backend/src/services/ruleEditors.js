@@ -403,5 +403,5 @@ function sectionForDomain(domain) {
 
 module.exports = { LEGAL_DOMAINS: LEGAL_DOMAINS, domainsFor: domainsFor, content: content,
   propose: propose, applyEditorProposal: applyEditorProposal, validate: validate,
-  mayApplyEditor: mayApplyEditor, sectionForDomain: sectionForDomain,
+  mayApplyEditor: mayApplyEditor, sectionForDomain: sectionForDomain, timerTable: timerTable,
   USE_CASES: USE_CASES, KIND_LABELS: KIND_LABELS, research: RR };

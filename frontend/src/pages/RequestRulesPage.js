@@ -23,7 +23,10 @@ var TABS = [
   { key: 'clarification', hubKey: 'clarification', label: 'Vague requests and clarification' },
   { key: 'exemptions', hubKey: 'exemptions', label: 'Exemptions and appeals' },
   { key: 'eligibility', hubKey: 'eligibility', label: 'Who is allowed to request' },
+  { key: 'deadlines', hubKey: 'deadlines', label: 'Response deadlines and tolling' },
 ];
+// what pauses a clock, in plain words
+var TOLL_LABELS = { clarification_pending: 'clarification', payment_pending: 'payment', extension: 'extension', ag_ruling_pending: 'AG ruling' };
 var hint = { fontSize: '11.5px', color: C.faint, lineHeight: '1.4' };
 var card = { background: 'white', border: '1px solid ' + C.line, borderRadius: '10px' };
 var cite = { fontSize: '11px', color: C.faint, lineHeight: '1.35' };
@@ -119,7 +122,7 @@ export default function RequestRulesPage() {
     return Promise.all([api.get('/request-rules'), api.get('/setup-hub')]).then(function (r) {
       setData(r[0].data); setEdits({}); setPosture({});
       var h = {};
-      r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'clarification' || x.key === 'exemptions' || x.key === 'eligibility') h[x.key] = x; }); });
+      r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'clarification' || x.key === 'exemptions' || x.key === 'eligibility' || x.key === 'deadlines') h[x.key] = x; }); });
       setHub(h); setErr('');
     }).catch(function (e) { setErr(errText(e, 'The screen could not load.')); });
   }
@@ -144,7 +147,7 @@ export default function RequestRulesPage() {
   var td = data.tabs[tab === 'exemptions' ? 'exemptions' : tab];
   var can = !!(data.canEdit && data.canEdit[tab]);
   var attested = hubRow && hubRow.signoff;
-  var laneIndex = { clarification: 'item 4 of 10', exemptions: 'item 5 of 10', eligibility: 'item 6 of 10' }[tab];
+  var laneIndex = { clarification: 'item 4 of 10', exemptions: 'item 5 of 10', eligibility: 'item 6 of 10', deadlines: 'item 2 of 10' }[tab];
 
   function edited(c) { return edits[c.path] !== undefined ? edits[c.path] : (c.value != null ? c.value : null); }
   function setEdit(path, v) { var o = Object.assign({}, edits); o[path] = v; setEdits(o); setMsg(''); }
@@ -199,7 +202,9 @@ export default function RequestRulesPage() {
 
   var clarOn = data.tabs.clarification.enabled;
   var mayAttest = can && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention' &&
-    (tab === 'clarification' ? (clarOn && td.unconfirmed === 0) : td.unconfirmed === 0);
+    (tab === 'clarification' ? (clarOn && td.unconfirmed === 0)
+      : tab === 'deadlines' ? td.calendar.holidayCount > 0   // blank service targets are a valid posture; an empty holiday calendar is not
+      : td.unconfirmed === 0);
 
   function attestBtn() {
     if (attested) return <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>Attested · undo</button>;
@@ -416,6 +421,94 @@ export default function RequestRulesPage() {
     );
   }
 
+  // ---------------- the deadlines tab (D1) ----------------
+  async function setTarget(clockKey) {
+    setBusy('target-' + clockKey); setErr(''); setMsg('');
+    var v = edits['target/' + clockKey];
+    try { await api.post('/request-rules/deadlines/target', { clock: clockKey, days: v === '' ? null : v }); setMsg('Recorded.'); await load(); }
+    catch (e) { setErr(errText(e, 'The service target could not be recorded.')); }
+    setBusy('');
+  }
+  async function loadHolidays() {
+    setBusy('holidays'); setErr(''); setMsg('');
+    try { var r = await api.post('/request-rules/deadlines/holidays', {}); setMsg(r.data.loaded + ' holidays loaded.'); await load(); }
+    catch (e) { setErr(errText(e, 'The holiday calendar could not be loaded.')); }
+    setBusy('');
+  }
+  function deadlinesBody() {
+    var d = data.tabs.deadlines;
+    var statutory = (d.clocks || []).filter(function (r) { return r.kind !== 'operational_target'; });
+    var targets = (d.clocks || []).filter(function (r) { return r.kind === 'operational_target'; });
+    var cal = d.calendar || { weekend: [0, 6], holidayCount: 0 };
+    function clockCite(r) {
+      if (!r.citation) return null;
+      var short = String(r.citation).split(';')[0];
+      return <button type="button" tabIndex={-1} onClick={function () { setStatute({ title: r.label, authority: r.citation, ruleIds: r.sourceRuleIds }); }}
+        title="Open the statute text behind this clock" style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline dotted' }}>{short}</button>;
+    }
+    function grp(title, n) {
+      return <div style={{ padding: '12px 16px 6px', fontSize: '12px', fontWeight: '700', background: '#F8FAFC', borderTop: '1px solid ' + C.line }}>{title} <span style={{ fontWeight: '500', color: C.faint }}>· {n}</span></div>;
+    }
+    return (
+      <div>
+        <ChoiceHead sub="Statutory figures read as law — changing one is a proposal with a citation. Service targets are the city's own numbers, editable here." pill={null} />
+        {grp('Set by ' + stateName + ' law', statutory.length)}
+        {statutory.map(function (r) {
+          return <div key={r.clockType} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 150px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px', lineHeight: '1.45' }}>
+            <div>
+              <b>{r.label}</b>{r.primary ? <span style={{ color: C.amber, fontWeight: '700' }}> · the primary clock</span> : null}
+              <div style={Object.assign({}, cite, { marginTop: '2px' })}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', background: '#E8EEF4', color: C.navy, border: '1px solid #C5D3DF', marginRight: '6px' }}>Fixed</span>
+                {clockCite(r)}
+                {(r.tollReasons || []).length ? <span> · pauses for: {(r.tollReasons || []).map(function (tr) { return TOLL_LABELS[tr] || tr.replace(/_/g, ' '); }).join(' · ')}</span> : null}
+              </div>
+            </div>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: C.navy, background: '#E8EEF4', border: '1px solid #C5D3DF', borderRadius: '6px', padding: '5px 8px', textAlign: 'center', lineHeight: '1.3' }}>{r.duration}</div>
+          </div>;
+        })}
+        {grp("This city's own service targets", targets.length)}
+        {targets.map(function (r) {
+          var val = edits['target/' + r.clockType] !== undefined ? edits['target/' + r.clockType] : (r.durationRaw != null ? String(r.durationRaw) : '');
+          return <div key={r.clockType} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 220px', gap: '12px', alignItems: 'center', padding: '12px 16px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px', lineHeight: '1.45' }}>
+            <div>
+              <b>{r.label}</b>
+              <div style={Object.assign({}, cite, { marginTop: '2px' })}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', background: 'white', color: C.mute, border: '1px dashed ' + C.edge, marginRight: '6px' }}>Not a legal deadline</span>
+                {r.useCase || 'The city\'s own pacing number.'} Blank = no target.
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input value={val} disabled={!can} placeholder="business days"
+                onChange={function (e) { setEdit('target/' + r.clockType, e.target.value.replace(/[^\d]/g, '')); }}
+                style={{ width: '110px', height: '30px', border: '1px solid ' + C.edge, borderRadius: '7px', padding: '0 10px', fontSize: '13px', fontFamily: 'inherit' }} />
+              <button type="button" disabled={!can || busy === 'target-' + r.clockType || edits['target/' + r.clockType] === undefined}
+                onClick={function () { setTarget(r.clockType); }}
+                style={btn(can && edits['target/' + r.clockType] !== undefined ? 'sec' : 'dis', { height: '28px', fontSize: '12px' })}>Set</button>
+            </div>
+          </div>;
+        })}
+        {grp('The calendar the clocks count on', cal.holidayCount ? cal.holidayCount + ' holidays' : 'empty')}
+        <div style={{ padding: '12px 16px 14px', fontSize: '12.5px', lineHeight: '1.5' }}>
+          <div>Weekends: <b>Saturday and Sunday</b> are not business days.</div>
+          <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {cal.holidayCount
+              ? <Pill bg="#E1F2E9" color={C.ok}>Holiday calendar: {cal.holidayCount} days · {String(cal.holidayFirst).slice(0, 4)}–{String(cal.holidayLast).slice(0, 4)}</Pill>
+              : <React.Fragment>
+                  <Pill bg="#FEE2E2" color="#991B1B">Holiday calendar: 0 days loaded</Pill>
+                  <button type="button" disabled={!can || busy === 'holidays'} onClick={loadHolidays} style={btn(can ? 'sec' : 'dis', { height: '28px', fontSize: '12px' })}>{busy === 'holidays' ? 'Loading…' : 'Load the US federal set'}</button>
+                </React.Fragment>}
+          </div>
+          <div style={hint}>{cal.holidayCount
+            ? 'Business-day clocks skip these days. Changing a loaded calendar goes through a proposal.'
+            : 'Every business-day clock above counts holidays as working days until a calendar is loaded — a 10-day statutory deadline lands EARLIER than the law requires. This is the one item on this tab that needs attention.'}</div>
+        </div>
+        {(d.unlanded || []).length ? <div style={{ padding: '10px 16px 14px', borderTop: '1px solid ' + C.line }}>
+          <span style={hint}>{stateName} law also sets: {(d.unlanded || []).map(function (u) { return u.timerLabel; }).join(' · ')} — it lands on no single clock; when one is declared, the engine pauses every running clock for its duration. Shown so the law's full set is visible; there is nothing to configure.</span>
+        </div> : null}
+      </div>
+    );
+  }
+
   // ---------------- letter views ----------------
   function letterModal() {
     if (!letter) return null;
@@ -458,10 +551,11 @@ export default function RequestRulesPage() {
   var headSub = {
     clarification: 'What happens when a request is too unclear to search for: what ' + stateName + ' law says, and the few things this city decides.',
     exemptions: 'Withholding information in ' + stateName + ' runs on strict clocks. The clocks are the law\'s; the city decides who approves a denial and how the letter goes out.',
-    eligibility: 'In ' + stateName + ', anyone may request. What is left to the city — and what the law already settles.'
+    eligibility: 'In ' + stateName + ', anyone may request. What is left to the city — and what the law already settles.',
+    deadlines: 'Every clock a request runs on: the deadlines ' + stateName + ' law sets, the service targets this city sets for itself, and what pauses them. A legal section — Senior Legal signs it off.'
   }[tab];
-  var headTitle = { clarification: 'Vague requests and clarification', exemptions: 'Exemptions and appeals', eligibility: 'Who is allowed to request' }[tab];
-  var showSave = tab !== 'eligibility' && (tab !== 'clarification' || clarOn);
+  var headTitle = { clarification: 'Vague requests and clarification', exemptions: 'Exemptions and appeals', eligibility: 'Who is allowed to request', deadlines: 'Response deadlines and tolling' }[tab];
+  var showSave = tab !== 'eligibility' && tab !== 'deadlines' && (tab !== 'clarification' || clarOn);
 
   return (
     <div style={{ maxWidth: '1220px', color: C.ink }}>
@@ -502,11 +596,13 @@ export default function RequestRulesPage() {
             ? <Pill bg="#EDE9FE" color="#5B21B6">Reasons library · not loaded yet</Pill> : null}
           {tab === 'eligibility' && td.unconfirmed > 0
             ? <Pill bg="#F6EBD6" color={C.amber}>{td.unconfirmed === 1 ? '1 decision to confirm' : td.unconfirmed + ' decisions to confirm'}</Pill> : null}
+          {tab === 'deadlines' && td.calendar && td.calendar.holidayCount === 0
+            ? <Pill bg="#FEE2E2" color="#991B1B">Holiday calendar empty</Pill> : null}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '480px minmax(0, 1fr)', gap: 0 }}>
           <LawPanel stateName={stateName} rules={td.rules || []} onCite={setStatute} />
-          {tab === 'clarification' ? clarificationBody() : tab === 'exemptions' ? exemptionsBody() : eligibilityBody()}
+          {tab === 'clarification' ? clarificationBody() : tab === 'exemptions' ? exemptionsBody() : tab === 'deadlines' ? deadlinesBody() : eligibilityBody()}
         </div>
 
         <div style={{ padding: '12px 20px', borderTop: '1px solid ' + C.line, background: C.wash, borderRadius: '0 0 10px 10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -514,6 +610,7 @@ export default function RequestRulesPage() {
             {msg ? <span style={{ color: C.ok, fontWeight: '600' }}>{msg} </span> : null}
             {tab === 'clarification' ? 'Attest becomes available once clarification is switched on and all five choices are recorded.'
               : tab === 'exemptions' ? <span>This is a legal section: recording and attesting these choices requires the <b>Legal Rules</b> group — the Senior Legal attorney owns it.</span>
+              : tab === 'deadlines' ? <span>This is a legal section — <b>Legal Rules</b> records targets and attests. Statutory figures never edit in place: a change means the law changed, which goes through a proposal with a citation. Attest waits only on the holiday calendar; blank service targets are a valid posture.</span>
               : 'Attest becomes available once the decision above is confirmed.'}
             {!can ? ' · view only for you' : ''}
           </span>

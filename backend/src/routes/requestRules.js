@@ -30,7 +30,8 @@ router.get('/', requireAuth, async function (req, res) {
     s.canEdit = {
       clarification: HUB.mayEdit(HUB.BY_KEY.clarification, req.user),
       exemptions: HUB.mayEdit(HUB.BY_KEY.exemptions, req.user),
-      eligibility: HUB.mayEdit(HUB.BY_KEY.eligibility, req.user)
+      eligibility: HUB.mayEdit(HUB.BY_KEY.eligibility, req.user),
+      deadlines: HUB.mayEdit(HUB.BY_KEY.deadlines, req.user)
     };
     res.json(s);
   } catch (e) { fail(res, e, 'The request-rules screen could not be read.'); }
@@ -69,6 +70,34 @@ router.post('/eligibility/posture', requireAuth, async function (req, res) {
     out.screen = await RR.screen(await JR.activeJid());
     res.json(out);
   } catch (e) { fail(res, e, 'The posture could not be recorded.'); }
+});
+
+// D1 (Kevin 2026-08-29): the deadlines tab. A LEGAL section — the hub row's gate (legal_rules) draws
+// the line for both acts. Service targets are the city's own numbers on operational-target clocks;
+// statutory figures are refused here by the service (they change by proposal). The holiday load is the
+// one-act fix for the empty-calendar case.
+function legalGate(req, res, act) {
+  if (HUB.mayEdit(HUB.BY_KEY.deadlines, req.user)) return true;
+  res.status(403).json({ error: act + ' needs the legal_rules permission group — Senior Legal or the Director owns the deadlines section.', code: 'PERMISSION_REQUIRED' });
+  return false;
+}
+router.post('/deadlines/target', requireAuth, async function (req, res) {
+  if (!legalGate(req, res, 'Setting a service target')) return;
+  var b = req.body || {};
+  if (!b.clock) return res.status(422).json({ error: 'Send the clock the target is for.' });
+  try {
+    var out = await RR.setServiceTarget(await JR.activeJid(), String(b.clock), b.days, req.user);
+    out.screen = await RR.screen(await JR.activeJid());
+    res.json(out);
+  } catch (e) { fail(res, e, 'The service target could not be recorded.'); }
+});
+router.post('/deadlines/holidays', requireAuth, async function (req, res) {
+  if (!legalGate(req, res, 'Loading the holiday calendar')) return;
+  try {
+    var out = await RR.loadHolidaySet(await JR.activeJid(), req.user);
+    out.screen = await RR.screen(await JR.activeJid());
+    res.json(out);
+  } catch (e) { fail(res, e, 'The holiday calendar could not be loaded.'); }
 });
 
 module.exports = router;
