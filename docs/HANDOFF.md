@@ -9330,3 +9330,47 @@ the template roll-up sections have their own surfaces (Taxonomy page; city_choic
 **NEXT:** Kevin's walk-through (brief + clock switch + holiday load + tab attests + waiver choices + fee
 schedule v1 + the two proposals) · then redaction planning, or the Content-tab pruning / letter-template
 slices.
+
+## 2026-08-29 (closing) — cleanup batch C1–C7; suite 2696/2697 (E1a the only red); redaction DEFERRED to next session
+
+**Kevin's closing calls:** redaction planning waits for next session · seven cleanup items, then end.
+
+**The batch (each verified live + screenshot, committed at green):**
+- **C1 (5cdc888):** the `jurisdiction` hub row ("Which state's law this city follows") DELETED — the agency
+  card is the one identity surface; its nine dependents rewired to `agency` (fields complete AND state
+  locked). Compliance lane 10.
+- **C2 (9663574):** ONE email home — new `/setup/email` "Email configuration" screen (provider toggle,
+  credentials, sender identity, test send, + the v1 tab's new-request alert recipient) behind the renamed
+  hub row; Integrations keeps AI keys only; the v1 Configuration "Email" tab retired (H4's second-email-
+  editor collision closed).
+- **C3 (6b2211d):** "Integrations & API Keys" admin nav tab removed; screen retitled "AI Service Keys";
+  reached via its hub row (hidden-but-routable).
+- **C4 (2a8b69c):** "Fee Configuration" admin nav tab removed; the hub's fee_rates row stays the one door
+  (rate-table edits still live there per F1 — full migration into Fee rules is future work).
+- **C5 (eed1f60):** the dead "Fees & Deadlines" Configuration tab DELETED — its four deadline_* fields had
+  ZERO readers (deadline_date comes from the jurisdiction deadline domain via tolling; the 77-day-clock
+  class of shadow config) and were never saved on live; the reader-less keys (deadline_*, fee_threshold,
+  cost_per_page, labor_rate) dropped from POST /config. H4's deadline-day-counts collision closed.
+- **C6 (8a9f8fa):** "User Types" admin nav tab removed; the catalog (informational except renaming a
+  type's display name) opens from "View user types" on the Organization Staff tab.
+- **C7 (66963e4):** new SIXTH hub lane **"System Features and Options"** (operations_config) — the
+  fulfillment lane's "Record types and categories" row moved in renamed **"Taxonomy"** (same key: the
+  calibration dep and counted evidence carry over); the admin Taxonomy nav tab retired. Hub lanes
+  [10,7,5,4,7,1], still 35 items; SPEC §2 lanes table updated.
+
+**Pattern for all hidden tabs:** the TABS entry gets `hidden: true` — out of the nav, deep link stays
+routable (hub doors, section editors, bookmarks), the retired-jurisdiction-tab precedent. Admin strip is
+now: Setup · Configuration · Update Configuration · Workflow · Process Map · Sources · Redaction Rules ·
+AI Data Flow · Portal Agent Security (Taxonomy/User Types/Fee Config/Integrations hidden).
+
+**Suite: 2696/2697, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged since
+2026-08-26; waits on fee schedule v1 + real proposal data).** setup_hub 22/22 (six lanes) · agency_setup
+20/20 · fee_law 42/42 · request_rules 47/47 · fresh_install 26/26.
+
+**Where the rebuild stands after today (4 build slices + the fold + 7 cleanups):** the hub is the one
+front door; request-rules (5 tabs) + Fee rules + agency + Email configuration are the purpose-built
+screens; every screen's Attest is the real section sign-off; jurisdiction-config's remaining rules-engine
+content is REDACTION only (+ the go-live flip). **NEXT SESSION: redaction planning (Kevin: "going to take
+a lot of planning").** Kevin's walk-through remains the critical path for E1a and the smoke's estimate
+beat (decision brief + clock switch + holiday-calendar load + tab attests + waiver choices + fee schedule
+v1 + the two pending proposals).
