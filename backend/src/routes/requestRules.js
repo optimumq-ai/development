@@ -31,7 +31,8 @@ router.get('/', requireAuth, async function (req, res) {
       clarification: HUB.mayEdit(HUB.BY_KEY.clarification, req.user),
       exemptions: HUB.mayEdit(HUB.BY_KEY.exemptions, req.user),
       eligibility: HUB.mayEdit(HUB.BY_KEY.eligibility, req.user),
-      deadlines: HUB.mayEdit(HUB.BY_KEY.deadlines, req.user)
+      deadlines: HUB.mayEdit(HUB.BY_KEY.deadlines, req.user),
+      intake: HUB.mayEdit(HUB.BY_KEY.intake, req.user)
     };
     res.json(s);
   } catch (e) { fail(res, e, 'The request-rules screen could not be read.'); }
@@ -81,6 +82,21 @@ function legalGate(req, res, act) {
   res.status(403).json({ error: act + ' needs the legal_rules permission group — Senior Legal or the Director owns the deadlines section.', code: 'PERMISSION_REQUIRED' });
   return false;
 }
+// I1 (Kevin 2026-08-29): the Request Intake tab's three confirms — channels + acknowledgment (intake
+// domain) and estimate capture (fee domain, write-through). Compliance-lane gate, like clarification.
+router.post('/intake/confirm', requireAuth, async function (req, res) {
+  if (!gate(req, res, 'intake', 'Recording a Request Intake choice')) return;
+  var b = req.body || {};
+  if (!b.path || b.value === undefined || b.value === null || b.value === '') {
+    return res.status(422).json({ error: 'Confirming records a decision — send the setting and the value the city chose.' });
+  }
+  try {
+    var out = await RR.confirmIntake(await JR.activeJid(), String(b.path), b.value, req.user);
+    out.screen = await RR.screen(await JR.activeJid());
+    res.json(out);
+  } catch (e) { fail(res, e, 'The choice could not be recorded.'); }
+});
+
 router.post('/deadlines/target', requireAuth, async function (req, res) {
   if (!legalGate(req, res, 'Setting a service target')) return;
   var b = req.body || {};

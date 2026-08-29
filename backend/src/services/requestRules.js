@@ -46,8 +46,39 @@ const TAB_CONCEPTS = {
   eligibility: ['eligibility'],
   // D1 (Kevin 2026-08-29): the deadlines tab — production.completion_window carries the produce/certify
   // rules, response.catastrophe_suspension the § 552.233 suspension. Exactly TX_RULES_READABLE §3's list.
-  deadlines: ['production', 'response']
+  deadlines: ['production', 'response'],
+  // I1 (Kevin 2026-08-29, "Request Intake"): intake.written_request_required + the designated-address
+  // rule under custody.records_officer_designation. Exactly TX_RULES_READABLE §10's two rules.
+  intake: ['intake', 'custody']
 };
+
+// The Request Intake tab's three choices (I1). Master.g1/g4 live in the intake domain; Master.p3 is the
+// estimate-capture knob whose STORE stays in the fee domain (the engine reads it there) — this tab is its
+// single confirmable home, the write-through pattern the waiver decider set.
+const INTAKE_CHOICES = [
+  { key: 'Master.g1', domain: 'intake', kind: 'channels', label: 'Which ways in the city operates',
+    options: [
+      { value: 'portal', label: 'Online portal' }, { value: 'email', label: 'E-mail' },
+      { value: 'mail', label: 'U.S. mail' }, { value: 'hand_delivery', label: 'Hand delivery' },
+      { value: 'fax', label: 'Fax' }],
+    suggested: ['portal', 'email', 'mail', 'hand_delivery'],
+    note: 'Which channels the city actually operates. A channel the statute names stays legally open regardless — unchecking it only hides it from the portal\'s how-to-request page.' },
+  { key: 'Master.g4', domain: 'intake', kind: 'choice', label: 'The acknowledgment, and when it goes out',
+    options: [
+      { value: 'same_business_day', label: 'Same business day' },
+      { value: 'next_business_day', label: 'Next business day' },
+      { value: 'no_auto', label: 'No automatic acknowledgment' }],
+    suggested: 'same_business_day',
+    note: 'When the automatic acknowledgment (with the request number) goes out. Every city sends the standard wording for now — editable wording comes with the letter templates.' },
+  { key: 'Master.p3', domain: 'fee', kind: 'capture', label: 'What intake captures for the estimate',
+    options: [
+      { value: 'page_count', label: 'Expected page count' },
+      { value: 'media', label: 'Media / format' },
+      { value: 'labor_class', label: 'Labor class' }],
+    suggested: ['page_count', 'media', 'labor_class'],
+    note: 'The data points intake asks for so the estimate can price the request. Recorded here — written through to the fee store the estimate engine reads.' }
+];
+const INTAKE_BY_KEY = {}; INTAKE_CHOICES.forEach(function (c) { INTAKE_BY_KEY[c.key] = c; });
 
 // The US federal (observed) holiday set 2026–2027 — the same list the fixture seeds
 // (src/db/seed_fixture.sql deadline_rules) and the per-state imports inherited. Loaded onto the
@@ -339,6 +370,21 @@ async function screen(jid) {
   var tt = require('./ruleEditors').timerTable(dlRaw, cmRaw);
   var holidays = Array.isArray(dlRaw.holidays) ? dlRaw.holidays : [];
 
+  // intake (I1): choices from the intake domain (g1, g4) and the fee domain (p3, write-through home);
+  // the designated addresses read from the agency configuration — no second place to type them.
+  var inRaw = (await JR.read(prof.id, 'intake')) || {};
+  var feeRaw = (await JR.read(prof.id, 'fee')) || {};
+  var inChoices = INTAKE_CHOICES.map(function (c) {
+    var store = c.domain === 'fee' ? feeRaw : inRaw;
+    return choiceRow(c, (store.knobs || {})[c.key]);
+  });
+  var agencyEmail = await get("SELECT value FROM system_config WHERE key = 'contact_email'");
+  var addr = {};
+  for (var ak of ['address_line1', 'address_city', 'address_state', 'address_zip']) {
+    var arow = await get('SELECT value FROM system_config WHERE key = ?', [ak]);
+    addr[ak] = arow ? arow.value : null;
+  }
+
   // eligibility
   var elRaw = (await JR.read(prof.id, 'eligibility')) || {};
   var dims = Object.keys(elRaw.dimensions || {}).map(function (k) {
@@ -380,12 +426,42 @@ async function screen(jid) {
         calendar: { weekend: dlRaw.weekend || [0, 6], holidayCount: holidays.length,
           holidayFirst: holidays[0] || null, holidayLast: holidays[holidays.length - 1] || null },
         unsetTargets: tt.rows.filter(function (r) { return r.kind === 'operational_target' && r.unset; }).length
+      },
+      intake: {
+        section: secOut('intake'),
+        rules: rulesForTab(byDomain, 'intake'),
+        choices: inChoices,
+        unconfirmed: inChoices.filter(function (c) { return !c.confirmed; }).length,
+        addresses: { email: agencyEmail ? agencyEmail.value : null,
+          mailing: [addr.address_line1, addr.address_city, addr.address_state, addr.address_zip].filter(Boolean).join(', ') || null }
       }
     },
     letters: {
       clarification: { subject: letter.subject, text: letter.text, graceDays: letterCtx.graceDays }
     }
   };
+}
+
+// ---- intake tab confirms (I1) ---------------------------------------------------------------------
+// Each confirm rides goLive.confirm against the knob's HOME domain — intake for channels and the
+// acknowledgment, fee for the estimate-capture knob (write-through: this tab is its single confirmable
+// home; the store stays where the engine reads it).
+async function confirmIntake(jid, path, value, user) {
+  var m = String(path).match(/^knobs\/(.+)$/);
+  var entry = m && INTAKE_BY_KEY[m[1]];
+  if (!entry) throw Object.assign(new Error('Not one of the Request Intake choices.'), { status: 404 });
+  if (entry.kind === 'channels' || entry.kind === 'capture') {
+    if (!Array.isArray(value) || !value.length) throw Object.assign(new Error(entry.label + ' takes a list with at least one item.'), { status: 422 });
+    var allowed = entry.options.map(function (o) { return o.value; });
+    var bad = value.filter(function (v) { return allowed.indexOf(v) < 0; });
+    if (bad.length) throw Object.assign(new Error('Unknown option(s): ' + bad.join(', ') + '. Allowed: ' + allowed.join(', ') + '.'), { status: 422 });
+  } else {
+    if (entry.options.map(function (o) { return o.value; }).indexOf(value) < 0) {
+      throw Object.assign(new Error(entry.label + ' takes one of: ' + entry.options.map(function (o) { return o.value; }).join(', ') + '.'), { status: 422 });
+    }
+  }
+  var who = user.name || user.email || user.sub;
+  return await GL.confirm(jid, entry.domain, path, value, who);
 }
 
 // ---- deadlines tab writes (D1) --------------------------------------------------------------------
@@ -423,6 +499,7 @@ async function loadHolidaySet(jid, user) {
 }
 
 module.exports = { TAB_CONCEPTS: TAB_CONCEPTS, CHOICES_DOMAIN: CHOICES_DOMAIN, CLAR_CHOICES: CLAR_CHOICES, EX_CHOICES: EX_CHOICES,
+  INTAKE_CHOICES: INTAKE_CHOICES, confirmIntake: confirmIntake,
   US_FEDERAL_HOLIDAYS: US_FEDERAL_HOLIDAYS, setServiceTarget: setServiceTarget, loadHolidaySet: loadHolidaySet,
   APPROVAL_GROUPS: APPROVAL_GROUPS, collectRules: collectRules, rulesForTab: rulesForTab,
   statutoryGraceDays: statutoryGraceDays, screen: screen, setEnabled: setEnabled,

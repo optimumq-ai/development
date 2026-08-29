@@ -24,7 +24,7 @@ function hashOf(o) { return crypto.createHash('sha256').update(stable(o || {}), 
 // absorbed it — the hub done-mark for that screen's row attests/un-attests the section, and the
 // jurisdiction-config attest rail points there instead of offering its own button.
 var CORE_SECTIONS = [
-  { key: 'identity',  label: 'Jurisdiction identity & statutes', editor: '/config' },
+  { key: 'identity',  label: 'Jurisdiction identity & statutes', editor: '/setup/agency', foldedInto: { item: 'agency', name: 'Agency name, address and contact', door: '/setup/agency' } },
   { key: 'fees',      label: 'Fee & cost schedule',              editor: '/setup/fee-law', foldedInto: { item: 'fee_law', name: 'Fee rules', door: '/setup/fee-law' } },
   { key: 'deadlines', label: 'Response deadlines & tolling',     editor: '/tickler' },
   { key: 'clarification', label: 'Clarification / vague-request policy', editor: '/setup/request-rules?tab=clarification', foldedInto: { item: 'clarification', name: 'Request rules · Clarification', door: '/setup/request-rules?tab=clarification' } },
@@ -44,7 +44,7 @@ var CORE_SECTIONS = [
 // not_configured section, so a state cannot be signed off while a knob the statute leaves to local
 // policy is still sitting on an unconfirmed suggested default.
 var TEMPLATE_SECTIONS = [
-  { key: 'intake',      label: 'Intake channels & acknowledgment', editor: '/config', domain: 'intake' },
+  { key: 'intake',      label: 'Intake channels & acknowledgment', editor: '/setup/request-rules?tab=intake', domain: 'intake', foldedInto: { item: 'intake', name: 'Request Intake', door: '/setup/request-rules?tab=intake' } },
   { key: 'eligibility', label: 'Requester eligibility gate',       editor: '/setup/request-rules?tab=eligibility', domain: 'eligibility', foldedInto: { item: 'eligibility', name: 'Request rules · Eligibility', door: '/setup/request-rules?tab=eligibility' } },
   { key: 'branches',    label: 'State branch profile',             editor: '/config', domain: 'branches' },
   { key: 'disposition', label: 'Delivery format & release hold',   editor: '/config', domain: 'disposition' },

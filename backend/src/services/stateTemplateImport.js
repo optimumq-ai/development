@@ -70,10 +70,16 @@ function uniqSorted(a) { var s = {}; (a || []).forEach(function (x) { if (x) s[x
 // importer asserts full coverage and fails loud on an unassigned node — same discipline as the Phase-6
 // generator's audit. A silently unhomed knob is a config surface nobody will ever be asked to fill in.
 // ---------------------------------------------------------------------------------------------------
+// A knob in KNOB_SKIP is COVERED but deliberately not written to any domain — the surface exists
+// somewhere better. Master.bv (I1, Kevin 2026-08-29): the vagueness-wording choice's single home is the
+// clarification tab, where the master switch materializes it in `clarification_screen` (R1). The intake
+// copy carried no citations and no default, was read by nothing, and held the intake section at pending.
+var KNOB_SKIP = {
+  'Master.bv': 'single home: the clarification tab (clarification_screen, materialized on the switch)'
+};
 var KNOB_DOMAIN = {
   'Master.g1': 'intake',            // submission channels / required fields
   'Master.g4': 'intake',            // acknowledgment
-  'Master.bv': 'intake',            // reasonably-describes screen
   'Master.p3': 'fee',               // estimate data capture
   'Master.f2': 'fee',               // estimate review threshold
   'Master.dd': 'payment',           // deposit-before gate
@@ -265,6 +271,7 @@ function importStamp(meta) {
 function knobsByDomain(tpl, report) {
   var byDomain = {};
   Object.keys(tpl.knobs || {}).sort().forEach(function (k) {
+    if (KNOB_SKIP[k]) return;   // covered, deliberately unwritten — see KNOB_SKIP
     var domain = KNOB_DOMAIN[k];
     if (!domain) throw new Error('Knob node "' + k + '" has no home domain in KNOB_DOMAIN. ' +
       'Add it (and say why) rather than letting a config surface go unowned.');

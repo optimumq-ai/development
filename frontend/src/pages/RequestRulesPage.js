@@ -24,6 +24,7 @@ var TABS = [
   { key: 'exemptions', hubKey: 'exemptions', label: 'Exemptions and appeals' },
   { key: 'eligibility', hubKey: 'eligibility', label: 'Who is allowed to request' },
   { key: 'deadlines', hubKey: 'deadlines', label: 'Response deadlines and tolling' },
+  { key: 'intake', hubKey: 'intake', label: 'Request Intake' },
 ];
 // what pauses a clock, in plain words
 var TOLL_LABELS = { clarification_pending: 'clarification', payment_pending: 'payment', extension: 'extension', ag_ruling_pending: 'AG ruling' };
@@ -122,7 +123,7 @@ export default function RequestRulesPage() {
     return Promise.all([api.get('/request-rules'), api.get('/setup-hub')]).then(function (r) {
       setData(r[0].data); setEdits({}); setPosture({});
       var h = {};
-      r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'clarification' || x.key === 'exemptions' || x.key === 'eligibility' || x.key === 'deadlines') h[x.key] = x; }); });
+      r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'clarification' || x.key === 'exemptions' || x.key === 'eligibility' || x.key === 'deadlines' || x.key === 'intake') h[x.key] = x; }); });
       setHub(h); setErr('');
     }).catch(function (e) { setErr(errText(e, 'The screen could not load.')); });
   }
@@ -147,7 +148,7 @@ export default function RequestRulesPage() {
   var td = data.tabs[tab === 'exemptions' ? 'exemptions' : tab];
   var can = !!(data.canEdit && data.canEdit[tab]);
   var attested = hubRow && hubRow.signoff;
-  var laneIndex = { clarification: 'item 4 of 10', exemptions: 'item 5 of 10', eligibility: 'item 6 of 10', deadlines: 'item 2 of 10' }[tab];
+  var laneIndex = { clarification: 'item 4 of 11', exemptions: 'item 5 of 11', eligibility: 'item 6 of 11', deadlines: 'item 2 of 11', intake: 'item 7 of 11' }[tab];
 
   function edited(c) { return edits[c.path] !== undefined ? edits[c.path] : (c.value != null ? c.value : null); }
   function setEdit(path, v) { var o = Object.assign({}, edits); o[path] = v; setEdits(o); setMsg(''); }
@@ -509,6 +510,77 @@ export default function RequestRulesPage() {
     );
   }
 
+  // ---------------- the Request Intake tab (I1) ----------------
+  async function confirmIntake(c, value) {
+    setBusy('intake-' + c.key); setErr(''); setMsg('');
+    try { await api.post('/request-rules/intake/confirm', { path: c.path, value: value }); setMsg('Recorded.'); await load(); }
+    catch (e) { setErr(errText(e, 'The choice could not be recorded.')); }
+    setBusy('');
+  }
+  function intakeBody() {
+    var d = data.tabs.intake;
+    function listVal(c) { return edits[c.path] !== undefined ? edits[c.path] : (Array.isArray(c.value) ? c.value : (Array.isArray(c.suggested) ? c.suggested : [])); }
+    function toggleIn(c, v) {
+      var cur = listVal(c).slice(); var i = cur.indexOf(v);
+      if (i >= 0) cur.splice(i, 1); else cur.push(v);
+      setEdit(c.path, cur);
+    }
+    function row(c, control) {
+      return <div key={c.key} style={{ display: 'grid', gridTemplateColumns: '200px minmax(0, 1fr) 110px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid #EEF2F5' }}>
+        <div style={{ fontSize: '12.5px', fontWeight: '600', lineHeight: '1.35', paddingTop: '2px' }}>{c.label}</div>
+        <div>{control}
+          <div style={Object.assign({}, cite, { marginTop: '6px' })}><Bind kind="soft">Silent</Bind> {c.note}</div>
+          {decided(c)}
+        </div>
+        <button type="button" disabled={!can || busy === 'intake-' + c.key}
+          onClick={function () { confirmIntake(c, c.kind === 'choice' ? (edits[c.path] !== undefined ? edits[c.path] : (c.value != null ? c.value : c.suggested)) : listVal(c)); }}
+          style={btn(can ? 'sec' : 'dis', { height: '28px', fontSize: '12px' })}>Confirm</button>
+      </div>;
+    }
+    var g1 = (d.choices || []).filter(function (c) { return c.key === 'Master.g1'; })[0];
+    var g4 = (d.choices || []).filter(function (c) { return c.key === 'Master.g4'; })[0];
+    var p3 = (d.choices || []).filter(function (c) { return c.key === 'Master.p3'; })[0];
+    // channels the loaded rules NAME (display marker only — derived from the rule text, not hardcoded law)
+    var ruleText = (d.rules || []).map(function (r) { return r.summary; }).join(' ').toLowerCase();
+    var lawNamed = { email: /e-?mail/.test(ruleText), mail: /\bmail\b/.test(ruleText), hand_delivery: /hand deliver/.test(ruleText) };
+    function checks(c, markLaw) {
+      var cur = listVal(c);
+      return <div style={{ display: 'flex', flexWrap: 'wrap', rowGap: '8px' }}>
+        {(c.options || []).map(function (o) {
+          var on = cur.indexOf(o.value) >= 0;
+          var law = markLaw && lawNamed[o.value];
+          return <label key={o.value} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', marginRight: '14px', whiteSpace: 'nowrap', cursor: can ? 'pointer' : 'default' }}>
+            <input type="checkbox" disabled={!can} checked={on} onChange={function () { toggleIn(c, o.value); }} />
+            {o.label}{law ? <span style={{ color: C.faint, fontSize: '10.5px' }}> (law)</span> : null}
+          </label>;
+        })}
+      </div>;
+    }
+    return (
+      <div>
+        <ChoiceHead sub="Three choices. Confirming each records who decided, and when." pill={d.unconfirmed ? <Pill bg="#F6EBD6" color={C.amber}>{(d.choices.length - d.unconfirmed) + ' of ' + d.choices.length + ' confirmed'}</Pill> : <Pill bg="#E1F2E9" color={C.ok}>all confirmed</Pill>} />
+
+        {/* the designated addresses — read from the agency screen, never typed here (TX-style § 552.234(c)) */}
+        <div style={{ margin: '4px 16px 10px', padding: '10px 12px', background: '#F8FAFC', border: '1px solid ' + C.line, borderRadius: '8px', fontSize: '12.5px', lineHeight: '1.5' }}>
+          <Bind kind="fixed">Designated addresses</Bind>{' '}
+          {d.addresses && (d.addresses.email || d.addresses.mailing)
+            ? <span>Requests count as received at <b>{d.addresses.email || 'the contact e-mail'}</b>{d.addresses.mailing ? <span> and <b>{d.addresses.mailing}</b></span> : null} — the addresses from the agency screen, shown to requestors on the portal and in every letter.</span>
+            : <span>The agency screen's contact e-mail and mailing address serve as the designated ones — they are not filled in yet.</span>}
+          <button type="button" onClick={function () { nav('/setup/agency'); }} style={btn('sec', { height: '26px', fontSize: '11.5px', marginLeft: '8px' })}>Open the agency screen</button>
+        </div>
+
+        {g1 ? row(g1, checks(g1, true)) : null}
+        {g4 ? row(g4, (
+          <select value={edits[g4.path] !== undefined ? edits[g4.path] : (g4.value != null ? g4.value : g4.suggested)} disabled={!can}
+            onChange={function (e) { setEdit(g4.path, e.target.value); }} style={inp({ display: 'block', width: '280px' })}>
+            {(g4.options || []).map(function (o) { return <option key={o.value} value={o.value}>{o.label}{o.value === g4.suggested ? ' (suggested)' : ''}</option>; })}
+          </select>
+        )) : null}
+        {p3 ? row(p3, checks(p3, false)) : null}
+      </div>
+    );
+  }
+
   // ---------------- letter views ----------------
   function letterModal() {
     if (!letter) return null;
@@ -552,10 +624,11 @@ export default function RequestRulesPage() {
     clarification: 'What happens when a request is too unclear to search for: what ' + stateName + ' law says, and the few things this city decides.',
     exemptions: 'Withholding information in ' + stateName + ' runs on strict clocks. The clocks are the law\'s; the city decides who approves a denial and how the letter goes out.',
     eligibility: 'In ' + stateName + ', anyone may request. What is left to the city — and what the law already settles.',
-    deadlines: 'Every clock a request runs on: the deadlines ' + stateName + ' law sets, the service targets this city sets for itself, and what pauses them. A legal section — Senior Legal signs it off.'
+    deadlines: 'Every clock a request runs on: the deadlines ' + stateName + ' law sets, the service targets this city sets for itself, and what pauses them. A legal section — Senior Legal signs it off.',
+    intake: 'The ways a request may reach the city, where it counts as received, and what happens the moment it arrives: what ' + stateName + ' law says, and the three things this city decides.'
   }[tab];
-  var headTitle = { clarification: 'Vague requests and clarification', exemptions: 'Exemptions and appeals', eligibility: 'Who is allowed to request', deadlines: 'Response deadlines and tolling' }[tab];
-  var showSave = tab !== 'eligibility' && tab !== 'deadlines' && (tab !== 'clarification' || clarOn);
+  var headTitle = { clarification: 'Vague requests and clarification', exemptions: 'Exemptions and appeals', eligibility: 'Who is allowed to request', deadlines: 'Response deadlines and tolling', intake: 'Request Intake' }[tab];
+  var showSave = tab !== 'eligibility' && tab !== 'deadlines' && tab !== 'intake' && (tab !== 'clarification' || clarOn);
 
   return (
     <div style={{ maxWidth: '1220px', color: C.ink }}>
@@ -602,7 +675,7 @@ export default function RequestRulesPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '480px minmax(0, 1fr)', gap: 0 }}>
           <LawPanel stateName={stateName} rules={td.rules || []} onCite={setStatute} />
-          {tab === 'clarification' ? clarificationBody() : tab === 'exemptions' ? exemptionsBody() : tab === 'deadlines' ? deadlinesBody() : eligibilityBody()}
+          {tab === 'clarification' ? clarificationBody() : tab === 'exemptions' ? exemptionsBody() : tab === 'deadlines' ? deadlinesBody() : tab === 'intake' ? intakeBody() : eligibilityBody()}
         </div>
 
         <div style={{ padding: '12px 20px', borderTop: '1px solid ' + C.line, background: C.wash, borderRadius: '0 0 10px 10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -611,6 +684,7 @@ export default function RequestRulesPage() {
             {tab === 'clarification' ? 'Attest becomes available once clarification is switched on and all five choices are recorded.'
               : tab === 'exemptions' ? <span>This is a legal section: recording and attesting these choices requires the <b>Legal Rules</b> group — the Senior Legal attorney owns it.</span>
               : tab === 'deadlines' ? <span>This is a legal section — <b>Legal Rules</b> records targets and attests. Statutory figures never edit in place: a change means the law changed, which goes through a proposal with a citation. Attest waits only on the holiday calendar; blank service targets are a valid posture.</span>
+              : tab === 'intake' ? 'Attest becomes available once all three choices are confirmed. The designated addresses change on the agency screen, never here.'
               : 'Attest becomes available once the decision above is confirmed.'}
             {!can ? ' · view only for you' : ''}
           </span>

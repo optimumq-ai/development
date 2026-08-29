@@ -36,10 +36,15 @@ const LANES = [
 // legal_rules); `signoffRequired` = Ready also needs a person's mark (Option A, per item).
 const ITEMS = [
   // ── Start here ──
+  // I1 rider (Kevin 2026-08-29, the identity fold): the agency screen is the ONE identity surface — its
+  // fields plus the state lock are everything the identity section holds, so Attest here signs it.
   { key: 'agency', lane: 'organization', top: true, name: 'Agency name, address and contact', door: '/setup/agency', deps: [], groups: ['operations_config', 'system_admin'],
+    foldSections: ['identity'],
     note: 'Nothing else can be set up until this is filled in.' },
   // ── Lane 1 ──
-  { key: 'jurisdiction', lane: 'compliance', name: "Which state's law this city follows", door: '/jurisdiction-config/identity', deps: ['agency'], section: 'identity' },
+  // I1 rider: identity's one surface is the agency screen — this row's readiness (identity attested)
+  // now comes from the agency screen's Attest via the fold; the door follows.
+  { key: 'jurisdiction', lane: 'compliance', name: "Which state's law this city follows", door: '/setup/agency', deps: ['agency'], section: 'identity' },
   // D1 (Kevin 2026-08-29): deadlines migrates onto the request-rules screen as its 4th tab — the row
   // stays (its door moves) and the A1 fold covers it: Attest on the tab signs the deadlines section.
   { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/setup/request-rules?tab=deadlines', deps: ['jurisdiction'], section: 'deadlines', legal: true, foldSections: ['deadlines'] },
@@ -57,6 +62,8 @@ const ITEMS = [
   { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['jurisdiction'], section: 'clarification', foldSections: ['clarification'] },
   { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['jurisdiction'], section: 'exemption', legal: true, foldSections: ['exemption'] },
   { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['jurisdiction'], section: 'eligibility', foldSections: ['eligibility'] },
+  // I1 (Kevin 2026-08-29): intake gets its own row and lives as the request-rules screen's 5th tab.
+  { key: 'intake', lane: 'compliance', name: 'Request Intake', door: '/setup/request-rules?tab=intake', deps: ['jurisdiction'], section: 'intake', foldSections: ['intake'] },
   { key: 'redaction_rules', lane: 'compliance', name: 'Redaction rules library', door: '/admin?tab=redaction', deps: ['jurisdiction'], section: 'redaction', legal: true },
   { key: 'city_choices', lane: 'compliance', name: 'Choices the statute left to the city', door: '/jurisdiction-config', deps: ['jurisdiction'] },
   { key: 'law_updates', lane: 'compliance', name: 'Keeping up with changes in the law', door: '/admin?tab=updates', deps: ['jurisdiction'] },
@@ -170,6 +177,7 @@ const READERS = {
     return r;
   },
   exemptions: async function (ctx) { return sectionEvidence(ctx.sections.exemption); },
+  intake: async function (ctx) { return sectionEvidence(ctx.sections.intake); },
   eligibility: async function (ctx) {
     var sec = ctx.sections.eligibility;
     var r = sectionEvidence(sec);

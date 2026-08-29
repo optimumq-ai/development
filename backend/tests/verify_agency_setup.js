@@ -99,7 +99,14 @@ function agencyRow(page) { return (page.top || []).filter(function (x) { return 
   var at = await callAs(U.sa, 'POST', '/setup-hub/agency/done');
   var hub3 = agencyRow((await callAs(U.sa, 'GET', '/setup-hub')).body);
   ok('C5 attest from the strip = the hub\'s own mark: row shows marked done by name', at.status === 200 && hub3.signoff && /AGY oro_sysadmin/.test(hub3.signoff.by) && /marked done by/.test(hub3.evidence));
+  // I1 rider (the identity fold): the agency screen is the ONE identity surface — its Attest signs the
+  // identity section in the same act, and undoing the mark un-attests it.
+  var idAtt = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'identity'");
+  ok('C5a the fold: the agency done-mark attests the identity section in the same act',
+    at.body.attested && at.body.attested.indexOf('identity') >= 0 && idAtt && /AGY oro_sysadmin/.test(idAtt.attested_by), JSON.stringify(at.body));
   await callAs(U.sa, 'DELETE', '/setup-hub/agency/done');
+  var idAtt2 = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'identity'");
+  ok('C5b undoing the mark un-attests identity', !idAtt2 || idAtt2.attested_by == null, JSON.stringify(idAtt2));
 
   console.log('\n=== D. THE OLD DOOR IS GONE ===');
   var HUB = require('/opt/optimumq/backend/src/services/setupHub');

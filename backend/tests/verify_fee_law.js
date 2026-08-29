@@ -201,10 +201,10 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
     sC.clock.choices.slice(3).every(function (x) { return x.prefill && x.prefill.value === true; }),
     JSON.stringify(sC.clock && sC.clock.choices.map(function (x) { return [x.key, x.prefill && x.prefill.value]; })));
   var hC0 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
-  ok('G2 the hub: the deposits row is GONE (compliance lane 10) and the Fee rules evidence says "payment clock: off"',
+  ok('G2 the hub: the deposits row is GONE (compliance lane 11 incl. the new intake row) and the Fee rules evidence says "payment clock: off"',
     /payment clock: off/.test(hC0.evidence) &&
     !JSON.stringify((await callAs(U.dir, 'GET', '/setup-hub')).body.lanes).includes('"deposits"') &&
-    (await callAs(U.dir, 'GET', '/setup-hub')).body.lanes[0].items.length === 10, hC0.evidence);
+    (await callAs(U.dir, 'GET', '/setup-hub')).body.lanes[0].items.length === 11, hC0.evidence);
   var cOff = await callAs(U.dir, 'POST', '/fee-law/clock', { confirm: { key: 'deposit_lapse_action', value: 'withdraw' } });
   ok('G3 confirming while the switch is off is refused in words (off is itself the configured posture)',
     cOff.status === 409 && /Turn the deposit & payment clock on first/.test(cOff.body.error), JSON.stringify(cOff.body));

@@ -65,7 +65,7 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   SNAP.sections = await db.all("SELECT * FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx'");
   SNAP.proposalIds = (await db.all("SELECT id FROM config_proposals WHERE jurisdiction_id = 'jur-tx'")).map(function (r) { return r.id; });
   SNAP.profile = await db.get("SELECT * FROM jurisdiction_profiles WHERE id = 'jur-tx'");
-  SNAP.signoffs = await db.all("SELECT item_key, marked_by, marked_by_name, marked_at FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility','deadlines')");
+  SNAP.signoffs = await db.all("SELECT item_key, marked_by, marked_by_name, marked_at FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility','deadlines','intake')");
 
   // Precondition: the fixture ships without the imported template domains (they arrive when a harness or
   // the agency lock imports TX). Import here so this harness holds in any run order.
@@ -86,6 +86,19 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   el.dimensions.incarceration.gated = true; el.dimensions.incarceration.confirmed = false;
   delete el.dimensions.incarceration.confirmed_by; delete el.dimensions.incarceration.confirmed_at;
   await writeDomain('eligibility', el);
+  // I1 baseline: no bv stowaway (the fixture may still ship it), g1/g4/p3 unconfirmed.
+  var inb = await domain('intake');
+  if (inb) {
+    if (inb.knobs) delete inb.knobs['Master.bv'];
+    ['Master.g1', 'Master.g4'].forEach(function (k) { var cc = inb.knobs && inb.knobs[k] && inb.knobs[k].city_config; if (cc) { cc.confirmed = false; cc.value = null; delete cc.confirmed_by; delete cc.confirmed_at; } });
+    await writeDomain('intake', inb);
+  }
+  var feeb = await domain('fee');
+  if (feeb && feeb.knobs && feeb.knobs['Master.p3'] && feeb.knobs['Master.p3'].city_config) {
+    var p3cc = feeb.knobs['Master.p3'].city_config;
+    p3cc.confirmed = false; p3cc.value = null; delete p3cc.confirmed_by; delete p3cc.confirmed_at;
+    await writeDomain('fee', feeb);
+  }
   for (var k of ['clarification', 'exemptions', 'eligibility']) await db.run('DELETE FROM setup_hub_signoffs WHERE item_key = ?', [k]);
   await db.run("UPDATE jurisdiction_profile_sections SET attested_by = NULL, attested_at = NULL, attested_version = NULL, attested_hash = NULL WHERE jurisdiction_id = 'jur-tx' AND section IN ('clarification','eligibility')");
 
@@ -235,6 +248,38 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
     dlMark.status === 200 && dlMark.body.attested && dlMark.body.attested.indexOf('deadlines') >= 0 && dlAtt && dlAtt.attested_by === 'RR oro_senior_legal', JSON.stringify(dlMark.body));
   await callAs(U.legal, 'DELETE', '/setup-hub/deadlines/done');
 
+  console.log('\n=== IN. THE REQUEST INTAKE TAB (I1, Kevin 2026-08-29) ===');
+  var gI = await callAs(U.dir, 'GET', '/request-rules');
+  var IN = gI.body.tabs.intake;
+  var STIm = require('/opt/optimumq/backend/src/services/stateTemplateImport');
+  ok('IN1 the tab reads: the §10 rules exactly, three choices (channels · acknowledgment · estimate capture), none confirmed; the bv stowaway is gone (screen and importer both)',
+    IN.rules.map(function (r) { return r.id; }).join(',') === 'TX-0005,TX-0006' &&
+    IN.choices.map(function (c) { return c.key; }).join(',') === 'Master.g1,Master.g4,Master.p3' &&
+    IN.unconfirmed === 3 && IN.addresses && typeof IN.addresses === 'object' &&
+    STIm.KNOB_DOMAIN['Master.bv'] === undefined && gI.body.canEdit.intake === true,
+    JSON.stringify([IN.rules.map(function (r) { return r.id; }), IN.choices.map(function (c) { return c.key; }), IN.unconfirmed]));
+  var inRow = hubItem((await callAs(U.dir, 'GET', '/setup-hub')).body, 'intake');
+  ok('IN2 the hub: a NEW Request Intake row (compliance, not legal) doors to the tab', inRow && inRow.name === 'Request Intake' && inRow.door === '/setup/request-rules?tab=intake' && inRow.legal === false, JSON.stringify(inRow));
+  var iBad = await callAs(U.dir, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g1', value: ['carrier_pigeon'] });
+  ok('IN3 an unknown channel is refused in words', iBad.status === 422 && /Unknown option/.test(iBad.body.error), JSON.stringify(iBad.body));
+  var i1 = await callAs(U.dir, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g1', value: ['portal', 'email', 'mail', 'hand_delivery'] });
+  ok('IN4 confirming the channels records value + who/when; 2 of 3 remain', i1.status === 200 && i1.body.screen.tabs.intake.unconfirmed === 2 &&
+    i1.body.screen.tabs.intake.choices[0].confirmed === true && i1.body.screen.tabs.intake.choices[0].confirmedBy === 'RR oro_director', JSON.stringify(i1.body).slice(0, 160));
+  var i2 = await callAs(U.dir, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.p3', value: ['page_count', 'media', 'labor_class'] });
+  var feeAfter = await domain('fee');
+  ok('IN5 the estimate-capture confirm WRITES THROUGH to the fee store the engine reads',
+    i2.status === 200 && feeAfter.knobs['Master.p3'].city_config.confirmed === true &&
+    JSON.stringify(feeAfter.knobs['Master.p3'].city_config.value) === JSON.stringify(['page_count', 'media', 'labor_class']), JSON.stringify(feeAfter.knobs['Master.p3'].city_config).slice(0, 160));
+  var i3 = await callAs(U.dir, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g4', value: 'same_business_day' });
+  ok('IN6 all three confirmed', i3.status === 200 && i3.body.screen.tabs.intake.unconfirmed === 0);
+  var iStaff = await callAs(U.staff, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g4', value: 'same_business_day' });
+  ok('IN7 staff cannot record intake choices', iStaff.status === 403);
+  var iMark = await callAs(U.dir, 'POST', '/setup-hub/intake/done');
+  var inAtt = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'intake'");
+  ok('IN8 the A1 fold covers the tab: the done-mark attests the intake section in the same act',
+    iMark.status === 200 && iMark.body.attested && iMark.body.attested.indexOf('intake') >= 0 && inAtt && inAtt.attested_by === 'RR oro_director', JSON.stringify(iMark.body));
+  await callAs(U.dir, 'DELETE', '/setup-hub/intake/done');
+
   console.log('\n=== F. CLEANUP — the fixture is left exactly as found ===');
   await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx'");
   for (var rr of SNAP.rules) {
@@ -254,7 +299,7 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
     await db.run('UPDATE jurisdiction_profiles SET ' + pcols.map(function (c) { return c + ' = ?'; }).join(', ') + " WHERE id = 'jur-tx'",
       pcols.map(function (c) { return SNAP.profile[c]; }));
   }
-  await db.run("DELETE FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility','deadlines')");
+  await db.run("DELETE FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility','deadlines','intake')");
   for (var sg of SNAP.signoffs) {
     await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at) VALUES (?,?,?,?)', [sg.item_key, sg.marked_by, sg.marked_by_name, sg.marked_at]);
   }
