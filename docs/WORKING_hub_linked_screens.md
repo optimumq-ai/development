@@ -264,3 +264,25 @@ Hub after: `waiver_policy` row deleted, compliance lane 12 → 11 (HubLane artbo
 canvas notes (fee_waiver profile section attests through this screen — fold-into-fees vs dual-attest to
 decide at build; verify_setup_hub counts change). Uses the §2g pruned-waiver rendering + negative-finding
 records throughout. Awaiting Kevin's markup.
+
+## 2i. Fee rules — the fee-law screen absorbs the deposit & payment clock (F3, decided AND built 2026-08-29)
+
+Kevin's calls (this session, after verifying the F2 waiver migration complete against TX_RULES_READABLE §6):
+same treatment as waivers — no new tab, no separate setup section, the `deposits` hub row RETIRED (lane
+11 → 10) · the six clock/reissue settings recorded MASTER SWITCH + CONFIRMS (the clarification pattern —
+they drive automation that stops clocks and withdraws requests, so arming it is its own explicit act) ·
+canvas approved before build: docs/mockups/fee_law_payment_clock/ →
+https://claude.ai/code/artifact/1aee4897-bc84-4b53-bea5-bead15d1cfe5
+
+What the section fronts: the `paymentClockPolicy` store (domain `payment`) that depositAction, feeReissue
+and the tickler already read — previously only reachable via the retired hub row's jurisdiction-config
+door, switched off, with safe-manual defaults contradicting the TX statutory answers. City decisions tab:
+the estimates group retitles "…and their clocks" (matching the mandate tab), switch block + six rows when
+on, each pre-filled from the SAME template items the mandate rows render (`clockPrefills`: TX
+toll_and_restart · 10 business days · withdraw · yes ×3; 4 of 32 templates carry a clock-effect answer —
+elsewhere the rows are open choices and OFF is itself the configured, attestable posture). Confirms write
+through with the importer's provenance untouched. The six gate Attest, never Approve; the engine's
+enabled + payment-section-attested double gate is unchanged. Open residue: payment section still attests
+on jurisdiction-config (same fold-pending class as fee_waiver), and the grace-days provenance mismatch
+(§ 552.221(e) filed where § 552.263(f) is the answer) goes to the research pipeline with the
+negative-finding records. Spec: SPEC_setup_hub §3 + §7 F3.
