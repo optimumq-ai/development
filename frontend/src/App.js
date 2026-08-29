@@ -12,6 +12,7 @@ import DepartmentsPage from './pages/DepartmentsPage';
 import OrgPage from './pages/OrgPage';
 import AdministrationPage from './pages/AdministrationPage';
 import AgencySetupPage from './pages/AgencySetupPage';
+import EmailConfigPage from './pages/EmailConfigPage';
 import FeeLawPage from './pages/FeeLawPage';
 import RequestRulesPage from './pages/RequestRulesPage';
 import ReportsHubPage from './pages/ReportsHubPage';
@@ -148,6 +149,7 @@ export default function App() {
           <Route path="setup" element={<Navigate to="/admin?tab=setup" replace />} />
           {/* H3 (2026-08-25): the first hub-linked screen — agency identity + "Lock state and load its rules". */}
           <Route path="setup/agency" element={<AgencySetupPage />} />
+          <Route path="setup/email" element={<EmailConfigPage />} />
           <Route path="setup/fee-law" element={<FeeLawPage />} />
           {/* Clarification · Exemptions · Requestor eligibility — three hub rows, one screen (2026-08-27). */}
           <Route path="setup/request-rules" element={<RequestRulesPage />} />

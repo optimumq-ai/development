@@ -106,7 +106,6 @@ export default function ConfigurationPage() {
     { key:'auth', label:'Authentication' },
     { key:'fees', label:'Fees & Deadlines' },
     { key:'notifications', label:'Notifications' },
-    { key:'email', label:'Email' },
     { key:'redaction', label:'Redaction' },
     { key:'timecapture', label:'Time Tracking' },
     { key:'budgets', label:'Task Time Budgets' },
@@ -239,72 +238,6 @@ export default function ConfigurationPage() {
           </div>
         )}
 
-        {activeTab === 'email' && (
-          <div style={section}>
-            <div style={sectionTitle}>Email Provider Settings</div>
-            <div style={{background:'#EBF3FB',border:'1px solid #C7D9EB',borderRadius:'8px',padding:'14px 16px',fontSize:'13px',color:'#1F4E79'}}>
-              <strong>Supported email providers:</strong> Resend, SMTP, SendGrid, Postmark, Mailgun, AWS SES, and Microsoft 365 (Graph API).<br/>
-              <span style={{fontSize:'12px',color:'#4B6584'}}>If a Resend API key is configured, it takes priority over SMTP. Additional providers can be enabled on request — contact Optimum Q for activation.</span>
-            </div>
-            <div>
-              <label style={lbl}>Active Provider</label>
-              <select disabled value={config.resend_api_key ? 'resend' : (config.smtp_host ? 'smtp' : 'none')} style={Object.assign({}, inp, {background:'#F9FAFB',color:'#6B7280',cursor:'not-allowed'})}>
-                <option value="none">— Not configured —</option>
-                <option value="resend">Resend</option>
-                <option value="smtp">SMTP (Gmail, Office 365, etc.)</option>
-                <option value="sendgrid" disabled>SendGrid (available on request)</option>
-                <option value="postmark" disabled>Postmark (available on request)</option>
-                <option value="mailgun" disabled>Mailgun (available on request)</option>
-                <option value="ses" disabled>AWS SES (available on request)</option>
-                <option value="ms365" disabled>Microsoft 365 (available on request)</option>
-              </select>
-              <div style={hint}>Auto-detected based on which credentials are configured below</div>
-            </div>
-            <div>
-              <label style={lbl}>Resend API Key</label>
-              <input type="password" value={config.resend_api_key||''} onChange={function(e){set('resend_api_key',e.target.value);}} style={inp} placeholder="re_..."/>
-              <div style={hint}>Sign up free at resend.com — leave blank to fall back to SMTP</div>
-            </div>
-            <div>
-              <label style={lbl}>Resend From Address</label>
-              <input type="email" value={config.resend_from||'onboarding@resend.dev'} onChange={function(e){set('resend_from',e.target.value);}} style={inp} placeholder="onboarding@resend.dev"/>
-              <div style={hint}>Use onboarding@resend.dev for testing (sends only to your verified account email), or a verified domain address for production</div>
-            </div>
-            <div style={{height:'1px',background:'#E5E7EB',margin:'8px 0'}}></div>
-            <div style={{background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:'8px',padding:'12px 14px',fontSize:'13px',color:'#92400E'}}>
-              Configure outbound email so the system can send submission confirmations to requestors and new-request alerts to staff. Leave blank to disable email sending.
-            </div>
-            <div>
-              <label style={lbl}>SMTP Host</label>
-              <input value={config.smtp_host||''} onChange={function(e){set('smtp_host',e.target.value);}} style={inp} placeholder="smtp.gmail.com"/>
-              <div style={hint}>Examples: smtp.gmail.com, smtp.office365.com, smtp.sendgrid.net</div>
-            </div>
-            <div>
-              <label style={lbl}>SMTP Port</label>
-              <input value={config.smtp_port||'587'} onChange={function(e){set('smtp_port',e.target.value);}} style={inp} placeholder="587"/>
-              <div style={hint}>Usually 587 (TLS) or 465 (SSL)</div>
-            </div>
-            <div>
-              <label style={lbl}>SMTP Username</label>
-              <input value={config.smtp_user||''} onChange={function(e){set('smtp_user',e.target.value);}} style={inp} placeholder="openrecords@cityofdallas.gov"/>
-            </div>
-            <div>
-              <label style={lbl}>SMTP Password</label>
-              <input type="password" value={config.smtp_pass||''} onChange={function(e){set('smtp_pass',e.target.value);}} style={inp} placeholder="••••••••"/>
-              <div style={hint}>For Gmail, use an App Password (not your regular login)</div>
-            </div>
-            <div>
-              <label style={lbl}>From Address</label>
-              <input type="email" value={config.smtp_from||''} onChange={function(e){set('smtp_from',e.target.value);}} style={inp} placeholder="noreply@cityofdallas.gov"/>
-              <div style={hint}>If blank, the SMTP Username will be used</div>
-            </div>
-            <div>
-              <label style={lbl}>New Request Alert Recipient</label>
-              <input type="email" value={config.new_request_alert_email||''} onChange={function(e){set('new_request_alert_email',e.target.value);}} style={inp} placeholder="openrecords-team@cityofdallas.gov"/>
-              <div style={hint}>Email address that receives an alert each time a new request is submitted. If blank, the Public Records Contact Email is used.</div>
-            </div>
-          </div>
-        )}
         {activeTab === 'redaction' && (
           <div style={section}>
             <div style={sectionTitle}>Video &amp; Audio Redaction</div>

@@ -93,7 +93,10 @@ const ITEMS = [
   { key: 'sources', lane: 'technical', name: 'Where the records live', door: '/admin?tab=sources', deps: [] },
   { key: 'ai_keys', lane: 'technical', name: 'AI service keys', door: '/admin?tab=integrations', deps: [] },
   { key: 'ai_deployment', lane: 'technical', name: 'Where AI processing happens', door: '/admin?tab=ai-data', deps: ['ai_keys'] },
-  { key: 'email', lane: 'technical', name: 'Outgoing email', door: '/admin?tab=integrations', deps: [] },
+  // C2 cleanup (Kevin 2026-08-29): renamed from 'Outgoing email'; the Integrations page's email section
+  // moved to its own screen behind this row (Integrations keeps the AI keys; the v1 Configuration email
+  // tab is retired — its alert-recipient field moved along).
+  { key: 'email', lane: 'technical', name: 'Email configuration', door: '/setup/email', deps: [] },
   { key: 'auth_policy', lane: 'technical', name: 'How staff sign in', door: '/admin?tab=config', deps: [] },
   { key: 'agent_rules', lane: 'technical', name: 'What the public portal assistant may say', door: '/admin?tab=security', deps: [] },
   { key: 'settlement', lane: 'technical', name: 'Sending charges to the finance system', door: null, deps: ['fee_rates'], noScreen: true },
