@@ -1,14 +1,60 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1320, "h": 1060, "title": "Request rules — 5th tab: How requests come in" },
-    { "file": "HubLane.dc.html", "x": 1420, "y": 0, "w": 600, "h": 560, "title": "The hub lane after — intake's new row + the identity fold" }
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1320,
+      "h": 1060,
+      "title": "Request rules \u2014 5th tab: Request Intake"
+    },
+    {
+      "file": "HubLane.dc.html",
+      "x": 1420,
+      "y": 0,
+      "w": 600,
+      "h": 560,
+      "title": "The hub lane after \u2014 intake's new row + the identity fold"
+    }
   ],
   "annotations": [
-    { "id": "note-call", "x": 1420, "y": 700, "w": 380, "text": "Kevin's calls 2026-08-29: intake = the 5TH TAB on /setup/request-rules ('How requests come in'), with its OWN hub row like eligibility got (compliance lane 10 → 11, item 7; every tab's item-count string follows) · the IDENTITY FOLD rides in the same pass: the agency screen's Attest also signs the identity section, and the 'Which state's law' row doors to /setup/agency — two fewer reasons to visit jurisdiction-config, per the goal of retiring that screen entirely." },
-    { "id": "note-addresses", "x": 1420, "y": 1080, "w": 380, "text": "The designated-addresses rule (TX-0006) renders as a FIXED law card that reads the agency screen's mailing + contact e-mail — no second place to type an address. Changing them is an agency-screen act; this tab only shows what they legally mean (requests arriving elsewhere need not be answered, hand delivery and approved methods excepted)." },
-    { "id": "note-choices", "x": 1860, "y": 700, "w": 380, "text": "The three choices: CHANNELS (Master.g1) — the law's floor renders as fixed-checked (mail, e-mail, hand delivery; no phone channel exists to switch on, § 552.234(a) requires writing); the city elects portal/fax. ACKNOWLEDGMENT (Master.g4) — send timing, suggested same business day; standard wording until the letter-template slice. ESTIMATE CAPTURE (Master.p3) — lives in the FEE store today; the tab becomes its single home, confirms write through (the F2 waiver-decider pattern)." },
-    { "id": "note-stowaway", "x": 1860, "y": 1120, "w": 380, "text": "Stowaway retired: the import also filed a copy of the vagueness-wording knob (Master.bv) in the intake domain — no citations, no default, read by nothing. Its single, confirmable home is the Clarification tab; the intake copy is removed at import + migration (same twice-homing cleanup F2 did for the estimate/deposit pair)." },
-    { "id": "note-build", "x": 1420, "y": 1330, "w": 380, "text": "Build implications: new hub row `intake` (compliance, door ?tab=intake, foldSections:['intake'] — the intake profile section attests from the tab) · TAB_CONCEPTS.intake = ['intake','custody'] (exactly TX-0005 + TX-0006) · intake confirms ride the template-knob confirm path (goLive.confirm on the intake domain) · verify_setup_hub counts 35 → 36, lanes [11,8,5,4,7] · verify_request_rules + verify_agency_setup grow sections · laneIndex strings 'of 10' → 'of 11'." }
+    {
+      "id": "note-call",
+      "x": 1420,
+      "y": 700,
+      "w": 380,
+      "text": "Kevin's calls 2026-08-29: intake = the 5TH TAB on /setup/request-rules, titled 'Request Intake' (Kevin's title call), with its OWN hub row like eligibility got (compliance lane 10 \u2192 11, item 7; every tab's item-count string follows) \u00b7 the IDENTITY FOLD rides in the same pass: the agency screen's Attest also signs the identity section, and the 'Which state's law' row doors to /setup/agency \u2014 two fewer reasons to visit jurisdiction-config, per the goal of retiring that screen entirely."
+    },
+    {
+      "id": "note-addresses",
+      "x": 1420,
+      "y": 1120,
+      "w": 380,
+      "text": "The designated-addresses rule (TX-0006) renders as a FIXED law card that reads the agency screen's mailing + contact e-mail \u2014 no second place to type an address. Changing them is an agency-screen act; this tab only shows what they legally mean (requests arriving elsewhere need not be answered, hand delivery and approved methods excepted)."
+    },
+    {
+      "id": "note-choices",
+      "x": 1900,
+      "y": 700,
+      "w": 380,
+      "text": "The three choices: CHANNELS (Master.g1) \u2014 the law's floor renders as fixed-checked (mail, e-mail, hand delivery; no phone channel exists to switch on, \u00a7 552.234(a) requires writing); the city elects portal/fax. ACKNOWLEDGMENT (Master.g4) \u2014 send timing, suggested same business day; standard wording until the letter-template slice. ESTIMATE CAPTURE (Master.p3) \u2014 lives in the FEE store today; the tab becomes its single home, confirms write through (the F2 waiver-decider pattern)."
+    },
+    {
+      "id": "note-stowaway",
+      "x": 1900,
+      "y": 1140,
+      "w": 380,
+      "text": "Stowaway retired: the import also filed a copy of the vagueness-wording knob (Master.bv) in the intake domain \u2014 no citations, no default, read by nothing. Its single, confirmable home is the Clarification tab; the intake copy is removed at import + migration (same twice-homing cleanup F2 did for the estimate/deposit pair)."
+    },
+    {
+      "id": "note-build",
+      "x": 1420,
+      "y": 1480,
+      "w": 380,
+      "text": "Build implications: new hub row `intake` (compliance, door ?tab=intake, foldSections:['intake'] \u2014 the intake profile section attests from the tab) \u00b7 TAB_CONCEPTS.intake = ['intake','custody'] (exactly TX-0005 + TX-0006) \u00b7 intake confirms ride the template-knob confirm path (goLive.confirm on the intake domain) \u00b7 verify_setup_hub items 35 \u2192 36 (the agency card on top + lanes [11,8,5,4,7] = 35 lane rows) \u00b7 verify_request_rules + verify_agency_setup grow sections \u00b7 laneIndex strings 'of 10' \u2192 'of 11'."
+    }
   ],
-  "launch": { "view": "canvas" }
+  "launch": {
+    "view": "canvas"
+  }
 }

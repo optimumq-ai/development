@@ -49,7 +49,7 @@
     .box.on { background: #1E6091; border-color: #1E6091; }
     .box.on::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px;
                      border: solid #FFFFFF; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-    .box.off-dis { background: #F2F6F9; }
+    .box.law { background: #0E3A5C; border-color: #0E3A5C; }
     .confirm { display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 11px;
                border-radius: 7px; font-size: 12px; font-weight: 600; background: #FFFFFF; color: #1E6091;
                border: 1px solid #BECAD3; cursor: pointer; white-space: nowrap; }
@@ -60,9 +60,9 @@
 
   <!-- status strip — a NEW hub row backs this tab (like eligibility's in R1) -->
   <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
-    <button class="pill p-prog" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
-      In progress
+    <button class="pill" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer; background: #E8EEF4; color: #5C6F7C;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      Not started
     </button>
     <span class="ev" style="flex-grow: 1;">Texas · 0 of 3 choices confirmed · designated addresses read from the agency screen</span>
     <span style="font-size: 11.5px; color: #8296A4;">Compliance and Policies Setup · item 7 of 11</span>
@@ -76,12 +76,12 @@
       <div class="tab"><span class="dot" style="background: #D9A441;"></span>Exemptions and appeals</div>
       <div class="tab"><span class="dot" style="background: #A9B7C2;"></span>Who is allowed to request</div>
       <div class="tab"><span class="dot" style="background: #D9A441;"></span>Response deadlines and tolling</div>
-      <div class="tab on"><span class="dot" style="background: #A9B7C2;"></span>How requests come in</div>
+      <div class="tab on"><span class="dot" style="background: #A9B7C2;"></span>Request Intake</div>
     </div>
 
     <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3; display: flex; align-items: flex-start; gap: 16px;">
       <div style="flex-grow: 1;">
-        <div style="font-size: 19px; font-weight: 700;">How requests come in</div>
+        <div style="font-size: 19px; font-weight: 700;">Request Intake</div>
         <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">The ways a request may reach the city, where it counts as received, and what happens the moment it arrives: what Texas law says, and the three things this city decides.</div>
       </div>
     </div>
@@ -135,9 +135,9 @@
           <div>
             <div style="display: flex; flex-wrap: wrap; row-gap: 8px;">
               <span class="cb"><span class="box on"></span>Online portal</span>
-              <span class="cb"><span class="box on"></span>E-mail</span>
-              <span class="cb"><span class="box on"></span>U.S. mail</span>
-              <span class="cb"><span class="box on"></span>Hand delivery</span>
+              <span class="cb"><span class="box on law"></span>E-mail <span style="color: #8296A4; font-size: 10.5px;">(law)</span></span>
+              <span class="cb"><span class="box on law"></span>U.S. mail <span style="color: #8296A4; font-size: 10.5px;">(law)</span></span>
+              <span class="cb"><span class="box on law"></span>Hand delivery <span style="color: #8296A4; font-size: 10.5px;">(law)</span></span>
               <span class="cb"><span class="box"></span>Fax</span>
             </div>
             <div class="cite" style="margin-top: 6px;"><span class="bind b-fixed">Fixed floor</span> <span class="cl">§ 552.234(a)</span> — mail, e-mail and hand delivery the law names; the portal and fax are "approved methods" the city elects. Unchecking a named channel does not turn the law off — it only hides it from the portal's how-to-request page.</div>
