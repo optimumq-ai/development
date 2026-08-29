@@ -9225,3 +9225,38 @@ pipeline alongside the negative-finding records.
 **NEXT:** Kevin's walk-through now includes the clock switch + six confirms (decision brief artifact from
 this morning still current otherwise) · fee schedule v1 + proposals still unblock the smoke estimate beat
 and the E1a revisit · then Content-tab pruning or letter-template / redaction-library slices.
+
+## 2026-08-29 (later still) — A1 BUILT: attestation fold into the absorbing screens; suite 2677/2678 (E1a the only red)
+
+**Session arc after F3:** Kevin asked for the request-rules verification (all three tabs 1:1 against the
+readable doc — clarification 4+5, exemptions 10+4, eligibility 4+dims; old /clarification-policy page
+already gone) → the surviving residue was the SPLIT ATTESTATION (hub done-mark forced rows ready while the
+profile sections — the automation gates — stayed un-attested) → Kevin: "fold those section attestations
+into their absorbing screens."
+
+**Built (33b9aff):** ITEMS rows carry `foldSections` (clarification/exemption/eligibility on the
+request-rules rows; fees + fee_waiver + payment on fee_law). `POST /setup-hub/:key/done` attests each
+configured folded section FIRST (real refusal → 422 ATTEST_REFUSED in words, no mark; not_configured →
+SKIPPED, so `payment` with the clock off stays un-attested and the enabled+attested automation gate never
+half-arms); DELETE unmarks + un-attests. `jurisdictionProfile` sections expose `foldedInto
+{item,name,door}`; stale editor strings now point at the absorbing doors. Jurisdiction-config's attest
+rail for folded sections = pointer + door (drift/provenance still shown; verified by authenticated
+screenshot). `/jurisdiction-profile/attest` route unchanged (mechanism + permission-scope tests live
+there). SPEC_setup_hub §7 A1 in the build commit.
+
+**The debugging lesson that cost an hour (now in CLAUDE.md):** the test DB is built from
+`src/db/seed_fixture.sql`, NOT cloned from live — the fixture ships the payment domain with the old
+`legal-research-seed` researched values where live holds defaults. verify_fee_law's G tests assumed
+live-shaped state and only passed in full-suite order; made ORDER-PROOF (reset to shipped defaults at G
+start, provenance kept; cleanup verified byte-for-byte against the snapshot). CLAUDE.md's "clone of live"
+line corrected. Live's payment domain confirmed untouched throughout (Kevin's 2026-08-25 import stamp).
+
+**Suite: full run 2677/2678, live clean — the one red is the deferred verify_bw9_golive E1a (unchanged
+since 2026-08-26).** Fold-touched harnesses inside the run: fee_law 42/42 · request_rules 30/30 ·
+setup_hub 22/22 · user_types 77/77 · deposit_clock 35/35 · reissue 24/24 · both e2e walks green.
+
+**NEXT:** Kevin's walk-through — now the screens' Attest buttons are the real section sign-offs, so the
+walk covers everything (clarification switch + 5 confirms + attest · exemptions 4 + attest · eligibility
+gate + attest · fee rules: 13 figures + approve v1 + 2 waiver + clock switch/6 confirms + attest — which
+attests fees/fee_waiver/payment in one act) · the two pending proposals · then E1a revisit, Content-tab
+pruning, or letter-template / redaction-library slices.
