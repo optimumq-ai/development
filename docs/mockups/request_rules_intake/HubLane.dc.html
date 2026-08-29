@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-top: 1px solid #EEF2F5; font-size: 13px; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+    .hint { font-size: 11.5px; color: #8296A4; line-height: 1.4; }
+    .tag { font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+           border-radius: 3px; padding: 1px 6px; }
+  </style>
+</helmet>
+
+<!-- the Compliance lane after: intake gains its OWN row (tab 5); identity's door folds into the agency screen -->
+<div style="padding: 20px; width: 560px; background: #D8E0E8;">
+  <div class="card">
+    <div style="padding: 12px 14px;">
+      <div style="font-size: 14px; font-weight: 700;">Compliance and Policies Setup</div>
+      <div class="hint">ORO Director · Senior Legal on the legal sections — 11 rows (was 10)</div>
+    </div>
+    <div class="row"><span class="dot" style="background: #1B8A5A;"></span>Which state's law this city follows
+      <span class="tag" style="background: #E8EEF4; color: #0E3A5C;">door → /setup/agency · identity fold</span></div>
+    <div class="row"><span class="dot" style="background: #D9A441;"></span>Response deadlines and tolling</div>
+    <div class="row"><span class="dot" style="background: #D9A441;"></span>Fee rules</div>
+    <div class="row"><span class="dot" style="background: #D9A441;"></span>Vague requests and clarification</div>
+    <div class="row"><span class="dot" style="background: #D9A441;"></span>Exemptions and appeals</div>
+    <div class="row"><span class="dot" style="background: #A9B7C2;"></span>Requestor eligibility</div>
+    <div class="row" style="background: #F4FAF6;"><span class="dot" style="background: #A9B7C2;"></span><b>How requests come in</b>
+      <span class="tag" style="background: #E1F2E9; color: #1B8A5A;">new row · Request rules tab 5</span></div>
+    <div class="row"><span class="dot" style="background: #D9A441;"></span>Redaction rules library</div>
+    <div class="row"><span class="dot" style="background: #D9A441;"></span>Choices the statute left to the city</div>
+    <div class="row"><span class="dot" style="background: #B02A37;"></span>Keeping up with changes in the law</div>
+    <div class="row" style="border-radius: 0 0 10px 10px;"><span class="dot" style="background: #5B21B6;"></span>Turn the rules on for real</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
