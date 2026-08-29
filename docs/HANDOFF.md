@@ -9188,3 +9188,40 @@ deferrals (specialty reproduction, delivery) can't take "none".
 **NEXT:** unchanged — Kevin walks the screens (the brief is the map); fee schedule v1 + proposal
 review then unblock the smoke's estimate beat and the E1a revisit; after that the Content-tab
 pruning slice or the letter-template / redaction-library slices.
+
+## 2026-08-29 (later) — F3 BUILT: Fee rules absorbs the deposit & payment clock; suite 2673/2674 (E1a deferred)
+
+**Session arc:** Kevin verified the F2 waiver migration against TX_RULES_READABLE (§6 complete — his "3+3"
+count was §5's, the very section he pointed at next) → canvas mockup approved
+(docs/mockups/fee_law_payment_clock/, second-pass fixes dd96c4c) → built same session.
+
+**Kevin's calls:** same F2 treatment (no new tab, `deposits` hub row RETIRED, compliance lane 11 → 10) ·
+MASTER SWITCH + individual confirms (the clarification pattern — these settings stop clocks and withdraw
+requests) · canvas before code.
+
+**Built (5c45a7f + test fix 6a51b69):** `feeLaw.clockPrefills()` parses the state's six answers from the
+SAME template items the mandate rows render (TX: toll_and_restart · 10 business days · withdraw · yes ×3;
+32/32 templates parse, 4 carry a clock-effect answer — elsewhere open choices, and OFF is itself the
+configured, attestable posture) · `clockState()`/`decideClock()` + `POST /api/fee-law/clock` ({enabled} and
+{confirm:{key,value}}, strict policy validation, write-through to the `payment` domain the engine reads
+with importer provenance untouched, who/when in `fee_schedule_decisions.clock`) · FeeLawPage: estimates
+group retitled "…and their clocks", switch block + six confirm rows, tab badge counts the clock when on,
+Attest gate extends (clock off OR 6 confirmed) · hub: `deposits` row deleted, fee_law evidence appends
+"payment clock: off｜X of 6 confirmed" · RequestRulesPage lane indexes 4/5/6 of 10. SPEC_setup_hub §3 + §7
+F3 in the build commit; WORKING §2i (ce04e97). Verified live read-only (clock payload, hub 10 rows,
+evidence line) + authenticated screenshot of the off-state city tab (matches the canvas; the ON state is
+exercised only in the test DB — flipping live is Kevin's act).
+
+**Suite: full run 2672/2674 with TWO reds → the deferred `verify_bw9_golive` E1a (unchanged) and MY miss:
+verify_setup_hub B3 sums header counts to 36 and only A2 had been updated. Fixed (35), harness re-run
+through the runner: 22/22, live clean. Net suite state: 2673/2674, the one red is E1a.** Live census clean
+on both runs.
+
+**Open (F3 residue, both noted in the spec):** the `payment` profile section still attests on
+jurisdiction-config (same fold-pending class as fee_waiver's) · grace-days provenance mismatch (importer
+filed § 552.221(e)/TX-S05 where the answer is § 552.263(f)'s 10 business days) goes to the research
+pipeline alongside the negative-finding records.
+
+**NEXT:** Kevin's walk-through now includes the clock switch + six confirms (decision brief artifact from
+this morning still current otherwise) · fee schedule v1 + proposals still unblock the smoke estimate beat
+and the E1a revisit · then Content-tab pruning or letter-template / redaction-library slices.
