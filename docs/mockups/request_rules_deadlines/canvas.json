@@ -1,14 +1,60 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1280, "h": 1240, "title": "Request rules — 4th tab: Response deadlines and tolling" },
-    { "file": "HubDoor.dc.html", "x": 1380, "y": 0, "w": 600, "h": 520, "title": "The hub lane after — no row changes, just the door" }
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 1240,
+      "title": "Request rules \u2014 4th tab: Response deadlines and tolling"
+    },
+    {
+      "file": "HubDoor.dc.html",
+      "x": 1380,
+      "y": 0,
+      "w": 600,
+      "h": 520,
+      "title": "The hub lane after \u2014 no row changes, just the door"
+    }
   ],
   "annotations": [
-    { "id": "note-call", "x": 1380, "y": 660, "w": 380, "text": "Kevin's call 2026-08-29: deadlines and tolling migrates next, as a 4TH TAB on /setup/request-rules. Drawn appended (rightmost); say the word if it should lead the tab order instead (it is item 2 in the lane). The hub row STAYS — only its door changes (like the other three tabs); lane still 10 rows. The A1 attestation fold extends to it: Attest on this tab signs the deadlines section — a LEGAL section, so the strip's Attest demands Senior Legal or the Director (the hub gate already enforces this on the deadlines row)." },
-    { "id": "note-columns", "x": 1380, "y": 1080, "w": 380, "text": "Left column = the R1 law-panel pattern: the doc's 4 rules (TX-0008/0009/0010/TX-S04) with statute popups, plus the clock-presence list (5 statutory, 5 city-target-only) so the law's full set is visible. The catastrophe suspension renders as an honest no-config line — it lands on no clock; the engine pauses everything while one is declared." },
-    { "id": "note-editing", "x": 1800, "y": 660, "w": 380, "text": "Editing model (the fee-law rule, applied here): STATUTORY clock figures render as law, never editable in place — a change goes through the section's proposal composer with a citation (the BW9b path, which keeps working behind this tab). The two SERVICE TARGETS (acknowledge / complete) are the city's own numbers, editable directly on the tab; blank = no target. Toll reasons are engine-defined and display-only." },
-    { "id": "note-holidays", "x": 1800, "y": 1000, "w": 380, "text": "REAL FINDING pulled from live: the holiday calendar is EMPTY (0 days) while every statutory clock counts business days — deadlines currently land EARLIER than the law requires (safe direction, but wrong). The tab surfaces it as the one needs-attention item with a one-click 'Load the US federal set'. OPEN QUESTION for the build: is the federal-set seed enough, or does the city need its own holiday upload (the fixture ships a US-federal 2026-27 list that never reached live)?" },
-    { "id": "note-build", "x": 1380, "y": 1320, "w": 380, "text": "Build implications: TAB_CONCEPTS gains the deadlines concept domain (rules from the template, same collectRules walk) · timer table reuses ruleEditors.timerTable (deadline + clock_matrix domains) · deadlines hub row door → /setup/request-rules?tab=deadlines + foldSections:['deadlines'] · service-target writes are plain deadline-domain edits (non-legal fields), statutory ones stay proposal-gated · RequestRulesPage laneIndex map gains deadlines (item 2 of 10) · verify_request_rules grows a D-tab section; verify_deadline_rules/clock_matrix untouched." }
+    {
+      "id": "note-call",
+      "x": 1380,
+      "y": 660,
+      "w": 380,
+      "text": "Kevin's call 2026-08-29: deadlines and tolling migrates next, as a 4TH TAB on /setup/request-rules. Drawn appended (rightmost); say the word if it should lead the tab order instead (it is item 2 in the lane). The hub row STAYS \u2014 only its door changes (like the other three tabs); lane still 10 rows. The A1 attestation fold extends to it: Attest on this tab signs the deadlines section \u2014 a LEGAL section, so the strip's Attest demands Senior Legal or the Director (the hub gate already enforces this on the deadlines row)."
+    },
+    {
+      "id": "note-columns",
+      "x": 1380,
+      "y": 1080,
+      "w": 380,
+      "text": "Left column = the R1 law-panel pattern: the doc's 4 rules (TX-0008/0009/0010/TX-S04) with statute popups, plus the clock-presence list (5 statutory; the other 5 named concepts are city-target-only \u2014 the tab renders 2 target rows) so the law's full set is visible. The catastrophe suspension renders as an honest no-config line \u2014 it lands on no clock; the engine pauses everything while one is declared."
+    },
+    {
+      "id": "note-editing",
+      "x": 1840,
+      "y": 660,
+      "w": 380,
+      "text": "Editing model (the fee-law rule, applied here): STATUTORY clock figures render as law, never editable in place \u2014 a change goes through the section's proposal composer with a citation (the BW9b path, which keeps working behind this tab). The two SERVICE TARGETS (acknowledge / complete) are the city's own numbers, editable directly on the tab; blank = no target. Toll reasons are engine-defined and display-only."
+    },
+    {
+      "id": "note-holidays",
+      "x": 1840,
+      "y": 1000,
+      "w": 380,
+      "text": "REAL FINDING pulled from live: the holiday calendar is EMPTY (0 days) while every statutory clock counts business days \u2014 deadlines currently land EARLIER than the law requires (safe direction, but wrong). The tab surfaces it as the one needs-attention item with a one-click 'Load the US federal set'. OPEN QUESTION for the build: is the federal-set seed enough, or does the city need its own holiday upload (the fixture ships a US-federal 2026-27 list that never reached live)?"
+    },
+    {
+      "id": "note-build",
+      "x": 1380,
+      "y": 1320,
+      "w": 380,
+      "text": "Build implications: TAB_CONCEPTS gains the deadlines concept domain (rules from the template, same collectRules walk) \u00b7 timer table reuses ruleEditors.timerTable (deadline + clock_matrix domains) \u00b7 deadlines hub row door \u2192 /setup/request-rules?tab=deadlines + foldSections:['deadlines'] \u00b7 service-target writes are plain deadline-domain edits (non-legal fields), statutory ones stay proposal-gated \u00b7 RequestRulesPage laneIndex map gains deadlines (item 2 of 10) \u00b7 verify_request_rules grows a D-tab section; verify_deadline_rules/clock_matrix untouched."
+    }
   ],
-  "launch": { "view": "canvas" }
+  "launch": {
+    "view": "canvas"
+  }
 }
