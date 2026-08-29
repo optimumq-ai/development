@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .grp { padding: 10px 12px 4px; font-size: 12px; font-weight: 700; background: #F8FAFC; border-top: 1px solid #D2DCE3; }
+    .skip { padding: 8px 12px; border-top: 1px dashed #BECAD3; font-size: 11.5px; color: #A9B7C2; text-align: center; letter-spacing: .04em; }
+    .swwrap { display: flex; align-items: flex-start; gap: 12px; padding: 12px 12px 14px; border-top: 1px solid #EEF2F5; background: #FBFCFD; border-radius: 0 0 10px 10px; }
+    .sw { width: 38px; height: 22px; border-radius: 999px; background: #BECAD3; position: relative; flex-shrink: 0; margin-top: 2px; }
+    .sw .knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF; }
+    .cl { color: #1E6091; text-decoration: underline dotted; cursor: pointer; }
+  </style>
+</helmet>
+
+<!-- the same block BEFORE the switch is flipped — what the tab shows on first visit -->
+<div style="padding: 20px; width: 1520px; background: #D8E0E8;">
+  <div class="card">
+    <div class="grp" style="border-top: 0; border-radius: 10px 10px 0 0;">Estimates, deposits, payment and their clocks <span style="font-weight: 500; color: #8296A4;">· 3</span></div>
+    <div class="skip" style="border-top: 0;">⋯ Estimate valid for · Deposit capped at · Late response forfeits the fee — 3 rows, unchanged ⋯</div>
+    <div class="swwrap">
+      <div class="sw"><span class="knob"></span></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 13px; font-weight: 700;">Deposit &amp; payment clock — <span style="color: #8296A4;">off</span></div>
+        <div class="hint" style="margin-top: 2px;">Texas law already answers all six questions behind this switch — what the response clock does while a deposit is unpaid, how long the requestor has to pay, and the revised-estimate rules (<span class="cl">§ 552.263(e)–(f)</span> · <span class="cl">§ 552.2615(b)–(c)</span>). The switch decides whether the system <b>acts</b> on them: off, staff see flags and the clock is never touched — a request sitting on an unpaid deposit keeps burning its response window, and the city looks late for the requestor's inaction. Turning it on brings the six answers onto this tab to confirm.</div>
+      </div>
+      <span style="display: inline-flex; align-items: center; justify-content: center; height: 30px; padding: 0 14px; border-radius: 7px; font-size: 13px; font-weight: 600; background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; cursor: pointer; white-space: nowrap;">Turn on</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

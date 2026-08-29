@@ -1,0 +1,15 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1560, "h": 1100, "title": "City decisions tab — Deposit & payment clock, switch ON" },
+    { "file": "SwitchOff.dc.html", "x": 0, "y": 1240, "w": 1560, "h": 340, "title": "The same block before the switch — first visit" },
+    { "file": "HubLane.dc.html", "x": 1660, "y": 0, "w": 600, "h": 560, "title": "The hub lane after — deposits row retired" }
+  ],
+  "annotations": [
+    { "id": "note-pattern", "x": 1660, "y": 620, "w": 380, "text": "Kevin's calls 2026-08-29: same treatment as fee waivers (F2) — no new tab, no separate setup section. NEW here: a MASTER SWITCH (the clarification pattern), because these six settings drive automation that stops clocks and withdraws requests. Flipping it materializes the six answers pre-filled from Texas law; each is confirmed individually. Nothing automated runs until the switch is on AND Fee rules attests — the same double gate clarification uses." },
+    { "id": "note-counts", "x": 1660, "y": 900, "w": 380, "text": "Counts: the City decisions group retitles to \"…and their clocks\" to match the mandate tab, 3 existing deferral rows unchanged, + 6 clock settings when the switch is on (tab badge 15 → 21). Hub: compliance lane 11 → 10 rows; Fee rules evidence line grows \"payment clock: on/off · X of 6 confirmed\". The six gate Attest, never Approve." },
+    { "id": "note-engine", "x": 2080, "y": 620, "w": 380, "text": "Engine truth behind this screen: the six settings ARE the paymentClockPolicy store that depositAction, feeReissue and the tickler already read. Today it is switched off with safe defaults that CONTRADICT the Texas answers (clock keeps running, lapse only flags, reissue rules off) — deliberate until configured, but it means a request on an unpaid deposit reports false lateness. Confirming writes the lawful values through; provenance (citations + rule ids) rides along." },
+    { "id": "note-openq", "x": 2080, "y": 940, "w": 380, "text": "One figure to eye at build: the deposit payment window. The policy research says 10 business days (§ 552.263(f)); the template import filed the 60-day § 552.221(e) citation on the same field. They are two different windows (pay-the-deposit vs collect-what-you-asked-for) — the 60-day one already renders as its own mandate row. Build reconciles: grace = 10 business days, provenance corrected." },
+    { "id": "note-silent", "x": 1660, "y": 1160, "w": 380, "text": "Silent-state behavior (the Florida case): the same six rows render as OPEN city choices — no pre-fill, the safe-manual defaults suggested — and the switch copy drops the \"Texas law already answers\" line. \"Leave it off\" must count as CONFIGURED, same class as the clarification switch and offer-a-waiver-at-all." }
+  ],
+  "launch": { "view": "canvas" }
+}
