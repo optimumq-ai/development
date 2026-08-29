@@ -104,7 +104,6 @@ export default function ConfigurationPage() {
 
   const tabs = [
     { key:'auth', label:'Authentication' },
-    { key:'fees', label:'Fees & Deadlines' },
     { key:'notifications', label:'Notifications' },
     { key:'redaction', label:'Redaction' },
     { key:'timecapture', label:'Time Tracking' },
@@ -168,32 +167,6 @@ export default function ConfigurationPage() {
               <select value={config.min_password_length||'10'} onChange={function(e){set('min_password_length',e.target.value);}} style={inp}>
                 {['8','10','12','14','16'].map(function(n){ return <option key={n} value={n}>{n} characters</option>; })}
               </select>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'fees' && (
-          <div style={section}>
-            <div style={sectionTitle}>Response Deadlines</div>
-            <div>
-              <label style={lbl}>Response Deadlines (Business Days)</label>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginTop:'8px'}}>
-                {[['Simple','deadline_simple','5'],['Standard','deadline_standard','10'],['Complex','deadline_complex','20'],['Redaction Required','deadline_redaction','30']].map(function(item){
-                  return (
-                    <div key={item[0]} style={{background:'#F9FAFB',borderRadius:'8px',padding:'12px',border:'1px solid #F3F4F6'}}>
-                      <label style={{display:'block',fontSize:'12px',fontWeight:'600',color:'#374151',marginBottom:'6px'}}>{item[0]}</label>
-                      <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                        <input type="number" value={config[item[1]]||item[2]} onChange={function(e){set(item[1],e.target.value);}} style={{width:'70px',padding:'8px',border:'1px solid #E5E7EB',borderRadius:'6px',fontSize:'14px',outline:'none'}} min="1"/>
-                        <span style={{fontSize:'13px',color:'#9CA3AF'}}>business days</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div style={{background:'#F0F6FF',border:'1px solid #DBEAFE',borderRadius:'8px',padding:'12px 14px'}}>
-              <div style={{fontSize:'13px',fontWeight:600,color:'#1E40AF',marginBottom:'3px'}}>Fee amounts are configured on the Fee Configuration page</div>
-              <div style={{fontSize:'12px',color:'#6B7280'}}>Per-page copy rates, labor rates, minimum and maximum fees, de minimis auto-waive, free allowances, and deposit rules all live on the Fee Configuration page, which the estimate engine reads directly. They are not set here.</div>
             </div>
           </div>
         )}
