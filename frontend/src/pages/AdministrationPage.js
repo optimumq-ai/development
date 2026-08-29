@@ -39,7 +39,9 @@ const TABS = [
   { key: 'ai-data',      label: 'AI Data Flow',         el: AIDataFlowPage, admin: true },
   { key: 'security',     label: 'Portal Agent Security', el: SecurityPage, admin: true },
   // v3 user-type model (SPEC_user_type_model §10.2, S3): the catalog matrix. Visible to anyone who may see Administration.
-  { key: 'user-types',   label: 'User Types',           el: UserTypesPage },
+  // C6 cleanup (Kevin 2026-08-29): the nav tab is gone — reached from the Organization page's Staff tab
+  // ("View user types"); ?tab=user-types stays routable.
+  { key: 'user-types',   label: 'User Types',           el: UserTypesPage, hidden: true },
 ];
 
 export default function AdministrationPage() {

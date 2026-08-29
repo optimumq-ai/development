@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import StaffManagementPage from './StaffManagementPage';
 
@@ -26,6 +27,7 @@ function CodeChip({ code, color }) {
 
 export default function OrgPage() {
   const [tab, setTab] = useState('departments');
+  const nav = useNavigate();
   const [departments, setDepartments] = useState([]);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -210,9 +212,15 @@ export default function OrgPage() {
           {/* ---------- STAFF ---------- */}
           {tab === 'staff' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <Guidance>
-                <strong>Staff</strong> belong to a fulfillment team. Each person is assigned a subset of <strong>task types</strong> (record search, redaction, …) — task routing only offers a task to people on the right team who hold its type. Use <em>Edit</em> for team and task types, and <em>Routing</em> for the plain-language specialization that smart-routing matches on.
-              </Guidance>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ flexGrow: 1 }}>
+                  <Guidance>
+                    <strong>Staff</strong> belong to a fulfillment team. Each person is assigned a subset of <strong>task types</strong> (record search, redaction, …) — task routing only offers a task to people on the right team who hold its type. Use <em>Edit</em> for team and task types, and <em>Routing</em> for the plain-language specialization that smart-routing matches on.
+                  </Guidance>
+                </div>
+                <button onClick={() => nav('/admin?tab=user-types')} title="The catalog of user types: what each may do, which task menus it carries, and who holds it"
+                  style={{ padding: '8px 16px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>View user types</button>
+              </div>
               <StaffManagementPage embedded />
             </div>
           )}
