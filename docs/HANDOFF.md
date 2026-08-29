@@ -9161,3 +9161,30 @@ profile section still attests on jurisdiction-config (fold-into-fees pending) ·
 work is DONE via F2. **NEXT:** Kevin's walk-through (clarification switch, waiver choices, fee schedule v1 —
 which also unblocks the smoke's estimate beat and the E1a revisit) · then the Content-tab pruning slice or
 the letter-template / redaction-library slices.
+
+## 2026-08-29 — no build: walk-through decision brief for Kevin (live state re-verified, unchanged)
+
+**Kevin's call:** no slice this session — support the walk-through instead.
+
+**Live re-probed (read-only, node pg scripts):** nothing moved since 2026-08-27 — clarification
+still off (`clarification_screen` domain absent, policy `enabled:false`), waiver choices 0/2,
+fee schedule versionless (13 deferrals undecided, 2 gaps defaulted), the two 2026-08-26 TX
+template merge proposals (`prop-1471997e` fee, `prop-f280e725` template_import) still pending in
+`config_proposals`. Confirmed in code: `feeLaw.approve` refuses while any deferral is blank
+(422 UNDECIDED) and bounds-checks against state law before minting v1.
+
+**Delivered:** decision brief artifact
+https://claude.ai/code/artifact/2b89ea16-4edd-4683-8ae9-fc54554a51a8 — every decision in walk
+order (27 acts across 5 stops + the 2 proposals), each with the screen's own label, suggested
+answer, and plain-language consequence; data pulled from the live `requestRules.screen()` /
+`feeLaw.screen()` readers on 2026-08-29 so it matches the screens exactly. Link handed via
+`~/exchange/WALKTHROUGH_BRIEF_2026-08-29.md` (built-screen screenshots deliberately not included,
+per the exchange-folder rule). Notable for the walk: the ONE choice with no suggested default is
+the denial-letter send deadline (TX silent — needs a number from Kevin); the two actual-cost
+deferrals (specialty reproduction, delivery) can't take "none".
+
+**No code, no config, no DB writes. Suite not run (nothing changed).**
+
+**NEXT:** unchanged — Kevin walks the screens (the brief is the map); fee schedule v1 + proposal
+review then unblock the smoke's estimate beat and the E1a revisit; after that the Content-tab
+pruning slice or the letter-template / redaction-library slices.
