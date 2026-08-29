@@ -9294,3 +9294,39 @@ ledger, template_import) — each with its own surface or pending slice.
 **NEXT:** Kevin's walk-through (now including the holiday-calendar load and the deadlines attest) · fee
 schedule v1 + the two pending proposals unblock the smoke estimate beat and the E1a revisit · then
 Content-tab pruning or the letter-template / redaction-library slices.
+
+## 2026-08-29 (fourth slice) — I1 BUILT: "Request Intake" 5th tab + the identity fold; suite 2696/2697 (E1a the only red)
+
+**Kevin's calls:** north star = ELIMINATE the jurisdiction-config screen (hub → purpose-built screens →
+mark complete; keep it simple during the rebuild) · intake verified un-migrated → 5th tab on
+/setup/request-rules, title **"Request Intake"** (his call, mid-canvas) · the identity fold rides in the
+same pass · canvas approved before build (docs/mockups/request_rules_intake/ →
+https://claude.ai/code/artifact/4a013e52-7194-4e29-a350-b911e1868743).
+
+**Built (ac4eadb), verified live + screenshot:** `TAB_CONCEPTS.intake = ['intake','custody']` (READABLE
+§10's TX-0005/0006 exactly) · designated-addresses card reads the AGENCY config (no second place to type
+them; TX-0006 rendered as what it legally means) · three confirms via `POST /request-rules/intake/confirm`
+riding goLive.confirm on each knob's HOME domain — channels Master.g1 + acknowledgment Master.g4 (intake),
+estimate-capture Master.p3 (FEE domain, write-through single home; it was ALREADY confirmed by Kevin
+2026-08-25, so the tab opens 1 of 3) · new hub row "Request Intake" (compliance 10 → 11, 36 items,
+foldSections intake) · law-named channels get a display-only "(law)" marker derived from the loaded rule
+text. **Identity fold:** agency item foldSections ['identity'] (its Attest signs the identity section;
+gate deliberately the agency groups), jurisdiction row door → /setup/agency, readiness from the same act.
+**Stowaway retired:** stateTemplateImport gains KNOB_SKIP (Master.bv — covered, deliberately unwritten;
+single home the clarification tab); the LIVE intake-domain copy removed by a guarded migration write
+(actor 'I1 migration…', refuses if the knob carries a recorded decision) — the one deliberate live config
+write this session, Kevin-approved on the canvas.
+
+**Suite: 2696/2697, live census clean — the one red is the deferred verify_bw9_golive E1a.** Touched:
+request_rules 47/47 (IN1–IN8) · agency_setup 20/20 (C5a/C5b) · setup_hub 22/22 (36 items, [11,8,5,4,7]) ·
+fee_law 42/42 · config_integrity, fresh_install, bw9b all green. SPEC_setup_hub §3 + §7 I1.
+
+**Migration scoreboard:** request-rules screen = clarification · exemptions · eligibility · deadlines ·
+Request Intake (5 tabs) · Fee rules = fees + waivers + deposit/payment clock · agency screen = identity ·
+every screen's Attest is the real section sign-off (A1 fold). **Left on jurisdiction-config: REDACTION
+(Kevin: "going to take a lot of planning" — its own future slice) + the go-live flip.** The taxonomy and
+the template roll-up sections have their own surfaces (Taxonomy page; city_choices row).
+
+**NEXT:** Kevin's walk-through (brief + clock switch + holiday load + tab attests + waiver choices + fee
+schedule v1 + the two proposals) · then redaction planning, or the Content-tab pruning / letter-template
+slices.
