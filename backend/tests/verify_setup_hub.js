@@ -45,9 +45,9 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var U = { dir: await mk('oro_director'), legal: await mk('oro_senior_legal'), sa: await mk('oro_sysadmin'), staff: await mk('team_staff', 'team-police'), sup: await mk('team_supervisor', 'team-police'), none: await mk('none') };
 
   console.log('\n=== A. THE CATALOG ===');
-  ok('A1 five lanes in the decided order and names', HUB.LANES.length === 5 && /^Compliance and Policies Setup$/.test(HUB.LANES[0].title) && /Fees, Estimates and Routing$/.test(HUB.LANES[1].title) && /Redaction and Release$/.test(HUB.LANES[2].title) && /^Organization Departments, Teams, and Staff Setup$/.test(HUB.LANES[3].title) && HUB.LANES[4].title === 'Technical Setup');
-  ok('A2 thirty-five items (10 + 8 + 5 + 4 + 7 + the agency card on top; intake ADDED as Request rules tab 5, the jurisdiction row DELETED into the agency card — all 2026-08-29)', HUB.ITEMS.length === 35 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
-    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 8, 5, 4, 7]));
+  ok('A1 six lanes in the decided order and names (System Features and Options added 2026-08-29)', HUB.LANES.length === 6 && /^Compliance and Policies Setup$/.test(HUB.LANES[0].title) && /Fees, Estimates and Routing$/.test(HUB.LANES[1].title) && /Redaction and Release$/.test(HUB.LANES[2].title) && /^Organization Departments, Teams, and Staff Setup$/.test(HUB.LANES[3].title) && HUB.LANES[4].title === 'Technical Setup' && HUB.LANES[5].title === 'System Features and Options');
+  ok('A2 thirty-five items (10 + 7 + 5 + 4 + 7 + 1 + the agency card on top; taxonomy moved to System Features and Options 2026-08-29)', HUB.ITEMS.length === 35 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
+    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 7, 5, 4, 7, 1]));
   var badDeps = []; HUB.ITEMS.forEach(function (i) { (i.deps || []).forEach(function (d) { if (!HUB.BY_KEY[d]) badDeps.push(i.key + '->' + d); }); });
   ok('A3 every dependency points at a real item', badDeps.length === 0, badDeps.join(','));
   ok('A4 every lane owner is a permission GROUP from the user-type model (no role names anywhere)', HUB.LANES.every(function (l) { return l.groups.every(function (g) { return ut.PERMISSION_GROUPS.indexOf(g) !== -1; }); }) &&
@@ -58,7 +58,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
 
   console.log('\n=== B. EVIDENCE IS COUNTED ===');
   var page = (await callAs(U.dir, 'GET', '/setup-hub')).body;
-  ok('B1 the page renders for a Director: counts + top card + five lanes', page && page.counts && page.top.length === 1 && page.lanes.length === 5);
+  ok('B1 the page renders for a Director: counts + top card + six lanes', page && page.counts && page.top.length === 1 && page.lanes.length === 6);
   var states = ['ready', 'in_progress', 'not_started', 'waiting', 'needs_attention'];
   var allItems = []; page.lanes.forEach(function (l) { allItems = allItems.concat(l.items); }); allItems = allItems.concat(page.top);
   ok('B2 every row carries a known state and a non-empty evidence line', allItems.every(function (x) { return states.indexOf(x.state) !== -1 && typeof x.evidence === 'string' && x.evidence.length > 0; }));
@@ -123,7 +123,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var broken = await HUB.build({ sub: U.dir, permissionGroups: ['compliance_policy'], authorities: [] });
   HUB.READERS.agent_rules = saved;
   var ar = null; broken.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'agent_rules') ar = x; }); });
-  ok('E1 a reader that throws yields an honest not_started line; the page still builds', ar && ar.state === 'not_started' && /could not read: boom/.test(ar.evidence) && broken.lanes.length === 5);
+  ok('E1 a reader that throws yields an honest not_started line; the page still builds', ar && ar.state === 'not_started' && /could not read: boom/.test(ar.evidence) && broken.lanes.length === 6);
 
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }

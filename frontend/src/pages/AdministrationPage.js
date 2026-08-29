@@ -28,7 +28,9 @@ const TABS = [
   // C4 cleanup (Kevin 2026-08-29): the nav tab is gone — fee setup lives on Fee rules; the hub's
   // "What this city actually charges" row remains the one door here (?tab=fees stays routable).
   { key: 'fees',         label: 'Fee Configuration',    el: FeeConfigPage, hidden: true },
-  { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage },
+  // C7 cleanup (Kevin 2026-08-29): the nav tab is gone — the hub's Taxonomy row (System Features and
+  // Options) and the calibration row are the doors; ?tab=taxonomy stays routable.
+  { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage, hidden: true },
   { key: 'workflow',     label: 'Workflow',             el: WorkflowPage },
   { key: 'map',          label: 'Process Map',          el: WorkflowMapPage },
   { key: 'sources',      label: 'Sources',              el: SourcesPage },

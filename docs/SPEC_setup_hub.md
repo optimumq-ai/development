@@ -19,6 +19,7 @@ configured**, never from a checkbox; a person may additionally **mark it done** 
 | 2b | Request Fulfillment Process Setup — Redaction and Release | `operations_config` |
 | 3 | Organization Departments, Teams, and Staff Setup | `operations_config` |
 | 4 | Technical Setup | `system_admin` |
+| 5 | System Features and Options (added 2026-08-29, C7: feature-catalog screens — Taxonomy first; the fulfillment lane's "Record types and categories" row moved here renamed, same key/deps/reader; the admin Taxonomy nav tab retired) | `operations_config` |
 The **agency identity** card sits above the lanes ("Start here"; `operations_config` or `system_admin`). **Go-live**
 is the last row of lane 1; it is flipped on the Jurisdiction Configuration page by the `go_live` authority
 (ORO System Administrator **or** ORO Director) and is never "marked done".

@@ -30,6 +30,9 @@ const LANES = [
   { key: 'organization', title: 'Organization Departments, Teams, and Staff Setup',
     ownerLabel: 'Anyone in the Open Records Office · fulfillment team managers and supervisors', groups: ['operations_config'] },
   { key: 'technical', title: 'Technical Setup', ownerLabel: 'System Administrator', groups: ['system_admin'] },
+  // C7 cleanup (Kevin 2026-08-29): feature-catalog screens live here rather than as setup-step rows.
+  { key: 'features', title: 'System Features and Options',
+    ownerLabel: 'Anyone in the Open Records Office · fulfillment team managers and supervisors', groups: ['operations_config'] },
 ];
 
 // Item catalog. `deps` are item keys; `door` is the screen; `legal` marks a Legal Rules section (attest by
@@ -72,7 +75,9 @@ const ITEMS = [
   // ── Lane 2a ──
   { key: 'fee_rates', lane: 'fulfillment_fees', name: 'What this city actually charges', door: '/admin?tab=fees', deps: ['fee_law'], groups: ['fee_configuration'] },
   { key: 'fee_test', lane: 'fulfillment_fees', name: 'Try a test estimate', door: '/setup/fee-law?tab=test', deps: ['fee_rates', 'calibration'] },
-  { key: 'taxonomy', lane: 'fulfillment_fees', name: 'Record types and categories', door: '/admin?tab=taxonomy', deps: ['sources'], softDeps: true },
+  // C7 (Kevin 2026-08-29): 'Record types and categories' becomes 'Taxonomy' under System Features and
+  // Options — same key, so the calibration dependency and the counted evidence carry over unchanged.
+  { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/admin?tab=taxonomy', deps: ['sources'], softDeps: true },
   { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/admin?tab=taxonomy', deps: ['taxonomy'] },
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Who gets which request', door: '/admin?tab=workflow', deps: ['departments', 'teams'] },
   { key: 'time_budgets', lane: 'fulfillment_fees', name: 'How many days a task should take', door: '/admin?tab=config', deps: [] },
