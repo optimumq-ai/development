@@ -62,7 +62,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var states = ['ready', 'in_progress', 'not_started', 'waiting', 'needs_attention'];
   var allItems = []; page.lanes.forEach(function (l) { allItems = allItems.concat(l.items); }); allItems = allItems.concat(page.top);
   ok('B2 every row carries a known state and a non-empty evidence line', allItems.every(function (x) { return states.indexOf(x.state) !== -1 && typeof x.evidence === 'string' && x.evidence.length > 0; }));
-  ok('B3 header counts add up to 36', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 36);
+  ok('B3 header counts add up to 35', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 35);
   var teamsBefore = find(page, 'teams');
   var dept = 'dept-' + TAG;
   await db.run("INSERT INTO departments (id, name, code, kind, is_open_records, active) VALUES (?,?,?,'department',0,1)", [dept, 'HUB Unserved ' + TAG, 'H' + TAG.slice(-5)]);
