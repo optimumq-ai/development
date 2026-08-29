@@ -864,28 +864,41 @@ export default function JurisdictionConfigPage() {
 
             <div style={panel}>
               <div style={railHead}>Attest this section</div>
-              <div style={Object.assign({}, kv, { marginBottom: 7 })}>
-                {openCount > 0
-                  ? <span><b>{openCount}</b> policy setting(s) unconfirmed — <b>attestation refuses until every one is</b> (the attest() gate, not a UI nicety).</span>
-                  : sec.status === 'not_configured'
-                    ? <span>This section has no configuration yet, so there is nothing to sign off on.</span>
-                    : <span>When you attest, the section’s content hash is recorded under your name; any later edit — including an applied proposal — shows as drift until re-attested.</span>}
-              </div>
-              {sec.attested && !sec.drift ? (
-                <button type="button" style={canAttest(sec.section) ? btnQuiet : btnOff} disabled={!canAttest(sec.section)}
-                  onClick={function () { setPopup({ kind: 'unattest', section: sec.section }); }}>Re-open (un-attest)…</button>
+              {sec.foldedInto ? (
+                /* Attestation fold (2026-08-29): this section's sign-off lives on the screen that
+                   absorbed it — "Attest as complete" there records (or re-opens) this attestation. */
+                <div>
+                  <div style={Object.assign({}, kv, { marginBottom: 7 })}>
+                    This section is attested from <b>{sec.foldedInto.name}</b> — its "Attest as complete" records this attestation in the same act{sec.drift ? '; it has drifted since, so re-attest it there' : ''}. Drift and provenance still show here.
+                  </div>
+                  <button type="button" style={btn} onClick={function () { window.location.href = sec.foldedInto.door; }}>Open {sec.foldedInto.name}</button>
+                </div>
               ) : (
-                <button type="button" style={attestable && canAttest(sec.section) ? btn : btnOff}
-                  disabled={!attestable || !canAttest(sec.section)}
-                  onClick={function () { setPopup({ kind: 'attest', section: sec.section }); }}>
-                  {sec.drift ? 'Re-attest ' + sec.section + '…' : 'Attest ' + sec.section + '…'}
-                </button>
+                <div>
+                  <div style={Object.assign({}, kv, { marginBottom: 7 })}>
+                    {openCount > 0
+                      ? <span><b>{openCount}</b> policy setting(s) unconfirmed — <b>attestation refuses until every one is</b> (the attest() gate, not a UI nicety).</span>
+                      : sec.status === 'not_configured'
+                        ? <span>This section has no configuration yet, so there is nothing to sign off on.</span>
+                        : <span>When you attest, the section’s content hash is recorded under your name; any later edit — including an applied proposal — shows as drift until re-attested.</span>}
+                  </div>
+                  {sec.attested && !sec.drift ? (
+                    <button type="button" style={canAttest(sec.section) ? btnQuiet : btnOff} disabled={!canAttest(sec.section)}
+                      onClick={function () { setPopup({ kind: 'unattest', section: sec.section }); }}>Re-open (un-attest)…</button>
+                  ) : (
+                    <button type="button" style={attestable && canAttest(sec.section) ? btn : btnOff}
+                      disabled={!attestable || !canAttest(sec.section)}
+                      onClick={function () { setPopup({ kind: 'attest', section: sec.section }); }}>
+                      {sec.drift ? 'Re-attest ' + sec.section + '…' : 'Attest ' + sec.section + '…'}
+                    </button>
+                  )}
+                  {!canAttest(sec.section) ? (
+                    <span style={Object.assign({}, kv, { marginLeft: 8 })}>
+                      {LEGAL_SECTIONS[sec.section] ? 'Senior Legal or the Director attests this section.' : 'The Director or a System Administrator attests this section.'}
+                    </span>
+                  ) : null}
+                </div>
               )}
-              {!canAttest(sec.section) ? (
-                <span style={Object.assign({}, kv, { marginLeft: 8 })}>
-                  {LEGAL_SECTIONS[sec.section] ? 'Senior Legal or the Director attests this section.' : 'The Director or a System Administrator attests this section.'}
-                </span>
-              ) : null}
             </div>
           </div>
 

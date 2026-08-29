@@ -191,7 +191,13 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   var mark = await callAs(U.dir, 'POST', '/setup-hub/eligibility/done');
   var hub3 = await callAs(U.dir, 'GET', '/setup-hub');
   ok('E6 the row can be attested once the decision is recorded', mark.status === 200 && hubItem(hub3.body, 'eligibility').state === 'ready');
-  await db.run("DELETE FROM setup_hub_signoffs WHERE item_key = 'eligibility'");
+  // Attestation fold (Kevin 2026-08-29): the done-mark IS the section sign-off — one act, one home.
+  var elAtt = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'eligibility'");
+  ok('E6a the fold: marking the row done attests the eligibility profile section in the same act',
+    mark.body.attested && mark.body.attested.indexOf('eligibility') >= 0 && elAtt && elAtt.attested_by === 'RR oro_director', JSON.stringify(mark.body));
+  var unmark = await callAs(U.dir, 'DELETE', '/setup-hub/eligibility/done');
+  var elAtt2 = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'eligibility'");
+  ok('E6b undoing the mark un-attests the folded section', unmark.status === 200 && (!elAtt2 || elAtt2.attested_by == null), JSON.stringify(unmark.body));
 
   console.log('\n=== F. CLEANUP — the fixture is left exactly as found ===');
   await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx'");

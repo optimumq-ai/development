@@ -19,8 +19,10 @@ On-premise open-records platform for cities. Node/Express backend (`backend/`, P
 
 ## Tests (never against live)
 - Run the suite with `cd backend && npm test` — that is the ONLY supported way. It rebuilds `optimumq_test`
-  as a clone of live, boots a test API on :3101 against it, runs all 12 harnesses, and then **censuses the live
-  DB before and after and fails if a single row moved**.
+  from the version-controlled fixture `src/db/seed_fixture.sql` (**NOT a clone of live** — the fixture can
+  differ from live config, e.g. it ships the payment-clock domain with researched TX values where live holds
+  defaults; a harness must never assume live-shaped state), boots a test API on :3101 against it, runs all
+  the harnesses, and then **censuses the live DB before and after and fails if a single row moved**.
 - NEVER run a `verify_*.js` harness bare. `tests/testEnv.js` will refuse and exit — tests must not touch live
   data. (They used to. It cost us 15 orphan tasks in real worklists and a 77-day statutory clock in production
   config.)

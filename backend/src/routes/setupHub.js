@@ -5,10 +5,19 @@
 //                                       legal section; the go-live row is flipped elsewhere, never marked)
 //   DELETE /api/setup-hub/:key/done     undo the mark — same gate
 // Reads are open to any signed-in user: the page is the city's shared picture of where setup stands.
+//
+// ATTESTATION FOLD (Kevin 2026-08-29): an item with `foldSections` fronts profile sections its screen
+// absorbed. Marking it done ALSO attests each folded section that is configured — the attests run FIRST,
+// so a refusal (a real gate, e.g. an unconfirmed knob) fails the whole act in words and no mark is
+// written. A section with nothing configured is skipped, not an error: `payment` while the clock switch
+// is off stays un-attested by design (off is a valid posture; automation stays unarmed). Undoing the
+// mark un-attests every folded section.
 const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const HUB = require('../services/setupHub');
+const JP = require('../services/jurisdictionProfile');
+const JR = require('../services/jurisdictionRules');
 
 router.get('/', requireAuth, async function (req, res) {
   try { res.json(await HUB.build(req.user)); }
@@ -27,13 +36,36 @@ function gate(req, res) {
 }
 router.post('/:key/done', requireAuth, async function (req, res) {
   var item = gate(req, res); if (!item) return;
-  try { await HUB.mark(item.key, req.user); res.json({ ok: true, key: item.key }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    var attested = [], skipped = [];
+    if (item.foldSections && item.foldSections.length) {
+      var jid = await JR.activeJid();
+      for (var i = 0; i < item.foldSections.length; i++) {
+        var section = item.foldSections[i];
+        var st = await JP.sectionState(jid, section);
+        if (!st || st.status === 'not_configured') { skipped.push(section); continue; }
+        try { await JP.attest(jid, section, req.user && req.user.name); attested.push(section); }
+        catch (e) { return res.status(422).json({ error: 'The ' + section + ' section refused attestation: ' + e.message, code: 'ATTEST_REFUSED', section: section }); }
+      }
+    }
+    await HUB.mark(item.key, req.user);
+    res.json({ ok: true, key: item.key, attested: attested, skipped: skipped });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.delete('/:key/done', requireAuth, async function (req, res) {
   var item = gate(req, res); if (!item) return;
-  try { await HUB.unmark(item.key); res.json({ ok: true, key: item.key }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    await HUB.unmark(item.key);
+    var unattested = [];
+    if (item.foldSections && item.foldSections.length) {
+      var jid = await JR.activeJid();
+      for (var i = 0; i < item.foldSections.length; i++) {
+        try { await JP.unattest(jid, item.foldSections[i]); unattested.push(item.foldSections[i]); }
+        catch (e) { /* an unknown/never-attested section is nothing to undo */ }
+      }
+    }
+    res.json({ ok: true, key: item.key, unattested: unattested });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;

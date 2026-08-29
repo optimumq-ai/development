@@ -132,7 +132,16 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   var at = await callAs(U.dir, 'POST', '/setup-hub/fee_law/done');
   var h2 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
   ok('E3 attest from the strip marks it ready by name', at.status === 200 && h2.state === 'ready' && /marked done by FL oro_director/.test(h2.evidence), h2.state + ' | ' + h2.evidence);
+  // Attestation fold (Kevin 2026-08-29): the done-mark also attests the folded sections — fees always
+  // (configured once a schedule exists); payment is SKIPPED while the clock switch is off (off is a
+  // valid posture; automation stays unarmed because its enabled+attested double gate never half-arms).
+  var feesAtt = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'fees'");
+  ok('E3a the fold: the done-mark attests the fees section in the same act; the payment section (clock off) is skipped, not refused',
+    at.body.attested && at.body.attested.indexOf('fees') >= 0 && at.body.skipped.indexOf('payment') >= 0 &&
+    feesAtt && feesAtt.attested_by === 'FL oro_director', JSON.stringify(at.body));
   await callAs(U.dir, 'DELETE', '/setup-hub/fee_law/done');
+  var feesAtt2 = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'fees'");
+  ok('E3b undoing the mark un-attests the folded sections', !feesAtt2 || feesAtt2.attested_by == null, JSON.stringify(feesAtt2));
   ok('E4 the route and page exist', /path="setup\/fee-law"/.test(fs.readFileSync('/opt/optimumq/frontend/src/App.js', 'utf8')) && fs.existsSync('/opt/optimumq/frontend/src/pages/FeeLawPage.js'));
 
   console.log('\n=== F. FEE WAIVERS ON THIS SCREEN (Kevin 2026-08-27; the waiver_policy hub row is retired) ===');
@@ -173,6 +182,16 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   // later in suite order — snapshot config_json AND updated_by (the RESTORE_STAMP lesson: a restore
   // that stamps itself leaves a harness fingerprint configIntegrity rightly flags).
   var pcSnap = await db.get("SELECT config_json, updated_by FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'");
+  // ORDER-PROOF (the R1 lesson): the fixture ships this domain with the legal-research-seed researched
+  // values, and earlier harnesses may leave it in any restored state — G must not assume what it holds.
+  // Reset to shipped defaults (provenance kept, so the ride-along assertions still bite) and assert G9
+  // against the SNAPSHOT bytes, not against assumed values.
+  var PCPmod = require('/opt/optimumq/backend/src/services/paymentClockPolicy');
+  if (pcSnap) {
+    var pcBase = PCPmod.defaults();
+    try { pcBase.provenance = JSON.parse(pcSnap.config_json).provenance || {}; } catch (e) {}
+    await db.run("UPDATE jurisdiction_rules SET config_json = ? WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'", [JSON.stringify(pcBase)]);
+  }
   var sC = (await callAs(U.dir, 'GET', '/fee-law')).body;
   ok('G1 the screen carries the clock: off, six settings, every TX answer pre-filled from the template (restart · 10 business days · withdraw · yes ×3)',
     sC.clock && sC.clock.enabled === false && sC.clock.choices.length === 6 && sC.clock.confirmed === 0 &&
@@ -220,10 +239,12 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   // and the bw9 go-live walk run later and must see the store exactly as the suite reset left it)
   if (pcSnap == null) await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'");
   else await db.run("UPDATE jurisdiction_rules SET config_json = ?, updated_by = ? WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'", [pcSnap.config_json, pcSnap.updated_by]);
+  var pcEnd = await db.get("SELECT config_json, updated_by FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'");
   var sEnd = (await callAs(U.dir, 'GET', '/fee-law')).body;
-  ok('G9 cleanup: the policy store reads exactly as before G (switch off, shipped defaults)',
-    sEnd.clock.enabled === false && (await PCP.read('jur-tx')).deposit_clock_effect === 'runs_no_stop' && (await PCP.read('jur-tx')).deposit_grace_days === null,
-    JSON.stringify(sEnd.clock.enabled));
+  ok('G9 cleanup: the policy store is byte-identical to the pre-G snapshot, stamp included, and the screen still reads',
+    ((pcSnap == null && pcEnd == null) || (pcEnd && pcEnd.config_json === pcSnap.config_json && pcEnd.updated_by === pcSnap.updated_by)) &&
+    sEnd.clock && sEnd.clock.choices.length === 6,
+    JSON.stringify(pcEnd && pcEnd.updated_by));
 
   console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);

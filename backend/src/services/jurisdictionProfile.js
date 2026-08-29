@@ -20,14 +20,17 @@ function stable(o) {
 }
 function hashOf(o) { return crypto.createHash('sha256').update(stable(o || {}), 'utf8').digest('hex').slice(0, 32); }
 
+// `foldedInto` (attestation fold, Kevin 2026-08-29): the section's attestation lives on the screen that
+// absorbed it — the hub done-mark for that screen's row attests/un-attests the section, and the
+// jurisdiction-config attest rail points there instead of offering its own button.
 var CORE_SECTIONS = [
   { key: 'identity',  label: 'Jurisdiction identity & statutes', editor: '/config' },
-  { key: 'fees',      label: 'Fee & cost schedule',              editor: '/fee-config' },
+  { key: 'fees',      label: 'Fee & cost schedule',              editor: '/setup/fee-law', foldedInto: { item: 'fee_law', name: 'Fee rules', door: '/setup/fee-law' } },
   { key: 'deadlines', label: 'Response deadlines & tolling',     editor: '/tickler' },
-  { key: 'clarification', label: 'Clarification / vague-request policy', editor: '/clarification-policy' },
-  { key: 'payment',   label: 'Deposit & payment clock',            editor: '/fee-config' },
-  { key: 'fee_waiver', label: 'Fee-waiver policy',                 editor: '/fee-config' },
-  { key: 'exemption', label: 'Exemption model & appeals',        editor: '/config' },
+  { key: 'clarification', label: 'Clarification / vague-request policy', editor: '/setup/request-rules?tab=clarification', foldedInto: { item: 'clarification', name: 'Request rules · Clarification', door: '/setup/request-rules?tab=clarification' } },
+  { key: 'payment',   label: 'Deposit & payment clock',            editor: '/setup/fee-law?tab=city', foldedInto: { item: 'fee_law', name: 'Fee rules', door: '/setup/fee-law?tab=city' } },
+  { key: 'fee_waiver', label: 'Fee-waiver policy',                 editor: '/setup/fee-law', foldedInto: { item: 'fee_law', name: 'Fee rules', door: '/setup/fee-law' } },
+  { key: 'exemption', label: 'Exemption model & appeals',        editor: '/setup/request-rules?tab=exemptions', foldedInto: { item: 'exemptions', name: 'Request rules · Exemptions', door: '/setup/request-rules?tab=exemptions' } },
   { key: 'redaction', label: 'Redaction / exemption rules',      editor: '/redaction-rules' },
   { key: 'taxonomy',  label: 'Record types & taxonomy',          editor: '/taxonomy' }
 ];
@@ -42,7 +45,7 @@ var CORE_SECTIONS = [
 // policy is still sitting on an unconfirmed suggested default.
 var TEMPLATE_SECTIONS = [
   { key: 'intake',      label: 'Intake channels & acknowledgment', editor: '/config', domain: 'intake' },
-  { key: 'eligibility', label: 'Requester eligibility gate',       editor: '/config', domain: 'eligibility' },
+  { key: 'eligibility', label: 'Requester eligibility gate',       editor: '/setup/request-rules?tab=eligibility', domain: 'eligibility', foldedInto: { item: 'eligibility', name: 'Request rules · Eligibility', door: '/setup/request-rules?tab=eligibility' } },
   { key: 'branches',    label: 'State branch profile',             editor: '/config', domain: 'branches' },
   { key: 'disposition', label: 'Delivery format & release hold',   editor: '/config', domain: 'disposition' },
   { key: 'ledger',      label: 'Requestor ledger',                 editor: '/config', domain: 'ledger' },
@@ -198,7 +201,7 @@ async function rows(jid) {
     var attested = !!(r.attested_hash);
     var drift = attested && r.attested_hash !== r.content_hash;
     var readiness = r.status === 'not_configured' ? 'not_configured' : (attested ? (drift ? 'needs_reattestation' : 'attested') : 'configured');
-    return { section: sec.key, label: sec.label, editor: sec.editor, version: Number(r.version) || 0, status: r.status, source: r.source || null,
+    return { section: sec.key, label: sec.label, editor: sec.editor, foldedInto: sec.foldedInto || null, version: Number(r.version) || 0, status: r.status, source: r.source || null,
       lastChangedAt: r.last_changed_at || null, lastChangedBy: r.last_changed_by || null,
       attestedBy: r.attested_by || null, attestedAt: r.attested_at || null, attestedVersion: r.attested_version || null,
       attested: attested, drift: drift, readiness: readiness, contentHash: r.content_hash || null };

@@ -45,10 +45,16 @@ const ITEMS = [
   // 'Fee waivers and who approves them' row is retired — its content lives on this screen's tabs.
   // F3 (Kevin 2026-08-29): the fee-law screen also absorbs the deposit & payment clock policy; the
   // separate 'Deposits and payment clock' row is retired — its settings live on the City decisions tab.
-  { key: 'fee_law', lane: 'compliance', name: 'Fee rules', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees' },
-  { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['jurisdiction'], section: 'clarification' },
-  { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['jurisdiction'], section: 'exemption', legal: true },
-  { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['jurisdiction'], section: 'eligibility' },
+  // ATTESTATION FOLD (Kevin 2026-08-29): for a row whose screen ABSORBED profile sections,
+  // `foldSections` lists them — "Attest as complete" on that screen (the done-mark) also attests each
+  // listed section that is configured (skipping one with nothing configured, e.g. `payment` while the
+  // clock switch is off — off stays a valid posture and automation stays unarmed), and undoing the mark
+  // un-attests them. One act, one home; jurisdiction-config keeps drift/audit but stops offering a
+  // separate Attest for folded sections.
+  { key: 'fee_law', lane: 'compliance', name: 'Fee rules', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees', foldSections: ['fees', 'fee_waiver', 'payment'] },
+  { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['jurisdiction'], section: 'clarification', foldSections: ['clarification'] },
+  { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['jurisdiction'], section: 'exemption', legal: true, foldSections: ['exemption'] },
+  { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['jurisdiction'], section: 'eligibility', foldSections: ['eligibility'] },
   { key: 'redaction_rules', lane: 'compliance', name: 'Redaction rules library', door: '/admin?tab=redaction', deps: ['jurisdiction'], section: 'redaction', legal: true },
   { key: 'city_choices', lane: 'compliance', name: 'Choices the statute left to the city', door: '/jurisdiction-config', deps: ['jurisdiction'] },
   { key: 'law_updates', lane: 'compliance', name: 'Keeping up with changes in the law', door: '/admin?tab=updates', deps: ['jurisdiction'] },
