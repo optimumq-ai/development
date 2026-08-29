@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 32px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 10px; font-size: 13px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-bad   { background: #FBEDEE; color: #B02A37; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .cite { font-size: 11px; color: #8296A4; line-height: 1.35; }
+    .cl { color: #1E6091; text-decoration: underline dotted; cursor: pointer; }
+    .bind { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 4px; white-space: nowrap; }
+    .b-fixed { background: #E8EEF4; color: #0E3A5C; border: 1px solid #C5D3DF; }
+    .b-soft  { background: #FFFFFF; color: #5C6F7C; border: 1px dashed #BECAD3; }
+    .rid { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+           background: #F2F6F9; color: #5C6F7C; border: 1px solid #D2DCE3; white-space: nowrap; }
+    .tab { display: flex; align-items: center; gap: 7px; padding: 12px 16px; font-size: 13px; font-weight: 600;
+           color: #5C6F7C; border-bottom: 2px solid transparent; cursor: pointer; }
+    .tab.on { color: #12232E; border-bottom-color: #1E6091; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; }
+    .lr { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; align-items: start;
+          padding: 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.5; }
+    .grp { padding: 12px 16px 6px; font-size: 12px; font-weight: 700; color: #12232E; background: #F8FAFC; border-top: 1px solid #D2DCE3; }
+    .sect { padding: 14px 16px 10px; display: flex; align-items: center; gap: 10px; }
+    .clk { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 12px; align-items: start;
+           padding: 12px 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.45; }
+    .dur { font-size: 12px; font-weight: 700; color: #0E3A5C; background: #E8EEF4; border: 1px solid #C5D3DF;
+           border-radius: 6px; padding: 5px 8px; text-align: center; line-height: 1.3; }
+    .dur.unset { color: #9A6512; background: #F6EBD6; border-color: #F1D9A8; }
+    .toll { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 999px;
+            background: #F2F6F9; color: #5C6F7C; border: 1px solid #D2DCE3; white-space: nowrap; }
+    .star { color: #9A6512; font-weight: 700; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; width: 1240px; background: #D8E0E8;">
+
+  <!-- status strip — follows the ACTIVE tab's hub row; deadlines is a LEGAL section -->
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-prog" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      In progress
+    </button>
+    <span class="ev" style="flex-grow: 1;">Texas · 5 statutory clocks landed · 2 service targets unset · <b style="color: #B02A37;">holiday calendar empty</b></span>
+    <span style="font-size: 11.5px; color: #8296A4;">Compliance and Policies Setup · item 2 of 10 · Senior Legal attests</span>
+    <button class="btn b-dis" style="height: 30px;">Attest as complete</button>
+  </div>
+
+  <div class="card">
+    <!-- FOUR tabs now — one screen, four hub rows; the strip follows the active tab -->
+    <div style="display: flex; align-items: center; border-bottom: 1px solid #D2DCE3; padding: 0 8px;">
+      <div class="tab"><span class="dot" style="background: #D9A441;"></span>Vague requests and clarification</div>
+      <div class="tab"><span class="dot" style="background: #D9A441;"></span>Exemptions and appeals</div>
+      <div class="tab"><span class="dot" style="background: #A9B7C2;"></span>Who is allowed to request</div>
+      <div class="tab on"><span class="dot" style="background: #D9A441;"></span>Response deadlines and tolling</div>
+    </div>
+
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3; display: flex; align-items: flex-start; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 19px; font-weight: 700;">Response deadlines and tolling</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">Every clock a request runs on: the deadlines Texas law sets, the service targets this city sets for itself, and what pauses them. A legal section — Senior Legal signs it off.</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 560px minmax(0, 1fr); gap: 0;">
+
+      <!-- ============ WHAT TEXAS LAW SAYS ============ -->
+      <div style="border-right: 1px solid #D2DCE3; display: flex; flex-direction: column;">
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E3A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">What Texas law says</div>
+            <div class="hint" style="margin-top: 1px;">Loaded when the state was locked. Not editable — click a citation to read the statute text behind it.</div>
+          </div>
+          <span class="pill p-ready">4 rules</span>
+        </div>
+
+        <div class="lr">
+          <span class="rid">TX-0008</span>
+          <div>Public information must be produced promptly — as soon as possible under the circumstances, within a reasonable time, without delay.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.221(a), (b)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0009</span>
+          <div>If the information cannot be produced within 10 business days, the officer must certify that in writing and set a date and hour when it will be available.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.221(d)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0010</span>
+          <div>Information in active use or in storage gets the same written certification, with a date and hour when it will be available.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.221(c)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-S04</span>
+          <div>A body significantly impacted by a catastrophe may suspend requirements for up to 7 days, once extendable by 7 — requests during the suspension count as received the first business day after it ends; pending clocks pause.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.233</span></div>
+          </div>
+        </div>
+
+        <div class="grp">The clocks Texas law sets — and the ones it doesn't</div>
+        <div style="padding: 12px 16px 16px; font-size: 12.5px; line-height: 1.6;">
+          <div><span class="bind b-fixed">Statutory</span>&nbsp; completion · clarification response · nonpayment close · catastrophe suspension · AG referral</div>
+          <div style="margin-top: 8px;"><span class="bind b-soft">Not in Texas law</span>&nbsp; acknowledgment · initial decision · extension · special windows · denial deadline — service targets only, this city's own choice</div>
+          <div class="hint" style="margin-top: 10px;">The catastrophe suspension lands on no single clock — when one is declared, the engine pauses every running clock for its duration. Shown here so the law's full set is visible; there is nothing to configure.</div>
+        </div>
+      </div>
+
+      <!-- ============ THE CLOCKS THIS CITY RUNS ============ -->
+      <div style="display: flex; flex-direction: column;">
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">The clocks this city runs</div>
+            <div class="hint" style="margin-top: 1px;">Statutory figures read as law — changing one is a proposal with a citation. Service targets are the city's own numbers, editable here.</div>
+          </div>
+        </div>
+
+        <div class="grp">Set by Texas law · 5</div>
+        <div class="clk">
+          <div><b>Produce, or certify a delay</b> <span class="star">★ the primary clock</span>
+            <div class="cite" style="margin-top: 2px;"><span class="bind b-fixed">Fixed</span> <span class="cl">§ 552.221(b), (d)</span> · pauses for:
+              <span class="toll">clarification</span> <span class="toll">payment</span> <span class="toll">extension</span> <span class="toll">AG ruling</span></div>
+          </div>
+          <div class="dur">10 business days</div>
+        </div>
+        <div class="clk">
+          <div><b>Request an AG ruling</b>
+            <div class="cite" style="margin-top: 2px;"><span class="bind b-fixed">Fixed</span> <span class="cl">§ 552.301(b)</span> · from receipt of the request</div>
+          </div>
+          <div class="dur">10 business days</div>
+        </div>
+        <div class="clk">
+          <div><b>Submit briefing to the Attorney General</b>
+            <div class="cite" style="margin-top: 2px;"><span class="bind b-fixed">Fixed</span> <span class="cl">§ 552.301(e)</span> · comments, request copy, and sample to the AG</div>
+          </div>
+          <div class="dur">15 business days</div>
+        </div>
+        <div class="clk">
+          <div><b>Requestor response to a clarification</b>
+            <div class="cite" style="margin-top: 2px;"><span class="bind b-fixed">Fixed</span> <span class="cl">§ 552.222(d)</span> · no reply = the request is considered withdrawn</div>
+          </div>
+          <div class="dur">61 calendar days</div>
+        </div>
+        <div class="clk">
+          <div><b>Requestor payment / collection window</b>
+            <div class="cite" style="margin-top: 2px;"><span class="bind b-fixed">Fixed</span> <span class="cl">§ 552.221(e)</span> · fail to pay or collect = considered withdrawn</div>
+          </div>
+          <div class="dur">60 calendar days</div>
+        </div>
+
+        <div class="grp">This city's own service targets · 2</div>
+        <div class="clk">
+          <div><b>Acknowledge receipt</b>
+            <div class="cite" style="margin-top: 2px;"><span class="bind b-soft">Not a legal deadline</span> · how fast staff confirm a request arrived; blank = no target</div>
+          </div>
+          <div class="in empty" style="height: 30px;">business days</div>
+        </div>
+        <div class="clk">
+          <div><b>Complete / produce target</b>
+            <div class="cite" style="margin-top: 2px;"><span class="bind b-soft">Not a legal deadline</span> · the city's own goal inside the statutory window</div>
+          </div>
+          <div class="in empty" style="height: 30px;">business days</div>
+        </div>
+
+        <div class="grp">The calendar the clocks count on</div>
+        <div style="padding: 12px 16px 16px; font-size: 12.5px; line-height: 1.5;">
+          <div>Weekends: <b>Saturday and Sunday</b> are not business days.</div>
+          <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+            <span class="pill p-bad">Holiday calendar: 0 days loaded</span>
+            <button class="btn b-sec" style="height: 28px; font-size: 12px;">Load the US federal set…</button>
+          </div>
+          <div class="hint" style="margin-top: 6px;">Every business-day clock above counts holidays as working days until a calendar is loaded — a 10-day statutory deadline lands EARLIER than the law requires. This is the one item on this tab that needs attention today.</div>
+        </div>
+
+        <div style="padding: 10px 16px 14px; border-top: 1px solid #D2DCE3; margin-top: auto;">
+          <span class="hint" style="margin-top: 0;">Attest from the strip signs off the <b>deadlines</b> section (a Legal Rules section — Senior Legal or the Director), the same one act as the other tabs. Statutory figures never edit in place: a change means the law changed, which goes through a proposal with a citation.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
