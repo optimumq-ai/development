@@ -25,7 +25,9 @@ const TABS = [
   { key: 'setup',        label: 'Setup',                el: SetupHubPage },
   { key: 'config',       label: 'Configuration',        el: ConfigurationPage, admin: true },
   { key: 'updates',      label: 'Update Configuration', el: RuleUpdatesPage },
-  { key: 'fees',         label: 'Fee Configuration',    el: FeeConfigPage },
+  // C4 cleanup (Kevin 2026-08-29): the nav tab is gone — fee setup lives on Fee rules; the hub's
+  // "What this city actually charges" row remains the one door here (?tab=fees stays routable).
+  { key: 'fees',         label: 'Fee Configuration',    el: FeeConfigPage, hidden: true },
   { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage },
   { key: 'workflow',     label: 'Workflow',             el: WorkflowPage },
   { key: 'map',          label: 'Process Map',          el: WorkflowMapPage },
