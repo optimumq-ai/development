@@ -2,7 +2,7 @@
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (design closed 2026-08-24; inventory in
 // WORKING_setup_inventory.md; canvas artboards in docs/mockups/setup_hub/).
 //
-// One page, five lanes, thirty-six items. Every item is: a plain-language NAME, the DOOR that sets it (an
+// One page, five lanes, thirty-five items. Every item is: a plain-language NAME, the DOOR that sets it (an
 // existing screen), an OWNER (a permission group — the hub gates on the user-type model, nothing else), an
 // EVIDENCE line counted from what is actually configured, and a STATE derived from that evidence:
 //
@@ -42,12 +42,13 @@ const ITEMS = [
     foldSections: ['identity'],
     note: 'Nothing else can be set up until this is filled in.' },
   // ── Lane 1 ──
-  // I1 rider: identity's one surface is the agency screen — this row's readiness (identity attested)
-  // now comes from the agency screen's Attest via the fold; the door follows.
-  { key: 'jurisdiction', lane: 'compliance', name: "Which state's law this city follows", door: '/setup/agency', deps: ['agency'], section: 'identity' },
+  // C1 cleanup (Kevin 2026-08-29): the 'jurisdiction' row ("Which state's law this city follows") is
+  // DELETED — it doored to the same agency screen the Start-here card does, and the identity fold means
+  // the agency card's Attest already signs the identity section. Rows that waited on it wait on `agency`
+  // instead, whose readiness is the stronger fact (fields complete AND the state locked).
   // D1 (Kevin 2026-08-29): deadlines migrates onto the request-rules screen as its 4th tab — the row
   // stays (its door moves) and the A1 fold covers it: Attest on the tab signs the deadlines section.
-  { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/setup/request-rules?tab=deadlines', deps: ['jurisdiction'], section: 'deadlines', legal: true, foldSections: ['deadlines'] },
+  { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/setup/request-rules?tab=deadlines', deps: ['agency'], section: 'deadlines', legal: true, foldSections: ['deadlines'] },
   // 'Fee rules' (Kevin 2026-08-27): the fee-law screen absorbs fee waivers; the separate
   // 'Fee waivers and who approves them' row is retired — its content lives on this screen's tabs.
   // F3 (Kevin 2026-08-29): the fee-law screen also absorbs the deposit & payment clock policy; the
@@ -58,15 +59,15 @@ const ITEMS = [
   // clock switch is off — off stays a valid posture and automation stays unarmed), and undoing the mark
   // un-attests them. One act, one home; jurisdiction-config keeps drift/audit but stops offering a
   // separate Attest for folded sections.
-  { key: 'fee_law', lane: 'compliance', name: 'Fee rules', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees', foldSections: ['fees', 'fee_waiver', 'payment'] },
-  { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['jurisdiction'], section: 'clarification', foldSections: ['clarification'] },
-  { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['jurisdiction'], section: 'exemption', legal: true, foldSections: ['exemption'] },
-  { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['jurisdiction'], section: 'eligibility', foldSections: ['eligibility'] },
+  { key: 'fee_law', lane: 'compliance', name: 'Fee rules', door: '/setup/fee-law', deps: ['agency'], section: 'fees', foldSections: ['fees', 'fee_waiver', 'payment'] },
+  { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['agency'], section: 'clarification', foldSections: ['clarification'] },
+  { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['agency'], section: 'exemption', legal: true, foldSections: ['exemption'] },
+  { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['agency'], section: 'eligibility', foldSections: ['eligibility'] },
   // I1 (Kevin 2026-08-29): intake gets its own row and lives as the request-rules screen's 5th tab.
-  { key: 'intake', lane: 'compliance', name: 'Request Intake', door: '/setup/request-rules?tab=intake', deps: ['jurisdiction'], section: 'intake', foldSections: ['intake'] },
-  { key: 'redaction_rules', lane: 'compliance', name: 'Redaction rules library', door: '/admin?tab=redaction', deps: ['jurisdiction'], section: 'redaction', legal: true },
-  { key: 'city_choices', lane: 'compliance', name: 'Choices the statute left to the city', door: '/jurisdiction-config', deps: ['jurisdiction'] },
-  { key: 'law_updates', lane: 'compliance', name: 'Keeping up with changes in the law', door: '/admin?tab=updates', deps: ['jurisdiction'] },
+  { key: 'intake', lane: 'compliance', name: 'Request Intake', door: '/setup/request-rules?tab=intake', deps: ['agency'], section: 'intake', foldSections: ['intake'] },
+  { key: 'redaction_rules', lane: 'compliance', name: 'Redaction rules library', door: '/admin?tab=redaction', deps: ['agency'], section: 'redaction', legal: true },
+  { key: 'city_choices', lane: 'compliance', name: 'Choices the statute left to the city', door: '/jurisdiction-config', deps: ['agency'] },
+  { key: 'law_updates', lane: 'compliance', name: 'Keeping up with changes in the law', door: '/admin?tab=updates', deps: ['agency'] },
   { key: 'go_live', lane: 'compliance', name: 'Turn the rules on for real', door: '/jurisdiction-config', deps: [], goLive: true },
   // ── Lane 2a ──
   { key: 'fee_rates', lane: 'fulfillment_fees', name: 'What this city actually charges', door: '/admin?tab=fees', deps: ['fee_law'], groups: ['fee_configuration'] },
@@ -81,7 +82,7 @@ const ITEMS = [
   { key: 'redaction_auto', lane: 'fulfillment_redaction', name: 'Automatic redaction decisions', door: null, deps: ['redaction_rules'], noScreen: true },
   { key: 'release_review', lane: 'fulfillment_redaction', name: 'Review before records go out', door: null, deps: [], noScreen: true },
   { key: 'layout_templates', lane: 'fulfillment_redaction', name: 'Redaction layout templates', door: '/mass-redaction', deps: ['redaction_rules'] },
-  { key: 'decision_reasons', lane: 'fulfillment_redaction', name: 'Standard wording for denials', door: null, deps: ['jurisdiction'], noScreen: true },
+  { key: 'decision_reasons', lane: 'fulfillment_redaction', name: 'Standard wording for denials', door: null, deps: ['agency'], noScreen: true },
   { key: 'mass_schedule', lane: 'fulfillment_redaction', name: 'When bulk redaction runs', door: null, deps: [], noScreen: true },
   // ── Lane 3 ──
   { key: 'departments', lane: 'organization', name: 'City departments', door: '/org', deps: [] },
@@ -146,11 +147,6 @@ const READERS = {
     var head = name + (state ? ', ' + state : '');
     if (missing.length) return ev('in_progress', head + ' · ' + missing.map(function (m) { return m === 'state not locked' ? m : m + ' missing'; }).join(' · '));
     return ev('ready', head + ' · ' + email + ' · ' + state + ' rules loaded' + (lockedBy ? ' by ' + lockedBy : '') + ', ' + String(lockedAt).slice(0, 10));
-  },
-  jurisdiction: async function (ctx) {
-    if (!ctx.jid) return ev('not_started', 'no jurisdiction profile chosen');
-    var sec = ctx.sections.identity || ctx.sections.jurisdiction;
-    return sectionEvidence(sec, ctx.settings && ctx.settings.jurisdiction && ctx.settings.jurisdiction.name ? ctx.settings.jurisdiction.name : 'profile ' + ctx.jid);
   },
   deadlines: async function (ctx) { return sectionEvidence(ctx.sections.deadlines); },
   fee_law: async function (ctx) {

@@ -91,7 +91,9 @@ function agencyRow(page) { return (page.top || []).filter(function (x) { return 
   var page1 = (await callAs(U.sa, 'GET', '/setup-hub')).body;
   var hub1 = agencyRow(page1);
   ok('C2 agency row is ready and says the rules loaded, by whom', hub1 && hub1.state === 'ready' && /TX rules loaded by AGY oro_sysadmin/.test(hub1.evidence), hub1 && (hub1.state + ' | ' + hub1.evidence));
-  ok('C3 the compliance lane sees the jurisdiction (page.jurisdiction = jur-tx; "Which state\'s law" is no longer not_started)', page1.jurisdiction === 'jur-tx' && (function () { var j = null; page1.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'jurisdiction') j = x; }); }); return j && j.state !== 'not_started' && !/no jurisdiction profile chosen/.test(j.evidence); })(), page1.jurisdiction);
+  // C1 cleanup 2026-08-29: the 'jurisdiction' row is DELETED — the agency card is the one identity
+  // surface, so the page-level jurisdiction and the ABSENCE of the old row are what to assert.
+  ok('C3 the hub sees the jurisdiction (page.jurisdiction = jur-tx) and the old "Which state\'s law" row is GONE', page1.jurisdiction === 'jur-tx' && (function () { var j = null; page1.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'jurisdiction') j = x; }); }); return j === null; })(), page1.jurisdiction);
   await db.run("DELETE FROM system_config WHERE key = 'address_zip'");
   var hub2 = agencyRow((await callAs(U.sa, 'GET', '/setup-hub')).body);
   ok('C4 the address is counted: drop the ZIP and the row falls back to in_progress "street address missing"', hub2.state === 'in_progress' && /street address missing/.test(hub2.evidence), hub2.state + ' | ' + hub2.evidence);

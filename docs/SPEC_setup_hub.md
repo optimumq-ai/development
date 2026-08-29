@@ -24,12 +24,14 @@ is the last row of lane 1; it is flipped on the Jurisdiction Configuration page 
 (ORO System Administrator **or** ORO Director) and is never "marked done".
 
 ## 3. Items
-The 36 items and their doors, dependencies and readers are the catalog in `services/setupHub.js` (`ITEMS`) —
-the inventory's numbering maps 1:1, with four amendments: `eligibility` ("Requestor eligibility")
+The 35 items and their doors, dependencies and readers are the catalog in `services/setupHub.js` (`ITEMS`) —
+the inventory's numbering maps 1:1, with five amendments: `eligibility` ("Requestor eligibility")
 ADDED to the compliance lane (R1, 2026-08-27), `waiver_policy` RETIRED into the fee_law row (F2, 2026-08-27,
-renamed "Fee rules"), `deposits` ("Deposits and payment clock") RETIRED into the same row (F3,
-2026-08-29), and `intake` ("Request Intake") ADDED as the request-rules screen's 5th tab (I1, 2026-08-29) —
-compliance lane 11. The `jurisdiction` row doors to `/setup/agency` (the identity fold, I1's rider).
+renamed "Fee rules"), `deposits` ("Deposits and payment clock") RETIRED into the same row (F3, 2026-08-29),
+`intake` ("Request Intake") ADDED as the request-rules screen's 5th tab (I1, 2026-08-29), and the
+`jurisdiction` row ("Which state's law this city follows") DELETED (C1 cleanup, 2026-08-29: it doored to the
+same agency screen as the Start-here card, whose Attest signs the identity section via the fold; rows that
+waited on it wait on `agency`, the stronger fact — fields complete AND state locked) — compliance lane 10.
 Five items have **no screen yet** (2.9 redaction automation, 2.10 release switches, 2.12 decision reasons,
 2.13 bulk schedule, 4.7 settlement): their rows render with a counted state and "no screen yet" and no door.
 Building those screens is later hub slices (H2+), decided item by item.
