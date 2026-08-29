@@ -9260,3 +9260,37 @@ walk covers everything (clarification switch + 5 confirms + attest · exemptions
 gate + attest · fee rules: 13 figures + approve v1 + 2 waiver + clock switch/6 confirms + attest — which
 attests fees/fee_waiver/payment in one act) · the two pending proposals · then E1a revisit, Content-tab
 pruning, or letter-template / redaction-library slices.
+
+## 2026-08-29 (third slice) — D1 BUILT: deadlines & tolling as the request-rules 4th tab; suite 2686/2687 (E1a the only red)
+
+**Kevin's calls:** deadlines migrates next, as a 4TH TAB on /setup/request-rules · canvas approved before
+build (docs/mockups/request_rules_deadlines/ →
+https://claude.ai/code/artifact/405783ad-e235-474d-b09a-3fd1b945c227; second-pass fixes ac7aecc).
+
+**Built (9a56312), verified live + screenshot:** `TAB_CONCEPTS.deadlines = ['production','response']`
+(exactly READABLE §3's four rules) · `ruleEditors.timerTable` exported and re-served as the tab's clock
+table — 5 statutory clocks as law rows (citations, toll lists, primary marker), § 552.233 suspension as
+the honest unlanded line · legal-gated writes: `POST /request-rules/deadlines/target` (operational-target
+clocks ONLY — `clockMatrix.kindOf` polices; a statutory clock refuses in words, proposal path) and
+`POST /request-rules/deadlines/holidays` (one-act US-federal 2026-27 load onto an EMPTY calendar; a loaded
+one refuses 409) · hub deadlines row stays, door → `?tab=deadlines`, A1 fold covers it (`foldSections:
+['deadlines']`, legal gate) · frontend 4th tab + red calendar pill; Attest waits only on the holiday
+calendar (blank service targets are a valid posture). SPEC_setup_hub §7 D1 in the build commit.
+
+**THE FINDING Kevin should act on during his walk:** live's holiday calendar is EMPTY while every
+statutory clock counts business days — deadlines currently land EARLIER than the law requires. The tab's
+"Load the US federal set" button is the one-act fix (and now gates Attest of the tab).
+
+**Suite: 2686/2687, live clean — the one red is the deferred verify_bw9_golive E1a (unchanged since
+2026-08-26).** Touched harnesses: request_rules 39/39 (DL1–DL9 new, fixture-proof from the start) ·
+deadline_rules 25/25 · clock_matrix 54/54 · setup_hub 22/22 · fee_law 42/42.
+
+**Migration scoreboard after today:** request-rules screen owns clarification · exemptions · eligibility ·
+deadlines (4 tabs, law 1:1 vs the readable doc); Fee rules owns fees + waivers + deposit/payment clock;
+the A1 fold makes every one of those screens' Attest the real section sign-off. Still on
+jurisdiction-config: identity, redaction, taxonomy + the template sections (intake, branches, disposition,
+ledger, template_import) — each with its own surface or pending slice.
+
+**NEXT:** Kevin's walk-through (now including the holiday-calendar load and the deadlines attest) · fee
+schedule v1 + the two pending proposals unblock the smoke estimate beat and the E1a revisit · then
+Content-tab pruning or the letter-template / redaction-library slices.
