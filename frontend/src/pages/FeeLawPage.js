@@ -70,10 +70,11 @@ export default function FeeLawPage() {
   var [statute, setStatute] = useState(null);
   var [wEdits, setWEdits] = useState({});       // waiver-choice edits before save
   var [sentences, setSentences] = useState(false);
+  var [clockEdits, setClockEdits] = useState({}); // clock-setting edits before confirm
 
   function load() {
     return Promise.all([api.get('/fee-law'), api.get('/setup-hub')]).then(function (r) {
-      setData(r[0].data); setEdits({}); setWEdits({});
+      setData(r[0].data); setEdits({}); setWEdits({}); setClockEdits({});
       var h = {}; r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'fee_law' || x.key === 'fee_test') h[x.key] = x; }); });
       setHub(h); setErr('');
     }).catch(function (e) { setErr(errText(e, 'The fee-law screen could not load.')); });
@@ -101,7 +102,9 @@ export default function FeeLawPage() {
   var attested = hubRow && hubRow.signoff;
   var waiver = data.waiver || { choices: [], decided: 0, sentences: [] };
   var waiverOpen = waiver.choices.length - waiver.decided;
-  var mayAttest = can && !!data.version && waiverOpen === 0 && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention';
+  var clock = data.clock || { enabled: false, choices: [], confirmed: 0 };
+  var clockOpen = clock.enabled ? clock.choices.length - clock.confirmed : 0;  // off is itself a configured posture
+  var mayAttest = can && !!data.version && waiverOpen === 0 && clockOpen === 0 && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention';
   var stateName = data.jurisdiction.stateName || data.jurisdiction.name;
   var nextVersion = data.version ? data.version.version + 1 : 1;
 
@@ -150,6 +153,30 @@ export default function FeeLawPage() {
     var f = e.target.files && e.target.files[0]; if (!f) return;
     if (!/\.(txt|md|text|csv)$/i.test(f.name)) { setErr('Upload a text file (.txt or .md), or paste the policy text. PDF reading is not available yet.'); return; }
     var rd = new FileReader(); rd.onload = function () { setDocText(String(rd.result || '')); setDocName(f.name); }; rd.readAsText(f);
+  }
+  // The deposit & payment clock (F3): the switch and each confirm write through to the policy store
+  // the engine reads. Values shown before confirming: an edit > the recorded decision > the state's answer.
+  function clockVal(ch) {
+    if (clockEdits[ch.key] !== undefined) return clockEdits[ch.key];
+    if (ch.value != null) return ch.kind === 'bool' ? (ch.value ? 'yes' : 'no') : String(ch.value);
+    if (ch.prefill && ch.prefill.value != null) return ch.kind === 'bool' ? (ch.prefill.value ? 'yes' : 'no') : String(ch.prefill.value);
+    return '';
+  }
+  function setClockVal(k, v) { var e = Object.assign({}, clockEdits); e[k] = v; setClockEdits(e); setMsg(''); }
+  async function setClockEnabled(on) {
+    setBusy('clock'); setErr('');
+    try { await api.post('/fee-law/clock', { enabled: on }); await load(); }
+    catch (e) { setErr(errText(e, 'Could not update the clock switch.')); }
+    setBusy('');
+  }
+  async function confirmClock(ch) {
+    var v = clockVal(ch);
+    if (v === '') { setErr(ch.label + ' — enter a value first.'); return; }
+    var value = ch.kind === 'bool' ? v === 'yes' : ch.kind === 'days' ? Number(v) : v;
+    setBusy('clock'); setErr('');
+    try { await api.post('/fee-law/clock', { confirm: { key: ch.key, value: value } }); setMsg('Confirmed.'); await load(); }
+    catch (e) { setErr(errText(e, 'Could not record the setting.')); }
+    setBusy('');
   }
   async function toggleAttest() {
     setBusy('attest');
@@ -245,7 +272,7 @@ export default function FeeLawPage() {
         <span style={{ fontSize: '11.5px', color: C.faint }}>Compliance and Policies Setup</span>
         {attested
           ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>Attested · undo</button>
-          : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })} title={mayAttest ? 'Record that this item is complete' : (!data.version ? 'Approve a fee schedule version first' : 'Record the fee-waiver choices first')}>Attest as complete</button>}
+          : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })} title={mayAttest ? 'Record that this item is complete' : (!data.version ? 'Approve a fee schedule version first' : waiverOpen ? 'Record the fee-waiver choices first' : 'Confirm the deposit & payment clock settings first')}>Attest as complete</button>}
       </div>
 
       {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
@@ -270,7 +297,7 @@ export default function FeeLawPage() {
           <div style={{ display: 'flex', gap: '2px', marginTop: '12px' }}>
             {TABS.map(function (t) {
               var active = tab === t.key;
-              var badge = t.key === 'mandate' ? c.mandate + ' loaded' : t.key === 'city' ? (c.decided + waiver.decided) + ' of ' + (c.deferral + waiver.choices.length) + ' decided' : t.key === 'document' ? (data.document ? data.document.found + ' from document' : 'none read') : (data.version ? 'v' + data.version.version : 'no version');
+              var badge = t.key === 'mandate' ? c.mandate + ' loaded' : t.key === 'city' ? (c.decided + waiver.decided + (clock.enabled ? clock.confirmed : 0)) + ' of ' + (c.deferral + waiver.choices.length + (clock.enabled ? clock.choices.length : 0)) + ' decided' : t.key === 'document' ? (data.document ? data.document.found + ' from document' : 'none read') : (data.version ? 'v' + data.version.version : 'no version');
               return <button key={t.key} type="button" onClick={function () { goTab(t.key); }}
                 style={{ padding: '9px 16px', background: 'none', border: 'none', borderBottom: active ? '2px solid ' + C.pri : '2px solid transparent', marginBottom: '-1px', fontSize: '13.5px', fontWeight: active ? '700' : '500', color: active ? C.pri : C.mute, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 {t.label}<span style={{ fontSize: '10.5px', fontWeight: '700', color: active ? C.pri : C.faint, background: active ? '#E8EEF4' : C.wash, borderRadius: '999px', padding: '1px 7px' }}>{badge}</span>
@@ -312,8 +339,61 @@ export default function FeeLawPage() {
           </div>
           <Group title="Fee computation" n={by(defr, 'computation').length} />
           {head3}{by(defr, 'computation').map(function (r) { return <React.Fragment key={r.key}>{DeferralRow({ row: r })}</React.Fragment>; })}
-          <Group title="Estimates, deposits, payment" n={by(defr, 'estimate_payment').length} />
+          <Group title="Estimates, deposits, payment and their clocks" n={by(defr, 'estimate_payment').length + (clock.enabled ? clock.choices.length : 0)} />
           {head3}{by(defr, 'estimate_payment').map(function (r) { return <React.Fragment key={r.key}>{DeferralRow({ row: r })}</React.Fragment>; })}
+
+          {/* Deposit & payment clock (F3): the master switch, then the six settings pre-filled with the
+              state's answers. The switch arms automation that stops clocks and withdraws requests, so it
+              is its own explicit act — and off is itself a valid, attestable posture. */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 12px 10px', borderTop: '1px solid #EEF2F5', background: '#FBFCFD' }}>
+            <button type="button" disabled={!can || busy === 'clock'} onClick={function () { setClockEnabled(!clock.enabled); }}
+              title={clock.enabled ? 'Turn the deposit & payment clock automation off' : 'Turn the deposit & payment clock automation on'}
+              style={{ width: '38px', height: '22px', borderRadius: '999px', border: 0, padding: 0, background: clock.enabled ? C.ok : C.edge, position: 'relative', flexShrink: 0, marginTop: '2px', cursor: can ? 'pointer' : 'default' }}>
+              <span style={{ position: 'absolute', top: '2px', left: clock.enabled ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '999px', background: 'white' }}></span>
+            </button>
+            <div style={{ flexGrow: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: '700' }}>Deposit &amp; payment clock — <span style={{ color: clock.enabled ? C.ok : C.faint }}>{clock.enabled ? 'on' : 'off'}</span>
+                {clock.switchedBy ? <span style={{ fontWeight: '400', fontSize: '11px', color: C.faint }}> · by {clock.switchedBy}{clock.switchedAt ? ', ' + String(clock.switchedAt).slice(0, 10) : ''}</span> : null}</div>
+              <div style={hint}>{clock.enabled
+                ? 'The six settings below arrived pre-filled with the ' + stateName + ' answers — confirm each one. Nothing automated happens until this switch is on and Fee rules is attested.'
+                : 'Turning this on lets the system act while the city waits to be paid: hold or restart the response clock, and close a request when the payment window passes. Off is today’s behavior: staff see flags, the clock is never touched, nothing closes on its own.'}</div>
+            </div>
+            {!clock.enabled && can ? <button type="button" disabled={busy === 'clock'} onClick={function () { setClockEnabled(true); }} style={btn('pri', { height: '30px' })}>{busy === 'clock' ? 'Turning on…' : 'Turn on'}</button> : null}
+          </div>
+          {clock.enabled ? clock.choices.map(function (ch) {
+            var decided = ch.value != null && clockEdits[ch.key] === undefined;
+            var pre = ch.prefill;
+            return <div key={ch.key} style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
+              <span>{ch.label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {ch.kind === 'choice' ? (
+                  <select value={clockVal(ch)} disabled={!can} onChange={function (e) { setClockVal(ch.key, e.target.value); }} style={inp(false, { color: C.ink })}>
+                    <option value="">—</option>
+                    {(ch.options || []).map(function (o) { return <option key={o.value} value={o.value}>{o.label}{pre && pre.value === o.value ? ' (' + stateName + ' answer)' : ''}</option>; })}
+                  </select>
+                ) : ch.kind === 'bool' ? (
+                  <select value={clockVal(ch)} disabled={!can} onChange={function (e) { setClockVal(ch.key, e.target.value); }} style={inp(false, { color: C.ink })}>
+                    <option value="">—</option>
+                    <option value="yes">Yes{pre && pre.value === true ? ' (' + stateName + ' answer)' : ''}</option>
+                    <option value="no">No{pre && pre.value === false ? ' (' + stateName + ' answer)' : ''}</option>
+                  </select>
+                ) : (
+                  <input value={clockVal(ch)} disabled={!can} onChange={function (e) { setClockVal(ch.key, e.target.value.replace(/[^\d]/g, '')); }}
+                    placeholder="days" style={inp(false, { width: '120px' })} />
+                )}
+                {ch.kind === 'days' && pre && pre.businessDays ? <span style={hint}>business days</span> : null}
+                <button type="button" disabled={!can || busy === 'clock'} onClick={function () { confirmClock(ch); }} style={btn(can ? 'sec' : 'dis', { height: '28px', fontSize: '12px' })}>Confirm</button>
+              </div>
+              <span style={cite}>
+                {pre ? <Chip kind="fixed" /> : <Says text="Silent" />}{' '}
+                {pre && pre.authority ? <button type="button" tabIndex={-1} onClick={function () { setStatute({ title: ch.label, authority: pre.authority, ruleIds: pre.rules }); }} title="Open the statute text behind this answer" style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline dotted' }}>{pre.authority}</button> : 'the state template does not answer this — a city choice'}
+                {decided ? <span style={{ color: C.ok, fontWeight: '600' }}> · ✓ confirmed by {ch.by}{ch.at ? ', ' + String(ch.at).slice(0, 10) : ''}</span> : null}
+              </span>
+            </div>;
+          }) : null}
+          {clock.enabled ? <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderTop: '1px solid #EEF2F5' }}>
+            <span style={Object.assign({}, hint, { flexGrow: 1 })}>All six write through to the policy the engine reads, and they gate <b>Attest</b> — but not <b>Approve</b>: the fee schedule waits only on the money figures above. Automation runs only while the switch is on <b>and</b> this screen is attested.</span>
+          </div> : null}
           {waiver.choices.length ? <React.Fragment>
             <Group title="Fee waiver" n={waiver.choices.length} />
             {head3}

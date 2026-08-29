@@ -168,6 +168,63 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   if (amSnap == null) await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'approval_modules'");
   else await db.run("UPDATE jurisdiction_rules SET config_json = ? WHERE jurisdiction_id = 'jur-tx' AND domain = 'approval_modules'", [amSnap.config_json]);
 
+  console.log('\n=== G. DEPOSIT & PAYMENT CLOCK ON THIS SCREEN (Kevin 2026-08-29; the deposits hub row is retired) ===');
+  // G writes through to the `payment` domain that verify_requestor_ledger and the go-live walk read
+  // later in suite order — snapshot config_json AND updated_by (the RESTORE_STAMP lesson: a restore
+  // that stamps itself leaves a harness fingerprint configIntegrity rightly flags).
+  var pcSnap = await db.get("SELECT config_json, updated_by FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'");
+  var sC = (await callAs(U.dir, 'GET', '/fee-law')).body;
+  ok('G1 the screen carries the clock: off, six settings, every TX answer pre-filled from the template (restart · 10 business days · withdraw · yes ×3)',
+    sC.clock && sC.clock.enabled === false && sC.clock.choices.length === 6 && sC.clock.confirmed === 0 &&
+    sC.clock.choices[0].prefill.value === 'toll_and_restart' &&
+    sC.clock.choices[1].prefill.value === 10 && sC.clock.choices[1].prefill.businessDays === true &&
+    sC.clock.choices[2].prefill.value === 'withdraw' &&
+    sC.clock.choices.slice(3).every(function (x) { return x.prefill && x.prefill.value === true; }),
+    JSON.stringify(sC.clock && sC.clock.choices.map(function (x) { return [x.key, x.prefill && x.prefill.value]; })));
+  var hC0 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
+  ok('G2 the hub: the deposits row is GONE (compliance lane 10) and the Fee rules evidence says "payment clock: off"',
+    /payment clock: off/.test(hC0.evidence) &&
+    !JSON.stringify((await callAs(U.dir, 'GET', '/setup-hub')).body.lanes).includes('"deposits"') &&
+    (await callAs(U.dir, 'GET', '/setup-hub')).body.lanes[0].items.length === 10, hC0.evidence);
+  var cOff = await callAs(U.dir, 'POST', '/fee-law/clock', { confirm: { key: 'deposit_lapse_action', value: 'withdraw' } });
+  ok('G3 confirming while the switch is off is refused in words (off is itself the configured posture)',
+    cOff.status === 409 && /Turn the deposit & payment clock on first/.test(cOff.body.error), JSON.stringify(cOff.body));
+  var cOn = await callAs(U.dir, 'POST', '/fee-law/clock', { enabled: true });
+  var PCP = require('/opt/optimumq/backend/src/services/paymentClockPolicy');
+  ok('G4 the switch writes enabled through to the policy store, records who/when, and the hub counts "0 of 6 confirmed"',
+    cOn.status === 200 && cOn.body.clock.enabled === true && cOn.body.clock.switchedBy === 'FL oro_director' &&
+    (await PCP.read('jur-tx')).enabled === true &&
+    /payment clock: 0 of 6 confirmed/.test(hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body).evidence),
+    JSON.stringify(cOn.body.clock).slice(0, 200));
+  var cBad = await callAs(U.dir, 'POST', '/fee-law/clock', { confirm: { key: 'deposit_clock_effect', value: 'coin_flip' } });
+  ok('G5 an invalid setting value is refused in words, nothing written', cBad.status === 422 && /Invalid value/.test(cBad.body.error) &&
+    (await PCP.read('jur-tx')).deposit_clock_effect === 'runs_no_stop', JSON.stringify(cBad.body));
+  var confirms = [
+    ['deposit_clock_effect', 'toll_and_restart'], ['deposit_grace_days', 10], ['deposit_lapse_action', 'withdraw'],
+    ['reissue_required_on_variance', true], ['reissue_blocks_collection', true], ['reissue_restarts_response_window', true]];
+  var cLast = null;
+  for (var ci = 0; ci < confirms.length; ci++) cLast = await callAs(U.dir, 'POST', '/fee-law/clock', { confirm: { key: confirms[ci][0], value: confirms[ci][1] } });
+  var polAfter = await PCP.read('jur-tx');
+  ok('G6 confirming all six writes the lawful values through to the store the engine reads (restart · 10 · withdraw · true ×3), provenance untouched',
+    cLast.status === 200 && cLast.body.clock.confirmed === 6 && cLast.body.clock.choices[0].by === 'FL oro_director' &&
+    polAfter.deposit_clock_effect === 'toll_and_restart' && polAfter.deposit_grace_days === 10 && polAfter.deposit_lapse_action === 'withdraw' &&
+    polAfter.reissue_required_on_variance === true && polAfter.reissue_blocks_collection === true && polAfter.reissue_restarts_response_window === true &&
+    polAfter.provenance.deposit_clock_effect && polAfter.provenance.deposit_clock_effect.source === 'statute',
+    JSON.stringify([polAfter.deposit_clock_effect, polAfter.deposit_grace_days, polAfter.deposit_lapse_action]));
+  var cStaff = await callAs(U.staff, 'POST', '/fee-law/clock', { enabled: false });
+  ok('G7 staff cannot touch the clock settings', cStaff.status === 403);
+  var a4 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
+  ok('G8 Approve never waits on the clock settings (they gate Attest, not the schedule); deferral count unchanged at 13',
+    a4.status === 200 && a4.body.screen.counts.deferral === 13, JSON.stringify(a4.body.screen && a4.body.screen.counts));
+  // restore the payment policy store byte-identically, stamp included (residue-free: verify_requestor_ledger
+  // and the bw9 go-live walk run later and must see the store exactly as the suite reset left it)
+  if (pcSnap == null) await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'");
+  else await db.run("UPDATE jurisdiction_rules SET config_json = ?, updated_by = ? WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'", [pcSnap.config_json, pcSnap.updated_by]);
+  var sEnd = (await callAs(U.dir, 'GET', '/fee-law')).body;
+  ok('G9 cleanup: the policy store reads exactly as before G (switch off, shipped defaults)',
+    sEnd.clock.enabled === false && (await PCP.read('jur-tx')).deposit_clock_effect === 'runs_no_stop' && (await PCP.read('jur-tx')).deposit_grace_days === null,
+    JSON.stringify(sEnd.clock.enabled));
+
   console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR', e); process.exit(1); });

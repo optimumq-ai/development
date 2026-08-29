@@ -236,6 +236,113 @@ async function decideWaiver(jid, body, user) {
   return { waiver: await waiverState(jid, dec), screen: await screen(jid) };
 }
 
+// ---- deposit & payment clock (Kevin 2026-08-29, F3: the fee-law screen absorbs the payment policy;
+// the 'deposits' hub row is retired). The six settings ARE the paymentClockPolicy store the engine
+// already reads (depositAction, feeReissue, the tickler) — until now they sat behind a separate
+// jurisdiction-config section, switched off, with safe-manual defaults that contradict what Texas law
+// fixes. The screen renders them the clarification way: a MASTER SWITCH (these settings stop clocks and
+// withdraw requests, so arming the automation is its own explicit act), then the six answers pre-filled
+// from the state template for individual confirmation. Confirming writes the value through to the
+// policy store; provenance (citations + rule ids the importer filed) rides along untouched. Nothing
+// automated runs until the switch is on AND the payment section attests — the engine's double gate is
+// unchanged. The six gate ATTEST of this screen, never Approve. In a state whose template answers none
+// of this, the rows render as open choices and leaving the switch off is itself the configured answer.
+const CLOCK_FIELDS = [
+  { key: 'deposit_clock_effect', kind: 'choice', label: 'What the response clock does while a deposit is unpaid',
+    options: [
+      { value: 'runs_no_stop', label: 'Keeps running' },
+      { value: 'toll_pause_resume', label: 'Pauses, resumes when paid' },
+      { value: 'toll_and_restart', label: 'Restarts when the deposit is paid' },
+      { value: 'operational_hold', label: 'Operational hold — clock untouched' }
+    ] },
+  { key: 'deposit_grace_days', kind: 'days', label: 'How long the requestor has to pay a deposit' },
+  { key: 'deposit_lapse_action', kind: 'choice', label: 'What happens when that window passes unpaid',
+    options: [
+      { value: 'flag_only', label: 'Flag for staff — close nothing' },
+      { value: 'withdraw', label: 'The request is considered withdrawn' }
+    ] },
+  { key: 'reissue_required_on_variance', kind: 'bool', label: 'A cost overrun requires a revised estimate to be re-sent' },
+  { key: 'reissue_blocks_collection', kind: 'bool', label: 'Until it is re-sent, the overrun cannot be collected' },
+  { key: 'reissue_restarts_response_window', kind: 'bool', label: 'Re-sending gives the requestor a fresh response window' }
+];
+
+// The state's answers, read from the SAME template items the mandate rows render
+// (payment.depositClock, payment.reissue). A value the template does not state parses to no prefill —
+// the row is then an open city choice, which is exactly the silent-state design.
+function clockPrefills(tplItems) {
+  var dc = tplItems['payment.depositClock'] || {};
+  var ri = tplItems['payment.reissue'] || {};
+  var dv = String(dc.value || ''), rv = String(ri.value || '');
+  function src(item) { return { authority: item.authority || '', rules: item.rule_ids || [] }; }
+  var out = {};
+  var eff = /deemed received|received on the date the deposit/i.test(dv) ? 'toll_and_restart'
+    : /paus/i.test(dv) ? 'toll_pause_resume'
+    : /keeps running|runs[, ]|no (stop|clock effect)/i.test(dv) ? 'runs_no_stop' : null;
+  if (eff) out.deposit_clock_effect = Object.assign({ value: eff }, src(dc));
+  var g = dv.match(/grace:\s*(\d+)(\s*business)?/i);
+  if (g) out.deposit_grace_days = Object.assign({ value: Number(g[1]), businessDays: !!g[2] }, src(dc));
+  var la = /lapse_action:\s*withdraw/i.test(dv) ? 'withdraw' : /lapse_action:\s*flag/i.test(dv) ? 'flag_only' : null;
+  if (la) out.deposit_lapse_action = Object.assign({ value: la }, src(dc));
+  if (/revised_estimate_required:\s*yes/i.test(rv)) out.reissue_required_on_variance = Object.assign({ value: true }, src(ri));
+  else if (/revised_estimate_required:\s*no/i.test(rv)) out.reissue_required_on_variance = Object.assign({ value: false }, src(ri));
+  if (/collection cap/i.test(rv)) out.reissue_blocks_collection = Object.assign({ value: true }, src(ri));
+  if (/window restarts/i.test(rv)) out.reissue_restarts_response_window = Object.assign({ value: true }, src(ri));
+  return out;
+}
+
+async function clockState(jid, dec, tplItems) {
+  var PCP = require('./paymentClockPolicy');
+  var pol = await PCP.read(jid);
+  var c = (dec && dec.clock) || {};
+  var pre = clockPrefills(tplItems || {});
+  var choices = CLOCK_FIELDS.map(function (f) {
+    var d = c[f.key];
+    return { key: f.key, kind: f.kind, label: f.label, options: f.options || null,
+      prefill: pre[f.key] || null,
+      value: d ? d.value : null, by: d ? d.by : null, at: d ? d.at : null,
+      current: pol[f.key] };
+  });
+  var sw = c._switch || null;
+  return { enabled: pol.enabled === true,
+    switchedBy: sw ? sw.by : null, switchedAt: sw ? sw.at : null,
+    choices: choices,
+    confirmed: choices.filter(function (x) { return x.value != null; }).length };
+}
+
+// Record the switch or one confirmation. Both write through to the paymentClockPolicy store; who/when
+// live in this screen's decisions domain (dec.clock). Confirming needs the switch on — while it is off
+// the settings do not exist as recorded city decisions, and off itself is a valid, attestable posture.
+async function decideClock(jid, body, user) {
+  var s = await screen(jid);
+  if (!s.jurisdiction) throw Object.assign(new Error('No jurisdiction is locked yet.'), { status: 409 });
+  var PCP = require('./paymentClockPolicy');
+  var dec = await decisions(jid);
+  dec.clock = dec.clock || {};
+  var who = user.name || user.email || user.sub;
+  var when = nowStr();
+  var raw = (await JR.read(jid, PCP.DOMAIN)) || {};
+  if (body.enabled !== undefined) {
+    raw.enabled = body.enabled === true;
+    await PCP.write(jid, raw, who);
+    dec.clock._switch = { value: body.enabled === true, by: who, at: when };
+  }
+  if (body.confirm) {
+    var f = CLOCK_FIELDS.filter(function (x) { return x.key === (body.confirm && body.confirm.key); })[0];
+    if (!f) throw Object.assign(new Error('Not one of the six deposit & payment clock settings.'), { status: 422 });
+    if (!(PCP.normalize(raw).enabled === true)) {
+      throw Object.assign(new Error('Turn the deposit & payment clock on first — the six settings are confirmed while it is on.'), { status: 409 });
+    }
+    raw[f.key] = body.confirm.value;
+    try { await PCP.write(jid, raw, who); }
+    catch (e) { throw Object.assign(new Error(e.message), { status: 422 }); }
+    var pol = await PCP.read(jid);
+    dec.clock[f.key] = { value: pol[f.key], by: who, at: when };
+  }
+  await JR.write(jid, DECISIONS_DOMAIN, dec, who);
+  var tpl = templateItems(s.jurisdiction.code);
+  return { clock: await clockState(jid, dec, tpl.items), screen: await screen(jid) };
+}
+
 // ---- reading -------------------------------------------------------------------------------------
 async function activeJurisdiction() {
   var jid = await JR.activeJid();
@@ -304,6 +411,7 @@ async function screen(jid) {
     counts: { mandate: mandate.length, ceilings: ceilings.length, ceilingsDefaulted: ceilings.filter(function (r) { return r.city.source === 'default'; }).length, deferral: deferral.length, decided: deferral.length - undecided.length, undecided: undecided.length, gaps: rows.filter(function (r) { return r.gap; }).length },
     document: dec.document || null,
     waiver: await waiverState(prof.id, dec),
+    clock: await clockState(prof.id, dec, tpl.items),
     version: ver ? { id: ver.id, version: ver.version, name: ver.name, by: ver.created_by, at: ver.created_at } : null
   };
 }
@@ -448,4 +556,4 @@ async function readDocument(jid, text, docName, user) {
   return { found: found, skipped: skipped, refused: res.refused, notes: r.notes || '', screen: await screen(jid) };
 }
 
-module.exports = { CATALOG: CATALOG, BY_KEY: BY_KEY, DECISIONS_DOMAIN: DECISIONS_DOMAIN, WAIVER_GROUNDS: WAIVER_GROUNDS, parseValue: parseValue, screen: screen, decide: decide, decideWaiver: decideWaiver, approve: approve, compose: compose, readDocument: readDocument, templateItems: templateItems };
+module.exports = { CATALOG: CATALOG, BY_KEY: BY_KEY, DECISIONS_DOMAIN: DECISIONS_DOMAIN, WAIVER_GROUNDS: WAIVER_GROUNDS, CLOCK_FIELDS: CLOCK_FIELDS, parseValue: parseValue, screen: screen, decide: decide, decideWaiver: decideWaiver, decideClock: decideClock, clockPrefills: clockPrefills, approve: approve, compose: compose, readDocument: readDocument, templateItems: templateItems };

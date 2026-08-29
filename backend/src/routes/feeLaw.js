@@ -87,6 +87,18 @@ router.post('/waiver', requireAuth, async function (req, res) {
   } catch (e) { fail(res, e, 'The waiver choices could not be recorded.'); }
 });
 
+// The deposit & payment clock (Kevin 2026-08-29, F3): the master switch and the six settings, written
+// through to the paymentClockPolicy store the engine reads. They gate Attest, never Approve.
+router.post('/clock', requireAuth, async function (req, res) {
+  if (!mayEdit(req.user)) return res.status(403).json({ error: 'Recording the deposit & payment clock settings needs the compliance_policy or legal_rules permission group.', code: 'PERMISSION_REQUIRED' });
+  try {
+    var jid = await JR.activeJid();
+    var r = await FL.decideClock(jid, req.body || {}, req.user);
+    r.screen.canEdit = true;
+    res.json(r);
+  } catch (e) { fail(res, e, 'The clock settings could not be recorded.'); }
+});
+
 router.post('/approve', requireAuth, async function (req, res) {
   if (!mayEdit(req.user)) return res.status(403).json({ error: 'Approving the fee schedule needs the compliance_policy or legal_rules permission group.', code: 'PERMISSION_REQUIRED' });
   try {

@@ -43,8 +43,9 @@ const ITEMS = [
   { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/jurisdiction-config/deadlines', deps: ['jurisdiction'], section: 'deadlines', legal: true },
   // 'Fee rules' (Kevin 2026-08-27): the fee-law screen absorbs fee waivers; the separate
   // 'Fee waivers and who approves them' row is retired — its content lives on this screen's tabs.
+  // F3 (Kevin 2026-08-29): the fee-law screen also absorbs the deposit & payment clock policy; the
+  // separate 'Deposits and payment clock' row is retired — its settings live on the City decisions tab.
   { key: 'fee_law', lane: 'compliance', name: 'Fee rules', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees' },
-  { key: 'deposits', lane: 'compliance', name: 'Deposits and payment clock', door: '/jurisdiction-config/payment', deps: ['jurisdiction'], section: 'payment' },
   { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['jurisdiction'], section: 'clarification' },
   { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['jurisdiction'], section: 'exemption', legal: true },
   { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['jurisdiction'], section: 'eligibility' },
@@ -146,6 +147,7 @@ const READERS = {
     var c = s.counts;
     var line = c.mandate + ' figures set by ' + s.jurisdiction.code + ' law' + (c.deferral ? ' · ' + c.decided + ' of ' + c.deferral + ' city choices decided' : '');
     if (s.waiver && s.waiver.choices.length) line += ' · waivers: ' + s.waiver.decided + ' of ' + s.waiver.choices.length + ' decided';
+    if (s.clock) line += ' · payment clock: ' + (s.clock.enabled ? s.clock.confirmed + ' of ' + s.clock.choices.length + ' confirmed' : 'off');
     if (!s.version) return ev(c.decided ? 'in_progress' : 'not_started', line + ' · no fee schedule version yet');
     var sec = ctx.sections.fees;
     var r = sectionEvidence(sec, 'fee schedule v' + s.version.version);
@@ -154,7 +156,6 @@ const READERS = {
     r.evidence = line + ' · ' + r.evidence;
     return r;
   },
-  deposits: async function (ctx) { return sectionEvidence(ctx.sections.payment); },
   clarification: async function (ctx) {
     var r = sectionEvidence(ctx.sections.clarification);
     if (r.state === 'not_started') r.evidence = 'not configured yet — clarification is switched off';
