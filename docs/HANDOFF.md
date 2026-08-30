@@ -9419,3 +9419,44 @@ Authentication). **Kevin: work through those three one at a time next.** Configu
 carries Redaction and Agent Rules sections.
 
 **Suite: 2696/2697, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged).**
+
+## 2026-08-30 (C11) — the v1 Configuration page RETIRED: six dedicated /setup screens; suite 2700/2701 (E1a the only red)
+
+**Kevin's calls (verbatim intent):** every Configuration tab becomes its own screen behind a hub row, not a
+tab. Time Tracking → **"Task Processing Time Capture"** under System Features and Options · Redaction → NEW
+row **"Video Redaction Options"** · Notifications → **"System Notifications"** under System Features and
+Options · Task Time Budgets → System Features and Options (name kept) · Agent Rules → System Features and
+Options · Authentication → its own screen behind "User Authentication Setup" (Technical Setup).
+
+**Built:** `components/setup/SetupScreen.js` — the shared strip (state pill → hub, evidence, lane, Attest =
+the row's done-mark) lifted from the email screen; six pages on it: `/setup/authentication`,
+`/setup/notifications`, `/setup/video-redaction`, `/setup/time-capture`, `/setup/time-budgets`,
+`/setup/agent-rules`. `ConfigurationPage.js` DELETED; `/config` and `/admin?tab=config` land on the hub.
+Hub: 34 items, lanes [10,2,6,4,6,5] — the fulfillment-fees lane is down to calibration + routing.
+
+**Calls I made (flag for Kevin):** (1) "Video Redaction Options" sits in the **Redaction and Release** lane
+(Kevin named a lane for every other row but not this one; the redaction lane is where it belongs — move it
+to features with a one-line catalog edit if he prefers). (2) The agent-rules row is named **"Portal Agent
+Rules"** (no name given). Note the old `agent_rules` row doored to the Portal Agent Security tab while its
+reader counted `agent_rules` rows — the two were never the same thing; the security tab now has no hub row.
+(3) `POST /api/config` was system-authority for every key, so a Director (operations_config) owning the
+notifications/redaction rows would have hit 403 — the four operational keys (`overdue_alert_days`,
+`escalation_days`, `ack_email`, `av_redaction_mode`) now accept operations_config; the rest unchanged.
+(4) **Bug fixed in passing:** `av_redaction_mode` is read by `routes/avRedaction.js` but was never in the
+POST allow-list — the v1 Redaction tab's Save silently dropped it (live still holds the seed `internal`).
+(5) The `time_tracking` reader read a config key nothing ever wrote; it now reads the real per-screen
+time-capture setting. (6) `auth_policy` evidence said "minute timeout" for an `8h` value — wording fixed.
+
+**Tests:** verify_setup_hub 26/26 (+G1–G4: the config gating), verify_agency_setup D2 now asserts the
+ConfigurationPage file is GONE. **Suite: full run 2671 passed / E1a / `verify_magic_reset` did not complete;
+the single-harness rerun 29/29 → 2700/2701, live census clean every run.** `verify_magic_reset` crashed in
+3 of 5 runs today (a dumped pg Client with `_ending: true` while `_connecting: true` — the harness's own
+pool across the DB swap, section D), never twice in a row, never on the C10 tree's run; it does not touch
+anything C11 changed. Runner now prints a broken harness's last 30 lines + its error lines, and
+`SUITE_DUMP_DIR=<dir>` keeps the whole output — the next crash will name its line.
+
+**Seen on live, not mine:** the time_budgets row shows "marked done by Kevin Hargrove, 2026-08-30".
+
+**NEXT (in flight):** C12 — AI Service Keys gets the same treatment (`/setup/ai-keys`; the hidden
+Integrations tab retired). Then the remaining hidden admin tabs (Taxonomy, User Types, Portal Agent
+Security's status) and the "How many days a task should take" design pass Kevin deferred.

@@ -13,6 +13,12 @@ import OrgPage from './pages/OrgPage';
 import AdministrationPage from './pages/AdministrationPage';
 import AgencySetupPage from './pages/AgencySetupPage';
 import EmailConfigPage from './pages/EmailConfigPage';
+import AuthenticationSetupPage from './pages/AuthenticationSetupPage';
+import SystemNotificationsPage from './pages/SystemNotificationsPage';
+import VideoRedactionOptionsPage from './pages/VideoRedactionOptionsPage';
+import TimeCapturePage from './pages/TimeCapturePage';
+import TimeBudgetsPage from './pages/TimeBudgetsPage';
+import AgentRulesPage from './pages/AgentRulesPage';
 import FeeLawPage from './pages/FeeLawPage';
 import RequestRulesPage from './pages/RequestRulesPage';
 import ReportsHubPage from './pages/ReportsHubPage';
@@ -150,6 +156,12 @@ export default function App() {
           {/* H3 (2026-08-25): the first hub-linked screen — agency identity + "Lock state and load its rules". */}
           <Route path="setup/agency" element={<AgencySetupPage />} />
           <Route path="setup/email" element={<EmailConfigPage />} />
+          <Route path="setup/authentication" element={<AuthenticationSetupPage />} />
+          <Route path="setup/notifications" element={<SystemNotificationsPage />} />
+          <Route path="setup/video-redaction" element={<VideoRedactionOptionsPage />} />
+          <Route path="setup/time-capture" element={<TimeCapturePage />} />
+          <Route path="setup/time-budgets" element={<TimeBudgetsPage />} />
+          <Route path="setup/agent-rules" element={<AgentRulesPage />} />
           <Route path="setup/fee-law" element={<FeeLawPage />} />
           {/* Clarification · Exemptions · Requestor eligibility — three hub rows, one screen (2026-08-27). */}
           <Route path="setup/request-rules" element={<RequestRulesPage />} />
@@ -168,7 +180,7 @@ export default function App() {
           <Route path="mass-redaction" element={<MassRedactionPage />} />
           <Route path="fee-config" element={<Navigate to="/setup/fee-law" replace />} />
           <Route path="cash-drawer" element={<CashDrawerPage />} />
-          <Route path="config" element={<Navigate to="/admin?tab=config" replace />} />
+          <Route path="config" element={<Navigate to="/admin?tab=setup" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>

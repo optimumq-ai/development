@@ -130,9 +130,14 @@ function run(cmd, argv, extraEnv) {
     const m = out.match(/(\d+)\/(\d+) pass, (\d+) fail/);
     if (!m) {
       broken++;
+      // SUITE_DUMP_DIR=<dir>: keep the harness's WHOLE output there — the printed tail is never enough for a crash.
+      if (process.env.SUITE_DUMP_DIR) { try { require('fs').writeFileSync(path.join(process.env.SUITE_DUMP_DIR, 'broken_' + h + '.log'), out); } catch (e) { /* best effort */ } }
       console.log('  ⚠️  ' + h.padEnd(24) + 'NO SUMMARY — harness did not complete');
       // 30 lines, not 4: a Node crash trace is longer than that, and 4 lines once showed only '}' and the version.
       console.log(out.trim().split('\n').slice(-30).map((l) => '        ' + l).join('\n'));
+      // …and the error lines themselves: a dumped pg Client object is longer than any tail (2026-08-30).
+      var errLines = out.split('\n').filter((l) => /^\s*(\w*Error\b|error:|HARNESS ERROR)/.test(l)).slice(0, 8);
+      if (errLines.length) console.log(errLines.map((l) => '        ERR> ' + l.trim().slice(0, 300)).join('\n'));
       continue;
     }
     pass += Number(m[1]); fail += Number(m[3]);

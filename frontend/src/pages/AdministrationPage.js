@@ -2,16 +2,15 @@ import React from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import SetupHubPage from './SetupHubPage';
-import ConfigurationPage from './ConfigurationPage';
 import RuleUpdatesPage from './RuleUpdatesPage';
 import TaxonomyPage from './TaxonomyPage';
 import WorkflowPage from './WorkflowPage';
 import WorkflowMapPage from './WorkflowMapPage';
 import SourcesPage from './SourcesPage';
 import RedactionRulesPage from './RedactionRulesPage';
-import IntegrationsPage from './IntegrationsPage';
 import AIDataFlowPage from './AIDataFlowPage';
 import SecurityPage from './SecurityPage';
+import IntegrationsPage from './IntegrationsPage';
 import UserTypesPage from './UserTypesPage';
 
 // ADMINISTRATION (2026-08-01, Kevin's menu reorganization): the thirteen technical-setup screens under
@@ -22,9 +21,9 @@ import UserTypesPage from './UserTypesPage';
 const TABS = [
   // H1 (2026-08-25): the Setup & Configuration HUB replaces the 7-phase wizard as the front door (SPEC_setup_hub.md).
   { key: 'setup',        label: 'Setup',                el: SetupHubPage },
-  // C10 (Kevin 2026-08-30): the nav tab is gone — the hub's 'User Authentication Setup' row (and, for now, the
-  // time-budgets / time-tracking / notifications rows) door here; ?tab=config stays routable.
-  { key: 'config',       label: 'Configuration',        el: ConfigurationPage, admin: true, hidden: true },
+  // C10–C11 (Kevin 2026-08-30): the v1 Configuration tab is RETIRED — its six sections are dedicated /setup
+  // screens behind hub rows (authentication, notifications, video-redaction, time-capture, time-budgets,
+  // agent-rules); ?tab=config lands on the hub.
   { key: 'updates',      label: 'Update Configuration', el: RuleUpdatesPage },
   // C4 (Kevin 2026-08-29) hid the v1 "Fee Configuration" rate-table tab; C9 (Kevin 2026-08-30) RETIRED it — the
   // screen was blank and Fee rules (/setup/fee-law) is the fee schedule now. /fee-config and ?tab=fees land on Fee rules.
@@ -58,6 +57,8 @@ export default function AdministrationPage() {
   if (activeKey === 'jurisdiction') return <Navigate to="/jurisdiction-config" replace />;
   // RETIRED 2026-08-30 (C9): the v1 Fee Configuration rate-table tab — Fee rules is the fee schedule now.
   if (activeKey === 'fees') return <Navigate to="/setup/fee-law" replace />;
+  // RETIRED 2026-08-30 (C11): the v1 Configuration tab — its sections are /setup screens; land on the hub.
+  if (activeKey === 'config') return <Navigate to="/admin?tab=setup" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (

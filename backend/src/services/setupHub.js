@@ -2,7 +2,7 @@
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (design closed 2026-08-24; inventory in
 // WORKING_setup_inventory.md; canvas artboards in docs/mockups/setup_hub/).
 //
-// One page, six lanes, thirty-three items. Every item is: a plain-language NAME, the DOOR that sets it (an
+// One page, six lanes, thirty-four items. Every item is: a plain-language NAME, the DOOR that sets it (an
 // existing screen), an OWNER (a permission group — the hub gates on the user-type model, nothing else), an
 // EVIDENCE line counted from what is actually configured, and a STATE derived from that evidence:
 //
@@ -80,17 +80,23 @@ const ITEMS = [
   // C7 (Kevin 2026-08-29): 'Record types and categories' becomes 'Taxonomy' under System Features and
   // Options — same key, so the calibration dependency and the counted evidence carry over unchanged.
   { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/admin?tab=taxonomy', deps: ['sources'], softDeps: true },
+  { key: 'time_budgets', lane: 'features', name: 'How many days a task should take', door: '/setup/time-budgets', deps: [] },
+  { key: 'time_tracking', lane: 'features', name: 'Task Processing Time Capture', door: '/setup/time-capture', deps: [] },
+  { key: 'notifications', lane: 'features', name: 'System Notifications', door: '/setup/notifications', deps: ['email'] },
+  { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [] },
   { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/admin?tab=taxonomy', deps: ['taxonomy'] },
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Who gets which request', door: '/admin?tab=workflow', deps: ['departments', 'teams'] },
-  { key: 'time_budgets', lane: 'fulfillment_fees', name: 'How many days a task should take', door: '/admin?tab=config', deps: [] },
-  { key: 'time_tracking', lane: 'fulfillment_fees', name: 'Whether staff record their time', door: '/admin?tab=config', deps: [] },
-  { key: 'notifications', lane: 'fulfillment_fees', name: 'When the system warns you', door: '/admin?tab=config', deps: ['email'] },
+  // C11 (Kevin 2026-08-30): the v1 Configuration page is RETIRED — each of its six tabs became a dedicated
+  // /setup screen behind a hub row. time_budgets, time_tracking (renamed 'Task Processing Time Capture'),
+  // notifications (renamed 'System Notifications') and agent_rules moved to System Features and Options;
+  // av_redaction ('Video Redaction Options') is NEW in the redaction lane; auth_policy stays in Technical Setup.
   // ── Lane 2b ──
   { key: 'redaction_auto', lane: 'fulfillment_redaction', name: 'Automatic redaction decisions', door: null, deps: ['redaction_rules'], noScreen: true },
   { key: 'release_review', lane: 'fulfillment_redaction', name: 'Review before records go out', door: null, deps: [], noScreen: true },
   { key: 'layout_templates', lane: 'fulfillment_redaction', name: 'Redaction layout templates', door: '/mass-redaction', deps: ['redaction_rules'] },
   { key: 'decision_reasons', lane: 'fulfillment_redaction', name: 'Standard wording for denials', door: null, deps: ['agency'], noScreen: true },
   { key: 'mass_schedule', lane: 'fulfillment_redaction', name: 'When bulk redaction runs', door: null, deps: [], noScreen: true },
+  { key: 'av_redaction', lane: 'fulfillment_redaction', name: 'Video Redaction Options', door: '/setup/video-redaction', deps: [] },
   // ── Lane 3 ──
   { key: 'departments', lane: 'organization', name: 'City departments', door: '/org', deps: [] },
   { key: 'teams', lane: 'organization', name: 'Fulfillment teams', door: '/org', deps: ['departments'] },
@@ -104,8 +110,7 @@ const ITEMS = [
   // moved to its own screen behind this row (Integrations keeps the AI keys; the v1 Configuration email
   // tab is retired — its alert-recipient field moved along).
   { key: 'email', lane: 'technical', name: 'Email configuration', door: '/setup/email', deps: [] },
-  { key: 'auth_policy', lane: 'technical', name: 'User Authentication Setup', door: '/admin?tab=config', deps: [] },
-  { key: 'agent_rules', lane: 'technical', name: 'What the public portal assistant may say', door: '/admin?tab=security', deps: [] },
+  { key: 'auth_policy', lane: 'technical', name: 'User Authentication Setup', door: '/setup/authentication', deps: [] },
   { key: 'settlement', lane: 'technical', name: 'Sending charges to the finance system', door: null, deps: ['fee_law'], noScreen: true },
 ];
 const BY_KEY = {}; ITEMS.forEach(function (i) { BY_KEY[i.key] = i; });
@@ -256,8 +261,17 @@ const READERS = {
     return ev(set === rows.length ? 'ready' : 'in_progress', set + ' of ' + rows.length + ' task types have a day budget');
   },
   time_tracking: async function () {
-    var mode = await cfg('time_capture_mode') || await cfg('time_tracking_mode');
-    return mode ? ev('ready', mode.replace(/_/g, ' ')) : ev('not_started', 'running on the shipped default');
+    // C11: reads the real per-screen setting (services/timeCaptureConfig), not a key nothing ever wrote.
+    var TC = require('./timeCaptureConfig'); var c = await TC.get({ get: get, run: run });
+    var on = TC.UIS.filter(function (u) { return u.available && c[u.key] && c[u.key] !== 'off'; });
+    var avail = TC.UIS.filter(function (u) { return u.available; }).length;
+    if (!on.length) return ev('not_started', 'off on every task screen (the shipped default)');
+    return ev('ready', on.length + ' of ' + avail + ' task screens capture time · ' + on.map(function (u) { return u.label + ': ' + c[u.key]; }).join(', '));
+  },
+  av_redaction: async function () {
+    var m = await cfg('av_redaction_mode');
+    var words = { internal: 'redacted inside Optimum Q', external: 'redacted in the city\'s own tool', not_required: 'presumptively releasable, reviewed before release' };
+    return m ? ev('ready', words[m] || m) : ev('not_started', 'running on the shipped default (internal)');
   },
   notifications: async function () {
     var od = await cfg('overdue_alert_days'), es = await cfg('escalation_days');
@@ -339,7 +353,7 @@ const READERS = {
   },
   auth_policy: async function () {
     var mode = await cfg('auth_mode') || 'local', mfa = await cfg('mfa_mode'), to = await cfg('session_timeout'), pl = await cfg('min_password_length');
-    return ev('ready', mode + (mfa ? ' + MFA ' + mfa : '') + (to ? ' · ' + to + ' minute timeout' : '') + (pl ? ' · ' + pl + '+ character passwords' : ''));
+    return ev('ready', mode + (mfa ? ' + MFA ' + mfa : '') + (to ? ' · ' + to + ' session timeout' : '') + (pl ? ' · ' + pl + '+ character passwords' : ''));
   },
   agent_rules: async function () {
     var n = await count('SELECT COUNT(*) n FROM agent_rules WHERE enabled = 1');

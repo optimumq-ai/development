@@ -113,8 +113,8 @@ function agencyRow(page) { return (page.top || []).filter(function (x) { return 
   console.log('\n=== D. THE OLD DOOR IS GONE ===');
   var HUB = require('/opt/optimumq/backend/src/services/setupHub');
   ok('D1 no hub item points at the retired Agency tab', HUB.ITEMS.every(function (i) { return i.door !== '/admin?tab=config' || i.key !== 'agency'; }) && HUB.BY_KEY.agency.door === '/setup/agency');
-  var cp = fs.readFileSync('/opt/optimumq/frontend/src/pages/ConfigurationPage.js', 'utf8');
-  ok('D2 ConfigurationPage has no Agency tab and no agency_name/state field', !/label:\s*'Agency'/.test(cp) && !/agency_name/.test(cp) && !/set\('state'/.test(cp));
+  // C11 (2026-08-30): the v1 ConfigurationPage is retired outright — the file must be gone, not merely agency-free.
+  ok('D2 the v1 ConfigurationPage is retired (file deleted; no hub row doors to ?tab=config)', !fs.existsSync('/opt/optimumq/frontend/src/pages/ConfigurationPage.js') && HUB.ITEMS.every(function (i) { return i.door !== '/admin?tab=config'; }));
   ok('D3 the route and page exist', /path="setup\/agency"/.test(fs.readFileSync('/opt/optimumq/frontend/src/App.js', 'utf8')) && fs.existsSync('/opt/optimumq/frontend/src/pages/AgencySetupPage.js'));
 
   console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');

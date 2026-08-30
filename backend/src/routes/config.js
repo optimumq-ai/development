@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireAuthority, requirePermission, hasAuthority } = require('../middleware/auth');
+const { requireAuth, requireAuthority, requirePermission, hasAuthority, hasPermission } = require('../middleware/auth');
 const { all, get, run } = require('../db');
 const timeCapture = require('../services/timeCaptureConfig');
 const db = { get: get, run: run };
@@ -12,9 +12,19 @@ router.get('/', requireAuth, async function(req, res) {
   res.json(config);
 });
 
-router.post('/', requireAuth, requireAuthority('system'), async function(req, res) {
-  var allowed = ['agency_name','agency_short_name','jurisdiction_type','state','contact_email','contact_phone','auth_mode','mfa_mode','session_timeout','min_password_length','overdue_alert_days','escalation_days','ack_email','smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','new_request_alert_email','resend_api_key','resend_from'];
-  var body = req.body;
+// C11 (2026-08-30): the operational keys (notification timing, the requestor acknowledgement, the video
+// redaction default) are owned by the operations_config group via their hub rows; everything else here is
+// system-authority. av_redaction_mode was READ (routes/avRedaction.js) but never in this list — the v1
+// Configuration tab's Save silently dropped it.
+var OPERATIONAL = ['overdue_alert_days', 'escalation_days', 'ack_email', 'av_redaction_mode'];
+router.post('/', requireAuth, async function(req, res) {
+  var body = req.body || {};
+  var keys = Object.keys(body);
+  var onlyOperational = keys.length && keys.every(function (k) { return OPERATIONAL.indexOf(k) !== -1; });
+  if (!(hasAuthority(req.user, 'system') || (onlyOperational && hasPermission(req.user, 'operations_config')))) {
+    return res.status(403).json({ error: onlyOperational ? 'Changing these settings needs the operations_config permission group.' : 'This action needs the "system" authority, which none of your user types carries.', code: onlyOperational ? 'PERMISSION_REQUIRED' : 'AUTHORITY_REQUIRED' });
+  }
+  var allowed = ['av_redaction_mode','agency_name','agency_short_name','jurisdiction_type','state','contact_email','contact_phone','auth_mode','mfa_mode','session_timeout','min_password_length','overdue_alert_days','escalation_days','ack_email','smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','new_request_alert_email','resend_api_key','resend_from'];
   for (var key of allowed) {
     if (body[key] !== undefined) {
       var existing = await get('SELECT key FROM system_config WHERE key = ?', [key]);

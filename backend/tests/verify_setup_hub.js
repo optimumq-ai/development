@@ -1,7 +1,7 @@
 'use strict';
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (H1).
 //
-//   A. The catalog: six lanes, thirty-three items, every item has a name / lane / deps / owner group; every
+//   A. The catalog: six lanes, thirty-four items, every item has a name / lane / deps / owner group; every
 //      dependency points at a real item; lane owners are permission GROUPS (the hub gates on the user-type
 //      model and nothing else — WORKING_setup_inventory "no stopgap").
 //   B. Evidence is COUNTED: a change in what is configured changes the row (a team with no serving department
@@ -46,8 +46,8 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
 
   console.log('\n=== A. THE CATALOG ===');
   ok('A1 six lanes in the decided order and names (System Features and Options added 2026-08-29)', HUB.LANES.length === 6 && /^Compliance and Policies Setup$/.test(HUB.LANES[0].title) && /Fees, Estimates and Routing$/.test(HUB.LANES[1].title) && /Redaction and Release$/.test(HUB.LANES[2].title) && /^Organization Departments, Teams, and Staff Setup$/.test(HUB.LANES[3].title) && HUB.LANES[4].title === 'Technical Setup' && HUB.LANES[5].title === 'System Features and Options');
-  ok('A2 thirty-three items (10 + 5 + 5 + 4 + 7 + 1 + the agency card on top; fee_rates and fee_test retired into Fee rules 2026-08-30)', HUB.ITEMS.length === 33 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
-    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 5, 5, 4, 7, 1]));
+  ok('A2 thirty-four items (10 + 2 + 6 + 4 + 6 + 5 + the agency card on top; C11 2026-08-30: the Configuration tabs became /setup screens, four rows moved to System Features and Options, av_redaction added)', HUB.ITEMS.length === 34 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
+    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 2, 6, 4, 6, 5]));
   var badDeps = []; HUB.ITEMS.forEach(function (i) { (i.deps || []).forEach(function (d) { if (!HUB.BY_KEY[d]) badDeps.push(i.key + '->' + d); }); });
   ok('A3 every dependency points at a real item', badDeps.length === 0, badDeps.join(','));
   ok('A4 every lane owner is a permission GROUP from the user-type model (no role names anywhere)', HUB.LANES.every(function (l) { return l.groups.every(function (g) { return ut.PERMISSION_GROUPS.indexOf(g) !== -1; }); }) &&
@@ -62,7 +62,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var states = ['ready', 'in_progress', 'not_started', 'waiting', 'needs_attention'];
   var allItems = []; page.lanes.forEach(function (l) { allItems = allItems.concat(l.items); }); allItems = allItems.concat(page.top);
   ok('B2 every row carries a known state and a non-empty evidence line', allItems.every(function (x) { return states.indexOf(x.state) !== -1 && typeof x.evidence === 'string' && x.evidence.length > 0; }));
-  ok('B3 header counts add up to 33', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 33);
+  ok('B3 header counts add up to 34', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 34);
   var teamsBefore = find(page, 'teams');
   var dept = 'dept-' + TAG;
   await db.run("INSERT INTO departments (id, name, code, kind, is_open_records, active) VALUES (?,?,?,'department',0,1)", [dept, 'HUB Unserved ' + TAG, 'H' + TAG.slice(-5)]);
@@ -94,7 +94,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   ok('C2 the go-live row sits in lane 1, is never markable, and says who flips it', page.lanes[0].items.some(function (x) { return x.key === 'go_live'; }) && gl.goLive === true && (gl.state === 'ready' || /ORO System Administrator or ORO Director|ready to flip|enforcement/.test(gl.evidence)), gl && (gl.state + ': ' + gl.evidence));
 
   console.log('\n=== D. MARK IT DONE (Option A) ===');
-  var item = 'time_budgets';   // lane 2a: operations_config
+  var item = 'time_budgets';   // System Features and Options: operations_config
   var m1 = await callAs(U.sup, 'POST', '/setup-hub/' + item + '/done');
   var m2 = await callAs(U.staff, 'POST', '/setup-hub/' + item + '/done');
   var m3 = await callAs(U.none, 'POST', '/setup-hub/' + item + '/done');
@@ -124,6 +124,19 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   HUB.READERS.agent_rules = saved;
   var ar = null; broken.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'agent_rules') ar = x; }); });
   ok('E1 a reader that throws yields an honest not_started line; the page still builds', ar && ar.state === 'not_started' && /could not read: boom/.test(ar.evidence) && broken.lanes.length === 6);
+
+  console.log('\n=== G. POST /config GATING (C11: operational keys are operations_config; the rest system) ===');
+  var ack0 = await db.get("SELECT value FROM system_config WHERE key = 'ack_email'");
+  var g1 = await callAs(U.sup, 'POST', '/config', { ack_email: 'off' });
+  var g2 = await callAs(U.sup, 'POST', '/config', { auth_mode: 'local' });
+  var g3 = await callAs(U.staff, 'POST', '/config', { ack_email: 'on' });
+  var g4 = await callAs(U.sa, 'POST', '/config', { av_redaction_mode: 'internal' });
+  var ack1 = await db.get("SELECT value FROM system_config WHERE key = 'ack_email'");
+  ok('G1 operations_config may write an operational key (ack_email) and it lands', g1.status === 200 && ack1 && ack1.value === 'off', g1.status);
+  ok('G2 operations_config is refused on a system key (auth_mode), by name', g2.status === 403 && g2.body && g2.body.code === 'AUTHORITY_REQUIRED', g2.status);
+  ok('G3 staff without the group is refused on an operational key', g3.status === 403 && g3.body && g3.body.code === 'PERMISSION_REQUIRED', g3.status);
+  ok('G4 system authority writes any key, incl. av_redaction_mode (now in the allow-list)', g4.status === 200, g4.status);
+  if (ack0) await db.run("UPDATE system_config SET value = ? WHERE key = 'ack_email'", [ack0.value]); else await db.run("DELETE FROM system_config WHERE key = 'ack_email'");
 
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
