@@ -384,6 +384,48 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.legal, 'DELETE', '/setup-hub/redaction_rules/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'redaction_rules'");
   if (rrMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rrMark.item_key, rrMark.marked_by, rrMark.marked_by_name, rrMark.marked_at, rrMark.content_hash || null, rrMark.notified_hash || null]);
 
+  console.log('\n=== P. UPDATE CONFIGURATION (form) — an unreviewed proposal is a required item; a shipped reminder default is not a decision ===');
+  var UC_KEYS = ['freshness_scan_days', 'freshness_reminder_to'];
+  var ucSave = {}; for (var uckey of UC_KEYS) { var ucrow = await db.get('SELECT value FROM system_config WHERE key = ?', [uckey]); ucSave[uckey] = ucrow ? ucrow.value : null; await db.run('DELETE FROM system_config WHERE key = ?', [uckey]); }
+  // the fixture may ship pending proposals — park them so this section starts from an empty queue, restored below
+  var ucParked = jid ? (await db.all("SELECT id FROM config_proposals WHERE jurisdiction_id = ? AND status = 'pending'", [jid])).map(function (r0) { return r0.id; }) : [];
+  for (var ucp of ucParked) await db.run("UPDATE config_proposals SET status = 'dismissed' WHERE id = ?", [ucp]);
+  var ucMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'law_updates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/law_updates/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'law_updates'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'law_updates'");
+  var ucA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+  ok('P1 nothing saved and no proposals → RED naming both reminder settings', ucA.approval === 'red' && /how often to send the reminder/.test(ucA.approvalWhy || '') && /who receives the reminder/.test(ucA.approvalWhy || ''), ucA.approval + ': ' + ucA.approvalWhy);
+  var ucRef = await callAs(U.dir, 'POST', '/setup-hub/law_updates/done');
+  ok('P2 approval is refused while red (422 REQUIRED_MISSING)', ucRef.status === 422 && ucRef.body && ucRef.body.code === 'REQUIRED_MISSING', ucRef.status + ' ' + JSON.stringify(ucRef.body && ucRef.body.code));
+  var ucn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'law_updates'")).n;
+  var ucSet = await callAs(U.dir, 'POST', '/config-freshness/settings', { cadenceDays: 182, recipient: 'updates@hub.test' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var ucB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+  var ucn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'law_updates'")).n;
+  ok('P3 both reminder settings saved → YELLOW; the completing save submits the screen and tells the owners once', ucSet.status === 200 && ucB.approval === 'yellow' && ucB.ready && ucn1 > ucn0, ucSet.status + ' ' + ucB.approval + ': ' + ucB.approvalWhy + ' · ' + ucn0 + '→' + ucn1);
+  var ucApv = await callAs(U.dir, 'POST', '/setup-hub/law_updates/done');
+  var ucC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+  ok('P4 approval → GREEN, and the evidence says the queue is empty', ucApv.status === 200 && ucC.approval === 'green' && /no proposed changes waiting/.test(ucC.evidence || ''), ucApv.status + ' ' + ucC.approval + ': ' + ucC.evidence);
+  var ucProp = 'cp-uc-' + TAG, ucPlanted = false;
+  if (jid && cols.indexOf('jurisdiction_id') !== -1 && cols.indexOf('status') !== -1) {
+    try {
+      var ucNeed = cols.filter(function (c) { return ['id', 'jurisdiction_id', 'status', 'domain', 'section', 'proposed_config', 'proposal_json', 'created_at', 'proposed_by', 'citation', 'note', 'source'].indexOf(c) !== -1; });
+      var ucVals = ucNeed.map(function (c) { return c === 'id' ? ucProp : c === 'jurisdiction_id' ? jid : c === 'status' ? 'pending' : c === 'created_at' ? new Date().toISOString().slice(0, 19).replace('T', ' ') : (c === 'proposed_config' || c === 'proposal_json') ? '{}' : 'hub-' + TAG; });
+      await db.run('INSERT INTO config_proposals (' + ucNeed.join(',') + ') VALUES (' + ucNeed.map(function () { return '?'; }).join(',') + ')', ucVals);
+      ucPlanted = true;
+    } catch (e) { console.log('        (could not plant a proposal: ' + e.message + ')'); }
+  }
+  if (ucPlanted) {
+    var ucD = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+    ok('P5 a proposal nobody has reviewed re-opens the approved row: RED, naming the change to review', ucD.approval === 'red' && /Review the proposed change/.test(ucD.approvalWhy || '') && ucD.state === 'needs_attention', ucD.approval + '/' + ucD.state + ': ' + ucD.approvalWhy);
+    await db.run('DELETE FROM config_proposals WHERE id = ?', [ucProp]);
+  } else ok('P5 (skipped: no jurisdiction or proposals table shape unknown)', true);
+  for (var ucp2 of ucParked) await db.run("UPDATE config_proposals SET status = 'pending' WHERE id = ?", [ucp2]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'law_updates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/law_updates/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'law_updates'");
+  for (var uck2 in ucSave) { if (ucSave[uck2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [uck2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [uck2, ucSave[uck2]]); }
+  if (ucMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [ucMark.item_key, ucMark.marked_by, ucMark.marked_by_name, ucMark.marked_at, ucMark.content_hash || null, ucMark.notified_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

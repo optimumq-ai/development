@@ -286,9 +286,22 @@ const READERS = {
     return ev(done ? 'in_progress' : 'not_started', done + ' of ' + total + ' answered');
   },
   law_updates: async function (ctx) {
-    var pending = ctx.jid ? await count("SELECT COUNT(*) n FROM config_proposals WHERE jurisdiction_id = ? AND status = 'pending'", [ctx.jid]) : 0;
-    if (pending) return ev('needs_attention', pending + ' proposed change' + (pending > 1 ? 's' : '') + ' waiting for review');
-    return ev('ready', 'no proposed changes waiting');
+    // FORM (approval model, §3h). The Update Configuration screen does two things, and both are required:
+    //   · it is the REVIEW QUEUE for proposed changes — "no proposals waiting" is the completed state, so an
+    //     unreviewed proposal is a missing required item (approve it or discard it; it is the one thing this
+    //     screen exists to clear, and a change nobody has looked at must not read as approved setup);
+    //   · it saves the REMINDER settings (how often, and to whom) — a shipped default (182 days, the agency
+    //     contact address) is not a decision, the Authentication precedent.
+    var rows = ctx.jid ? await all("SELECT id, domain, summary FROM config_proposals WHERE jurisdiction_id = ? AND status = 'pending' ORDER BY created_at", [ctx.jid]) : [];
+    var days = await cfg('freshness_scan_days'), to = await cfg('freshness_reminder_to');
+    var missingU = rows.map(function (p) { return 'Review the proposed change' + (p.domain ? ' (' + p.domain + ')' : '') + ': ' + String(p.summary || p.id).slice(0, 60); });
+    if (!days) missingU.push('Reminder settings: how often to send the reminder');
+    if (!to) missingU.push('Reminder settings: who receives the reminder');
+    var extraU = { required: { missing: missingU, total: rows.length + 2 },
+      digest: digestOf([days || null, to || null, rows.map(function (p) { return p.id; })]) };
+    if (rows.length) return ev('needs_attention', rows.length + ' proposed change' + (rows.length > 1 ? 's' : '') + ' waiting for review', extraU);
+    var reminder = (days ? 'reminder every ' + days + ' days' : 'reminder frequency not saved') + (to ? ' to ' + to : ' · no recipient saved');
+    return ev(missingU.length ? 'in_progress' : 'ready', 'no proposed changes waiting · ' + reminder, extraU);
   },
   go_live: async function (ctx) {
     var GL = require('./goLive');

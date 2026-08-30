@@ -118,6 +118,7 @@ The three organization rows share the Organization screen (`/org?tab=…`); each
 | Fee rules (`fee_law`) | tabs (decisions) | every deferral decided · both waiver choices · the clock's six when on · an APPROVED schedule version — exactly what the screen offers; the fees/fee_waiver/payment section knobs the screen does not surface stay with go-live (audit §3-E) | `routes/feeLaw.js` hook |
 | Clarification · Exemptions · Eligibility · Intake · Deadlines (5 rows) | decisions | every unconfirmed local policy setting of the row's section (`sectionRequired`) — the same rule go-live counts | `routes/requestRules.js` hook + `policy-settings/confirm` (domain → item) |
 | Redaction rules library (`redaction_rules`) | list | ≥1 rule approved AND in effect; health: rules waiting for a supervisor's approval · rules approved but switched off; "Ready for approval" and the approval are `legal_rules` acts (the row is a legal section) | `routes/redactionRules.js` finish hook (+ `policy-settings/confirm` domain `redaction`, already mapped) |
+| Update Configuration (`law_updates`) | form | the review queue is EMPTY (every proposed change approved or discarded) + both reminder settings SAVED (how often, who receives it) | `routes/configFreshness.js` finish hook |
 
 `routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
 
@@ -127,6 +128,18 @@ that is both approved and in effect counts toward the list; everything else is t
 reads before approving ("4 waiting for approval · 1 approved but not in effect"). The `redaction` PROFILE
 SECTION is still attested on Jurisdiction Configuration — this row carries no `foldSections`, because the
 redaction rules-engine content is its own planned slice (I1's closing note); folding it belongs there.
+
+**Update Configuration — why a review queue is a FORM (2026-08-31).** The screen holds a QUEUE (proposed
+changes waiting to be approved or discarded) and a small settings form (reminder cadence + recipient). It is
+not a list screen: nobody "declares the queue complete", and an empty queue is not an empty list — it is the
+finished state. So **"no proposals waiting" is a required item**: each pending proposal is a named missing
+item ("Review the proposed change (fee): …"), and a proposal that arrives after approval re-opens the row to
+RED (red wins over changed-since-approval, and the counted state stays `needs_attention` — the row is asking
+for work, not for a signature). The two reminder settings are required as SAVED decisions, the Authentication
+precedent: the 182-day cadence and the fall-back-to-`contact_email` recipient are shipped defaults, and the
+status payload now carries `saved: {cadenceDays, recipient}` so the screen can outline an unsaved one in red.
+OPEN (see `WORKING_setup_conversion_questions.md` Q1): a proposal created by the nightly freshness scan turns
+the row red with NO notification — only screen-driven changes report through `afterChange`.
 
 ## 3g′. FORM AND TABBED SCREENS SUBMIT THEMSELVES (Kevin 2026-08-30, BUILT)
 

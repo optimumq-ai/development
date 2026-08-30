@@ -168,6 +168,10 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   var fFails = [], applied = 0, dismissed = 0;
   for (var p of list) { var r6 = await callAs(DIR, 'POST', '/config-freshness/proposals/' + p.id + '/apply', { attested: true }); if (r6.status < 300) applied++; else { var r6b = await callAs(DIR, 'POST', '/config-freshness/proposals/' + p.id + '/dismiss', {}); if (r6b.status < 300) { dismissed++; finding('proposal ' + p.id + ' (' + (p.domain || p.area || '') + ') could not be APPLIED — dismissed instead: ' + err(r6)); } else fFails.push(p.id + ': ' + err(r6)); } }
   ok('F1 pending proposals cleared (' + list.length + ' pending → ' + applied + ' applied, ' + dismissed + ' dismissed)', fFails.length === 0, fFails.join(' | '));
+  // Update Configuration is a FORM row (SPEC §3g): the empty queue above plus the two reminder settings SAVED
+  // — the shipped 182 days and the fallback address are defaults, not the city's decision.
+  var frs = await callAs(DIR, 'POST', '/config-freshness/settings', { cadenceDays: 182, recipient: 'records@golden.test' });
+  ok('F2 the reminder settings are recorded (Update Configuration)', frs.status === 200, err(frs));
 
   console.log('\n=== G. ATTEST — every hub row, then every section with no fold ===');
   var hub = await callAs(DIR, 'GET', '/setup-hub');

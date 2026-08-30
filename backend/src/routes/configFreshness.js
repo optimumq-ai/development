@@ -4,6 +4,15 @@ const router = express.Router();
 const { requireAuth, requirePermission, requireAnyPermission, hasPermission } = require('../middleware/auth');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
+// UPDATE CONFIGURATION is a FORM screen on the approval model (SPEC_setup_hub §3g): reviewing or discarding
+// a proposal, and saving the reminder settings, are both changes on the `law_updates` row. Router-level
+// finish hook, after the response — best effort, never blocking.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { require('../services/setupHub').afterChange('law_updates', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const F = require('../services/configFreshness');
 const CE = require('../services/configExtractors');
 const EC = require('../services/effectiveConfig');
@@ -36,7 +45,12 @@ router.get('/status', requireAuth, async function (req, res) {
     var toRow = await get("SELECT value FROM system_config WHERE key = 'freshness_reminder_to'");
     var contact = await get("SELECT value FROM system_config WHERE key = 'contact_email'");
     var ax = await get("SELECT value FROM system_config WHERE key = 'freshness_auto_extract'");
-    res.json({ jurisdiction: jid, sources: sources || [], pending: pending, lastRun: lastRun || null, cadenceDays: await F.cadenceDays(), recipient: (toRow && toRow.value) || (contact && contact.value) || 'admin@optimumq.ai', autoExtract: !!(ax && (ax.value === '1' || ax.value === 'true')) });
+    // `saved` says which reminder settings the CITY recorded — the values above fall back to shipped
+    // defaults, and a shipped default is not a decision (approval model, §3g). The screen outlines an
+    // unsaved setting in red; the hub row counts it as a missing required item.
+    var scanRow = await get("SELECT value FROM system_config WHERE key = 'freshness_scan_days'");
+    res.json({ jurisdiction: jid, sources: sources || [], pending: pending, lastRun: lastRun || null, cadenceDays: await F.cadenceDays(), recipient: (toRow && toRow.value) || (contact && contact.value) || 'admin@optimumq.ai', autoExtract: !!(ax && (ax.value === '1' || ax.value === 'true')),
+      saved: { cadenceDays: !!(scanRow && scanRow.value), recipient: !!(toRow && toRow.value) } });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
