@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+// Portal Agent Rules is a LIST screen (approval model, SPEC_setup_hub §3e): adding, editing, switching off
+// or deleting a rule is a change on the `agent_rules` row. Router-level finish hook — best effort.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { require('../services/setupHub').afterChange('agent_rules', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { get, all, run } = require('../db');
 const { requireAuth, requirePermission } = require('../middleware/auth');
 // v3 (S2): portal agent rules are Lane 4 — the system_admin group (§8 row 5). Reads stay requireAuth.

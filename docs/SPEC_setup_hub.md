@@ -127,6 +127,7 @@ The three taxonomy rows share the Taxonomy screen (`/setup/taxonomy?tab=calibrat
 | Process Map (`process_map`) | acknowledgement (§3j) | nothing — the required set is empty; the lane owner's approval IS the act | none (no write path; the digest is the shipped model) |
 | How many days a task should take (`time_budgets`) | form | every task type's budget REVIEWED by the city (`source = 'supervisor'`) — the catalog seeds a figure into every row, so "has a number" proves nothing | `routes/config.js` PUT `/config/time-budgets` |
 | Task Processing Time Capture (`time_tracking`) | form | ONE item — the per-screen blob has been saved. Off on every screen is a valid posture (states differ on which labor is chargeable); shipped silence is not | `routes/config.js` PUT `/config/time-capture` |
+| Portal Agent Rules (`agent_rules`) | list | ≥1 rule IN FORCE; health: rules written but switched off. Declared and approved by `system_admin` (the row's own gate, matching its API) | `routes/agentRules.js` finish hook |
 
 `routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
 

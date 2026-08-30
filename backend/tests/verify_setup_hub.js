@@ -571,6 +571,34 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.dir, 'DELETE', '/setup-hub/time_tracking/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_tracking'");
   if (tcMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [tcMark.item_key, tcMark.marked_by, tcMark.marked_by_name, tcMark.marked_at, tcMark.content_hash || null, tcMark.notified_hash || null]);
 
+  console.log('\n=== U. PORTAL AGENT RULES (list) — a system_admin row in the features lane ===');
+  var arMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'agent_rules'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/agent_rules/done'); await callAs(U.sa, 'DELETE', '/setup-hub/agent_rules/ready');
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'agent_rules'");
+  var an0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agent_rules'")).n;
+  var arNew = await callAs(U.sa, 'POST', '/agent-rules', { rule_text: 'HUB harness rule ' + TAG });
+  var arId = arNew.body && (arNew.body.id || (arNew.body.rule && arNew.body.rule.id));
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var uA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'agent_rules');
+  var an1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agent_rules'")).n;
+  ok('U1 a LIST row that stays quiet while it grows — a rule added before anyone declares it complete tells nobody', arNew.status === 200 && !!arId && uA.approvalModel === 'list' && uA.approval === 'yellow' && /rule/.test(uA.approvalWhy || '') && an1 === an0, arNew.status + ' ' + uA.approvalModel + '/' + uA.approval + ': ' + uA.approvalWhy + ' · ' + an0 + '→' + an1);
+  var arBad = await callAs(U.dir, 'POST', '/setup-hub/agent_rules/ready');
+  var arRdy = await callAs(U.sa, 'POST', '/setup-hub/agent_rules/ready');
+  var arApv = await callAs(U.sa, 'POST', '/setup-hub/agent_rules/done');
+  var uB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'agent_rules');
+  var an2 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agent_rules'")).n;
+  ok('U2 the row is system_admin\'s (its API is): the SysAdmin declares and approves → GREEN; a Director gets 403', arBad.status === 403 && arRdy.status === 200 && arApv.status === 200 && uB.approval === 'green' && an2 > an1, arBad.status + '/' + arRdy.status + '/' + arApv.status + ' ' + uB.approval + ' · ' + an1 + '→' + an2);
+  var ac0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agent_rules'")).n;
+  var arOff = await callAs(U.sa, 'PATCH', '/agent-rules/' + arId, { enabled: 0 });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var uC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'agent_rules');
+  var ac1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agent_rules'")).n;
+  ok('U3 switching a rule off after approval → YELLOW "changed since approval" + one notification', arOff.status === 200 && uC.approval === 'yellow' && /changed since approval/.test(uC.approvalWhy || '') && ac1 > ac0, arOff.status + ' ' + uC.approval + ': ' + uC.approvalWhy + ' · ' + ac0 + '→' + ac1);
+  if (arId) await db.run('DELETE FROM agent_rules WHERE id = ?', [arId]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'agent_rules'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/agent_rules/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'agent_rules'");
+  if (arMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [arMark.item_key, arMark.marked_by, arMark.marked_by_name, arMark.marked_at, arMark.content_hash || null, arMark.notified_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

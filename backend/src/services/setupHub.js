@@ -528,8 +528,15 @@ const READERS = {
     return ev('ready', mode + (mfa ? ' + MFA ' + mfa : '') + (to ? ' · ' + to + ' session timeout' : '') + (pl ? ' · ' + pl + '+ character passwords' : ''), extraA);
   },
   agent_rules: async function () {
-    var n = await count('SELECT COUNT(*) n FROM agent_rules WHERE enabled = 1');
-    return n ? ev('ready', n + ' rule' + (n > 1 ? 's' : '') + ' in force') : ev('not_started', 'running on the shipped defaults');
+    // LIST MODEL (§3e, 2026-08-31): rules are written one at a time, in plain English, over weeks. The count
+    // is the rules IN FORCE; a rule written and switched off is health. The assistant's core instructions
+    // work with none of these, so an empty library is red only in the sense of "nobody has looked yet".
+    var arows = await all('SELECT id, rule_text, enabled, sort_order FROM agent_rules ORDER BY sort_order, id');
+    var on = arows.filter(function (a) { return Number(a.enabled) === 1; }).length;
+    var off = arows.length - on;
+    var xar = { list: { count: on, noun: 'rule', health: off ? off + ' rule' + (off > 1 ? 's' : '') + ' written but switched off' : '' },
+      digest: digestOf(arows.map(function (a) { return [a.id, a.rule_text, a.enabled, a.sort_order]; })) };
+    return on ? ev('ready', on + ' rule' + (on > 1 ? 's' : '') + ' in force' + (off ? ' · ' + off + ' switched off' : ''), xar) : ev('not_started', 'running on the shipped defaults', xar);
   },
   settlement: async function () {
     var active = await get("SELECT config_json FROM fee_profiles WHERE context = 'FR' AND status = 'active' ORDER BY version DESC LIMIT 1");
