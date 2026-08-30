@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../lib/api';
 import SetupScreen from '../components/setup/SetupScreen';
 
 // UPDATE CONFIGURATION — the hub's `law_updates` row (C16, Kevin 2026-08-30: the admin Update Configuration
-// tab becomes this dedicated screen at /setup/update-configuration; the row takes the tab's name). Body unchanged.
+// tab becomes this dedicated screen at /setup/update-configuration; the row takes the tab's name).
+// APPROVAL MODEL (§3g, 2026-08-31): a FORM screen. Two things are required — the review queue is EMPTY
+// (every proposed change approved or discarded) and the two reminder settings are SAVED (the figures below
+// fall back to shipped defaults, and a shipped default is not a decision). An unsaved setting is outlined
+// in red here; the strip's pill and line come from the hub row.
 
 var DOMAINS = [
   { key: 'fee', label: 'Fee & cost schedule' },
@@ -30,6 +34,7 @@ export default function RuleUpdatesPage() {
   const [cadenceInput, setCadenceInput] = useState(182);
   const [recipientInput, setRecipientInput] = useState('');
   const [scheduled, setScheduled] = useState([]);
+  const stripRef = useRef(null);   // SetupScreen's reload — every change here moves the row's colour
 
   useEffect(function () { load(); }, []);
   async function load() {
@@ -39,6 +44,7 @@ export default function RuleUpdatesPage() {
       var p = await api.get('/config-freshness/proposals?status=pending'); setProposals(p.data.proposals || []);
       var sc = await api.get('/config-freshness/scheduled'); setScheduled(sc.data.scheduled || []);
     } catch (e) {}
+    if (stripRef.current) { try { stripRef.current(); } catch (e) {} }
   }
   async function runReminder() {
     setBusy(true); setMsg('');
@@ -74,7 +80,10 @@ export default function RuleUpdatesPage() {
   return (
     <SetupScreen hubKey="law_updates" laneLabel="Compliance and Policies Setup" title="Update Configuration" maxWidth="1000px"
       intro="When a change to the laws, codes, ordinances, or fee rules that affect records requests is adopted, upload an approved copy of the change here. Optimum Q drafts the matching configuration update for you to review and approve. Keeping configuration current with applicable law is your office&rsquo;s responsibility.">
-    {function () { if (!status) return <div style={{ color: '#9CA3AF' }}>Loading…</div>; return (
+    {function (s) { stripRef.current = s.reload; if (!status) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
+      var savedC = !!(status.saved && status.saved.cadenceDays), savedR = !!(status.saved && status.saved.recipient);
+      var reqBorder = function (okSaved) { return '1px solid ' + (okSaved ? '#E5E7EB' : '#DC2626'); };
+      return (
     <div>
 
       {msg ? <div style={{ background: '#EBF3FB', border: '1px solid #BFD9F2', color: navy, borderRadius: '8px', padding: '10px 14px', fontSize: '13px', marginBottom: '16px' }}>{msg}</div> : null}
@@ -139,9 +148,10 @@ export default function RuleUpdatesPage() {
 
       <div style={card}>
         <div style={{ fontSize: '15px', fontWeight: 700, color: '#111', marginBottom: '12px' }}>Reminder settings</div>
+        {(!savedC || !savedR) ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '10px' }}>Required — the settings outlined in red show the shipped default. Choose each one and save to record the city's decision.</div> : null}
         <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div><label style={lbl}>Send reminder every (days)</label><input type="number" min="1" value={cadenceInput} onChange={function (e) { setCadenceInput(e.target.value); }} style={{ display: 'block', marginTop: '4px', width: '110px', padding: '7px 10px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px' }} /></div>
-          <div style={{ flex: 1, minWidth: '220px' }}><label style={lbl}>Reminder recipient</label><input type="email" value={recipientInput} onChange={function (e) { setRecipientInput(e.target.value); }} style={{ display: 'block', marginTop: '4px', width: '100%', boxSizing: 'border-box', padding: '7px 10px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px' }} /></div>
+          <div><label style={lbl}>Send reminder every (days)</label><input type="number" min="1" value={cadenceInput} onChange={function (e) { setCadenceInput(e.target.value); }} style={{ display: 'block', marginTop: '4px', width: '110px', padding: '7px 10px', borderRadius: '8px', border: reqBorder(savedC), fontSize: '13px' }} /></div>
+          <div style={{ flex: 1, minWidth: '220px' }}><label style={lbl}>Reminder recipient</label><input type="email" value={recipientInput} onChange={function (e) { setRecipientInput(e.target.value); }} style={{ display: 'block', marginTop: '4px', width: '100%', boxSizing: 'border-box', padding: '7px 10px', borderRadius: '8px', border: reqBorder(savedR), fontSize: '13px' }} /></div>
           <button onClick={saveSettings} disabled={busy} style={btn}>Save</button>
           <button onClick={runReminder} disabled={busy} style={btnOutline}>Send reminder now</button>
         </div>

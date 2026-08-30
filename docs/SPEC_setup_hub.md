@@ -117,8 +117,50 @@ Government adds region, Titan model, Bedrock key + secret). `verify_setup_hub` J
 The three organization rows share the Organization screen (`/org?tab=…`); each tab wears the strip of its own row.
 | Fee rules (`fee_law`) | tabs (decisions) | every deferral decided · both waiver choices · the clock's six when on · an APPROVED schedule version — exactly what the screen offers; the fees/fee_waiver/payment section knobs the screen does not surface stay with go-live (audit §3-E) | `routes/feeLaw.js` hook |
 | Clarification · Exemptions · Eligibility · Intake · Deadlines (5 rows) | decisions | every unconfirmed local policy setting of the row's section (`sectionRequired`) — the same rule go-live counts | `routes/requestRules.js` hook + `policy-settings/confirm` (domain → item) |
+| Redaction rules library (`redaction_rules`) | list | ≥1 rule approved AND in effect; health: rules waiting for a supervisor's approval · rules approved but switched off; "Ready for approval" and the approval are `legal_rules` acts (the row is a legal section) | `routes/redactionRules.js` finish hook (+ `policy-settings/confirm` domain `redaction`, already mapped) |
+| Update Configuration (`law_updates`) | form | the review queue is EMPTY (every proposed change approved or discarded) + both reminder settings SAVED (how often, who receives it) | `routes/configFreshness.js` finish hook |
+| Taxonomy (`taxonomy`) | list | ≥1 active record type; health: discovered drafts to review | `routes/taxonomy.js` finish hook (reports all three rows) |
+| How much work each record type takes (`calibration`) | list | ≥1 calibrated record type; health: how many are still to calibrate | same hook + `routes/estimateProfiles.js` finish hook |
+| Which department owns which records (`record_owners`) | list | ≥1 ownership assignment; health: record types with no owner | `routes/taxonomy.js` finish hook |
+The three taxonomy rows share the Taxonomy screen (`/setup/taxonomy?tab=calibration|owners`); the body is one page (the content really is shared) and the `?tab=` chooses which row the strip signs off.
+| Workflow Rules (`routing_rules`) | list | ≥1 ENABLED routing rule; health: rules written but switched off | `routes/workflow.js` finish hook |
+| Process Map (`process_map`) | acknowledgement (§3j) | nothing — the required set is empty; the lane owner's approval IS the act | none (no write path; the digest is the shipped model) |
+| How many days a task should take (`time_budgets`) | form | every task type's budget REVIEWED by the city (`source = 'supervisor'`) — the catalog seeds a figure into every row, so "has a number" proves nothing | `routes/config.js` PUT `/config/time-budgets` |
+| Task Processing Time Capture (`time_tracking`) | form | ONE item — the per-screen blob has been saved. Off on every screen is a valid posture (states differ on which labor is chargeable); shipped silence is not | `routes/config.js` PUT `/config/time-capture` |
+| Portal Agent Rules (`agent_rules`) | list | ≥1 rule IN FORCE; health: rules written but switched off. Declared and approved by `system_admin` (the row's own gate, matching its API) | `routes/agentRules.js` finish hook |
+| Video Redaction Options (`av_redaction`) | form | the mode SAVED — the screen shows "internal" with nothing stored, which is the shipped default; choosing internal deliberately is a decision and saving it says so | `routes/config.js` POST (already mapped) |
+| Redaction layout templates (`layout_templates`) | list | ≥1 template; health: record piles the variant scan flagged that still have no template. The Mass Redaction screen (`/mass-redaction`) now wears the strip — it is the row's only approval home | `routes/redactionTemplates.js` finish hook, LIBRARY CRUD ONLY (`POST /`, `PATCH /:id`, `DELETE /:id`) — applying, staging, matching and batch-running a template is work, not setup |
 
-`routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
+`routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i), `av_redaction`, `time_budgets` (PUT `/config/time-budgets`) and `time_tracking` (PUT `/config/time-capture`) — all converted.
+
+**Redaction rules library — design notes (2026-08-31).** A rule has its OWN two-step life (`approval_status`:
+a supervisor approves the rule · `is_active`: it is in effect) and that is NOT the hub's approval. Only a rule
+that is both approved and in effect counts toward the list; everything else is the health line the lane owner
+reads before approving ("4 waiting for approval · 1 approved but not in effect"). The `redaction` PROFILE
+SECTION is still attested on Jurisdiction Configuration — this row carries no `foldSections`, because the
+redaction rules-engine content is its own planned slice (I1's closing note); folding it belongs there.
+
+**Update Configuration — why a review queue is a FORM (2026-08-31).** The screen holds a QUEUE (proposed
+changes waiting to be approved or discarded) and a small settings form (reminder cadence + recipient). It is
+not a list screen: nobody "declares the queue complete", and an empty queue is not an empty list — it is the
+finished state. So **"no proposals waiting" is a required item**: each pending proposal is a named missing
+item ("Review the proposed change (fee): …"), and a proposal that arrives after approval re-opens the row to
+RED (red wins over changed-since-approval, and the counted state stays `needs_attention` — the row is asking
+for work, not for a signature). The two reminder settings are required as SAVED decisions, the Authentication
+precedent: the 182-day cadence and the fall-back-to-`contact_email` recipient are shipped defaults, and the
+status payload now carries `saved: {cadenceDays, recipient}` so the screen can outline an unsaved one in red.
+OPEN (see `WORKING_setup_conversion_questions.md` Q1): a proposal created by the nightly freshness scan turns
+the row red with NO notification — only screen-driven changes report through `afterChange`.
+
+**Taxonomy, calibration and record ownership — three rows, one shared body (2026-08-31).** Organization
+splits its three rows into three TABS because departments, teams and staff are three different lists. The
+Taxonomy screen's three rows are three different QUESTIONS about the SAME list of record types, so splitting
+the body would mean showing the record types three times. The screen therefore keeps one body and the
+`?tab=` picks which row the strip is signing off (a "Setting up" pill row switches it without leaving the
+page). Counts are what the row can honestly claim: calibration counts the types actually CALIBRATED (a city
+may stop before covering all of them — the rest is health, not a blocker), ownership counts the assignments
+made. `routes/taxonomy.js` reports all three (a deleted record type moves every one of them);
+`routes/estimateProfiles.js` reports `calibration`.
 
 ## 3g′. FORM AND TABBED SCREENS SUBMIT THEMSELVES (Kevin 2026-08-30, BUILT)
 
@@ -151,6 +193,18 @@ redirects) is everything the bell tells staff.
   `no_auto` (unconfirmed = send, the statutory-safe default). The `ack_email` system_config key is retired:
   dropped from `/config`'s allow-list and the hub's readers; nothing reads it.
 Harness: `verify_setup_hub` N1–N3; golden D5c; request-rules IN4b.
+
+## 3j. ACKNOWLEDGEMENT SCREENS — nothing to fill in, and reading it is the act (2026-08-31, BUILT on Process Map)
+A fourth, small pattern for a setup row whose screen sets NOTHING: it explains how the product behaves and
+the city's only act is to read it and say so. Before the approval model these rows were counted `ready` and
+therefore GREEN before anyone had looked at them — the one colour the model must never hand out for free.
+Mechanics: the reader reports an EMPTY required set (`required: {missing: [], total: 0}`) plus a digest of
+the material. Colours then fall out of the form pattern unchanged — **yellow** "complete — awaiting approval"
+from the first page build (there is nothing to fill in, so it is never red), **green** on the lane owner's
+approval, and **yellow again** if the material changes under it (a release that adds a decision point
+re-opens the row for a fresh read). There is no write path, so no `afterChange` hook and no notification —
+the guide's colour is the whole signal. Process Map is the first (and so far only) screen on this pattern;
+`verify_setup_hub` R4–R5. A screen that sets even one thing is NOT this pattern — it is a form.
 
 ## 3h. HOW TO CONVERT THE NEXT SCREEN — the recipe (2026-08-31)
 Pick the pattern by what the screen is, then do these steps; every converted screen so far follows them.

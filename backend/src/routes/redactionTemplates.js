@@ -4,6 +4,17 @@
 // consumed two ways: batch processing, and on-demand when a request pulls a not-yet-public record.
 const express = require('express');
 const router = express.Router();
+// The templates library is a LIST screen (approval model, SPEC_setup_hub §3e) behind the hub's
+// `layout_templates` row. Only the library's own CRUD reports a change — applying, staging, matching and
+// batch-running a template is WORK, not setup, and must not touch the row. Best effort, after the response.
+router.use(function (req, res, next) {
+  var p = req.path || '';
+  var crud = (req.method === 'POST' && p === '/') || ((req.method === 'PATCH' || req.method === 'DELETE') && /^\/[^/]+$/.test(p));
+  if (crud) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { require('../services/setupHub').afterChange('layout_templates', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth, requireRedactionWork, isElevated } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');

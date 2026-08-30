@@ -58,6 +58,8 @@ router.get('/time-capture', requireAuth, async function (req, res) {
 router.put('/time-capture', requireAuth, requirePermission('operations_config'), async function (req, res) {
   try {
     var next = await timeCapture.set(db, (req.body && req.body.config) || req.body || {});
+    // Approval model: saving the blob IS the decision on the `time_tracking` row (best effort, after the write).
+    try { await require('../services/setupHub').afterChange('time_tracking', req.user && (req.user.name || req.user.email)); } catch (eT) {}
     res.json({ config: next, uis: timeCapture.UIS, modes: timeCapture.MODES });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -94,6 +96,8 @@ router.put('/time-budgets', requireAuth, requirePermission('operations_config'),
     await run("UPDATE time_budgets SET budget_days = ?, source = 'supervisor', updated_by = ?, updated_at = datetime('now') WHERE record_type_id IS NULL AND task_type = ?",
       [d, (req.user && req.user.name) || req.user.sub, t]);
     var out = await get('SELECT task_type, budget_days, source, updated_by, updated_at FROM time_budgets WHERE record_type_id IS NULL AND task_type = ?', [t]);
+    // Approval model: a reviewed budget is a change on the `time_budgets` row (best effort, after the write).
+    try { await require('../services/setupHub').afterChange('time_budgets', req.user && (req.user.name || req.user.email)); } catch (eB) {}
     res.json({ ok: true, budget: out });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

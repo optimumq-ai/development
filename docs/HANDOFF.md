@@ -9799,3 +9799,37 @@ load) — run it after `verify_agency_setup` as the suite does; alone or after o
 2 clocks and fails. Not a bug. Ran in suite order: hub 64/64, agency 20/20, fee-law 43/43, request-rules 48/48.
 The Opus agent (worktree `.claude/worktrees/agent-*`, branch `worktree-agent-*`) has committed Redaction rules
 library on the list model; it continues down the handoff order; merge + build + harness runs happen here.
+## 2026-08-31 — the conversion finished: every setup screen is on the approval model (worktree, NOT suite-run)
+
+Ten more screens converted in ten commits on branch `worktree-agent-a5d22d1a013755919`, following §3h to the
+letter. **Redaction rules library** (list — approved AND in effect is the count, waiting-for-approval is
+health; legal_rules declares and approves) · **Update Configuration** (form — the review queue EMPTY plus the
+two reminder settings saved; a proposal arriving after approval re-opens the row RED) · **Taxonomy /
+calibration / record ownership** (three list rows sharing one body, the door's `?tab=` picks which row the
+strip signs off) · **Workflow Rules** (list — enabled rules count, switched-off ones are health) · **Process
+Map** (the new §3j ACKNOWLEDGEMENT pattern: an empty required set, so yellow until someone says they read it —
+it used to read green before anyone had opened it) · **Task time budgets** (form — a seeded figure is not a
+decision; the required set is the screen's own "provisional default, not yet reviewed") · **Task Processing
+Time Capture** (form — off everywhere is a decision only once it is SAVED) · **Portal Agent Rules** (list,
+system_admin) · **Video Redaction Options** (form — the shipped "internal" is not an answer) · **Redaction
+layout templates** (list; `/mass-redaction` now wears the strip — it was the row's only possible approval
+home, and without one Go Live could never turn green).
+
+New finish hooks: `redactionRules`, `configFreshness`, `taxonomy` (reports all three taxonomy rows),
+`estimateProfiles`, `workflow`, `agentRules`, `redactionTemplates` (library CRUD only — applying a template
+is work, not setup); `config.js` PUTs for time-budgets and time-capture.
+
+**Harness (NOT RUN — this worktree may not touch the test DB):** `verify_setup_hub` +26 cases, O1–O5 · P1–P5 ·
+Q1–Q6 · R1–R5 · S1–S4 · T1–T3 · U1–U3 · V1–V3 · W1–W3, each saving and restoring every row/config key it
+touches and deleting the notifications it creates. **D1–D3's gate test moved from `time_budgets` to
+`mass_schedule`** — time_budgets now has a required set and would 422. `verify_golden_setup` +B9 (every task
+budget reviewed), +B10 (time capture saved), +B11 (video mode saved), +F2 (reminder settings) — G2 marks every
+row, so each newly-required row has to be configurable there. **Someone with the test DB must run
+`cd backend && npm test`.**
+
+**Open for Kevin — `docs/WORKING_setup_conversion_questions.md`:** Q1 a proposal minted by the nightly
+freshness scan turns Update Configuration red with no notification · Q2 is the reminder cadence really a city
+decision · Q3 is "approved" meaningful on a reference screen (Process Map) · Q4 should the templates library
+get its own `/setup/redaction-templates` screen instead of putting setup chrome on Mass Redaction.
+
+**Skipped as instructed:** `city_choices` and every `noScreen: true` row.

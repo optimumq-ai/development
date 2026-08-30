@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 import MassJobsPanel from '../components/MassJobsPanel';
 import { useNavigate } from 'react-router-dom';
+import SetupScreen from '../components/setup/SetupScreen';
+
+// MASS REDACTION — also the door for the hub's `layout_templates` row "Redaction layout templates".
+// LIST MODEL (§3e, 2026-08-31): the templates library is a list written one template at a time, so the
+// screen wears the shared setup strip — the approver's only home for this row. The body is unchanged;
+// the page's own heading and intro moved into the strip's card.
 
 function scoreColor(pass) { return pass === true ? '#03543F' : pass === false ? '#92400E' : '#6B7280'; }
 function scoreBg(pass) { return pass === true ? '#DEF7EC' : pass === false ? '#FEF3C7' : '#F3F4F6'; }
@@ -208,11 +214,10 @@ export default function MassRedactionPage() {
   }
 
   return (
-    <div style={{ padding: '28px 32px', maxWidth: '900px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 6px' }}>Mass Redaction</h1>
-      <p style={{ color: '#6B7280', fontSize: '13px', margin: '0 0 18px', lineHeight: 1.5 }}>
-        Reusable redaction templates for same-format records. Define a template once &mdash; the boxes and the rule each cites &mdash; then run it across a batch of documents of that form type. Every document is checked against the template's layout first, so the boxes are never stamped onto a form they don't fit.
-      </p>
+    <SetupScreen hubKey="layout_templates" laneLabel="Request Fulfillment Process Setup — Redaction and Release" title="Mass Redaction" maxWidth="900px"
+      intro="Reusable redaction templates for same-format records. Define a template once — the boxes and the rule each cites — then run it across a batch of documents of that form type. Every document is checked against the template's layout first, so the boxes are never stamped onto a form they don't fit.">
+    {function () { return (
+    <div>
 
       <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#1E40AF', lineHeight: 1.5 }}>
         To create a template: open a sample document in the redaction workspace (the <strong>Redact</strong> button on a PDF in a request's Records tab), place your boxes and attach a rule to each, then choose <strong>Save as Reusable Template</strong>. For a structured CSV record, use <strong>Redact fields</strong> on the record, mark the exempt columns, and choose <strong>Save as reusable template</strong>.
@@ -523,5 +528,7 @@ export default function MassRedactionPage() {
         </div>
       ) : null}
     </div>
+    ); }}
+    </SetupScreen>
   );
 }

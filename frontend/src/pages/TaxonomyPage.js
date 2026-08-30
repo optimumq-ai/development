@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
 import RecordTypeEditor from '../components/RecordTypeEditor';
 import SetupScreen from '../components/setup/SetupScreen';
 
 // TAXONOMY — the hub's `taxonomy` row, and the door for `calibration` and `record_owners` too (C17, Kevin
-// 2026-08-30: the hidden admin Taxonomy tab becomes this dedicated screen at /setup/taxonomy). Body unchanged.
+// 2026-08-30: the hidden admin Taxonomy tab becomes this dedicated screen at /setup/taxonomy).
+// LIST MODEL (§3e, 2026-08-31): all three rows are lists over the SAME record types, so the body is one
+// page — what the ?tab= chooses is which of the three setup items the strip is signing off (the
+// Organization pattern, minus the content split, because the content really is shared). Each row keeps
+// its own count, health, "Ready for approval" and approval.
+var SETUP_ROWS = [
+  { tab: 'types', hubKey: 'taxonomy', label: 'Taxonomy', lane: 'System Features and Options' },
+  { tab: 'calibration', hubKey: 'calibration', label: 'How much work each record type takes', lane: 'Request Fulfillment Process Setup — Fees, Estimates and Routing' },
+  { tab: 'owners', hubKey: 'record_owners', label: 'Which department owns which records', lane: 'Organization Departments, Teams, and Staff Setup' }
+];
+function rowFor(tab) { for (var i = 0; i < SETUP_ROWS.length; i++) if (SETUP_ROWS[i].tab === tab) return SETUP_ROWS[i]; return SETUP_ROWS[0]; }
 
 var AVAIL = {
   releasable: { label: 'Releasable', bg: '#DEF7EC', fg: '#03543F' },
@@ -23,6 +33,8 @@ var FILTERS = [
 
 export default function TaxonomyPage() {
   var navigate = useNavigate();
+  var [params, setParams] = useSearchParams();
+  var setupRow = rowFor(params.get('tab'));
   var [cats, setCats] = useState([]);
   var [types, setTypes] = useState([]);
   var [loading, setLoading] = useState(true);
@@ -127,10 +139,18 @@ export default function TaxonomyPage() {
   }
 
   return (
-    <SetupScreen hubKey="taxonomy" laneLabel="System Features and Options" title="Taxonomy" maxWidth="960px"
+    <SetupScreen hubKey={setupRow.hubKey} laneLabel={setupRow.lane} title="Taxonomy" maxWidth="960px"
       intro="The record types this city holds, grouped by category, with each type's release posture, owning department and estimate calibration. Three setup rows open here: Taxonomy, how much work each record type takes, and which department owns which records.">
     {function () { return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em' }}>Setting up</span>
+        {SETUP_ROWS.map(function (r) {
+          var on = r.tab === setupRow.tab;
+          return <button key={r.tab} onClick={function () { setParams(r.tab === 'types' ? {} : { tab: r.tab }); }}
+            style={{ fontSize: '12.5px', padding: '6px 13px', borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit', border: '1px solid ' + (on ? '#1F4E79' : '#D1D5DB'), background: on ? '#EBF3FB' : 'white', color: on ? '#1F4E79' : '#4B5563', fontWeight: on ? 700 : 500 }}>{r.label}</button>;
+        })}
+      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
         <p style={{ color: '#5C6F7C', fontSize: '13px', margin: 0 }}>Current, live taxonomy &mdash; {types.length} record types across {cats.filter(function(c){ return types.some(function(t){ return t.category_id === c.id; }); }).length} categories</p>
         <div style={{ border: '1px solid #DBEAFE', borderRadius: '10px', padding: '12px 14px', background: '#F8FAFF', minWidth: '300px', flexShrink: 0 }}>

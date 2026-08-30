@@ -84,6 +84,17 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   ok('B7 AI configuration: both keys and a deployment model (technical lane)', ai.status < 300, err(ai));
   var au = await callAs(SA, 'POST', '/config', { auth_mode: 'local', mfa_mode: 'optional', session_timeout: '8h', min_password_length: '10' });
   ok('B8 sign-in settings saved (technical lane)', au.status < 300, err(au));
+  // System Features and Options: a seeded task budget is a provisional default, not the city's decision (§3g).
+  var tb = await callAs(DIR, 'GET', '/config/time-budgets');
+  var tbFails = [];
+  for (var tbr of ((tb.body && tb.body.budgets) || [])) { var tbw = await callAs(DIR, 'PUT', '/config/time-budgets', { taskType: tbr.task_type, budgetDays: Number(tbr.budget_days) || 3 }); if (tbw.status !== 200) tbFails.push(tbr.task_type + ': ' + err(tbw)); }
+  ok('B9 every task time budget reviewed and saved (' + ((tb.body && tb.body.budgets) || []).length + ')', tb.status === 200 && tbFails.length === 0, tbFails.join(' | '));
+  // Time capture: off everywhere is a valid posture, but it has to be SAVED to be the city's decision (§3g).
+  var tc = await callAs(DIR, 'PUT', '/config/time-capture', { config: { search: 'discretion', estimate: 'off', legal_redaction: 'off', legal: 'off' } });
+  ok('B10 task processing time capture saved', tc.status === 200, err(tc));
+  // Video Redaction Options: the screen shows "internal" by default, but the default is not a decision (§3g).
+  var avm = await callAs(DIR, 'POST', '/config', { av_redaction_mode: 'internal' });
+  ok('B11 the video/audio redaction mode saved', avm.status === 200, err(avm));
 
   console.log('\n=== C. FEE RULES — decide, waiver, clock, APPROVE ===');
   var fl = await callAs(DIR, 'GET', '/fee-law');
@@ -166,6 +177,10 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   var fFails = [], applied = 0, dismissed = 0;
   for (var p of list) { var r6 = await callAs(DIR, 'POST', '/config-freshness/proposals/' + p.id + '/apply', { attested: true }); if (r6.status < 300) applied++; else { var r6b = await callAs(DIR, 'POST', '/config-freshness/proposals/' + p.id + '/dismiss', {}); if (r6b.status < 300) { dismissed++; finding('proposal ' + p.id + ' (' + (p.domain || p.area || '') + ') could not be APPLIED — dismissed instead: ' + err(r6)); } else fFails.push(p.id + ': ' + err(r6)); } }
   ok('F1 pending proposals cleared (' + list.length + ' pending → ' + applied + ' applied, ' + dismissed + ' dismissed)', fFails.length === 0, fFails.join(' | '));
+  // Update Configuration is a FORM row (SPEC §3g): the empty queue above plus the two reminder settings SAVED
+  // — the shipped 182 days and the fallback address are defaults, not the city's decision.
+  var frs = await callAs(DIR, 'POST', '/config-freshness/settings', { cadenceDays: 182, recipient: 'records@golden.test' });
+  ok('F2 the reminder settings are recorded (Update Configuration)', frs.status === 200, err(frs));
 
   console.log('\n=== G. ATTEST — every hub row, then every section with no fold ===');
   var hub = await callAs(DIR, 'GET', '/setup-hub');

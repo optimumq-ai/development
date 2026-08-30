@@ -82,6 +82,8 @@ const ITEMS = [
   // `testEstimateStatus` for the Fee rules screen's tab badge.
   // C7 (Kevin 2026-08-29): 'Record types and categories' becomes 'Taxonomy' under System Features and
   // Options — same key, so the calibration dependency and the counted evidence carry over unchanged.
+  // LIST MODEL (2026-08-31): three rows share the Taxonomy screen (the Organization pattern) — the strip
+  // follows the door's ?tab=, so each row is declared ready and approved on its own.
   { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/setup/taxonomy', deps: ['sources'], softDeps: true },
   { key: 'time_budgets', lane: 'features', name: 'How many days a task should take', door: '/setup/time-budgets', deps: [] },
   { key: 'time_tracking', lane: 'features', name: 'Task Processing Time Capture', door: '/setup/time-capture', deps: [] },
@@ -89,7 +91,7 @@ const ITEMS = [
   // The agent-rules API is system-authority (routes/agentRules.js) — the row's gate says so too, or a Director
   // sees live controls that 403 (spec/architecture audit 2026-08-31).
   { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [], groups: ['system_admin'] },
-  { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/setup/taxonomy', deps: ['taxonomy'] },
+  { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/setup/taxonomy?tab=calibration', deps: ['taxonomy'] },
   // C15 (Kevin 2026-08-30): the admin Workflow and Process Map tabs become dedicated screens behind these rows.
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Workflow Rules', door: '/setup/workflow-rules', deps: ['departments', 'teams'] },
   { key: 'process_map', lane: 'fulfillment_fees', name: 'Process Map', door: '/setup/process-map', deps: [] },
@@ -109,7 +111,7 @@ const ITEMS = [
   { key: 'departments', lane: 'organization', name: 'City departments', door: '/org?tab=departments', deps: [] },
   { key: 'teams', lane: 'organization', name: 'Fulfillment teams', door: '/org?tab=teams', deps: ['departments'] },
   { key: 'staff', lane: 'organization', name: 'Staff and what each person does', door: '/org?tab=staff', deps: ['teams'] },
-  { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/setup/taxonomy', deps: ['taxonomy', 'departments'] },
+  { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/setup/taxonomy?tab=owners', deps: ['taxonomy', 'departments'] },
   // ── Lane 4 ──
   // C14 (Kevin 2026-08-30): renamed from 'Where the records live'; the admin Sources tab retired for its own screen.
   { key: 'sources', lane: 'technical', name: 'Record Sources and Connectors', door: '/setup/record-sources', deps: [] },
@@ -253,10 +255,22 @@ const READERS = {
     return withSection(r, sec);
   },
   redaction_rules: async function (ctx) {
-    var n = await count("SELECT COUNT(*) n FROM redaction_rules WHERE approval_status = 'approved' AND is_active = 1");
-    var r = sectionEvidence(ctx.sections.redaction, n + ' rules');
-    if (r.state === 'not_started' && n > 0) return ev('in_progress', n + ' rules · section not confirmed');
-    return r;
+    // LIST MODEL (2026-08-31, §3e): the library is written over weeks, rule by rule. What COUNTS is a rule
+    // that is approved AND in effect; a rule still waiting for a supervisor's approval, or approved but
+    // switched off, is HEALTH the approver sees — it never blocks the colour. The digest covers every rule
+    // row, so an add / edit / approve / activate / delete after approval re-opens the row.
+    var rows = await all('SELECT id, title, category, approval_status, is_active FROM redaction_rules ORDER BY id');
+    var live = rows.filter(function (r0) { return r0.approval_status === 'approved' && Number(r0.is_active) === 1; }).length;
+    var pending = rows.filter(function (r0) { return r0.approval_status === 'pending_review'; }).length;
+    var idle = rows.filter(function (r0) { return r0.approval_status === 'approved' && Number(r0.is_active) !== 1; }).length;
+    var health = [];
+    if (pending) health.push(pending + ' waiting for approval');
+    if (idle) health.push(idle + ' approved but not in effect');
+    var xr = { list: { count: live, noun: 'rule', health: health.join(' · ') },
+      digest: digestOf(rows.map(function (r0) { return [r0.id, r0.title, r0.category, r0.approval_status, Number(r0.is_active) === 1]; })) };
+    var r = sectionEvidence(ctx.sections.redaction, live + ' rules');
+    if (r.state === 'not_started' && live > 0) r = ev('in_progress', live + ' rules · section not confirmed');
+    return Object.assign(r, xr);
   },
   city_choices: async function (ctx) {
     if (!ctx.settings) return ev('not_started', 'no jurisdiction profile chosen');
@@ -267,9 +281,22 @@ const READERS = {
     return ev(done ? 'in_progress' : 'not_started', done + ' of ' + total + ' answered');
   },
   law_updates: async function (ctx) {
-    var pending = ctx.jid ? await count("SELECT COUNT(*) n FROM config_proposals WHERE jurisdiction_id = ? AND status = 'pending'", [ctx.jid]) : 0;
-    if (pending) return ev('needs_attention', pending + ' proposed change' + (pending > 1 ? 's' : '') + ' waiting for review');
-    return ev('ready', 'no proposed changes waiting');
+    // FORM (approval model, §3h). The Update Configuration screen does two things, and both are required:
+    //   · it is the REVIEW QUEUE for proposed changes — "no proposals waiting" is the completed state, so an
+    //     unreviewed proposal is a missing required item (approve it or discard it; it is the one thing this
+    //     screen exists to clear, and a change nobody has looked at must not read as approved setup);
+    //   · it saves the REMINDER settings (how often, and to whom) — a shipped default (182 days, the agency
+    //     contact address) is not a decision, the Authentication precedent.
+    var rows = ctx.jid ? await all("SELECT id, domain, summary FROM config_proposals WHERE jurisdiction_id = ? AND status = 'pending' ORDER BY created_at", [ctx.jid]) : [];
+    var days = await cfg('freshness_scan_days'), to = await cfg('freshness_reminder_to');
+    var missingU = rows.map(function (p) { return 'Review the proposed change' + (p.domain ? ' (' + p.domain + ')' : '') + ': ' + String(p.summary || p.id).slice(0, 60); });
+    if (!days) missingU.push('Reminder settings: how often to send the reminder');
+    if (!to) missingU.push('Reminder settings: who receives the reminder');
+    var extraU = { required: { missing: missingU, total: rows.length + 2 },
+      digest: digestOf([days || null, to || null, rows.map(function (p) { return p.id; })]) };
+    if (rows.length) return ev('needs_attention', rows.length + ' proposed change' + (rows.length > 1 ? 's' : '') + ' waiting for review', extraU);
+    var reminder = (days ? 'reminder every ' + days + ' days' : 'reminder frequency not saved') + (to ? ' to ' + to : ' · no recipient saved');
+    return ev(missingU.length ? 'in_progress' : 'ready', 'no proposed changes waiting · ' + reminder, extraU);
   },
   go_live: async function (ctx) {
     var GL = require('./goLive');
@@ -280,48 +307,93 @@ const READERS = {
     return ev('in_progress', 'everything is confirmed — ready to flip', { goLiveSummary: s });
   },
   taxonomy: async function () {
-    var n = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
-    var drafts = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'draft' OR status = 'discovered'");
-    if (!n) return ev('not_started', 'no record types yet');
-    return ev(drafts ? 'in_progress' : 'ready', n + ' record types' + (drafts ? ' · ' + drafts + ' discovered drafts to review' : ''));
+    // LIST MODEL (§3e, 2026-08-31): the taxonomy is written type by type over weeks. Health = the discovered
+    // drafts nobody has ruled on yet; they never block the colour, but the approver sees them.
+    var trows = await all('SELECT id, name, code, category_id, status, public_availability, auto_release_eligible FROM record_types ORDER BY id');
+    var n = trows.filter(function (t) { return t.status === 'active' || t.status == null; }).length;
+    var drafts = trows.filter(function (t) { return t.status === 'draft' || t.status === 'discovered'; }).length;
+    var xtx = { list: { count: n, noun: 'record type', health: drafts ? drafts + ' discovered draft' + (drafts > 1 ? 's' : '') + ' to review' : '' },
+      digest: digestOf(trows.map(function (t) { return [t.id, t.name, t.code, t.category_id, t.status, t.public_availability, t.auto_release_eligible]; })) };
+    if (!n) return ev('not_started', 'no record types yet', xtx);
+    return ev(drafts ? 'in_progress' : 'ready', n + ' record types' + (drafts ? ' · ' + drafts + ' discovered drafts to review' : ''), xtx);
   },
   calibration: async function () {
+    // LIST MODEL (§3e, 2026-08-31): calibration is done type by type, and a city may honestly stop before
+    // every type is covered — so the COUNT is the types actually calibrated and the rest is health. The
+    // digest carries each profile's seed/sample so a re-calibration after approval re-opens the row.
     var m = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
-    var n = await count('SELECT COUNT(*) n FROM record_type_estimate_profiles WHERE has_expert_seed = 1 OR sample_size > 0');
-    if (!m) return ev('waiting', 'until there are record types to estimate', { waitingOn: ['taxonomy'] });
-    if (!n) return ev('not_started', 'none of ' + m + ' record types calibrated');
-    return ev(n >= m ? 'ready' : 'in_progress', n + ' of ' + m + ' record types calibrated');
+    var prows = await all('SELECT record_type_id, sample_size, has_expert_seed, updated_at FROM record_type_estimate_profiles ORDER BY record_type_id');
+    var done = prows.filter(function (p) { return Number(p.has_expert_seed) === 1 || Number(p.sample_size) > 0; });
+    var n = done.length;
+    var xcal = { list: { count: n, noun: 'calibrated record type', health: !m ? 'no record types yet' : (n < m ? (m - n) + ' of ' + m + ' still to calibrate' : '') },
+      digest: digestOf(prows.map(function (p) { return [p.record_type_id, p.sample_size, p.has_expert_seed, p.updated_at]; })) };
+    if (!m) return ev('waiting', 'until there are record types to estimate', { waitingOn: ['taxonomy'], list: xcal.list, digest: xcal.digest });
+    if (!n) return ev('not_started', 'none of ' + m + ' record types calibrated', xcal);
+    return ev(n >= m ? 'ready' : 'in_progress', n + ' of ' + m + ' record types calibrated', xcal);
   },
   routing_rules: async function () {
-    var n = await count('SELECT COUNT(*) n FROM workflow_rules WHERE enabled = 1');
-    return n ? ev('ready', n + ' routing rule' + (n > 1 ? 's' : '') + ' enabled') : ev('not_started', 'no routing rules written');
+    // LIST MODEL (§3e, 2026-08-31): routing rules are written one at a time. What counts is a rule that is
+    // ENABLED — a rule written and switched off is health, and the digest carries what each rule does, so
+    // editing a condition after approval re-opens the row.
+    var wrows = await all('SELECT id, name, enabled, priority, conditions, actions FROM workflow_rules ORDER BY priority, id');
+    var on = wrows.filter(function (w) { return Number(w.enabled) === 1; }).length;
+    var off = wrows.length - on;
+    var xwf = { list: { count: on, noun: 'routing rule', health: off ? off + ' rule' + (off > 1 ? 's' : '') + ' written but switched off' : '' },
+      digest: digestOf(wrows.map(function (w) { return [w.id, w.name, w.enabled, w.priority, w.conditions, w.actions]; })) };
+    return on ? ev('ready', on + ' routing rule' + (on > 1 ? 's' : '') + ' enabled' + (off ? ' · ' + off + ' switched off' : ''), xwf) : ev('not_started', 'no routing rules written', xwf);
   },
   process_map: async function () {
-    // Informational: the decision inventory (data/workflowModel) and how much of it is built today.
+    // ACKNOWLEDGEMENT (§3j, 2026-08-31): the Process Map sets nothing — it is the decision inventory
+    // (data/workflowModel) and how much of it is built today. There is nothing to fill in, so the required
+    // set is EMPTY: the row is yellow ("read it and approve") until the lane owner signs that they have,
+    // and green after. The digest is the model itself, so a release that adds or changes a decision point
+    // re-opens the row for a fresh read.
     var M = require('../data/workflowModel'); var nodes = M.nodes || (typeof M.build === 'function' ? M.build().nodes : null) || {};
-    var c = { built: 0, partial: 0, planned: 0 }; Object.keys(nodes).forEach(function (k) { var st = nodes[k].status; c[st] = (c[st] || 0) + 1; });
-    var total = Object.keys(nodes).length;
-    if (!total) return ev('not_started', 'no process model loaded');
-    return ev('ready', total + ' decision points · ' + c.built + ' built · ' + c.partial + ' partial · ' + c.planned + ' planned');
+    var keys = Object.keys(nodes);
+    var c = { built: 0, partial: 0, planned: 0 }; keys.forEach(function (k) { var st = nodes[k].status; c[st] = (c[st] || 0) + 1; });
+    var total = keys.length;
+    var xpm = { required: { missing: [], total: 0 }, digest: digestOf(keys.sort().map(function (k) { return [k, nodes[k].label, nodes[k].status, nodes[k].decider, nodes[k].phase]; })) };
+    if (!total) return ev('not_started', 'no process model loaded', { required: { missing: ['The process model could not be read'], total: 1 }, digest: 'none' });
+    return ev('ready', total + ' decision points · ' + c.built + ' built · ' + c.partial + ' partial · ' + c.planned + ' planned', xpm);
   },
   time_budgets: async function () {
-    var rows = await all('SELECT task_type, budget_days FROM time_budgets WHERE record_type_id IS NULL');
-    var set = rows.filter(function (r) { return r.budget_days != null; }).length;
-    if (!rows.length) return ev('not_started', 'no task budgets yet');
-    return ev(set === rows.length ? 'ready' : 'in_progress', set + ' of ' + rows.length + ' task types have a day budget');
+    // FORM (approval model, §3h): the task catalog SEEDS a row per task type and every row already carries a
+    // figure, so "has a number" proves nothing. What counts is a figure the city REVIEWED — the screen's own
+    // "Provisional default — not yet reviewed by your office" (`source = 'supervisor'`). A shipped default is
+    // not a decision (the Authentication precedent).
+    var rows = await all('SELECT task_type, budget_days, source, updated_by FROM time_budgets WHERE record_type_id IS NULL ORDER BY task_type');
+    if (!rows.length) return ev('not_started', 'no task budgets yet', { required: { missing: ['No task types are budgeted yet — the task catalog seeds them'], total: 1 }, digest: 'none' });
+    var pretty = function (t) { return String(t).replace(/_/g, ' ').replace(/\b\w/g, function (ch) { return ch.toUpperCase(); }); };
+    var unset = rows.filter(function (b) { return b.source !== 'supervisor'; });
+    var extraB = { required: { missing: unset.map(function (b) { return pretty(b.task_type) + ' — provisional default, not yet reviewed'; }), total: rows.length },
+      digest: digestOf(rows.map(function (b) { return [b.task_type, b.budget_days, b.source, b.updated_by]; })) };
+    var done = rows.length - unset.length;
+    if (!done) return ev('not_started', 'all ' + rows.length + ' task types still on the provisional defaults', extraB);
+    return ev(unset.length ? 'in_progress' : 'ready', done + ' of ' + rows.length + ' task budgets set by your office', extraB);
   },
   time_tracking: async function () {
     // C11: reads the real per-screen setting (services/timeCaptureConfig), not a key nothing ever wrote.
+    // FORM (approval model, §3h): the whole screen SAVES ONE blob, and every screen starts at 'off' by
+    // default — so the required item is that the blob has been saved at all. Off everywhere is a perfectly
+    // good posture (states differ on which labor is chargeable), but it has to be the city's answer, not
+    // the shipped silence. One required item, because one Save records all of them.
     var TC = require('./timeCaptureConfig'); var c = await TC.get({ get: get, run: run });
+    var raw = await cfg(TC.KEY);
     var on = TC.UIS.filter(function (u) { return u.available && c[u.key] && c[u.key] !== 'off'; });
     var avail = TC.UIS.filter(function (u) { return u.available; }).length;
-    if (!on.length) return ev('not_started', 'off on every task screen (the shipped default)');
-    return ev('ready', on.length + ' of ' + avail + ' task screens capture time · ' + on.map(function (u) { return u.label + ': ' + c[u.key]; }).join(', '));
+    var extraT = { required: { missing: raw ? [] : ['Task screens — not decided; choose each screen\'s setting and save'], total: 1 }, digest: digestOf([raw || null]) };
+    if (!raw) return ev('not_started', 'off on every task screen (the shipped default) — nothing saved yet', extraT);
+    if (!on.length) return ev('ready', 'off on every task screen — saved as the city\'s decision', extraT);
+    return ev('ready', on.length + ' of ' + avail + ' task screens capture time · ' + on.map(function (u) { return u.label + ': ' + c[u.key]; }).join(', '), extraT);
   },
   av_redaction: async function () {
+    // FORM (approval model, §3h): one choice, and it must be SAVED. The screen shows "internal" when nothing
+    // is stored, which is the shipped default — and a shipped default is not a decision (Authentication).
+    // Choosing internal deliberately IS one, and saving it says so.
     var m = await cfg('av_redaction_mode');
     var words = { internal: 'redacted inside Optimum Q', external: 'redacted in the city\'s own tool', not_required: 'presumptively releasable, reviewed before release' };
-    return m ? ev('ready', words[m] || m) : ev('not_started', 'running on the shipped default (internal)');
+    var extraV = { required: { missing: m ? [] : ['Default video and audio redaction mode — not decided'], total: 1 }, digest: digestOf([m || null]) };
+    return m ? ev('ready', words[m] || m, extraV) : ev('not_started', 'running on the shipped default (internal) — nothing saved yet', extraV);
   },
   notifications: async function () {
     // STAFF ALERTS (Kevin 2026-08-30, §3i): two tabs. Alerts = the catalogue (services/alertCatalog.js), read-only,
@@ -345,8 +417,16 @@ const READERS = {
     catch (e) { return ev('not_started', 'no screen yet'); }
   },
   layout_templates: async function () {
-    var n = await count("SELECT COUNT(*) n FROM layout_profiles WHERE status IS NULL OR status <> 'retired'");
-    return n ? ev('ready', n + ' template' + (n > 1 ? 's' : '')) : ev('not_started', '0 templates');
+    // LIST MODEL (§3e, 2026-08-31): templates are authored one form type at a time. Health = the record
+    // piles the variant scan flagged as mass-redaction candidates that still have no template (the Mass
+    // Redaction screen's own "Waiting for a template" cards) — it never blocks the colour.
+    var lrows = await all("SELECT id, name, record_type_id, kind, status, safety_threshold, layout_fingerprint FROM layout_profiles WHERE status IS NULL OR status NOT IN ('retired', 'deleted') ORDER BY id");
+    var waiting = await count('SELECT COUNT(*) n FROM record_types rt WHERE rt.mass_redaction_candidate = 1 ' +
+      "AND NOT EXISTS (SELECT 1 FROM layout_profiles lp WHERE lp.record_type_id = rt.id AND (lp.status IS NULL OR lp.status <> 'deleted'))");
+    var n = lrows.length;
+    var xlt = { list: { count: n, noun: 'template', health: waiting ? waiting + ' record pile' + (waiting > 1 ? 's are' : ' is') + ' waiting for a template' : '' },
+      digest: digestOf(lrows.map(function (l) { return [l.id, l.name, l.record_type_id, l.kind, l.status, l.safety_threshold, l.layout_fingerprint]; })) };
+    return n ? ev('ready', n + ' template' + (n > 1 ? 's' : '') + (waiting ? ' · ' + waiting + ' waiting for one' : ''), xlt) : ev('not_started', '0 templates', xlt);
   },
   decision_reasons: async function () {
     var n = await count('SELECT COUNT(*) n FROM decision_reasons WHERE is_active = 1');
@@ -388,10 +468,16 @@ const READERS = {
     return ev('ready', n + ' people, all typed · ' + searchers + ' can search records', xs);
   },
   record_owners: async function () {
+    // LIST MODEL (§3e, 2026-08-31): ownership is assigned type by type. The count is the assignments made;
+    // record types still without an owner are health.
     var m = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
-    if (!m) return ev('waiting', 'until there are record types to assign', { waitingOn: ['taxonomy'] });
-    var n = await count("SELECT COUNT(DISTINCT record_type_id) n FROM record_type_departments WHERE role = 'owner'");
-    return ev(n >= m ? 'ready' : (n ? 'in_progress' : 'not_started'), n + ' of ' + m + ' record types have an owner');
+    var orows = await all("SELECT record_type_id, department_id FROM record_type_departments WHERE role = 'owner' ORDER BY record_type_id, department_id");
+    var seen = {}; orows.forEach(function (o) { seen[o.record_type_id] = 1; });
+    var n = Object.keys(seen).length;
+    var xown = { list: { count: n, noun: 'ownership assignment', health: !m ? 'no record types yet' : (n < m ? (m - n) + ' record type' + ((m - n) > 1 ? 's have' : ' has') + ' no owner' : '') },
+      digest: digestOf(orows.map(function (o) { return [o.record_type_id, o.department_id]; })) };
+    if (!m) return ev('waiting', 'until there are record types to assign', { waitingOn: ['taxonomy'], list: xown.list, digest: xown.digest });
+    return ev(n >= m ? 'ready' : (n ? 'in_progress' : 'not_started'), n + ' of ' + m + ' record types have an owner', xown);
   },
   sources: async function () {
     // LIST MODEL (Kevin 2026-08-31): red until the first connector, yellow while the list grows (quietly — no
@@ -447,8 +533,15 @@ const READERS = {
     return ev('ready', mode + (mfa ? ' + MFA ' + mfa : '') + (to ? ' · ' + to + ' session timeout' : '') + (pl ? ' · ' + pl + '+ character passwords' : ''), extraA);
   },
   agent_rules: async function () {
-    var n = await count('SELECT COUNT(*) n FROM agent_rules WHERE enabled = 1');
-    return n ? ev('ready', n + ' rule' + (n > 1 ? 's' : '') + ' in force') : ev('not_started', 'running on the shipped defaults');
+    // LIST MODEL (§3e, 2026-08-31): rules are written one at a time, in plain English, over weeks. The count
+    // is the rules IN FORCE; a rule written and switched off is health. The assistant's core instructions
+    // work with none of these, so an empty library is red only in the sense of "nobody has looked yet".
+    var arows = await all('SELECT id, rule_text, enabled, sort_order FROM agent_rules ORDER BY sort_order, id');
+    var on = arows.filter(function (a) { return Number(a.enabled) === 1; }).length;
+    var off = arows.length - on;
+    var xar = { list: { count: on, noun: 'rule', health: off ? off + ' rule' + (off > 1 ? 's' : '') + ' written but switched off' : '' },
+      digest: digestOf(arows.map(function (a) { return [a.id, a.rule_text, a.enabled, a.sort_order]; })) };
+    return on ? ev('ready', on + ' rule' + (on > 1 ? 's' : '') + ' in force' + (off ? ' · ' + off + ' switched off' : ''), xar) : ev('not_started', 'running on the shipped defaults', xar);
   },
   settlement: async function () {
     var active = await get("SELECT config_json FROM fee_profiles WHERE context = 'FR' AND status = 'active' ORDER BY version DESC LIMIT 1");

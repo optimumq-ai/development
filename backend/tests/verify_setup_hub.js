@@ -105,11 +105,13 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   } else ok('C4 (skipped: email row is ' + (emBefore && emBefore.state) + ' on this fixture)', true);
 
   console.log('\n=== D. MARK IT DONE (Option A) ===');
-  var item = 'time_budgets';   // System Features and Options: operations_config
+  // A row with no required set and no list — the gate is what D1/D2/D3 are about, not readiness.
+  // (Was `time_budgets` until it became a FORM row on 2026-08-31: approving it now needs its budgets reviewed.)
+  var item = 'mass_schedule';   // Redaction and Release: operations_config
   var m1 = await callAs(U.sup, 'POST', '/setup-hub/' + item + '/done');
   var m2 = await callAs(U.staff, 'POST', '/setup-hub/' + item + '/done');
   var m3 = await callAs(U.none, 'POST', '/setup-hub/' + item + '/done');
-  ok('D1 a team supervisor (operations_config) may mark a lane-2a item; team staff and a typeless account get 403 PERMISSION_REQUIRED', m1.status === 200 && m2.status === 403 && m2.body.code === 'PERMISSION_REQUIRED' && m3.status === 403);
+  ok('D1 a team supervisor (operations_config) may mark an operations item; team staff and a typeless account get 403 PERMISSION_REQUIRED', m1.status === 200 && m2.status === 403 && m2.body.code === 'PERMISSION_REQUIRED' && m3.status === 403, m1.status + '/' + m2.status + '/' + m3.status);
   var after = find((await callAs(U.staff, 'GET', '/setup-hub')).body, item);
   ok('D2 the mark shows by name and date on the row, the row reads ready, and a non-holder sees canEdit=false', after.signoff && /HUB team_supervisor/.test(after.signoff.by) && after.state === 'ready' && /marked done by/.test(after.evidence) && after.canEdit === false);
   var un = await callAs(U.sup, 'DELETE', '/setup-hub/' + item + '/done');
@@ -344,6 +346,304 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'DELETE', '/setup-hub/notifications/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key IN ('notifications','intake')");
   if (nMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (item_key) DO NOTHING', [nMark.item_key, nMark.marked_by, nMark.marked_by_name, nMark.marked_at, nMark.content_hash, nMark.notified_hash]);
   await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('notifications','intake')");
+
+  console.log('\n=== O. REDACTION RULES LIBRARY (list) — approved AND in effect is the count; waiting-for-approval is health ===');
+  var rrMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'redaction_rules'");
+  await callAs(U.legal, 'DELETE', '/setup-hub/redaction_rules/done'); await callAs(U.legal, 'DELETE', '/setup-hub/redaction_rules/ready');
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'redaction_rules'");
+  var oNew = await callAs(U.legal, 'POST', '/redaction/rules', { title: 'HUB rule ' + TAG, description: 'Harness rule for the approval model — ' + TAG, category: 'privacy' });
+  var oRule = oNew.body && oNew.body.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var oA = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  ok('O1 the row is a LIST row and a rule still waiting for a supervisor is HEALTH, not a count', oNew.status === 200 && !!oRule && oA.approvalModel === 'list' && /waiting for approval/.test(oA.approvalWhy || ''), oNew.status + ' ' + oA.approvalModel + ' ' + oA.approval + ': ' + oA.approvalWhy);
+  var oAp = await callAs(U.legal, 'PATCH', '/redaction/rules/' + oRule + '/approve');
+  var oAc = await callAs(U.legal, 'PATCH', '/redaction/rules/' + oRule, { is_active: true });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var oB = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  ok('O2 approved and switched on → the rule counts; YELLOW "in progress" while nobody has declared the library complete (quiet)', oAp.status === 200 && oAc.status === 200 && oB.approval === 'yellow' && /in progress/.test(oB.approvalWhy || '') && /rule/.test(oB.approvalWhy || '') && !oB.ready, oAp.status + '/' + oAc.status + ' ' + oB.approval + ': ' + oB.approvalWhy);
+  var on0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'redaction_rules'")).n;
+  var oBad = await callAs(U.sa, 'POST', '/setup-hub/redaction_rules/ready');
+  var oRdy = await callAs(U.legal, 'POST', '/setup-hub/redaction_rules/ready');
+  var oC = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  var on1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'redaction_rules'")).n;
+  ok('O3 "Ready for approval" is a LEGAL act: Senior Legal declares it (recorded by name, owners told once), the SysAdmin gets 403', oBad.status === 403 && oRdy.status === 200 && oC.ready && /ready for approval/.test(oC.approvalWhy || '') && on1 > on0, oBad.status + '/' + oRdy.status + ' ' + JSON.stringify(oC.ready) + ' · ' + on0 + '→' + on1);
+  var oApv = await callAs(U.legal, 'POST', '/setup-hub/redaction_rules/done');
+  var oD = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  ok('O4 approval → GREEN and the declaration is cleared', oApv.status === 200 && oD.approval === 'green' && !oD.ready, oApv.status + ' ' + oD.approval + ': ' + oD.approvalWhy);
+  var oc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'redaction_rules'")).n;
+  var oDel = await callAs(U.legal, 'DELETE', '/redaction/rules/' + oRule);
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var oE = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  var oc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'redaction_rules'")).n;
+  ok('O5 deleting a rule after approval → YELLOW "changed since approval" + one notification (the route\'s finish hook)', oDel.status === 200 && oE.approval === 'yellow' && /changed since approval/.test(oE.approvalWhy || '') && oc1 > oc0, oDel.status + ' ' + oE.approval + ': ' + oE.approvalWhy + ' · ' + oc0 + '→' + oc1);
+  if (oRule) { await db.run('DELETE FROM rule_legal_sources WHERE rule_id = ?', [oRule]); await db.run('DELETE FROM redaction_rules WHERE id = ?', [oRule]); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'redaction_rules'");
+  await callAs(U.legal, 'DELETE', '/setup-hub/redaction_rules/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'redaction_rules'");
+  if (rrMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rrMark.item_key, rrMark.marked_by, rrMark.marked_by_name, rrMark.marked_at, rrMark.content_hash || null, rrMark.notified_hash || null]);
+
+  console.log('\n=== P. UPDATE CONFIGURATION (form) — an unreviewed proposal is a required item; a shipped reminder default is not a decision ===');
+  var UC_KEYS = ['freshness_scan_days', 'freshness_reminder_to'];
+  var ucSave = {}; for (var uckey of UC_KEYS) { var ucrow = await db.get('SELECT value FROM system_config WHERE key = ?', [uckey]); ucSave[uckey] = ucrow ? ucrow.value : null; await db.run('DELETE FROM system_config WHERE key = ?', [uckey]); }
+  // the fixture may ship pending proposals — park them so this section starts from an empty queue, restored below
+  var ucParked = jid ? (await db.all("SELECT id FROM config_proposals WHERE jurisdiction_id = ? AND status = 'pending'", [jid])).map(function (r0) { return r0.id; }) : [];
+  for (var ucp of ucParked) await db.run("UPDATE config_proposals SET status = 'dismissed' WHERE id = ?", [ucp]);
+  var ucMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'law_updates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/law_updates/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'law_updates'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'law_updates'");
+  var ucA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+  ok('P1 nothing saved and no proposals → RED naming both reminder settings', ucA.approval === 'red' && /how often to send the reminder/.test(ucA.approvalWhy || '') && /who receives the reminder/.test(ucA.approvalWhy || ''), ucA.approval + ': ' + ucA.approvalWhy);
+  var ucRef = await callAs(U.dir, 'POST', '/setup-hub/law_updates/done');
+  ok('P2 approval is refused while red (422 REQUIRED_MISSING)', ucRef.status === 422 && ucRef.body && ucRef.body.code === 'REQUIRED_MISSING', ucRef.status + ' ' + JSON.stringify(ucRef.body && ucRef.body.code));
+  var ucn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'law_updates'")).n;
+  var ucSet = await callAs(U.dir, 'POST', '/config-freshness/settings', { cadenceDays: 182, recipient: 'updates@hub.test' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var ucB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+  var ucn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'law_updates'")).n;
+  ok('P3 both reminder settings saved → YELLOW; the completing save submits the screen and tells the owners once', ucSet.status === 200 && ucB.approval === 'yellow' && ucB.ready && ucn1 > ucn0, ucSet.status + ' ' + ucB.approval + ': ' + ucB.approvalWhy + ' · ' + ucn0 + '→' + ucn1);
+  var ucApv = await callAs(U.dir, 'POST', '/setup-hub/law_updates/done');
+  var ucC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+  ok('P4 approval → GREEN, and the evidence says the queue is empty', ucApv.status === 200 && ucC.approval === 'green' && /no proposed changes waiting/.test(ucC.evidence || ''), ucApv.status + ' ' + ucC.approval + ': ' + ucC.evidence);
+  var ucProp = 'cp-uc-' + TAG, ucPlanted = false;
+  if (jid && cols.indexOf('jurisdiction_id') !== -1 && cols.indexOf('status') !== -1) {
+    try {
+      var ucNeed = cols.filter(function (c) { return ['id', 'jurisdiction_id', 'status', 'domain', 'section', 'proposed_config', 'proposal_json', 'created_at', 'proposed_by', 'citation', 'note', 'source'].indexOf(c) !== -1; });
+      var ucVals = ucNeed.map(function (c) { return c === 'id' ? ucProp : c === 'jurisdiction_id' ? jid : c === 'status' ? 'pending' : c === 'created_at' ? new Date().toISOString().slice(0, 19).replace('T', ' ') : (c === 'proposed_config' || c === 'proposal_json') ? '{}' : 'hub-' + TAG; });
+      await db.run('INSERT INTO config_proposals (' + ucNeed.join(',') + ') VALUES (' + ucNeed.map(function () { return '?'; }).join(',') + ')', ucVals);
+      ucPlanted = true;
+    } catch (e) { console.log('        (could not plant a proposal: ' + e.message + ')'); }
+  }
+  if (ucPlanted) {
+    var ucD = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'law_updates');
+    ok('P5 a proposal nobody has reviewed re-opens the approved row: RED, naming the change to review', ucD.approval === 'red' && /Review the proposed change/.test(ucD.approvalWhy || '') && ucD.state === 'needs_attention', ucD.approval + '/' + ucD.state + ': ' + ucD.approvalWhy);
+    await db.run('DELETE FROM config_proposals WHERE id = ?', [ucProp]);
+  } else ok('P5 (skipped: no jurisdiction or proposals table shape unknown)', true);
+  for (var ucp2 of ucParked) await db.run("UPDATE config_proposals SET status = 'pending' WHERE id = ?", [ucp2]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'law_updates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/law_updates/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'law_updates'");
+  for (var uck2 in ucSave) { if (ucSave[uck2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [uck2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [uck2, ucSave[uck2]]); }
+  if (ucMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [ucMark.item_key, ucMark.marked_by, ucMark.marked_by_name, ucMark.marked_at, ucMark.content_hash || null, ucMark.notified_hash || null]);
+
+  console.log('\n=== Q. TAXONOMY / CALIBRATION / RECORD OWNERS (list) — three rows over one screen, three approvals ===');
+  var TX_ROWS = ['taxonomy', 'calibration', 'record_owners'];
+  var txSave = {};
+  for (var txk of TX_ROWS) { txSave[txk] = await db.get('SELECT * FROM setup_hub_signoffs WHERE item_key = ?', [txk]); await callAs(U.dir, 'DELETE', '/setup-hub/' + txk + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + txk + '/ready'); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('taxonomy','calibration','record_owners')");
+  var txCat = await db.get('SELECT id FROM categories ORDER BY id LIMIT 1');
+  var txDept = await db.get("SELECT id FROM departments WHERE active = 1 ORDER BY id LIMIT 1");
+  var txNew = await callAs(U.dir, 'POST', '/taxonomy/record-types', { category_id: txCat && txCat.id, name: 'HUB Type ' + TAG, code: 'HUBT' + TAG.slice(-5) });
+  var txId = txNew.body && txNew.body.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txPage = (await callAs(U.dir, 'GET', '/setup-hub')).body;
+  var txT = find(txPage, 'taxonomy'), txC = find(txPage, 'calibration'), txO = find(txPage, 'record_owners');
+  ok('Q1 all three are LIST rows over the same record types, each with its own counted line', txNew.status === 200 && !!txId && txT.approvalModel === 'list' && txC.approvalModel === 'list' && txO.approvalModel === 'list' && /record types/.test(txT.evidence || '') && /calibrated/.test(txC.evidence || '') && /have an owner/.test(txO.evidence || ''), txNew.status + ' | ' + [txT, txC, txO].map(function (x) { return x.approvalModel + '/' + x.approval + ': ' + x.evidence; }).join(' | '));
+  ok('Q2 the three doors are the one screen, each with its own ?tab= (the Organization pattern)', txT.door === '/setup/taxonomy' && txC.door === '/setup/taxonomy?tab=calibration' && txO.door === '/setup/taxonomy?tab=owners', [txT.door, txC.door, txO.door].join(' | '));
+  var txn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'taxonomy'")).n;
+  var txRdy = await callAs(U.sup, 'POST', '/setup-hub/taxonomy/ready');
+  var txApv = await callAs(U.dir, 'POST', '/setup-hub/taxonomy/done');
+  var txT2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'taxonomy');
+  var txn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'taxonomy'")).n;
+  ok('Q3 a supervisor declares the taxonomy complete (owners told once); the Director approves → GREEN, declaration cleared', txRdy.status === 200 && txApv.status === 200 && txT2.approval === 'green' && !txT2.ready && txn1 > txn0, txRdy.status + '/' + txApv.status + ' ' + txT2.approval + ' · ' + txn0 + '→' + txn1);
+  var txc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'taxonomy'")).n;
+  var txEdit = await callAs(U.dir, 'PATCH', '/taxonomy/record-types/' + txId, { name: 'HUB Type ' + TAG + ' (renamed)' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txT3 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'taxonomy');
+  var txc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'taxonomy'")).n;
+  ok('Q4 editing a record type after approval → YELLOW "changed since approval" + one notification (routes/taxonomy.js hook)', txEdit.status === 200 && txT3.approval === 'yellow' && /changed since approval/.test(txT3.approvalWhy || '') && txc1 > txc0, txEdit.status + ' ' + txT3.approval + ': ' + txT3.approvalWhy + ' · ' + txc0 + '→' + txc1);
+  var txCalApv = await callAs(U.dir, 'POST', '/setup-hub/calibration/done');
+  var txcal0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'calibration'")).n;
+  var txSeed = await callAs(U.dir, 'PUT', '/estimate-profiles/' + txId, { quantities: { searchHours: 2, reviewHours: 1, bwPages: 40 }, notes: 'hub harness' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txC2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'calibration');
+  var txcal1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'calibration'")).n;
+  ok('Q5 calibration is its OWN row: approved green, then a seeded profile → YELLOW + one notification (routes/estimateProfiles.js hook)', txCalApv.status === 200 && txSeed.status === 200 && txC2.approval === 'yellow' && /changed since approval/.test(txC2.approvalWhy || '') && txcal1 > txcal0, txCalApv.status + '/' + txSeed.status + ' ' + txC2.approval + ' · ' + txcal0 + '→' + txcal1);
+  var txOwnApv = await callAs(U.dir, 'POST', '/setup-hub/record_owners/done');
+  var txown0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'record_owners'")).n;
+  var txLink = txDept ? await callAs(U.dir, 'POST', '/taxonomy/record-types/' + txId + '/departments', { department_id: txDept.id, role: 'owner' }) : { status: 0 };
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txO2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'record_owners');
+  var txown1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'record_owners'")).n;
+  ok('Q6 record ownership is its OWN row: approved green, then a new owner assignment → YELLOW + one notification', txOwnApv.status === 200 && txLink.status === 200 && txO2.approval === 'yellow' && /changed since approval/.test(txO2.approvalWhy || '') && txown1 > txown0, txOwnApv.status + '/' + txLink.status + ' ' + txO2.approval + ' · ' + txown0 + '→' + txown1);
+  if (txId) {
+    await callAs(U.dir, 'DELETE', '/estimate-profiles/' + txId);
+    await callAs(U.dir, 'DELETE', '/taxonomy/record-types/' + txId);
+    await db.run('DELETE FROM record_type_estimate_profiles WHERE record_type_id = ?', [txId]);
+    await db.run('DELETE FROM record_type_departments WHERE record_type_id = ?', [txId]);
+    await db.run('DELETE FROM record_types WHERE id = ?', [txId]);
+    await db.run("DELETE FROM taxonomy_audit WHERE entity_id = ? OR details LIKE '%' || ? || '%'", [txId, txId]);
+    try { await db.run("DELETE FROM embeddings WHERE owner_type = 'record_type' AND owner_id = ?", [txId]); } catch (e) {}
+  }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('taxonomy','calibration','record_owners')");
+  for (var txk2 of TX_ROWS) {
+    await callAs(U.dir, 'DELETE', '/setup-hub/' + txk2 + '/done'); await db.run('DELETE FROM setup_hub_ready WHERE item_key = ?', [txk2]);
+    if (txSave[txk2]) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [txSave[txk2].item_key, txSave[txk2].marked_by, txSave[txk2].marked_by_name, txSave[txk2].marked_at, txSave[txk2].content_hash || null, txSave[txk2].notified_hash || null]);
+  }
+
+  console.log('\n=== R. WORKFLOW RULES (list) + PROCESS MAP (acknowledgement — nothing to fill in, reading it is the act) ===');
+  var wfMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'routing_rules'");
+  var pmMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'process_map'");
+  for (var rk5 of ['routing_rules', 'process_map']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/ready'); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('routing_rules','process_map')");
+  var wfNew = await callAs(U.dir, 'POST', '/workflow/rules', { name: 'HUB rule ' + TAG, description: 'harness', priority: 900, conditions: [], actions: {} });
+  var wfId = wfNew.body && wfNew.body.rule && wfNew.body.rule.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var rA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'routing_rules');
+  ok('R1 Workflow Rules is a LIST row — enabled rules are the count', wfNew.status === 200 && !!wfId && rA.approvalModel === 'list' && rA.approval === 'yellow' && /routing rule/.test(rA.approvalWhy || ''), wfNew.status + ' ' + rA.approvalModel + '/' + rA.approval + ': ' + rA.approvalWhy);
+  var wn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'routing_rules'")).n;
+  var wfRdy = await callAs(U.sup, 'POST', '/setup-hub/routing_rules/ready');
+  var wfApv = await callAs(U.dir, 'POST', '/setup-hub/routing_rules/done');
+  var rB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'routing_rules');
+  var wn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'routing_rules'")).n;
+  ok('R2 declared ready (owners told once) then approved → GREEN', wfRdy.status === 200 && wfApv.status === 200 && rB.approval === 'green' && wn1 > wn0, wfRdy.status + '/' + wfApv.status + ' ' + rB.approval + ' · ' + wn0 + '→' + wn1);
+  var wc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'routing_rules'")).n;
+  var wfOff = await callAs(U.dir, 'PATCH', '/workflow/rules/' + wfId, { enabled: false });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var rC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'routing_rules');
+  var wc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'routing_rules'")).n;
+  ok('R3 switching a rule off after approval → YELLOW "changed since approval", the health line says so, one notification', wfOff.status === 200 && rC.approval === 'yellow' && /changed since approval/.test(rC.approvalWhy || '') && /switched off/.test(rC.approvalWhy || '') && wc1 > wc0, wfOff.status + ' ' + rC.approval + ': ' + rC.approvalWhy + ' · ' + wc0 + '→' + wc1);
+  var rD = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'process_map');
+  ok('R4 the Process Map counts as READ, not configured: nothing is missing, so it waits at YELLOW for the lane owner', rD.approvalModel === 'fields' && rD.approval === 'yellow' && /awaiting approval/.test(rD.approvalWhy || '') && /decision points/.test(rD.evidence || ''), rD.approvalModel + '/' + rD.approval + ': ' + rD.approvalWhy + ' · ' + rD.evidence);
+  var pmApv = await callAs(U.dir, 'POST', '/setup-hub/process_map/done');
+  var rE = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'process_map');
+  ok('R5 approving the Process Map is never refused (there is nothing to fill in) → GREEN by name and date', pmApv.status === 200 && rE.approval === 'green' && /approved by/.test(rE.approvalWhy || ''), pmApv.status + ' ' + rE.approval + ': ' + rE.approvalWhy);
+  if (wfId) await db.run('DELETE FROM workflow_rules WHERE id = ?', [wfId]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('routing_rules','process_map')");
+  for (var rk6 of ['routing_rules', 'process_map']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk6 + '/done'); await db.run('DELETE FROM setup_hub_ready WHERE item_key = ?', [rk6]); }
+  for (var rSaved of [wfMark, pmMark]) { if (rSaved) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rSaved.item_key, rSaved.marked_by, rSaved.marked_by_name, rSaved.marked_at, rSaved.content_hash || null, rSaved.notified_hash || null]); }
+
+  console.log('\n=== S. TASK TIME BUDGETS (form) — a seeded figure is not a decision; the city has to review each one ===');
+  var tbSaved = await db.all('SELECT task_type, budget_days, source, updated_by, updated_at FROM time_budgets WHERE record_type_id IS NULL ORDER BY task_type');
+  var tbMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'time_budgets'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_budgets/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_budgets'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_budgets'");
+  await db.run("UPDATE time_budgets SET source = 'seed', updated_by = NULL WHERE record_type_id IS NULL");
+  var tbA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_budgets');
+  ok('S1 every budget still on its provisional default → RED, naming the task types', tbA.approval === 'red' && /provisional default, not yet reviewed/.test(tbA.approvalWhy || ''), tbA.approval + ': ' + tbA.approvalWhy);
+  var tbRef = await callAs(U.dir, 'POST', '/setup-hub/time_budgets/done');
+  ok('S2 approval is refused while any budget is unreviewed (422 REQUIRED_MISSING)', tbRef.status === 422 && tbRef.body && tbRef.body.code === 'REQUIRED_MISSING', tbRef.status);
+  var tbFails = [];
+  for (var tbSb of tbSaved) { var tbSr = await callAs(U.dir, 'PUT', '/config/time-budgets', { taskType: tbSb.task_type, budgetDays: Number(tbSb.budget_days) || 3 }); if (tbSr.status !== 200) tbFails.push(tbSb.task_type + ':' + tbSr.status); }
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var tbn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'time_budgets'")).n;
+  var tbB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_budgets');
+  ok('S3 saving every budget through the screen → YELLOW, and the completing save submits it (owners told once)', tbFails.length === 0 && tbB.approval === 'yellow' && tbB.ready && tbn1 > 0, tbFails.join(',') + ' ' + tbB.approval + ': ' + tbB.approvalWhy + ' · setup_ready ' + tbn1);
+  var tbApv = await callAs(U.dir, 'POST', '/setup-hub/time_budgets/done');
+  var tbc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_budgets'")).n;
+  var tbEdit = await callAs(U.dir, 'PUT', '/config/time-budgets', { taskType: tbSaved[0] && tbSaved[0].task_type, budgetDays: (Number(tbSaved[0] && tbSaved[0].budget_days) || 3) + 1 });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var tbC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_budgets');
+  var tbc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_budgets'")).n;
+  ok('S4 approved, then a changed budget → YELLOW "changed since approval" + one notification', tbApv.status === 200 && tbEdit.status === 200 && tbC.approval === 'yellow' && /changed since approval/.test(tbC.approvalWhy || '') && tbc1 > tbc0, tbApv.status + '/' + tbEdit.status + ' ' + tbC.approval + ' · ' + tbc0 + '→' + tbc1);
+  for (var tbRow of tbSaved) await db.run('UPDATE time_budgets SET budget_days = ?, source = ?, updated_by = ?, updated_at = ? WHERE record_type_id IS NULL AND task_type = ?', [tbRow.budget_days, tbRow.source, tbRow.updated_by, tbRow.updated_at, tbRow.task_type]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_budgets'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_budgets/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_budgets'");
+  if (tbMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [tbMark.item_key, tbMark.marked_by, tbMark.marked_by_name, tbMark.marked_at, tbMark.content_hash || null, tbMark.notified_hash || null]);
+
+  console.log('\n=== T. TASK PROCESSING TIME CAPTURE (form) — "off everywhere" is a decision only once it is SAVED ===');
+  var TC_KEY = require('/opt/optimumq/backend/src/services/timeCaptureConfig').KEY;
+  var tcRow = await db.get('SELECT value FROM system_config WHERE key = ?', [TC_KEY]);
+  var tcMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'time_tracking'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_tracking/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_tracking'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_tracking'");
+  await db.run('DELETE FROM system_config WHERE key = ?', [TC_KEY]);
+  var tA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_tracking');
+  var tRef = await callAs(U.dir, 'POST', '/setup-hub/time_tracking/done');
+  ok('T1 nothing saved → RED ("the shipped default"), and approval is refused 422', tA.approval === 'red' && /not decided/.test(tA.approvalWhy || '') && tRef.status === 422 && tRef.body.code === 'REQUIRED_MISSING', tA.approval + ': ' + tA.approvalWhy + ' · ' + tRef.status);
+  var tn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'time_tracking'")).n;
+  var tSave = await callAs(U.dir, 'PUT', '/config/time-capture', { config: { search: 'off', estimate: 'off', legal_redaction: 'off', legal: 'off' } });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var tB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_tracking');
+  var tn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'time_tracking'")).n;
+  ok('T2 saved as OFF everywhere → YELLOW: off is a valid posture once the city records it; the save submits the screen', tSave.status === 200 && tB.approval === 'yellow' && /off on every task screen — saved/.test(tB.evidence || '') && tB.ready && tn1 > tn0, tSave.status + ' ' + tB.approval + ': ' + tB.evidence + ' · ' + tn0 + '→' + tn1);
+  var tApv = await callAs(U.dir, 'POST', '/setup-hub/time_tracking/done');
+  var tc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_tracking'")).n;
+  var tOn = await callAs(U.dir, 'PUT', '/config/time-capture', { config: { search: 'always' } });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var tC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_tracking');
+  var tc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_tracking'")).n;
+  ok('T3 approved, then a screen switched on → YELLOW "changed since approval" + one notification', tApv.status === 200 && tOn.status === 200 && tC.approval === 'yellow' && /changed since approval/.test(tC.approvalWhy || '') && tc1 > tc0, tApv.status + '/' + tOn.status + ' ' + tC.approval + ' · ' + tc0 + '→' + tc1);
+  if (tcRow) await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [TC_KEY, tcRow.value]); else await db.run('DELETE FROM system_config WHERE key = ?', [TC_KEY]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_tracking'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_tracking/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_tracking'");
+  if (tcMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [tcMark.item_key, tcMark.marked_by, tcMark.marked_by_name, tcMark.marked_at, tcMark.content_hash || null, tcMark.notified_hash || null]);
+
+  console.log('\n=== U. PORTAL AGENT RULES (list) — a system_admin row in the features lane ===');
+  var arMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'agent_rules'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/agent_rules/done'); await callAs(U.sa, 'DELETE', '/setup-hub/agent_rules/ready');
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'agent_rules'");
+  var an0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agent_rules'")).n;
+  var arNew = await callAs(U.sa, 'POST', '/agent-rules', { rule_text: 'HUB harness rule ' + TAG });
+  var arId = arNew.body && (arNew.body.id || (arNew.body.rule && arNew.body.rule.id));
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var uA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'agent_rules');
+  var an1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agent_rules'")).n;
+  ok('U1 a LIST row that stays quiet while it grows — a rule added before anyone declares it complete tells nobody', arNew.status === 200 && !!arId && uA.approvalModel === 'list' && uA.approval === 'yellow' && /rule/.test(uA.approvalWhy || '') && an1 === an0, arNew.status + ' ' + uA.approvalModel + '/' + uA.approval + ': ' + uA.approvalWhy + ' · ' + an0 + '→' + an1);
+  var arBad = await callAs(U.dir, 'POST', '/setup-hub/agent_rules/ready');
+  var arRdy = await callAs(U.sa, 'POST', '/setup-hub/agent_rules/ready');
+  var arApv = await callAs(U.sa, 'POST', '/setup-hub/agent_rules/done');
+  var uB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'agent_rules');
+  var an2 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agent_rules'")).n;
+  ok('U2 the row is system_admin\'s (its API is): the SysAdmin declares and approves → GREEN; a Director gets 403', arBad.status === 403 && arRdy.status === 200 && arApv.status === 200 && uB.approval === 'green' && an2 > an1, arBad.status + '/' + arRdy.status + '/' + arApv.status + ' ' + uB.approval + ' · ' + an1 + '→' + an2);
+  var ac0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agent_rules'")).n;
+  var arOff = await callAs(U.sa, 'PATCH', '/agent-rules/' + arId, { enabled: 0 });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var uC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'agent_rules');
+  var ac1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agent_rules'")).n;
+  ok('U3 switching a rule off after approval → YELLOW "changed since approval" + one notification', arOff.status === 200 && uC.approval === 'yellow' && /changed since approval/.test(uC.approvalWhy || '') && ac1 > ac0, arOff.status + ' ' + uC.approval + ': ' + uC.approvalWhy + ' · ' + ac0 + '→' + ac1);
+  if (arId) await db.run('DELETE FROM agent_rules WHERE id = ?', [arId]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'agent_rules'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/agent_rules/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'agent_rules'");
+  if (arMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [arMark.item_key, arMark.marked_by, arMark.marked_by_name, arMark.marked_at, arMark.content_hash || null, arMark.notified_hash || null]);
+
+  console.log('\n=== V. VIDEO REDACTION OPTIONS (form) — one choice, and it has to be saved ===');
+  var avRow = await db.get("SELECT value FROM system_config WHERE key = 'av_redaction_mode'");
+  var avMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'av_redaction'");
+  await callAs(U.sup, 'DELETE', '/setup-hub/av_redaction/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'av_redaction'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'av_redaction'");
+  await db.run("DELETE FROM system_config WHERE key = 'av_redaction_mode'");
+  var vA = find((await callAs(U.sup, 'GET', '/setup-hub')).body, 'av_redaction');
+  var vRef = await callAs(U.sup, 'POST', '/setup-hub/av_redaction/done');
+  ok('V1 nothing saved → RED (the screen shows "internal", but that is the shipped default), approval refused 422', vA.approval === 'red' && /not decided/.test(vA.approvalWhy || '') && vRef.status === 422 && vRef.body.code === 'REQUIRED_MISSING', vA.approval + ': ' + vA.approvalWhy + ' · ' + vRef.status);
+  var vn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'av_redaction'")).n;
+  var vSave = await callAs(U.sup, 'POST', '/config', { av_redaction_mode: 'internal' });
+  var vB = find((await callAs(U.sup, 'GET', '/setup-hub')).body, 'av_redaction');
+  var vn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'av_redaction'")).n;
+  ok('V2 saving the SAME value deliberately is a decision → YELLOW, submitted, owners told once', vSave.status === 200 && vB.approval === 'yellow' && vB.ready && vn1 > vn0, vSave.status + ' ' + vB.approval + ': ' + vB.approvalWhy + ' · ' + vn0 + '→' + vn1);
+  var vApv = await callAs(U.sup, 'POST', '/setup-hub/av_redaction/done');
+  var vc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'av_redaction'")).n;
+  var vChg = await callAs(U.sup, 'POST', '/config', { av_redaction_mode: 'external' });
+  var vC = find((await callAs(U.sup, 'GET', '/setup-hub')).body, 'av_redaction');
+  var vc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'av_redaction'")).n;
+  ok('V3 approved, then the mode changed → YELLOW "changed since approval" + one notification', vApv.status === 200 && vChg.status === 200 && vC.approval === 'yellow' && /changed since approval/.test(vC.approvalWhy || '') && vc1 > vc0, vApv.status + '/' + vChg.status + ' ' + vC.approval + ' · ' + vc0 + '→' + vc1);
+  if (avRow) await db.run("INSERT INTO system_config (key, value) VALUES ('av_redaction_mode', ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [avRow.value]); else await db.run("DELETE FROM system_config WHERE key = 'av_redaction_mode'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'av_redaction'");
+  await callAs(U.sup, 'DELETE', '/setup-hub/av_redaction/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'av_redaction'");
+  if (avMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [avMark.item_key, avMark.marked_by, avMark.marked_by_name, avMark.marked_at, avMark.content_hash || null, avMark.notified_hash || null]);
+
+  console.log('\n=== W. REDACTION LAYOUT TEMPLATES (list) — the Mass Redaction screen wears the strip ===');
+  var ltMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'layout_templates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/layout_templates/done'); await callAs(U.dir, 'DELETE', '/setup-hub/layout_templates/ready');
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'layout_templates'");
+  var ltNew = await callAs(U.dir, 'POST', '/redaction-templates', { name: 'HUB template ' + TAG, zones: [{ page_no: 1, x: 0.1, y: 0.1, w: 0.2, h: 0.05, label: 'harness' }] });
+  var ltId = ltNew.body && ltNew.body.template && ltNew.body.template.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var wA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'layout_templates');
+  ok('W1 the templates library is a LIST row and the row still doors to /mass-redaction (which now wears the strip)', ltNew.status === 200 && !!ltId && wA.approvalModel === 'list' && wA.approval === 'yellow' && wA.door === '/mass-redaction' && /template/.test(wA.approvalWhy || ''), ltNew.status + ' ' + wA.approvalModel + '/' + wA.approval + ' ' + wA.door + ': ' + wA.approvalWhy);
+  var ltn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'layout_templates'")).n;
+  var ltRdy = await callAs(U.sup, 'POST', '/setup-hub/layout_templates/ready');
+  var ltApv = await callAs(U.dir, 'POST', '/setup-hub/layout_templates/done');
+  var wB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'layout_templates');
+  var ltn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'layout_templates'")).n;
+  ok('W2 declared ready (owners told once) then approved → GREEN', ltRdy.status === 200 && ltApv.status === 200 && wB.approval === 'green' && !wB.ready && ltn1 > ltn0, ltRdy.status + '/' + ltApv.status + ' ' + wB.approval + ' · ' + ltn0 + '→' + ltn1);
+  var ltc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'layout_templates'")).n;
+  var ltEdit = await callAs(U.dir, 'PATCH', '/redaction-templates/' + ltId, { name: 'HUB template ' + TAG + ' (renamed)' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var wC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'layout_templates');
+  var ltc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'layout_templates'")).n;
+  ok('W3 renaming a template after approval → YELLOW "changed since approval" + one notification (library CRUD only)', ltEdit.status === 200 && wC.approval === 'yellow' && /changed since approval/.test(wC.approvalWhy || '') && ltc1 > ltc0, ltEdit.status + ' ' + wC.approval + ': ' + wC.approvalWhy + ' · ' + ltc0 + '→' + ltc1);
+  if (ltId) await db.run('DELETE FROM layout_profiles WHERE id = ?', [ltId]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'layout_templates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/layout_templates/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'layout_templates'");
+  if (ltMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [ltMark.item_key, ltMark.marked_by, ltMark.marked_by_name, ltMark.marked_at, ltMark.content_hash || null, ltMark.notified_hash || null]);
 
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }

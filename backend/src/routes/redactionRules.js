@@ -3,6 +3,15 @@
 // from is_active (in effect). New rules enter pending_review + inactive; a supervisor approves them.
 const express = require('express');
 const router = express.Router();
+// The Redaction Rules Library is a LIST screen (approval model, SPEC_setup_hub §3e): every add / edit /
+// approve / activate / delete reports a change, so an approved library drops to yellow and the lane owners
+// (Senior Legal — the row is a legal section) hear once. After the response — best effort, never blocking.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { require('../services/setupHub').afterChange('redaction_rules', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth, requireRedactionWork, isElevated } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
