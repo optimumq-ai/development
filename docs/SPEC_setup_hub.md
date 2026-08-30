@@ -15,7 +15,7 @@ configured**, never from a checkbox; a person may additionally **mark it done** 
 | lane | title | owner = permission group(s) |
 |---|---|---|
 | 1 | Compliance and Policies Setup | `compliance_policy`; Legal sections `legal_rules` (Senior Legal owns; Director may) |
-| 2a | Request Fulfillment Process Setup — Fees, Estimates and Routing | `operations_config` (fee items also `fee_configuration`) |
+| 2a | Request Fulfillment Process Setup — Fees, Estimates and Routing (C8, 2026-08-30: the `fee_rates` "What this city actually charges" and `fee_test` "Try a test estimate" rows retired — both are Fee rules content, the schedule and its "Test an estimate" tab; `settlement` now waits on `fee_law`) | `operations_config` |
 | 2b | Request Fulfillment Process Setup — Redaction and Release | `operations_config` |
 | 3 | Organization Departments, Teams, and Staff Setup | `operations_config` |
 | 4 | Technical Setup | `system_admin` |
@@ -25,7 +25,7 @@ is the last row of lane 1; it is flipped on the Jurisdiction Configuration page 
 (ORO System Administrator **or** ORO Director) and is never "marked done".
 
 ## 3. Items
-The 35 items and their doors, dependencies and readers are the catalog in `services/setupHub.js` (`ITEMS`) —
+The 33 items (35 before C8, 2026-08-30) and their doors, dependencies and readers are the catalog in `services/setupHub.js` (`ITEMS`) —
 the inventory's numbering maps 1:1, with five amendments: `eligibility` ("Requestor eligibility")
 ADDED to the compliance lane (R1, 2026-08-27), `waiver_policy` RETIRED into the fee_law row (F2, 2026-08-27,
 renamed "Fee rules"), `deposits` ("Deposits and payment clock") RETIRED into the same row (F3, 2026-08-29),

@@ -2,7 +2,7 @@
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (design closed 2026-08-24; inventory in
 // WORKING_setup_inventory.md; canvas artboards in docs/mockups/setup_hub/).
 //
-// One page, five lanes, thirty-five items. Every item is: a plain-language NAME, the DOOR that sets it (an
+// One page, six lanes, thirty-three items. Every item is: a plain-language NAME, the DOOR that sets it (an
 // existing screen), an OWNER (a permission group — the hub gates on the user-type model, nothing else), an
 // EVIDENCE line counted from what is actually configured, and a STATE derived from that evidence:
 //
@@ -73,8 +73,10 @@ const ITEMS = [
   { key: 'law_updates', lane: 'compliance', name: 'Keeping up with changes in the law', door: '/admin?tab=updates', deps: ['agency'] },
   { key: 'go_live', lane: 'compliance', name: 'Turn the rules on for real', door: '/jurisdiction-config', deps: [], goLive: true },
   // ── Lane 2a ──
-  { key: 'fee_rates', lane: 'fulfillment_fees', name: 'What this city actually charges', door: '/admin?tab=fees', deps: ['fee_law'], groups: ['fee_configuration'] },
-  { key: 'fee_test', lane: 'fulfillment_fees', name: 'Try a test estimate', door: '/setup/fee-law?tab=test', deps: ['fee_rates', 'calibration'] },
+  // C8 (Kevin 2026-08-30): the 'fee_rates' ("What this city actually charges", the pre-migration name for
+  // the v1 rate table) and 'fee_test' ("Try a test estimate") rows are DELETED — both are the Fee rules row's
+  // content now (the fee schedule + its "Test an estimate" tab). The test-estimate status reader survives as
+  // `testEstimateStatus` for the Fee rules screen's tab badge.
   // C7 (Kevin 2026-08-29): 'Record types and categories' becomes 'Taxonomy' under System Features and
   // Options — same key, so the calibration dependency and the counted evidence carry over unchanged.
   { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/admin?tab=taxonomy', deps: ['sources'], softDeps: true },
@@ -104,7 +106,7 @@ const ITEMS = [
   { key: 'email', lane: 'technical', name: 'Email configuration', door: '/setup/email', deps: [] },
   { key: 'auth_policy', lane: 'technical', name: 'How staff sign in', door: '/admin?tab=config', deps: [] },
   { key: 'agent_rules', lane: 'technical', name: 'What the public portal assistant may say', door: '/admin?tab=security', deps: [] },
-  { key: 'settlement', lane: 'technical', name: 'Sending charges to the finance system', door: null, deps: ['fee_rates'], noScreen: true },
+  { key: 'settlement', lane: 'technical', name: 'Sending charges to the finance system', door: null, deps: ['fee_law'], noScreen: true },
 ];
 const BY_KEY = {}; ITEMS.forEach(function (i) { BY_KEY[i.key] = i; });
 const LANE_BY_KEY = {}; LANES.forEach(function (l) { LANE_BY_KEY[l.key] = l; });
@@ -134,6 +136,18 @@ function sectionEvidence(sec, extraLine) {
   if (sec.attested) return ev('ready', (extraLine ? extraLine + who(sec.attestedBy, sec.attestedAt) : (sec.attestedBy ? who(sec.attestedBy, sec.attestedAt).replace(/^ · /, '') : 'confirmed')));
   if (sec.unconfirmed > 0 && sec.settings && sec.settings.length) return ev('in_progress', (sec.settings.length - sec.unconfirmed) + ' of ' + sec.settings.length + ' choices made · not yet confirmed');
   return ev('in_progress', (extraLine ? extraLine + ' · ' : '') + 'not yet confirmed');
+}
+
+// The "Test an estimate" status the Fee rules screen shows on its test tab (the retired fee_test hub row's
+// reader, C8 2026-08-30): not_started until a run, needs_attention when the last run was against a version
+// other than the one in use, ready when confirmed, in_progress when the last run found issues.
+async function testEstimateStatus() {
+  var p = await get("SELECT status, test_status, test_by, test_at, test_config_ref FROM onboarding_progress WHERE phase_key = 'fees'");
+  var active = await get("SELECT version FROM fee_profiles WHERE context = 'FR' ORDER BY CASE WHEN status = 'active' THEN 0 ELSE 1 END, version DESC LIMIT 1");
+  if (!p || !p.test_status) return ev('not_started', 'no test estimate run yet');
+  if (active && p.test_config_ref != null && String(p.test_config_ref) !== String(active.version)) return ev('needs_attention', 'last run was against version ' + p.test_config_ref + ', not the one in use (' + active.version + ')');
+  if (p.test_status === 'confirmed') return ev('ready', 'test confirmed against the version in use' + who(p.test_by, p.test_at));
+  return ev('in_progress', 'last test found issues' + who(p.test_by, p.test_at).replace('confirmed by', 'run by'));
 }
 
 // ---- the evidence readers, one per item -----------------------------------------------------------
@@ -217,24 +231,6 @@ const READERS = {
     if (s.live) return ev('ready', 'enforcement is ON — the rules are real');
     if (!s.ready) return ev('waiting', 'until every rule above is confirmed · the ORO System Administrator or ORO Director flips it', { waitingOn: ['city_choices'], goLiveSummary: s });
     return ev('in_progress', 'everything is confirmed — ready to flip', { goLiveSummary: s });
-  },
-  fee_rates: async function (ctx) {
-    var active = await get("SELECT id, version, jurisdiction_id, config_json FROM fee_profiles WHERE context = 'FR' AND status = 'active' ORDER BY version DESC LIMIT 1");
-    if (!active) { var drafts = await count("SELECT COUNT(*) n FROM fee_profiles WHERE context = 'FR'"); return drafts ? ev('in_progress', drafts + ' draft version(s) · none in use') : ev('not_started', 'no fee schedule yet'); }
-    try {
-      var FB = require('./feeBounds'); var c = JSON.parse(active.config_json || '{}');
-      var gate = await FB.check(c, active.jurisdiction_id || null);
-      if (gate && gate.violations && gate.violations.length) return ev('needs_attention', 'version ' + active.version + ' in use · ' + gate.violations.length + ' rate(s) above a state limit');
-    } catch (e) { /* bounds unavailable: still a real profile */ }
-    return ev('ready', 'version ' + active.version + ' in use · every rate within the state limits');
-  },
-  fee_test: async function () {
-    var p = await get("SELECT status, test_status, test_by, test_at, test_config_ref FROM onboarding_progress WHERE phase_key = 'fees'");
-    var active = await get("SELECT version FROM fee_profiles WHERE context = 'FR' ORDER BY CASE WHEN status = 'active' THEN 0 ELSE 1 END, version DESC LIMIT 1");
-    if (!p || !p.test_status) return ev('not_started', 'no test estimate run yet');
-    if (active && p.test_config_ref != null && String(p.test_config_ref) !== String(active.version)) return ev('needs_attention', 'last run was against version ' + p.test_config_ref + ', not the one in use (' + active.version + ')');
-    if (p.test_status === 'confirmed') return ev('ready', 'test confirmed against the version in use' + who(p.test_by, p.test_at));
-    return ev('in_progress', 'last test found issues' + who(p.test_by, p.test_at).replace('confirmed by', 'run by'));
   },
   taxonomy: async function () {
     var n = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
@@ -428,4 +424,4 @@ async function build(user) {
   return { counts: counts, top: top, lanes: lanes, jurisdiction: ctx.jid, profileError: ctx.error || null };
 }
 
-module.exports = { LANES: LANES, ITEMS: ITEMS, BY_KEY: BY_KEY, build: build, mark: mark, unmark: unmark, mayEdit: mayEdit, READERS: READERS };
+module.exports = { LANES: LANES, ITEMS: ITEMS, BY_KEY: BY_KEY, build: build, mark: mark, unmark: unmark, mayEdit: mayEdit, READERS: READERS, testEstimateStatus: testEstimateStatus };

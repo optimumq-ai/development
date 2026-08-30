@@ -59,7 +59,7 @@ export default function FeeLawPage() {
   function goTab(k) { setParams(k === 'mandate' ? {} : { tab: k }); }
 
   var [data, setData] = useState(null);
-  var [hub, setHub] = useState(null);       // { fee_law, fee_test }
+  var [hub, setHub] = useState(null);       // { fee_law } (fee_test row retired C8 2026-08-30; the test tab reads data.testStatus)
   var [edits, setEdits] = useState({});
   var [err, setErr] = useState('');
   var [msg, setMsg] = useState('');
@@ -75,7 +75,7 @@ export default function FeeLawPage() {
   function load() {
     return Promise.all([api.get('/fee-law'), api.get('/setup-hub')]).then(function (r) {
       setData(r[0].data); setEdits({}); setWEdits({}); setClockEdits({});
-      var h = {}; r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'fee_law' || x.key === 'fee_test') h[x.key] = x; }); });
+      var h = {}; r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'fee_law') h[x.key] = x; }); });
       setHub(h); setErr('');
     }).catch(function (e) { setErr(errText(e, 'The fee-law screen could not load.')); });
   }
@@ -463,7 +463,7 @@ export default function FeeLawPage() {
           </div>
         </div> : null}
 
-        {tab === 'test' ? <TestTab data={data} hubTest={hub && hub.fee_test} can={can} onChanged={load} goTab={goTab} /> : null}
+        {tab === 'test' ? <TestTab data={data} hubTest={data.testStatus} can={can} onChanged={load} goTab={goTab} /> : null}
       </div>
 
       <StatutePopup info={statute} onClose={function () { setStatute(null); }} />
@@ -543,7 +543,7 @@ function TestTab(props) {
           <span style={{ display: 'inline-flex', alignItems: 'center', height: '22px', padding: '0 9px', borderRadius: '999px', background: tst.bg, color: tst.color, fontSize: '11px', fontWeight: '700' }}>{tst.label}</span>
           <span style={{ fontSize: '12px', fontWeight: '600' }}>Try a test estimate</span>
         </div>
-        <div style={Object.assign({}, hint, { marginTop: '4px' })}>{ht ? ht.evidence : ''} — the hub row this records to. {draftOnly ? 'The outcome can be recorded once a version is approved.' : 'Does the estimate on the right look right for this city?'}</div>
+        <div style={Object.assign({}, hint, { marginTop: '4px' })}>{ht ? ht.evidence + '. ' : ''}{draftOnly ? 'The outcome can be recorded once a version is approved.' : 'Does the estimate on the right look right for this city?'}</div>
         <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
           <button type="button" disabled={!can || draftOnly || busy !== ''} onClick={function () { record('confirmed'); }} style={btn(can && !draftOnly ? 'pri' : 'dis', { height: '32px' })}>{busy === 'confirmed' ? 'Recording…' : 'It behaves correctly'}</button>
           <button type="button" disabled={!can || draftOnly || busy !== ''} onClick={function () { record('issues'); }} style={btn(can && !draftOnly ? 'sec' : 'dis', { height: '32px' })}>{busy === 'issues' ? 'Recording…' : 'Something is off'}</button>

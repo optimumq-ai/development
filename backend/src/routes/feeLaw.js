@@ -28,6 +28,7 @@ router.get('/', requireAuth, async function (req, res) {
     var jid = await JR.activeJid();
     var s = await FL.screen(jid);
     s.canEdit = mayEdit(req.user);
+    s.testStatus = await HUB.testEstimateStatus(); // C8: the retired fee_test hub row's reader, for the test tab's badge
     res.json(s);
   } catch (e) { fail(res, e, 'The fee-law screen could not be read.'); }
 });
