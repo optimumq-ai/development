@@ -9573,3 +9573,39 @@ Hub 34 items, lanes [10,3,6,4,5,5].
 
 **NEXT:** Kevin renames the fulfillment-fees lane · the "How many days a task should take" design pass
 (+ calibration / record-ownership doors) · then redaction planning.
+
+## 2026-08-30 (G1) — "Set Up Guide" tab built (Plan A gantt, live); hub tab renamed "Settings and Configuration"; the magic_reset crash ROOT-CAUSED and fixed
+
+**Kevin's process for retiring Jurisdiction Configuration, step 1:** the gantt-style plan as a second
+Administration tab. **Correction recorded:** Plan A (`docs/mockups/setup_hub/PlanGantt.dc.html`, chosen
+2026-08-24) was a design canvas, never an app screen — the hub was built from its item list, not its layout.
+Built now as `pages/SetupGuidePage.js` on the same `GET /api/setup-hub` payload (no second catalog): six
+phases from the lanes, STEP = 1 + max(step of deps) computed live (agency 1 · no-deps 2 · go-live last),
+bars coloured by counted state, one dependency trunk per source, dashed feeds from last-step leaves into
+go-live, row click opens the door. Tabs: **Settings and Configuration** (the hub) · **Set Up Guide**; the
+SetupScreen back-pill says "Settings and Configuration". SPEC §3a added.
+
+**Inventory for Kevin's process (agent sweep, 2026-08-30):** what /jurisdiction-config still does that
+nothing else does — (1) the go-live flip + return to dev mode (the hub's go_live row doors back to it);
+(2) the propose-a-change composer (no /setup screen hosts one); (3) attest for `redaction`, `taxonomy`
+(screens exist, no fold) and `branches`/`disposition`/`ledger`/`template_import` (no screen at all — their
+editor was the retired /config tab; they also hold the auto-release switches and the de-minimis knob);
+(4) config-integrity findings; (5) per-domain provenance; (6) the `city_choices` row's door. Loose ends:
+`deadlines` has two live attest paths; AgencySetupPage links a "Regenerate from state rules" control that no
+longer exists; the sidebar "Find Same-Format Records" opens the Taxonomy screen.
+
+**verify_magic_reset — root cause, at last.** `SUITE_DUMP_DIR` caught it: "terminating connection due to
+administrator command". The harness calls `magic.reset()` service-direct, so the reset's own ad-hoc pools
+(benchmark / admin / build in `services/magicDemo.js`) are terminated by its OWN `pg_terminate_backend`;
+an unlistened node-pg pool 'error' kills the process. `src/db`'s shared pool already guarded itself
+(2026-08-14); the module's private pools did not. Fix: `quietPool()` — all four pools log-and-recover.
+Evidence: 3 consecutive single-harness passes on the guarded code (29/29 ×3) after 4 crashes in 7 full
+runs today. Live API restarted to load it.
+
+**Suite for G1:** full run 2672 passed / E1a / magic_reset crashed (pre-fix) → single-harness 29/29 →
+2701/2702, live census clean every run. The one red is the deferred verify_bw9_golive E1a (unchanged).
+
+**NEXT (Kevin's process):** step 2 onward for retiring Jurisdiction Configuration — the six capabilities
+above need homes (go-live flip → the hub/guide; composer placement; folds for redaction/taxonomy; the four
+screenless sections; integrity + provenance surfaces). Then the fulfillment lane rename, the task-days
+design pass, redaction planning.

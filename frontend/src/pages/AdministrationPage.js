@@ -2,6 +2,7 @@ import React from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import SetupHubPage from './SetupHubPage';
+import SetupGuidePage from './SetupGuidePage';
 
 // ADMINISTRATION (2026-08-01, Kevin's menu reorganization): the thirteen technical-setup screens under
 // ONE panel item, tabbed — the Organization-tab pattern applied to the config surface. Each tab RENDERS
@@ -10,7 +11,11 @@ import SetupHubPage from './SetupHubPage';
 // third-party user feedback before calling the grouping final.
 const TABS = [
   // H1 (2026-08-25): the Setup & Configuration HUB replaces the 7-phase wizard as the front door (SPEC_setup_hub.md).
-  { key: 'setup',        label: 'Setup',                el: SetupHubPage },
+  // Kevin 2026-08-30: the hub tab is 'Settings and Configuration'; 'Set Up Guide' is Plan A (the dependency
+  // gantt, docs/mockups/setup_hub/PlanGantt.dc.html) driven by the same hub data — the first step of retiring
+  // the Jurisdiction Configuration screen.
+  { key: 'setup',        label: 'Settings and Configuration', el: SetupHubPage },
+  { key: 'guide',        label: 'Set Up Guide',         el: SetupGuidePage },
   // C10–C11 (Kevin 2026-08-30): the v1 Configuration tab is RETIRED — its six sections are dedicated /setup
   // screens behind hub rows (authentication, notifications, video-redaction, time-capture, time-budgets,
   // agent-rules); ?tab=config lands on the hub.

@@ -81,10 +81,10 @@ export default function SetupScreen(props) {
   return (
     <div style={{ maxWidth: props.maxWidth || '860px', color: '#12232E' }}>
       <div style={Object.assign({}, card, { display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 14px', marginBottom: '14px' })}>
-        <button type="button" onClick={function () { nav('/admin?tab=setup'); }} title="Back to Setup and Configuration"
+        <button type="button" onClick={function () { nav('/admin?tab=setup'); }} title="Back to Settings and Configuration"
           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '26px', padding: '0 11px', border: 0, borderRadius: '999px', background: hubKey ? st.bg : '#F3F4F6', color: hubKey ? st.color : '#4B5563', fontSize: '11px', fontWeight: '700', fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap' }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          {hubKey ? st.label : 'Setup and Configuration'}
+          {hubKey ? st.label : 'Settings and Configuration'}
         </button>
         <span style={{ flexGrow: 1, fontSize: '12px', color: '#5C6F7C', lineHeight: '1.35' }}>{row ? row.evidence : (hubKey ? '' : (props.note || ''))}</span>
         <span style={{ fontSize: '11.5px', color: '#8296A4', whiteSpace: 'nowrap' }}>{props.laneLabel}</span>

@@ -39,6 +39,18 @@ Building those screens is later hub slices (H2+), decided item by item.
 
 **C11 (Kevin 2026-08-30) — the v1 Configuration page RETIRED.** Its six tabs are six dedicated screens, one hub row each: Authentication → `/setup/authentication` (`auth_policy`) · Notifications → `/setup/notifications` (`notifications`) · Redaction → `/setup/video-redaction` (`av_redaction`, new) · Time Tracking → `/setup/time-capture` (`time_tracking`) · Task Time Budgets → `/setup/time-budgets` (`time_budgets`) · Agent Rules → `/setup/agent-rules` (`agent_rules`, which had doored to the Portal Agent Security tab while its reader counted `agent_rules` rows). All wear the shared `SetupScreen` strip (state pill → hub, evidence, lane, Attest = the row's done-mark). `POST /api/config` now admits `av_redaction_mode` (it was read by `routes/avRedaction.js` but the v1 tab's Save silently dropped it) and lets `operations_config` holders write the four operational keys (`overdue_alert_days`, `escalation_days`, `ack_email`, `av_redaction_mode`); everything else stays system-authority. `/config` and `/admin?tab=config` land on the hub. The `time_tracking` reader now reads the real per-screen time-capture setting. Still to revisit after this (Kevin): AI Service Keys and the other hidden admin tabs.
 
+## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)
+The Administration page has two tabs: **Settings and Configuration** (the hub, above) and **Set Up Guide** —
+Plan A from `docs/mockups/setup_hub/PlanGantt.dc.html` (chosen 2026-08-24, built 2026-08-30 as
+`pages/SetupGuidePage.js`). Same `GET /api/setup-hub` payload, no second catalog: one row per item grouped
+into six phases (Foundation = the agency card · Technical connections = technical lane · People and
+departments = organization lane · Review the rules the law set = compliance lane minus go-live · How this
+city works a request = fulfillment-fees + redaction + features lanes · Go live); the column is the STEP,
+computed live as 1 + max(step of deps) (agency = 1, no-deps = 2, go-live = last); the bar is the item's
+counted state; arrows are the dependencies, one trunk per source; dashed lines run from last-step leaves
+into go-live; a row click opens the item's door. This is the first step of retiring the Jurisdiction
+Configuration screen (Kevin's process, 2026-08-30).
+
 ## 4. States (counted)
 `ready` · `in_progress` · `not_started` · `needs_attention` (was finished, came undone: drift, pending
 proposal, rate above a limit, failing connection) · `waiting` (a prerequisite is not ready). Rules:

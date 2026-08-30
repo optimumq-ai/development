@@ -91,11 +91,21 @@ function schemaTables() {
   return out;
 }
 
+// A pool whose idle-client errors are logged, not fatal. The swap terminates every connection to the
+// old database — including this module's own pools mid-`end()` — and node-pg raises 'error' on the pool;
+// with no listener the whole process dies (the test harness did, 4× on 2026-08-30: "terminating connection
+// due to administrator command"). src/db's shared pool already guards itself the same way.
+function quietPool(cfg) {
+  var p = new Pool(cfg);
+  p.on('error', function (e) { console.error('[magic pool] idle client error (recovering):', e && e.message); });
+  return p;
+}
+
 // ── BENCHMARK: dump every table of the CURRENT database to one replayable SQL file ──────────────
 async function benchmark(opts) {
   opts = opts || {};
   var url = dbUrl(); var name = dbName(url);
-  var pool = new Pool({ connectionString: url });
+  var pool = quietPool({ connectionString: url });
   try {
     var t = await tableOrder(pool);
     var known = schemaTables();
@@ -204,14 +214,14 @@ async function reset(opts) {
     : Math.max(0, Math.round((Date.now() - new Date(meta.taken_at).getTime()) / 1000));
 
   var buildName = name + '_magicbuild';
-  var admin = new Pool({ connectionString: adminUrl(url) });
+  var admin = quietPool({ connectionString: adminUrl(url) });
   var build = null;
   try {
     // 1. Fresh build database.
     await admin.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid()", [buildName]);
     await admin.query('DROP DATABASE IF EXISTS ' + buildName);
     await admin.query('CREATE DATABASE ' + buildName);
-    build = new Pool({ connectionString: withDb(url, buildName) });
+    build = quietPool({ connectionString: withDb(url, buildName) });
 
     // 2. Schema from empty — the same file the app boots from, FKs and guards armed.
     await build.query(fs.readFileSync(SCHEMA, 'utf8'));
