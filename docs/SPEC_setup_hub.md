@@ -117,8 +117,16 @@ Government adds region, Titan model, Bedrock key + secret). `verify_setup_hub` J
 The three organization rows share the Organization screen (`/org?tab=…`); each tab wears the strip of its own row.
 | Fee rules (`fee_law`) | tabs (decisions) | every deferral decided · both waiver choices · the clock's six when on · an APPROVED schedule version — exactly what the screen offers; the fees/fee_waiver/payment section knobs the screen does not surface stay with go-live (audit §3-E) | `routes/feeLaw.js` hook |
 | Clarification · Exemptions · Eligibility · Intake · Deadlines (5 rows) | decisions | every unconfirmed local policy setting of the row's section (`sectionRequired`) — the same rule go-live counts | `routes/requestRules.js` hook + `policy-settings/confirm` (domain → item) |
+| Redaction rules library (`redaction_rules`) | list | ≥1 rule approved AND in effect; health: rules waiting for a supervisor's approval · rules approved but switched off; "Ready for approval" and the approval are `legal_rules` acts (the row is a legal section) | `routes/redactionRules.js` finish hook (+ `policy-settings/confirm` domain `redaction`, already mapped) |
 
 `routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
+
+**Redaction rules library — design notes (2026-08-31).** A rule has its OWN two-step life (`approval_status`:
+a supervisor approves the rule · `is_active`: it is in effect) and that is NOT the hub's approval. Only a rule
+that is both approved and in effect counts toward the list; everything else is the health line the lane owner
+reads before approving ("4 waiting for approval · 1 approved but not in effect"). The `redaction` PROFILE
+SECTION is still attested on Jurisdiction Configuration — this row carries no `foldSections`, because the
+redaction rules-engine content is its own planned slice (I1's closing note); folding it belongs there.
 
 ## 3g′. FORM AND TABBED SCREENS SUBMIT THEMSELVES (Kevin 2026-08-30, BUILT)
 

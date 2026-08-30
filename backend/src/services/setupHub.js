@@ -260,10 +260,22 @@ const READERS = {
     return withSection(r, sec);
   },
   redaction_rules: async function (ctx) {
-    var n = await count("SELECT COUNT(*) n FROM redaction_rules WHERE approval_status = 'approved' AND is_active = 1");
-    var r = sectionEvidence(ctx.sections.redaction, n + ' rules');
-    if (r.state === 'not_started' && n > 0) return ev('in_progress', n + ' rules · section not confirmed');
-    return r;
+    // LIST MODEL (2026-08-31, §3e): the library is written over weeks, rule by rule. What COUNTS is a rule
+    // that is approved AND in effect; a rule still waiting for a supervisor's approval, or approved but
+    // switched off, is HEALTH the approver sees — it never blocks the colour. The digest covers every rule
+    // row, so an add / edit / approve / activate / delete after approval re-opens the row.
+    var rows = await all('SELECT id, title, category, approval_status, is_active FROM redaction_rules ORDER BY id');
+    var live = rows.filter(function (r0) { return r0.approval_status === 'approved' && Number(r0.is_active) === 1; }).length;
+    var pending = rows.filter(function (r0) { return r0.approval_status === 'pending_review'; }).length;
+    var idle = rows.filter(function (r0) { return r0.approval_status === 'approved' && Number(r0.is_active) !== 1; }).length;
+    var health = [];
+    if (pending) health.push(pending + ' waiting for approval');
+    if (idle) health.push(idle + ' approved but not in effect');
+    var xr = { list: { count: live, noun: 'rule', health: health.join(' · ') },
+      digest: digestOf(rows.map(function (r0) { return [r0.id, r0.title, r0.category, r0.approval_status, Number(r0.is_active) === 1]; })) };
+    var r = sectionEvidence(ctx.sections.redaction, live + ' rules');
+    if (r.state === 'not_started' && live > 0) r = ev('in_progress', live + ' rules · section not confirmed');
+    return Object.assign(r, xr);
   },
   city_choices: async function (ctx) {
     if (!ctx.settings) return ev('not_started', 'no jurisdiction profile chosen');

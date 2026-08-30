@@ -350,6 +350,40 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   if (nMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (item_key) DO NOTHING', [nMark.item_key, nMark.marked_by, nMark.marked_by_name, nMark.marked_at, nMark.content_hash, nMark.notified_hash]);
   await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('notifications','intake')");
 
+  console.log('\n=== O. REDACTION RULES LIBRARY (list) — approved AND in effect is the count; waiting-for-approval is health ===');
+  var rrMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'redaction_rules'");
+  await callAs(U.legal, 'DELETE', '/setup-hub/redaction_rules/done'); await callAs(U.legal, 'DELETE', '/setup-hub/redaction_rules/ready');
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'redaction_rules'");
+  var oNew = await callAs(U.legal, 'POST', '/redaction/rules', { title: 'HUB rule ' + TAG, description: 'Harness rule for the approval model — ' + TAG, category: 'privacy' });
+  var oRule = oNew.body && oNew.body.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var oA = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  ok('O1 the row is a LIST row and a rule still waiting for a supervisor is HEALTH, not a count', oNew.status === 200 && !!oRule && oA.approvalModel === 'list' && /waiting for approval/.test(oA.approvalWhy || ''), oNew.status + ' ' + oA.approvalModel + ' ' + oA.approval + ': ' + oA.approvalWhy);
+  var oAp = await callAs(U.legal, 'PATCH', '/redaction/rules/' + oRule + '/approve');
+  var oAc = await callAs(U.legal, 'PATCH', '/redaction/rules/' + oRule, { is_active: true });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var oB = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  ok('O2 approved and switched on → the rule counts; YELLOW "in progress" while nobody has declared the library complete (quiet)', oAp.status === 200 && oAc.status === 200 && oB.approval === 'yellow' && /in progress/.test(oB.approvalWhy || '') && /rule/.test(oB.approvalWhy || '') && !oB.ready, oAp.status + '/' + oAc.status + ' ' + oB.approval + ': ' + oB.approvalWhy);
+  var on0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'redaction_rules'")).n;
+  var oBad = await callAs(U.sa, 'POST', '/setup-hub/redaction_rules/ready');
+  var oRdy = await callAs(U.legal, 'POST', '/setup-hub/redaction_rules/ready');
+  var oC = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  var on1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'redaction_rules'")).n;
+  ok('O3 "Ready for approval" is a LEGAL act: Senior Legal declares it (recorded by name, owners told once), the SysAdmin gets 403', oBad.status === 403 && oRdy.status === 200 && oC.ready && /ready for approval/.test(oC.approvalWhy || '') && on1 > on0, oBad.status + '/' + oRdy.status + ' ' + JSON.stringify(oC.ready) + ' · ' + on0 + '→' + on1);
+  var oApv = await callAs(U.legal, 'POST', '/setup-hub/redaction_rules/done');
+  var oD = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  ok('O4 approval → GREEN and the declaration is cleared', oApv.status === 200 && oD.approval === 'green' && !oD.ready, oApv.status + ' ' + oD.approval + ': ' + oD.approvalWhy);
+  var oc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'redaction_rules'")).n;
+  var oDel = await callAs(U.legal, 'DELETE', '/redaction/rules/' + oRule);
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var oE = find((await callAs(U.legal, 'GET', '/setup-hub')).body, 'redaction_rules');
+  var oc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'redaction_rules'")).n;
+  ok('O5 deleting a rule after approval → YELLOW "changed since approval" + one notification (the route\'s finish hook)', oDel.status === 200 && oE.approval === 'yellow' && /changed since approval/.test(oE.approvalWhy || '') && oc1 > oc0, oDel.status + ' ' + oE.approval + ': ' + oE.approvalWhy + ' · ' + oc0 + '→' + oc1);
+  if (oRule) { await db.run('DELETE FROM rule_legal_sources WHERE rule_id = ?', [oRule]); await db.run('DELETE FROM redaction_rules WHERE id = ?', [oRule]); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'redaction_rules'");
+  await callAs(U.legal, 'DELETE', '/setup-hub/redaction_rules/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'redaction_rules'");
+  if (rrMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rrMark.item_key, rrMark.marked_by, rrMark.marked_by_name, rrMark.marked_at, rrMark.content_hash || null, rrMark.notified_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);
