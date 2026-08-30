@@ -9787,3 +9787,15 @@ Also still pending his answer: the parallel Opus agent (worktree, handoff order,
 
 **Converted (15):** + Staff Alerts. **NEXT:** Redaction rules library (list) · Update Configuration · Taxonomy /
 Workflow Rules / Process Map · features lane · full suite run.
+
+## 2026-08-30 — the acknowledgement on/off folded into Master.g4 (ack_email retired); hub 64/64, request-rules 48/48
+
+Kevin: fold it. `Master.g4` already offered "No automatic acknowledgment", so the separate switch was a duplicate
+decision. `requestCreate.acknowledgementOn()` (exported) reads the intake domain: send unless `no_auto` is
+CONFIRMED. Removed: the intake reader's extra requirement, the Intake-tab toggle, `ack_email` from `/config`
+(allow-list + operational keys + the compliance carve-out); hub G1 now uses `overdue_alert_days`. Harness order
+lesson (cost 20 min): `verify_request_rules` DL1/DL4/DL5 need the state LOCKED (7 clocks come from the state
+load) — run it after `verify_agency_setup` as the suite does; alone or after only `verify_setup_hub` it reads
+2 clocks and fails. Not a bug. Ran in suite order: hub 64/64, agency 20/20, fee-law 43/43, request-rules 48/48.
+The Opus agent (worktree `.claude/worktrees/agent-*`, branch `worktree-agent-*`) has committed Redaction rules
+library on the list model; it continues down the handoff order; merge + build + harness runs happen here.

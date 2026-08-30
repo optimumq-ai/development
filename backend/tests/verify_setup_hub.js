@@ -139,17 +139,17 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   ok('E1 a reader that throws yields an honest not_started line; the page still builds', ar && ar.state === 'not_started' && /could not read: boom/.test(ar.evidence) && broken.lanes.length === 6);
 
   console.log('\n=== G. POST /config GATING (C11: operational keys are operations_config; the rest system) ===');
-  var ack0 = await db.get("SELECT value FROM system_config WHERE key = 'ack_email'");
-  var g1 = await callAs(U.sup, 'POST', '/config', { ack_email: 'off' });
+  var ack0 = await db.get("SELECT value FROM system_config WHERE key = 'overdue_alert_days'");
+  var g1 = await callAs(U.sup, 'POST', '/config', { overdue_alert_days: '2' });
   var g2 = await callAs(U.sup, 'POST', '/config', { auth_mode: 'local' });
-  var g3 = await callAs(U.staff, 'POST', '/config', { ack_email: 'on' });
+  var g3 = await callAs(U.staff, 'POST', '/config', { overdue_alert_days: '1' });
   var g4 = await callAs(U.sa, 'POST', '/config', { av_redaction_mode: 'internal' });
-  var ack1 = await db.get("SELECT value FROM system_config WHERE key = 'ack_email'");
-  ok('G1 operations_config may write an operational key (ack_email) and it lands', g1.status === 200 && ack1 && ack1.value === 'off', g1.status);
+  var ack1 = await db.get("SELECT value FROM system_config WHERE key = 'overdue_alert_days'");
+  ok('G1 operations_config may write an operational key (overdue_alert_days) and it lands', g1.status === 200 && ack1 && ack1.value === '2', g1.status);
   ok('G2 operations_config is refused on a system key (auth_mode), by name', g2.status === 403 && g2.body && g2.body.code === 'AUTHORITY_REQUIRED', g2.status);
   ok('G3 staff without the group is refused on an operational key', g3.status === 403 && g3.body && g3.body.code === 'PERMISSION_REQUIRED', g3.status);
   ok('G4 system authority writes any key, incl. av_redaction_mode (now in the allow-list)', g4.status === 200, g4.status);
-  if (ack0) await db.run("UPDATE system_config SET value = ? WHERE key = 'ack_email'", [ack0.value]); else await db.run("DELETE FROM system_config WHERE key = 'ack_email'");
+  if (ack0) await db.run("UPDATE system_config SET value = ? WHERE key = 'overdue_alert_days'", [ack0.value]); else await db.run("DELETE FROM system_config WHERE key = 'overdue_alert_days'");
 
   console.log('\n=== H. THE APPROVAL MODEL (Kevin 2026-08-31) — red / yellow / green on the agency item ===');
   var AG_KEYS = ['agency_name', 'agency_short_name', 'jurisdiction_type', 'address_line1', 'address_city', 'address_state', 'address_zip', 'contact_email', 'contact_phone', 'state', 'state_locked_at', 'state_locked_by'];
@@ -327,7 +327,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   for (var mk2 of ['departments', 'teams', 'staff']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + mk2 + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + mk2 + '/ready'); if (mSave[mk2]) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [mSave[mk2].item_key, mSave[mk2].marked_by, mSave[mk2].marked_by_name, mSave[mk2].marked_at, mSave[mk2].content_hash || null]); }
 
   console.log('\n=== N. STAFF ALERTS (tabs) + the acknowledgement decision on Request Intake ===');
-  var nSave = {}; for (var nk of ['overdue_alert_days', 'escalation_days', 'ack_email']) { var nrow = await db.get('SELECT value FROM system_config WHERE key = ?', [nk]); nSave[nk] = nrow ? nrow.value : null; await db.run('DELETE FROM system_config WHERE key = ?', [nk]); }
+  var nSave = {}; for (var nk of ['overdue_alert_days', 'escalation_days']) { var nrow = await db.get('SELECT value FROM system_config WHERE key = ?', [nk]); nSave[nk] = nrow ? nrow.value : null; await db.run('DELETE FROM system_config WHERE key = ?', [nk]); }
   var nMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'notifications'"); await callAs(U.sa, 'DELETE', '/setup-hub/notifications/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'notifications'");
   var nA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'notifications');
   ok('N1 the row is "Staff Alerts", doors to /setup/staff-alerts, RED naming both deadline settings, Deadline alerts tab marked red', nA.name === 'Staff Alerts' && nA.door === '/setup/staff-alerts' && nA.approval === 'red' && /Overdue alert/.test(nA.approvalWhy || '') && /Supervisor escalation/.test(nA.approvalWhy || '') && nA.tabs && nA.tabs.deadlines === 'red', nA.name + ' ' + nA.door + ' ' + nA.approval + ': ' + nA.approvalWhy + ' ' + JSON.stringify(nA.tabs));
@@ -340,11 +340,6 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'POST', '/config', { escalation_days: '3' });
   var nC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'notifications');
   ok('N3 approval refused while red; one setting saved → still RED; both saved → YELLOW, tab mark clears', nR.status === 422 && nB.approval === 'red' && nC.approval === 'yellow' && nC.tabs.deadlines !== 'red', nR.status + ' ' + nB.approval + ' → ' + nC.approval);
-  var nI0 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'intake');
-  var nAckBad = await callAs(U.staff, 'POST', '/config', { ack_email: 'off' });
-  var nAck = await callAs(U.legal, 'POST', '/config', { ack_email: 'off' });
-  var nI1 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'intake');
-  ok('N4 the acknowledgement email is an INTAKE decision: missing there until saved; Senior Legal may record it; plain staff may not (403)', /acknowledgement/.test(nI0.approvalWhy || '') && nAck.status === 200 && nAckBad.status === 403 && !/acknowledgement/.test(nI1.approvalWhy || ''), nAck.status + '/' + nAckBad.status + ' · ' + nI0.approvalWhy + ' → ' + nI1.approvalWhy);
   for (var nk2 in nSave) { if (nSave[nk2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [nk2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [nk2, nSave[nk2]]); }
   await callAs(U.sa, 'DELETE', '/setup-hub/notifications/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key IN ('notifications','intake')");
   if (nMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (item_key) DO NOTHING', [nMark.item_key, nMark.marked_by, nMark.marked_by_name, nMark.marked_at, nMark.content_hash, nMark.notified_hash]);

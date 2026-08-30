@@ -271,6 +271,12 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
     i2.status === 200 && feeAfter.knobs['Master.p3'].city_config.confirmed === true &&
     JSON.stringify(feeAfter.knobs['Master.p3'].city_config.value) === JSON.stringify(['page_count', 'media', 'labor_class']), JSON.stringify(feeAfter.knobs['Master.p3'].city_config).slice(0, 160));
   var i3 = await callAs(U.dir, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g4', value: 'same_business_day' });
+  var RCa = require('/opt/optimumq/backend/src/services/requestCreate');
+  var ackSame = await RCa.acknowledgementOn();
+  var iNo = await callAs(U.dir, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g4', value: 'no_auto' });
+  var ackNo = await RCa.acknowledgementOn();
+  await callAs(U.dir, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g4', value: 'same_business_day' });
+  ok('IN4b the acknowledgment goes out unless the city CONFIRMS "No automatic acknowledgment" here (the old ack_email switch folded into Master.g4)', i3.status === 200 && iNo.status === 200 && ackSame === true && ackNo === false, [ackSame, ackNo].join('/'));
   ok('IN6 all three confirmed', i3.status === 200 && i3.body.screen.tabs.intake.unconfirmed === 0);
   var iStaff = await callAs(U.staff, 'POST', '/request-rules/intake/confirm', { path: 'knobs/Master.g4', value: 'same_business_day' });
   ok('IN7 staff cannot record intake choices', iStaff.status === 403);

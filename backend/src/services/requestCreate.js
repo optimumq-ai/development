@@ -511,9 +511,9 @@ async function createRequest(fields, opts) {
   // the "-1" component suffix), and an MRR acknowledges ONCE with every described record, not per
   // component. wrap:false infrastructure rows and explicit opt-outs (opts.sendConfirmation === false)
   // stay silent. Fire-and-forget: a mail outage must not fail a submission.
-  // The Notifications screen's 'Requestor acknowledgement email' switch (ack_email) is honoured here — it was
-  // saved and never read (static audit, 2026-08-30), so 'Disabled' sent the email anyway.
-  var ackOff = false; try { var ackRow = await require('../db').get("SELECT value FROM system_config WHERE key = 'ack_email'"); ackOff = !!(ackRow && ackRow.value === 'off'); } catch (e) {}
+  // Whether it goes out at all is the SAME intake decision (Master.g4's "No automatic acknowledgment" option —
+  // Kevin 2026-08-30, folding the old ack_email switch into it). Unconfirmed = send: the statutory-safe default.
+  var ackOff = !(await acknowledgementOn());
   if (wrap && opts.sendConfirmation !== false && cols.requestor_email && !ackOff) {
     try {
       require('./email').sendSubmissionConfirmation({
@@ -531,7 +531,16 @@ async function createRequest(fields, opts) {
   };
 }
 
-module.exports = {
+// The intake decision Master.g4 ("The acknowledgment, and when it goes out"): false only when the city has
+// CONFIRMED 'no_auto'. Unconfirmed or any timing value → the acknowledgment is sent. Exported for the harness.
+async function acknowledgementOn() {
+  try {
+    var JR = require('./jurisdictionRules'); var jid = await JR.activeJid(); if (!jid) return true;
+    var raw = await JR.read(jid, 'intake'); var cc = raw && raw.knobs && raw.knobs['Master.g4'] && raw.knobs['Master.g4'].city_config;
+    return !(cc && cc.confirmed === true && cc.value === 'no_auto');
+  } catch (e) { return true; }
+}
+module.exports = { acknowledgementOn: acknowledgementOn,
   createRequest: createRequest,
   nextRequestNumber: nextRequestNumber,
   COLUMNS: COLUMNS,

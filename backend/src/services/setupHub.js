@@ -241,15 +241,8 @@ const READERS = {
     return withSection(r, ctx.sections.clarification);
   },
   exemptions: async function (ctx) { return withSection(sectionEvidence(ctx.sections.exemption), ctx.sections.exemption); },
-  intake: async function (ctx) {
-    // + the requestor acknowledgement email (ack_email) — correspondence to the citizen, so it is an intake decision
-    // (moved from the Staff Alerts screen, 2026-08-30). It must be SAVED on or off; the wire key is unchanged.
-    var r = withSection(sectionEvidence(ctx.sections.intake), ctx.sections.intake);
-    var ack = await cfg('ack_email');
-    if (r.required) { r.required.total += 1; if (!ack) r.required.missing.push('Requestor acknowledgement email — not decided'); }
-    r.digest = digestOf([r.digest, ack || null]);
-    return r;
-  },
+  // (whether the acknowledgment goes out is Master.g4's 'no_auto' option — one of this tab's three choices)
+  intake: async function (ctx) { return withSection(sectionEvidence(ctx.sections.intake), ctx.sections.intake); },
   eligibility: async function (ctx) {
     var sec = ctx.sections.eligibility;
     var r = sectionEvidence(sec);

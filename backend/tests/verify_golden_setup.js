@@ -125,8 +125,6 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   var ints = ((tabs.intake || {}).choices || []); dFails = [];
   for (var i of ints) { var iv = i.value != null ? i.value : (i.suggested != null ? i.suggested : null); if (iv == null) continue; var r3 = await callAs(DIR, 'POST', '/request-rules/intake/confirm', { path: 'knobs/' + i.key, value: iv }); if (r3.status !== 200) dFails.push('intake ' + i.key + ': ' + err(r3)); }
   ok('D5 intake choices confirmed (' + ints.length + ')', dFails.length === 0, dFails.join(' | '));
-  var dAck = await callAs(DIR, 'POST', '/config', { ack_email: 'on' });
-  ok('D5b the requestor acknowledgement decision (an intake decision) recorded by the Director', dAck.status === 200, err(dAck));
   var dDl = await callAs(SA, 'POST', '/config', { overdue_alert_days: '1', escalation_days: '3' });
   ok('D5c Staff Alerts: both deadline settings saved (a shipped default is not a decision)', dDl.status === 200, err(dDl));
   var clocks = ((tabs.deadlines || {}).timers || (tabs.deadlines || {}).clocks || (tabs.deadlines || {}).rows || []); dFails = []; var targeted = 0;

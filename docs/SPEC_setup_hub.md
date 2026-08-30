@@ -145,12 +145,12 @@ redirects) is everything the bell tells staff.
   warns on a kind missing from the catalogue, so a new alert cannot ship unlisted. Counts nothing toward colour.
 - **Deadline alerts tab** — `overdue_alert_days` + `escalation_days`, both SAVED (tabbed pattern: the tab mark is
   red until then; the screen's pill is this tab alone; one approval).
-- The **requestor acknowledgement switch** (`ack_email`, wire key unchanged) moved to Request rules → Request
-  Intake as an intake decision: counted in that row's required set ("— not decided" until saved on or off),
-  `POST /config {ack_email}` alone is open to `compliance_policy` / `legal_rules` holders, and reports to `intake`.
-  Open (Kevin): the Intake tab already carries "The acknowledgment, and when it goes out" (`Master.g4`, timing +
-  text) — the on/off may belong INSIDE that choice as a "Do not send" option rather than beside it.
-Harness: `verify_setup_hub` N1–N4; golden D5b/D5c.
+- The **requestor acknowledgement on/off** is NOT a separate switch (Kevin 2026-08-30, folded): Request Intake's
+  choice "The acknowledgment, and when it goes out" (`Master.g4`) already carries "No automatic acknowledgment"
+  (`no_auto`). `requestCreate.acknowledgementOn()` reads it — the email goes out unless the city has CONFIRMED
+  `no_auto` (unconfirmed = send, the statutory-safe default). The `ack_email` system_config key is retired:
+  dropped from `/config`'s allow-list and the hub's readers; nothing reads it.
+Harness: `verify_setup_hub` N1–N3; golden D5c; request-rules IN4b.
 
 ## 3h. HOW TO CONVERT THE NEXT SCREEN — the recipe (2026-08-31)
 Pick the pattern by what the screen is, then do these steps; every converted screen so far follows them.

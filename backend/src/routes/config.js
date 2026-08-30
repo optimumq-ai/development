@@ -16,16 +16,15 @@ router.get('/', requireAuth, async function(req, res) {
 // redaction default) are owned by the operations_config group via their hub rows; everything else here is
 // system-authority. av_redaction_mode was READ (routes/avRedaction.js) but never in this list — the v1
 // Configuration tab's Save silently dropped it.
-var OPERATIONAL = ['overdue_alert_days', 'escalation_days', 'ack_email', 'av_redaction_mode'];
+var OPERATIONAL = ['overdue_alert_days', 'escalation_days', 'av_redaction_mode']; // ack_email retired 2026-08-30: Master.g4 'no_auto' is the decision
 router.post('/', requireAuth, async function(req, res) {
   var body = req.body || {};
   var keys = Object.keys(body);
   var onlyOperational = keys.length && keys.every(function (k) { return OPERATIONAL.indexOf(k) !== -1; });
-  var onlyAck = keys.length === 1 && keys[0] === 'ack_email'; // an intake decision (Request rules) — the compliance lane may write it
-  if (!(hasAuthority(req.user, 'system') || (onlyOperational && hasPermission(req.user, 'operations_config')) || (onlyAck && (hasPermission(req.user, 'compliance_policy') || hasPermission(req.user, 'legal_rules'))))) {
+  if (!(hasAuthority(req.user, 'system') || (onlyOperational && hasPermission(req.user, 'operations_config')))) {
     return res.status(403).json({ error: onlyOperational ? 'Changing these settings needs the operations_config permission group.' : 'This action needs the "system" authority, which none of your user types carries.', code: onlyOperational ? 'PERMISSION_REQUIRED' : 'AUTHORITY_REQUIRED' });
   }
-  var allowed = ['av_redaction_mode','agency_name','agency_short_name','jurisdiction_type','state','contact_email','contact_phone','auth_mode','mfa_mode','session_timeout','min_password_length','overdue_alert_days','escalation_days','ack_email','smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','new_request_alert_email','resend_api_key','resend_from'];
+  var allowed = ['av_redaction_mode','agency_name','agency_short_name','jurisdiction_type','state','contact_email','contact_phone','auth_mode','mfa_mode','session_timeout','min_password_length','overdue_alert_days','escalation_days','smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','new_request_alert_email','resend_api_key','resend_from'];
   for (var key of allowed) {
     if (body[key] !== undefined) {
       var existing = await get('SELECT key FROM system_config WHERE key = ?', [key]);
@@ -42,7 +41,6 @@ router.post('/', requireAuth, async function(req, res) {
     if (['auth_mode', 'mfa_mode', 'session_timeout', 'min_password_length'].some(function (k) { return body[k] !== undefined; })) await HUBc.afterChange('auth_policy', whoC);
     if (body.new_request_alert_email !== undefined) await HUBc.afterChange('email', whoC);
     if (['overdue_alert_days', 'escalation_days'].some(function (k) { return body[k] !== undefined; })) await HUBc.afterChange('notifications', whoC);
-    if (body.ack_email !== undefined) await HUBc.afterChange('intake', whoC);
     if (body.av_redaction_mode !== undefined) await HUBc.afterChange('av_redaction', whoC);
   } catch (eC) { /* notify is best-effort */ }
   res.json({ success: true });
