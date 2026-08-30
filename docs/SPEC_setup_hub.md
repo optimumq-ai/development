@@ -120,6 +120,33 @@ The three organization rows share the Organization screen (`/org?tab=…`); each
 
 `routes/config.js` also reports changes to `notifications` and `av_redaction` (still derived until converted).
 
+## 3h. HOW TO CONVERT THE NEXT SCREEN — the recipe (2026-08-31)
+Pick the pattern by what the screen is, then do these steps; every converted screen so far follows them.
+1. **Reader** (`services/setupHub.js` READERS[key]) — keep the counted state/evidence and ADD, via `ev(state, line, extra)`:
+   - **form:** `required: { missing: [labels], total }` for the fields the SCREEN offers (never something it cannot set), and
+     `digest: digestOf([...every saved value the screen holds])`.
+   - **list:** `list: { count, noun, health? }` (+ `notConnected` for connectors) and a `digest` of the rows.
+   - **tabs:** `required.missing` entries prefixed `"<Tab name>: "` and `tabs: { <tabKey>: 'red'|'ok' }`.
+   - **decisions (profile section):** `return withSection(sectionEvidence(sec), sec)` — done.
+2. **Change hook** — the screen's write route(s) call `HUB.afterChange('<key>', actorName)` after a successful save.
+   Router-level: `res.on('finish')` for POST/PATCH/PUT/DELETE (see `routes/repositories.js`); one handler:
+   call it before `res.json` (see `routes/agency.js`). Settings saved through `routes/config.js` /
+   `policy-settings/confirm`: extend the key→item / domain→item maps there.
+3. **Screen** — if it uses `components/setup/SetupScreen` nothing else is needed (pill, Approve/Re-approve,
+   Ready for approval on lists, changed-since notice are automatic). A screen with its own strip copies the
+   Agency/Email pattern: `APPROVAL` colours, `ap = hubRow.approval`, `approvalWhy` in the line,
+   `attested = signoff && !changedSinceApproval && ap !== 'red'`, button label from `changedSinceApproval`,
+   Approve disabled while red. Forms mark empty required fields (red border + "Required — enter a value and
+   save"); tabbed screens put a colour mark on each configurable tab from `row.tabs`.
+4. **Doors** — one row per screen, or `?tab=` doors when several rows share a screen (Organization, Request rules).
+5. **Harness** — a section in `verify_setup_hub` walking red → refused (422 REQUIRED_MISSING / NOTHING_ADDED) →
+   yellow → green → a change → yellow + one notification; save/restore the config keys it touches. If the
+   golden harness marks the row, make golden set what the row now requires.
+6. **Spec** — a row in the §3g table.
+Refusals to keep: a screen's required set is only what it can set itself; a shipped default is not a
+decision (Authentication); environment-provided secrets count as set (AI keys); lists stay quiet while they
+grow; approval is one act per screen by the lane owner.
+
 ## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)
 The Administration page has two tabs: **Settings and Configuration** (the hub, above) and **Set Up Guide** —
 Plan A from `docs/mockups/setup_hub/PlanGantt.dc.html` (chosen 2026-08-24, built 2026-08-30 as
