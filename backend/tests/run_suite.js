@@ -131,7 +131,8 @@ function run(cmd, argv, extraEnv) {
     if (!m) {
       broken++;
       console.log('  ⚠️  ' + h.padEnd(24) + 'NO SUMMARY — harness did not complete');
-      console.log(out.trim().split('\n').slice(-4).map((l) => '        ' + l).join('\n'));
+      // 30 lines, not 4: a Node crash trace is longer than that, and 4 lines once showed only '}' and the version.
+      console.log(out.trim().split('\n').slice(-30).map((l) => '        ' + l).join('\n'));
       continue;
     }
     pass += Number(m[1]); fail += Number(m[3]);
