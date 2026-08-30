@@ -112,6 +112,9 @@ router.post('/test/:which', requireAuth, admin, async function (req, res) {
       if (!to) return res.json({ ok: false, message: 'Enter a test recipient address.' });
       var email = require('../services/email');
       var r = await email.send({ to: to, subject: 'Optimum Q email test', text: 'This is a test message confirming your email settings work.', html: '<p>This is a test message confirming your email settings work.</p>' });
+      // Remember the outcome: the hub's Email row reads email_last_test_ok to say 'test message sent' (it was
+      // never written before — static audit 2026-08-30 — so the row could never reach ready).
+      try { if (r && r.sent) await setCfg('email_last_test_ok', 'true'); else await db.run("DELETE FROM system_config WHERE key = 'email_last_test_ok'"); } catch (e) {}
       return res.json({ ok: !!(r && r.sent), message: r && r.sent ? ('Test email sent via ' + (r.provider || 'SMTP') + '.') : 'Send failed - check the settings.' });
     }
     res.status(400).json({ ok: false, message: 'Unknown test.' });

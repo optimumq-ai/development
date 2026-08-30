@@ -511,7 +511,10 @@ async function createRequest(fields, opts) {
   // the "-1" component suffix), and an MRR acknowledges ONCE with every described record, not per
   // component. wrap:false infrastructure rows and explicit opt-outs (opts.sendConfirmation === false)
   // stay silent. Fire-and-forget: a mail outage must not fail a submission.
-  if (wrap && opts.sendConfirmation !== false && cols.requestor_email) {
+  // The Notifications screen's 'Requestor acknowledgement email' switch (ack_email) is honoured here — it was
+  // saved and never read (static audit, 2026-08-30), so 'Disabled' sent the email anyway.
+  var ackOff = false; try { var ackRow = await require('../db').get("SELECT value FROM system_config WHERE key = 'ack_email'"); ackOff = !!(ackRow && ackRow.value === 'off'); } catch (e) {}
+  if (wrap && opts.sendConfirmation !== false && cols.requestor_email && !ackOff) {
     try {
       require('./email').sendSubmissionConfirmation({
         request_number: requestNumber, requestor_email: cols.requestor_email,

@@ -7,7 +7,7 @@ authority and on nothing else (Kevin 2026-08-24: no stopgap).
 
 ## 1. What it is
 One page — Administration → Setup — that replaces the seven-phase wizard as the front door. Everything the city
-has to decide before it can answer records requests for real, as **five lanes of plain-language items**. Each
+has to decide before it can answer records requests for real, as **six lanes (five until C7, 2026-08-29) of plain-language items**. Each
 item opens the screen that sets it (the row is the button); its **state is counted from what is actually
 configured**, never from a checkbox; a person may additionally **mark it done** (sign-off Option A).
 
@@ -19,12 +19,14 @@ configured**, never from a checkbox; a person may additionally **mark it done** 
 | 2b | Request Fulfillment Process Setup — Redaction and Release (C11, 2026-08-30: `av_redaction` "Video Redaction Options" ADDED — the v1 Configuration Redaction tab as a dedicated screen, `/setup/video-redaction`) | `operations_config` |
 | 3 | Organization Departments, Teams, and Staff Setup | `operations_config` |
 | 4 | Technical Setup (C10, 2026-08-30: the `auth_policy` row is named "User Authentication Setup"; C11: it doors to its own screen `/setup/authentication`; `agent_rules` moved to System Features and Options; C14: `sources` renamed "Record Sources and Connectors", doors to its own screen `/setup/record-sources` (the admin Sources tab retired; `/sources` and `?tab=sources` redirect); C12: `ai_keys` + `ai_deployment` MERGED into one row `ai_config` "AI configuration" → `/setup/ai-configuration`, four tabs — AI Service Keys · Deployment Model · AI Touchpoints Information · AI Portal Security Information (C13: the informational Portal Agent Security admin page, retired; `/portal-security` and `?tab=security` redirect to it); the hidden Integrations tab and the AI Data Flow admin tab retired, `/integrations`, `/ai-data-flow`, `?tab=integrations`, `?tab=ai-data` redirect there) | `system_admin` |
-| 5 | System Features and Options (added 2026-08-29, C7: feature-catalog screens — Taxonomy first; the fulfillment lane's "Record types and categories" row moved here renamed, same key/deps/reader; the admin Taxonomy nav tab retired; C11, 2026-08-30: `time_budgets` "How many days a task should take" `/setup/time-budgets`, `time_tracking` renamed "Task Processing Time Capture" `/setup/time-capture`, `notifications` renamed "System Notifications" `/setup/notifications`, `agent_rules` renamed "Portal Agent Rules" `/setup/agent-rules` — each a dedicated screen wearing the shared `components/setup/SetupScreen` strip; C17: `taxonomy` (and the `calibration` / `record_owners` doors) → `/setup/taxonomy`, the hidden admin Taxonomy tab retired; User Types → `/setup/user-types` (no hub row; reached from Organization → Staff), the hidden User Types tab retired) | `operations_config` |
+| 5 | System Features and Options (added 2026-08-29, C7: feature-catalog screens — Taxonomy first; the fulfillment lane's "Record types and categories" row moved here renamed, same key/deps/reader; the admin Taxonomy nav tab retired; C11, 2026-08-30: `time_budgets` "How many days a task should take" `/setup/time-budgets`, `time_tracking` renamed "Task Processing Time Capture" `/setup/time-capture`, `notifications` renamed "System Notifications" `/setup/notifications`, `agent_rules` renamed "Portal Agent Rules" `/setup/agent-rules` (row gate `system_admin`, matching its API — audit 2026-08-31) — each a dedicated screen wearing the shared `components/setup/SetupScreen` strip; C17: `taxonomy` (and the `calibration` / `record_owners` doors) → `/setup/taxonomy`, the hidden admin Taxonomy tab retired; User Types → `/setup/user-types` (no hub row; reached from Organization → Staff), the hidden User Types tab retired) | `operations_config` |
 The **agency identity** card sits above the lanes ("Start here"; `operations_config` or `system_admin`). **Go-live**
 is the last row of lane 1; it is flipped on the Jurisdiction Configuration page by the `go_live` authority
 (ORO System Administrator **or** ORO Director) and is never "marked done".
 
 ## 3. Items
+_Item counts quoted inside the slice table further down (36, 35, [10,8,5,4,7]…) are as of each slice; the current catalog is 34 items in six lanes [10,3,6,4,5,5] and the request-rules tabs are items 1–5 of 10 since C1 removed the jurisdiction row (audit 2026-08-31)._
+
 The 34 items (35 before C8; 33 after it; 34 with C11's `av_redaction`; 33 after C12 merged the two AI rows; 34 with C15's `process_map` — all 2026-08-30) and their doors, dependencies and readers are the catalog in `services/setupHub.js` (`ITEMS`) —
 the inventory's numbering maps 1:1, with five amendments: `eligibility` ("Requestor eligibility")
 ADDED to the compliance lane (R1, 2026-08-27), `waiver_policy` RETIRED into the fee_law row (F2, 2026-08-27,
@@ -38,6 +40,21 @@ Five items have **no screen yet** (2.9 redaction automation, 2.10 release switch
 Building those screens is later hub slices (H2+), decided item by item.
 
 **C11 (Kevin 2026-08-30) — the v1 Configuration page RETIRED.** Its six tabs are six dedicated screens, one hub row each: Authentication → `/setup/authentication` (`auth_policy`) · Notifications → `/setup/notifications` (`notifications`) · Redaction → `/setup/video-redaction` (`av_redaction`, new) · Time Tracking → `/setup/time-capture` (`time_tracking`) · Task Time Budgets → `/setup/time-budgets` (`time_budgets`) · Agent Rules → `/setup/agent-rules` (`agent_rules`, which had doored to the Portal Agent Security tab while its reader counted `agent_rules` rows). All wear the shared `SetupScreen` strip (state pill → hub, evidence, lane, Attest = the row's done-mark). `POST /api/config` now admits `av_redaction_mode` (it was read by `routes/avRedaction.js` but the v1 tab's Save silently dropped it) and lets `operations_config` holders write the four operational keys (`overdue_alert_days`, `escalation_days`, `ack_email`, `av_redaction_mode`); everything else stays system-authority. `/config` and `/admin?tab=config` land on the hub. The `time_tracking` reader now reads the real per-screen time-capture setting. Still to revisit after this (Kevin): AI Service Keys and the other hidden admin tabs.
+
+## 3b. Dependencies and marks (fixed 2026-08-31)
+A prerequisite MARKED done counts as ready for its dependents — readiness is computed through the dependency
+chain, a mark never overrides `needs_attention`, and a marked row whose own prerequisites are not ready is
+still waiting. (Before: the dependency pass ran before marks applied, so email marked done left System
+Notifications waiting forever. `verify_setup_hub` C4.)
+
+## 3c. The golden-setup harness (2026-08-31)
+`tests/verify_golden_setup.js` configures a city end-to-end through the real APIs on the test DB — agency lock,
+organization, fee rules (every deferral decided, waiver, clock + six settings, approve v1), request rules,
+every remaining policy setting, proposals, every hub row marked, every section attested — and asserts
+go-live `ready === true`, the guide all green, the sandbox prices, and a portal submission gets a priced
+estimate. It runs LAST in the suite (before the reset) and cleans its marks and users. A refusal along the
+way is printed as a NOTE — the harness exists to say where the product cannot be configured through its
+own doors.
 
 ## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)
 The Administration page has two tabs: **Settings and Configuration** (the hub, above) and **Set Up Guide** —

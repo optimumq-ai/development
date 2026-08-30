@@ -41,7 +41,7 @@ role tables are gone. `services/userTypes.js`, `middleware/auth.js` primitives, 
 `tasks.js, staff.js; taskRouting` · Pages: MyTasksPage, EstimateTaskPage, StaffManagementPage
 
 ## 5. ✅ Request Lifecycle & Workflow Engine
-**Setup & Configuration HUB — `SPEC_setup_hub.md` (design closed 2026-08-24; H1 BUILT 2026-08-25):** five lanes of 36 counted items replace the wizard as the front door (Administration → Setup); gated on the user-type model. `services/setupHub.js`, `routes/setupHub.js`, `verify_setup_hub`.
+**Setup & Configuration HUB — `SPEC_setup_hub.md` (design closed 2026-08-24; H1 BUILT 2026-08-25):** six lanes of 34 counted items replace the wizard as the front door (Administration → Settings and Configuration; the Set Up Guide tab is the same items as a dependency plan); gated on the user-type model. `services/setupHub.js`, `routes/setupHub.js`, `verify_setup_hub`.
 
 **Go-live readiness / setup wizard / configuration gating (CAPTURED 2026-07-19, BUILD LATER):** `DESIGN_go_live_readiness.md` — what exists (wizard BUILT but gates nothing outside itself; attestation mechanism BUILT with ZERO attestations; `dev_mode=1` bypassing the one enforcement point), Kevin's go-live checklist requirement, and the gates-vs-wizard timing split. Reads with `AUTO_CONFIG_DESIGN.md` (trust model, go-live gate decided HARD), `ONBOARDING_TAXONOMY_GATING.md` (two-key licensing), `JURISDICTION_PROFILE_DESIGN.md` (attestation build + why hard-gating was deferred), and `BUSINESS_LEGAL_IP_LOG.md` (contract checklist, [FOR COUNSEL]). ⚠️ Records a fresh-install defect: the schema seeds 6 phases without `fees` and never writes `requires_review`, so a new install does NOT reproduce the live wizard.
 
@@ -72,16 +72,16 @@ Manual workspace, templates/profiles, rules & exemption library, structured reda
 
 ## 9. ✅ Sources, Imports & Connectors
 Record Sources model, import ingestion (drop-folder/watermark/scheduler), connector registry (11: axon, tyler, laserfiche, nena911, email, filestore, keyword, paperindex, structured, demo, registry), document processing/extraction.
-`repositories.js, integrations.js, extract.js; importIngest, docProcessing, recordMetaExtract, connectors/*` · Pages: SourcesPage, IntegrationsPage
+`repositories.js, integrations.js, extract.js; importIngest, docProcessing, recordMetaExtract, connectors/*` · Pages: RecordSourcesPage
 Known: import-vs-connector confusion (Kevin flagged; redesign candidate).
 
 ## 10. ✅ Jurisdiction & Configuration
 Jurisdiction profiles (state law), system config, onboarding wizard, config freshness, agent rules, decision reasons.
-`jurisdictionProfile.js, config.js, configFreshness.js, onboarding.js, agentRules.js, decisionReasons.js; jurisdictionProfile, effectiveConfig, configExtractors, configFreshness` · Pages: JurisdictionProfilePage, ConfigurationPage, SetupPage, RuleUpdatesPage
+`jurisdictionProfile.js, config.js, configFreshness.js, onboarding.js, agentRules.js, decisionReasons.js; jurisdictionProfile, effectiveConfig, configExtractors, configFreshness` · Pages: JurisdictionProfilePage, RuleUpdatesPage
 
 ## 11. ✅ Reporting & AI Help
 ARIA/AI reports, report engine, dashboards, in-app help agent.
-`reports.js, help.js; reportAgent, reportEngine, helpAgent` · Pages: ARIAReportsPage, AIReportingPage, AIDataFlowPage
+`reports.js, help.js; reportAgent, reportEngine, helpAgent` · Pages: ARIAReportsPage, AIReportingPage
 
 ## 12. ✅ Auth, Security & Platform
 Login/auth, secrets, departments/teams, email/Resend, geocode, PM2/nginx/Postgres+pgvector ops.

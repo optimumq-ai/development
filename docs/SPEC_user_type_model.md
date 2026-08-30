@@ -89,7 +89,7 @@ user_user_types       (user_id, user_type_id, team_id NULL, PRIMARY KEY (user_id
 `(user_id, user_type_id, COALESCE(team_id,''))` — a Postgres PRIMARY KEY cannot hold the NULL `team_id` an
 office type needs. Catalog ids are `ut-<key>`. The tables and catalog rows are seeded by `schema.postgres.sql`
 (applied at API boot, idempotent) and carried by `seed_fixture.sql`. The compat shim's type→legacy-perm mapping
-is also a small seeded table, `legacy_perm_map`, so the task-pool SQL predicate can join it; it is dropped in S5
+is also a small seeded table, `legacy_perm_map`, so the task-pool SQL predicate can join it; it is dropped in S5 **Correction (audit 2026-08-31): `legacy_perm_map` was NOT dropped — `services/taskRouting.js` joins it in the task-pool predicate; do not delete it on this sentence.**
 with the shim. `services/userTypes.js` holds the spec's tables as constants (`CATALOG`, `AUTHORITY`,
 `PERMISSION`, `TASK_MENU`, `LEGACY`) and `verify_user_types` A4 fails if the seeded tables ever differ from them.
 
@@ -347,7 +347,7 @@ consult legacy claims.
    chips; team types as chips that require a team (defaults to the person's team). Editable after
    creation (new PATCH). Task-subset picker filtered to the union of the person's type menus (§6);
    types with an empty menu hide the picker. Gated per §8.
-2. **User types** admin page (Administration → User types): read-only matrix of type × authority ×
+2. **User types** admin page (`/setup/user-types`, reached from Organization → Staff → View user types; the admin tab was retired 2026-08-30): read-only matrix of type × authority ×
    permission group × task menu, with editable display names. Exists so a city can *see* the model
    during demos; editing the matrix is out of v1.
 3. **Organization** screen: the team "View staff" popup shows each member's team-level types.

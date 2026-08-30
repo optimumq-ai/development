@@ -1,0 +1,7 @@
+// CRAWL SUMMARY: per route, across user types — errors, blocked writes on load, failed GETs, stuck loading, blank.
+const res=require(process.argv[2]);const by={};
+for(const r of res){if(r.skipped)continue;const k=r.route;by[k]=by[k]||{route:k,users:0,landed:new Set(),err:[],blocked:new Set(),failed:new Set(),pageErrors:new Set(),console:new Set(),loading:[],blank:[],couldNot:[]};const b=by[k];b.users++;b.landed.add(r.landed);
+ if(r.err)b.err.push(r.type+': '+r.err);r.blocked.forEach(x=>b.blocked.add(x));r.failed.forEach(x=>b.failed.add(r.type+' '+x));r.pageErrors.forEach(x=>b.pageErrors.add(x));r.console.forEach(x=>b.console.add(x.slice(0,120)));if(r.loading)b.loading.push(r.type);if(r.blank)b.blank.push(r.type);if(r.couldNot)b.couldNot.push(r.type+'×'+r.couldNot);}
+const rows=Object.values(by).map(b=>({route:b.route,users:b.users,landed:[...b.landed].join(' | '),err:b.err,blockedWritesOnLoad:[...b.blocked],failedGets:[...b.failed],pageErrors:[...b.pageErrors],consoleErrors:[...b.console],stuckLoading:b.loading,blank:b.blank,couldNotText:b.couldNot}));
+const flagged=rows.filter(r=>r.err.length||r.blockedWritesOnLoad.length||r.failedGets.length||r.pageErrors.length||r.stuckLoading.length||r.blank.length);
+console.log(JSON.stringify({routes:rows.length,records:res.length,flagged:flagged.length,flaggedRoutes:flagged,cleanRoutes:rows.filter(r=>!flagged.includes(r)).map(r=>r.route)},null,1));

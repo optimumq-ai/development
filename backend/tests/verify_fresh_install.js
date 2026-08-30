@@ -68,16 +68,14 @@ var EXPECTED = [
   ok('B2 the FEES phase is present and gated — it carries the version-bound sandbox gate',
     gated.some(function (r) { return r.phase_key === 'fees'; }));
 
-  console.log('\n=== C. THE FRONTEND CAN RENDER EVERY SEEDED PHASE ===');
-  // A phase seeded in the DB with no PHASE_META entry renders with no guide text and no deep link — a dead
-  // row in the wizard. This catches the schema and the UI drifting apart in either direction.
-  var fs = require('fs');
-  var setup = fs.readFileSync('/opt/optimumq/frontend/src/pages/SetupPage.js', 'utf8');
-  var meta = setup.slice(setup.indexOf('const PHASE_META'), setup.indexOf('};', setup.indexOf('const PHASE_META')));
+  console.log('\n=== C. EVERY SEEDED PHASE HAS A DOOR ON THE HUB ===');
+  // The onboarding wizard (SetupPage.js) is retired (2026-08-31; the hub replaced it 2026-08-25). A phase seeded in
+  // the DB must still map to a hub row with a door, or it is a dead row nothing can walk. (Was: PHASE_META check.)
+  var HUB = require('/opt/optimumq/backend/src/services/setupHub');
+  var DOOR_FOR = { jurisdiction: 'agency', departments: 'departments', teams: 'teams', ownership: 'record_owners', repositories: 'sources', fees: 'fee_law', redaction: 'redaction_rules' };
   for (var j = 0; j < rows.length; j++) {
-    var k = rows[j].phase_key;
-    ok('C1.' + j + ' SetupPage PHASE_META has an entry for "' + k + '" (guide + deep link)',
-      new RegExp('(^|[^A-Za-z_])' + k + '\\s*:').test(meta));
+    var k = rows[j].phase_key, hk = DOOR_FOR[k], item = hk && HUB.BY_KEY[hk];
+    ok('C1.' + j + ' phase "' + k + '" has a hub row with a door (' + (hk || '?') + ')', !!(item && item.door), item ? item.door : 'no mapping');
   }
 
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');

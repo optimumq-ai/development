@@ -9609,3 +9609,28 @@ runs today. Live API restarted to load it.
 above need homes (go-live flip → the hub/guide; composer placement; folds for redaction/taxonomy; the four
 screenless sections; integrity + provenance surfaces). Then the fulfillment lane rename, the task-days
 design pass, redaction planning.
+
+## 2026-08-31 (overnight) — the audit Kevin asked for; see docs/AUDIT_2026-08-31.md — COMMITTED, suite 2739/2740 (E1a the only red)
+
+**State when Kevin left:** the working tree holds ~26 uncommitted changes — the audit's fixes, the new
+`tests/verify_golden_setup.js` (37/37 alone), `tests/audit/*` tools, `docs/AUDIT_2026-08-31.md`,
+`docs/audit/*` (the two triage reports) and doc corrections. A detached chain
+`<scratchpad>/night.sh` (pidfile `night.pid`) is finishing the route crawl → staged frontend build (swap on
+success only) → full `npm test` with `SUITE_DUMP_DIR` → `night.status` / `night.log` in
+`/tmp/claude-998/-opt-optimumq/94a8435b-f829-40d0-9195-9f10f6192337/scratchpad/`.
+
+**Resolved before commit (session resumed ~05:46):** the night chain finished (crawl 495 loads / 9 flags, build swapped, suite 2713 + E1a + `verify_fresh_install` crashed reading the deleted SetupPage.js → its section C retargeted to hub doors, 26/26; golden 37/37, setup_hub 27/27, magic_reset 29/29 in the same run). Live API restarted. The checklist below is what was planned for a fresh session; it is done.
+
+**Morning checklist (done):** (1) read `night.log` — build swapped? suite at baseline (2701+37+1 ≈ 2739/2740, E1a
+the only red, LIVE UNTOUCHED)? (2) fill the two `__CRAWL_*__` placeholders and §5 in
+`docs/AUDIT_2026-08-31.md` from `audit/crawl_summary.json` (`node tests/audit/crawlsum.js`); (3) restart the
+live API (`kill $(pgrep -f "^node /opt/optimumq/backend/server.js")`) so the backend fixes load; (4) commit
+everything as one audit commit; (5) walk Kevin through §2 (fixed), §3 (his calls — MFA, the parent/child
+notices and the non-cascading auto-close sweeps are the ones that matter), and the golden harness. If the
+suite is NOT at baseline, the failing harness's full output is in `failed_<harness>.log` in the scratchpad.
+
+**What the audit found, one line:** the setup flow could not reach go-live through the screens (four
+readiness mismatches, now fixed — golden harness green); the app's "not ready / won't price" on live is
+otherwise DATA (Kevin's walk-through); and two families of real defects remain for Kevin: MFA is
+non-functional, and 21 parent/child-invariant violations (citizen notices quote child numbers; auto-close
+sweeps don't cascade).

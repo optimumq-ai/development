@@ -84,7 +84,9 @@ const ITEMS = [
   { key: 'time_budgets', lane: 'features', name: 'How many days a task should take', door: '/setup/time-budgets', deps: [] },
   { key: 'time_tracking', lane: 'features', name: 'Task Processing Time Capture', door: '/setup/time-capture', deps: [] },
   { key: 'notifications', lane: 'features', name: 'System Notifications', door: '/setup/notifications', deps: ['email'] },
-  { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [] },
+  // The agent-rules API is system-authority (routes/agentRules.js) — the row's gate says so too, or a Director
+  // sees live controls that 403 (spec/architecture audit 2026-08-31).
+  { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [], groups: ['system_admin'] },
   { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/setup/taxonomy', deps: ['taxonomy'] },
   // C15 (Kevin 2026-08-30): the admin Workflow and Process Map tabs become dedicated screens behind these rows.
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Workflow Rules', door: '/setup/workflow-rules', deps: ['departments', 'teams'] },
@@ -416,9 +418,23 @@ async function build(user) {
   }
   // Dependencies: a row whose prerequisite is not ready shows "waiting on X" — but stays open (never a lock).
   // An item's own counted state wins when it is already in progress or ready (work done by hand is real).
+  // A prerequisite MARKED done counts as ready for its dependents (golden-setup harness, 2026-08-30: email
+  // marked done still left 'When the system warns you' waiting, because this pass ran before marks applied).
+  // A mark never overrides needs_attention, and a marked row whose own prerequisites are not ready is itself
+  // still waiting — so readiness is computed through the chain.
+  var effMemo = {};
+  function effReady(key, seen) {
+    if (effMemo[key] != null) return effMemo[key];
+    seen = seen || {}; if (seen[key]) return false; seen[key] = true;
+    var it = BY_KEY[key], st = out[key];
+    var v = false;
+    if (st && st.state === 'ready') v = true;
+    else if (st && marks[key] && st.state !== 'needs_attention') v = (it.deps || []).every(function (d) { return !out[d] || effReady(d, seen); });
+    effMemo[key] = v; return v;
+  }
   ITEMS.forEach(function (it) {
     var r = out[it.key];
-    var notReady = (it.deps || []).filter(function (d) { return out[d] && out[d].state !== 'ready'; });
+    var notReady = (it.deps || []).filter(function (d) { return out[d] && !effReady(d); });
     if (notReady.length && (r.state === 'not_started' || r.state === 'waiting')) {
       r.state = 'waiting'; r.waitingOn = notReady;
       r.why = (it.softDeps ? 'One part of this step is not available yet. You can still open it and set it by hand. ' : 'Something else has to happen first. ') +

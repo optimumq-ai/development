@@ -206,7 +206,7 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
     if (ff.blocked) return res.status(409).json({ error: ff.reason, code: 'FEE_FORFEITED', citation: ff.citation, clock: ff.clock });
     var jid = await activeJurisdiction();
     var cfgRow = await pickConfig(jid);
-    if (!cfgRow) return res.status(400).json({ error: 'No fee configuration exists for the active jurisdiction. Set one up under Fee Configuration first.' });
+    if (!cfgRow) return res.status(400).json({ error: 'No fee configuration exists for the active jurisdiction. Set one up on Fee rules (Administration → Settings and Configuration → Fee rules) first.' });
     var config = {}; try { config = JSON.parse(cfgRow.config_json || '{}'); } catch (e) { config = {}; }
 
     var b = req.body || {};

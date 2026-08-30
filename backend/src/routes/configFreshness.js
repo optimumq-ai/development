@@ -147,6 +147,25 @@ router.post('/proposals/:id/apply', requireAuth, REVIEW, async function (req, re
     var ad = CE.adapter(pr.domain);
     if (!ad || !ad.apply) return res.status(400).json({ error: 'This domain is review-only; apply the change in its area editor.', reviewOnly: true });
     var cfg = b.editedConfig; if (cfg == null) { try { cfg = JSON.parse(pr.proposed_json || '{}'); } catch (e) { cfg = {}; } }
+    // STALE PROPOSALS (found by the golden-setup harness, 2026-08-30): a proposal's body is computed when it is
+    // PROPOSED. If the city changed the domain since — e.g. locked the state (which proposes template merges
+    // for existing domains) and then switched the payment clock on — applying the old body writes the old
+    // values back over the city's. A template merge is re-run against what is stored NOW (the city's values
+    // win, the template adds its evidence); any other proposal whose base moved is refused so it can be
+    // re-proposed from the current values.
+    if (b.editedConfig == null && pr.current_json) {
+      var JRx = require('../services/jurisdictionRules');
+      var nowCfg = null; try { nowCfg = await JRx.read(pr.jurisdiction_id, pr.domain); } catch (e) {}
+      var baseThen = null; try { baseThen = JSON.parse(pr.current_json); } catch (e) {}
+      if (nowCfg && baseThen && JSON.stringify(nowCfg) !== JSON.stringify(baseThen)) {
+        if (/^template:/.test(pr.source_ref || '')) {
+          var STI = require('../services/stateTemplateImport');
+          cfg = STI.mergeForDomain(pr.domain, nowCfg, cfg);
+        } else {
+          return res.status(409).json({ error: 'The ' + pr.domain + ' configuration has changed since this was proposed' + (pr.created_at ? ' (' + String(pr.created_at).slice(0, 10) + ')' : '') + '. Applying it now would write the older values back over the newer ones — dismiss it and propose the change again from the current values.', code: 'STALE_PROPOSAL' });
+        }
+      }
+    }
     var actor = (req.user && req.user.name) || 'staff';
     var eff = b.effectiveDate;
     if (eff && ad.applyMode === 'live' && eff > EC.today()) {

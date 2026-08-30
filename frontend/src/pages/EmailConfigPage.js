@@ -24,6 +24,7 @@ var card = { background: 'white', border: '1px solid #D2DCE3', borderRadius: '10
 export default function EmailConfigPage() {
   var nav = useNavigate();
   var [status, setStatus] = useState(null);
+  var [denied, setDenied] = useState(false);
   var [hubRow, setHubRow] = useState(null);
   var [form, setForm] = useState({ provider: 'smtp', from_name: '', smtp_host: '', smtp_port: '587', smtp_user: '', smtp_pass: '', smtp_from: '', resend_from: '', resend_api_key: '' });
   var [saving, setSaving] = useState(false);
@@ -47,7 +48,7 @@ export default function EmailConfigPage() {
       var h = await api.get('/setup-hub'); var row = null;
       h.data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'email') row = x; }); });
       setHubRow(row);
-    } catch (e) { /* the strip degrades to Not started; the form still loads what it can */ }
+    } catch (e) { if (e && e.response && e.response.status === 403) setDenied(true); /* otherwise the strip degrades to Not started; the form still loads what it can */ }
   }
   function set(k, v) { setForm(function (f) { var n = Object.assign({}, f); n[k] = v; return n; }); }
   async function save() {
@@ -75,6 +76,7 @@ export default function EmailConfigPage() {
     setBusy('');
   }
 
+  if (denied) return <div style={{ color: '#5C6F7C', padding: '40px' }}>Email configuration is set up by the System Administrator — your user type can't view these settings.</div>;
   if (!status) return <div style={{ color: '#9CA3AF', padding: '40px' }}>Loading email settings…</div>;
   var st = STATE[(hubRow && hubRow.state) || 'not_started'];
   var can = !!(hubRow && hubRow.canEdit);

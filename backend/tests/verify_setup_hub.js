@@ -93,6 +93,15 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var gl = find(page, 'go_live');
   ok('C2 the go-live row sits in lane 1, is never markable, and says who flips it', page.lanes[0].items.some(function (x) { return x.key === 'go_live'; }) && gl.goLive === true && (gl.state === 'ready' || /ORO System Administrator or ORO Director|ready to flip|enforcement/.test(gl.evidence)), gl && (gl.state + ': ' + gl.evidence));
 
+  // C4 (2026-08-30): a prerequisite MARKED done counts as ready for its dependents.
+  var emBefore = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
+  if (emBefore && emBefore.state !== 'needs_attention' && emBefore.state !== 'ready') {
+    await callAs(U.sa, 'POST', '/setup-hub/email/done');
+    var pg4 = (await callAs(U.sa, 'GET', '/setup-hub')).body; var nt4 = find(pg4, 'notifications'), em4 = find(pg4, 'email');
+    ok('C4 marking a prerequisite done releases its dependents (email marked → notifications no longer waiting)', em4.state === 'ready' && nt4.state !== 'waiting', em4.state + ' / ' + nt4.state + ': ' + nt4.evidence);
+    await callAs(U.sa, 'DELETE', '/setup-hub/email/done');
+  } else ok('C4 (skipped: email row is ' + (emBefore && emBefore.state) + ' on this fixture)', true);
+
   console.log('\n=== D. MARK IT DONE (Option A) ===');
   var item = 'time_budgets';   // System Features and Options: operations_config
   var m1 = await callAs(U.sup, 'POST', '/setup-hub/' + item + '/done');

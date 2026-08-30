@@ -120,7 +120,7 @@ export default function MagicPage() {
 
   function load() {
     api.get('/magic/status').then(function (r) { setSt(r.data); })
-      .catch(function (e) { setSt(e.response && e.response.status === 404 ? null : undefined); });
+      .catch(function (e) { var sc = e.response && e.response.status; setSt(sc === 404 ? null : (sc === 403 ? { denied: true } : undefined)); });
     api.get('/magic/cast').then(function (r) { setCast(r.data.cast || []); }).catch(function () {});
   }
   useEffect(function () { load(); }, []);
@@ -183,6 +183,7 @@ export default function MagicPage() {
   }
 
   if (st === undefined) return <div style={{ background: C.bg, minHeight: '100vh', color: C.faint, padding: 40, fontSize: 14 }}>Loading{'…'}</div>;
+  if (st && st.denied) return <div style={{ background: C.bg, minHeight: '100vh', color: C.faint, padding: 40, fontSize: 14 }}>The demo controls are for the System Administrator — your user type can't use this screen.</div>;
   if (st === null) return (
     <div style={{ background: C.bg, minHeight: '100vh', color: C.dim, padding: 40, fontSize: 14 }}>
       This install is not in demo mode — there is nothing here.

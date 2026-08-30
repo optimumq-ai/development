@@ -1,6 +1,6 @@
 # Portal Agent Security — Prompt-Injection Defense
 
-**For:** prospect security discussions. Explains what the public portal AI agent can reach, the code-enforced safeguards around it, and how the system defends against the prompt-injection attempts a citizen might try. Companion to the in-app **Admin → Portal Agent Security** screen.
+**For:** prospect security discussions. Explains what the public portal AI agent can reach, the code-enforced safeguards around it, and how the system defends against the prompt-injection attempts a citizen might try. Companion to the in-app **Administration → Settings and Configuration → AI configuration → AI Portal Security Information** screen.
 
 ## What the portal agent is (and isn't)
 The public chat agent is an **intake assistant**, not a records-access or redaction-control system. It never touches data directly. It emits text markers (`[[SEARCH_QUERY]]`, `[[EMAIL_SEARCH]]`, `[[SUBMIT_READY]]`, `[[FEE_WAIVER_INFO]]`); **application code** decides what each marker does and hands back only the result. The agent sees only what code returns.

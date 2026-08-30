@@ -8,7 +8,7 @@ Audited 2026-07-05.
 **The core redaction workflow uses NO cloud AI.** Mass redaction is template / field-map / manual (deterministic). The AI touchpoints on real documents are all **optional assist** features. So a strict city can run actual redaction with zero cloud AI today by not using the assist features. The sensitive AI surface is small, identifiable, and mostly optional.
 
 ## In-app view
-This audit is presented interactively at **Admin → AI Data Flow & Compliance**, where each touchpoint's **"View code"** reads the real source live from the running codebase, and the routing column updates with the selected deployment profile (Standard / Government / Air-gapped). This document is the matching leave-behind.
+This audit is presented interactively at **Administration → Settings and Configuration → AI configuration (the Deployment Model and AI Touchpoints Information tabs)**, where each touchpoint's **"View code"** reads the real source live from the running codebase, and the routing column updates with the selected deployment profile (Standard / Government / Air-gapped). This document is the matching leave-behind.
 
 ## SENSITIVE — Claude/Voyage sees content that can contain private records
 | Touchpoint | File / function | What it sends | Core/Optional | Routes to (Standard → Government) |

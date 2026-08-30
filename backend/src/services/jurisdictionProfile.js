@@ -135,7 +135,14 @@ async function signature(jid, section) {
   if (section === 'deadlines') { try { return await CE.adapter('deadline').current(jid); } catch (e) { return {}; } }
   if (section === 'clarification') { try { return await CE.adapter('clarification').current(jid); } catch (e) { return {}; } }
   if (section === 'payment') { try { return await CE.adapter('payment').current(jid); } catch (e) { return {}; } }
-  if (section === 'fee_waiver') { try { return await CE.adapter('fee_waiver').current(jid); } catch (e) { return {}; } }
+  if (section === 'fee_waiver') {
+    // The Fee rules screen (F2) records the waiver decisions in the approval module (who decides) — nothing on
+    // any screen sets feeWaiverPolicy.enabled any more, so readiness must read what the screen writes
+    // (golden-setup harness, 2026-08-30: the section stayed not_configured forever and go-live could never be ready).
+    var pol = {}; try { pol = await CE.adapter('fee_waiver').current(jid); } catch (e) {}
+    var mod = null; try { var AMx = require('./approvalModules'); var amRaw = await require('./jurisdictionRules').read(jid, AMx.DOMAIN); mod = amRaw && amRaw.fee_waiver ? { enabled: amRaw.fee_waiver.enabled === true, mode: amRaw.fee_waiver.mode || null } : null; } catch (e) {}
+    return Object.assign({}, pol, { module: mod });
+  }
   if (section === 'exemption') { try { return await CE.adapter('exemption').current(jid); } catch (e) { return {}; } }
   if (section === 'redaction') {
     var rows = await all("SELECT id, approval_status, is_active, COALESCE(updated_at, created_at) AS u FROM redaction_rules WHERE jurisdiction_id = ? ORDER BY id", [jid]);
@@ -161,7 +168,7 @@ function isConfigured(section, sig) {
   if (section === 'deadlines') return !!(sig.clocks && Object.keys(sig.clocks).length);
   if (section === 'clarification') return sig && sig.enabled === true;
   if (section === 'payment') return sig && sig.enabled === true;
-  if (section === 'fee_waiver') return sig && sig.enabled === true;
+  if (section === 'fee_waiver') return !!(sig && (sig.enabled === true || (sig.module && sig.module.enabled && sig.module.mode)));
   if (section === 'exemption') return !!sig.exemption_model;
   if (section === 'redaction') return (sig.count || 0) > 0;
   if (section === 'taxonomy') return (sig.count || 0) > 0;

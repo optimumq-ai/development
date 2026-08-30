@@ -781,7 +781,7 @@ async function importState(code, opts) {
   return result;
 }
 
-module.exports = {
+module.exports = { mergeForDomain: mergeForDomain,
   IMPORTER: IMPORTER, TEMPLATE_DIR: TEMPLATE_DIR,
   KNOB_DOMAIN: KNOB_DOMAIN, BRANCH_DETAIL_DOMAIN: BRANCH_DETAIL_DOMAIN,
   POLICED_FIELD_MAP: POLICED_FIELD_MAP, SUGGESTED_DEFAULTS: SUGGESTED_DEFAULTS,

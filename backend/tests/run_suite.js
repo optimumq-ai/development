@@ -37,6 +37,7 @@ const ALL = [
   'verify_e2e_tx', 'verify_e2e_oh',
   // LAST on purpose: it benchmarks, SWAPS, and restores the test database — the world it leaves is
   // its own benchmark, but nothing else should have to run after a database swap.
+  'verify_golden_setup',   // LAST before the reset: it configures the whole city and attests every section
   'verify_magic_reset',
 ];
 
@@ -141,6 +142,7 @@ function run(cmd, argv, extraEnv) {
       continue;
     }
     pass += Number(m[1]); fail += Number(m[3]);
+    if (Number(m[3]) && process.env.SUITE_DUMP_DIR) { try { require('fs').writeFileSync(path.join(process.env.SUITE_DUMP_DIR, 'failed_' + h + '.log'), out); } catch (e) { /* best effort */ } }
     console.log('  ' + (Number(m[3]) === 0 ? '✅' : '❌') + '  ' + h.padEnd(24) + m[0]);
     // Print WHICH assertions failed. Without this the runner tells you a harness is red but not why, and the
     // only way to find out is to re-run it by hand against a --keep'd DB that the run has already dirtied —
@@ -168,6 +170,7 @@ function run(cmd, argv, extraEnv) {
   }
 
   console.log('\n── result ──');
+  if (process.env.SUITE_DUMP_DIR) { try { require('fs').writeFileSync(path.join(process.env.SUITE_DUMP_DIR, 'api_log.txt'), apiLog); } catch (e) { /* best effort */ } }
   console.log('  ' + pass + ' passed, ' + fail + ' failed' + (broken ? ', ' + broken + ' harness(es) did not complete' : ''));
   if (keep) console.log('  (--keep: test DB and API on :' + env.API_PORT + ' left running)');
 

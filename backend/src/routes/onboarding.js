@@ -107,7 +107,7 @@ router.patch('/:phase/reviewer', requireAuth, EDIT, async function (req, res) {
     const u = await get("SELECT id FROM users WHERE id = ?", [reviewerId]);
     if (!u) return res.status(400).json({ error: 'Unknown reviewer' });
   }
-  await run("UPDATE onboarding_progress SET reviewer_id = ?, updated_at = datetime('now') WHERE phase_key = ?", [reviewerId, req.params.phase]);
+  await run("UPDATE onboarding_progress SET reviewer_id = ?, updated_at = now() WHERE phase_key = ?", [reviewerId, req.params.phase]);
   res.json({ success: true, phase: req.params.phase, reviewerId: reviewerId });
 });
 
@@ -117,7 +117,7 @@ router.post('/:phase/request-review', requireAuth, EDIT, async function (req, re
   if (!p) return res.status(404).json({ error: 'Unknown phase' });
   if (!p.requires_review) return res.status(400).json({ error: 'This phase does not require review' });
   if (!p.reviewer_id || !p.reviewer_email) return res.status(400).json({ error: 'Assign a reviewer with an email address first' });
-  await run("UPDATE onboarding_progress SET status = 'review_requested', review_requested_at = datetime('now'), updated_at = datetime('now') WHERE phase_key = ?", [req.params.phase]);
+  await run("UPDATE onboarding_progress SET status = 'review_requested', review_requested_at = datetime('now'), updated_at = now() WHERE phase_key = ?", [req.params.phase]);
   const agencyName = await cfg('agency_name') || 'Public Records';
   const appUrl = await cfg('app_url') || '';
   const link = appUrl + '/setup?phase=' + p.phase_key + '&review=1';
@@ -145,7 +145,7 @@ router.post('/:phase/approve', requireAuth, async function (req, res) {
     if (p.test_status !== 'confirmed') return res.status(400).json({ error: 'Run the fee/estimate test and confirm it behaves correctly before approving Fees & Estimates.' });
     if (curVer && String(p.test_config_ref) !== curVer) return res.status(400).json({ error: 'The fee configuration changed since the last test. Please re-run and confirm the fee test before approving.' });
   }
-  await run("UPDATE onboarding_progress SET status = 'complete', completed_by = ?, completed_at = datetime('now'), notes = ?, updated_at = datetime('now') WHERE phase_key = ?", [req.user.sub, req.body.notes || null, req.params.phase]);
+  await run("UPDATE onboarding_progress SET status = 'complete', completed_by = ?, completed_at = now(), notes = ?, updated_at = now() WHERE phase_key = ?", [req.user.sub, req.body.notes || null, req.params.phase]);
   res.json({ success: true, phase: req.params.phase, status: 'complete' });
 });
 
@@ -159,14 +159,17 @@ router.patch('/:phase', requireAuth, EDIT, async function (req, res) {
     return res.status(400).json({ error: 'This phase requires reviewer approval - use the approve action' });
   }
   if (status === 'complete') {
-    await run("UPDATE onboarding_progress SET status = ?, completed_by = ?, completed_at = datetime('now'), updated_at = datetime('now') WHERE phase_key = ?", [status, req.user.sub, req.params.phase]);
+    await run("UPDATE onboarding_progress SET status = ?, completed_by = ?, completed_at = now(), updated_at = now() WHERE phase_key = ?", [status, req.user.sub, req.params.phase]);
   } else {
-    await run("UPDATE onboarding_progress SET status = ?, completed_by = NULL, completed_at = NULL, review_requested_at = NULL, updated_at = datetime('now') WHERE phase_key = ?", [status, req.params.phase]);
+    await run("UPDATE onboarding_progress SET status = ?, completed_by = NULL, completed_at = NULL, review_requested_at = NULL, updated_at = now() WHERE phase_key = ?", [status, req.params.phase]);
   }
   res.json({ success: true, phase: req.params.phase, status: status });
 });
 
 // Record the fee/estimate sandbox test outcome on the Fees phase (mandatory before Fees approval).
+// (2026-08-30, golden-setup harness: updated_at / completed_at are TIMESTAMP columns — the datetime('now')
+// shim renders TEXT and Postgres refused every write here with a 500. now() for those two; test_at and
+// review_requested_at are TEXT columns and keep the shim.)
 router.post('/fees/test-result', requireAuth, editOrReviewer('fees'), async function (req, res) {
   const outcome = req.body.outcome;
   if (['confirmed', 'issues'].indexOf(outcome) < 0) return res.status(400).json({ error: 'outcome must be confirmed or issues' });
@@ -174,9 +177,9 @@ router.post('/fees/test-result', requireAuth, editOrReviewer('fees'), async func
   const fp = await get("SELECT version FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status='active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jr && jr.value]);
   const ver = fp ? String(fp.version) : null;
   if (outcome === 'confirmed') {
-    await run("UPDATE onboarding_progress SET test_status='confirmed', test_by=?, test_at=datetime('now'), test_notes=NULL, test_config_ref=?, updated_at=datetime('now') WHERE phase_key='fees'", [req.user.sub, ver]);
+    await run("UPDATE onboarding_progress SET test_status='confirmed', test_by=?, test_at=datetime('now'), test_notes=NULL, test_config_ref=?, updated_at = now() WHERE phase_key='fees'", [req.user.sub, ver]);
   } else {
-    await run("UPDATE onboarding_progress SET test_status='issues', test_by=?, test_at=datetime('now'), test_notes=?, status='in_progress', updated_at=datetime('now') WHERE phase_key='fees'", [req.user.sub, req.body.notes || null]);
+    await run("UPDATE onboarding_progress SET test_status='issues', test_by=?, test_at=datetime('now'), test_notes=?, status='in_progress', updated_at = now() WHERE phase_key='fees'", [req.user.sub, req.body.notes || null]);
   }
   res.json({ success: true, outcome: outcome });
 });
