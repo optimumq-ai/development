@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+// Workflow Rules is a LIST screen (approval model, SPEC_setup_hub §3e): writing, editing, switching off or
+// deleting a rule is a change on the `routing_rules` row. Router-level finish hook — best effort.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { require('../services/setupHub').afterChange('routing_rules', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { get, all, run } = require('../db');
 const { requireAuth, requirePermission } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');

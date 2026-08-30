@@ -14,6 +14,14 @@ goes red on the guide and waits to be noticed.
 way a saved change tells them re-approval is needed? It is the one setup row whose colour can move without
 anybody in the city doing anything.
 
+## Q3 — Process Map: is "approved" a meaningful act on a reference screen?
+`process_map` sets nothing — it is the shipped decision inventory and how much of it is built. Built as an
+ACKNOWLEDGEMENT (SPEC §3j): yellow until the lane owner approves, green after, yellow again if a release
+changes the model. The alternative is to give the row no colour at all (informational, like the Alerts tab
+of Staff Alerts, which counts nothing). The reason the conservative build gives it a colour: before the
+approval model it read GREEN before anybody had opened it, and green-for-free is the one thing the model
+must not do.
+
 ## Q2 — Update Configuration: is the reminder cadence really the city's decision?
 Built as required-and-saved (the Authentication precedent: a shipped default is not a decision). It is the
 weakest of the required sets so far — 182 days is a courtesy reminder, not a legal posture. If Kevin would

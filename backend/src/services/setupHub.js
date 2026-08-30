@@ -339,16 +339,29 @@ const READERS = {
     return ev(n >= m ? 'ready' : 'in_progress', n + ' of ' + m + ' record types calibrated', xcal);
   },
   routing_rules: async function () {
-    var n = await count('SELECT COUNT(*) n FROM workflow_rules WHERE enabled = 1');
-    return n ? ev('ready', n + ' routing rule' + (n > 1 ? 's' : '') + ' enabled') : ev('not_started', 'no routing rules written');
+    // LIST MODEL (§3e, 2026-08-31): routing rules are written one at a time. What counts is a rule that is
+    // ENABLED — a rule written and switched off is health, and the digest carries what each rule does, so
+    // editing a condition after approval re-opens the row.
+    var wrows = await all('SELECT id, name, enabled, priority, conditions, actions FROM workflow_rules ORDER BY priority, id');
+    var on = wrows.filter(function (w) { return Number(w.enabled) === 1; }).length;
+    var off = wrows.length - on;
+    var xwf = { list: { count: on, noun: 'routing rule', health: off ? off + ' rule' + (off > 1 ? 's' : '') + ' written but switched off' : '' },
+      digest: digestOf(wrows.map(function (w) { return [w.id, w.name, w.enabled, w.priority, w.conditions, w.actions]; })) };
+    return on ? ev('ready', on + ' routing rule' + (on > 1 ? 's' : '') + ' enabled' + (off ? ' · ' + off + ' switched off' : ''), xwf) : ev('not_started', 'no routing rules written', xwf);
   },
   process_map: async function () {
-    // Informational: the decision inventory (data/workflowModel) and how much of it is built today.
+    // ACKNOWLEDGEMENT (§3j, 2026-08-31): the Process Map sets nothing — it is the decision inventory
+    // (data/workflowModel) and how much of it is built today. There is nothing to fill in, so the required
+    // set is EMPTY: the row is yellow ("read it and approve") until the lane owner signs that they have,
+    // and green after. The digest is the model itself, so a release that adds or changes a decision point
+    // re-opens the row for a fresh read.
     var M = require('../data/workflowModel'); var nodes = M.nodes || (typeof M.build === 'function' ? M.build().nodes : null) || {};
-    var c = { built: 0, partial: 0, planned: 0 }; Object.keys(nodes).forEach(function (k) { var st = nodes[k].status; c[st] = (c[st] || 0) + 1; });
-    var total = Object.keys(nodes).length;
-    if (!total) return ev('not_started', 'no process model loaded');
-    return ev('ready', total + ' decision points · ' + c.built + ' built · ' + c.partial + ' partial · ' + c.planned + ' planned');
+    var keys = Object.keys(nodes);
+    var c = { built: 0, partial: 0, planned: 0 }; keys.forEach(function (k) { var st = nodes[k].status; c[st] = (c[st] || 0) + 1; });
+    var total = keys.length;
+    var xpm = { required: { missing: [], total: 0 }, digest: digestOf(keys.sort().map(function (k) { return [k, nodes[k].label, nodes[k].status, nodes[k].decider, nodes[k].phase]; })) };
+    if (!total) return ev('not_started', 'no process model loaded', { required: { missing: ['The process model could not be read'], total: 1 }, digest: 'none' });
+    return ev('ready', total + ' decision points · ' + c.built + ' built · ' + c.partial + ' partial · ' + c.planned + ' planned', xpm);
   },
   time_budgets: async function () {
     var rows = await all('SELECT task_type, budget_days FROM time_budgets WHERE record_type_id IS NULL');

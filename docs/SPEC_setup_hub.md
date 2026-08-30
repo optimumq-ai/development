@@ -123,6 +123,8 @@ The three organization rows share the Organization screen (`/org?tab=…`); each
 | How much work each record type takes (`calibration`) | list | ≥1 calibrated record type; health: how many are still to calibrate | same hook + `routes/estimateProfiles.js` finish hook |
 | Which department owns which records (`record_owners`) | list | ≥1 ownership assignment; health: record types with no owner | `routes/taxonomy.js` finish hook |
 The three taxonomy rows share the Taxonomy screen (`/setup/taxonomy?tab=calibration|owners`); the body is one page (the content really is shared) and the `?tab=` chooses which row the strip signs off.
+| Workflow Rules (`routing_rules`) | list | ≥1 ENABLED routing rule; health: rules written but switched off | `routes/workflow.js` finish hook |
+| Process Map (`process_map`) | acknowledgement (§3j) | nothing — the required set is empty; the lane owner's approval IS the act | none (no write path; the digest is the shipped model) |
 
 `routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
 
@@ -186,6 +188,18 @@ redirects) is everything the bell tells staff.
   Open (Kevin): the Intake tab already carries "The acknowledgment, and when it goes out" (`Master.g4`, timing +
   text) — the on/off may belong INSIDE that choice as a "Do not send" option rather than beside it.
 Harness: `verify_setup_hub` N1–N4; golden D5b/D5c.
+
+## 3j. ACKNOWLEDGEMENT SCREENS — nothing to fill in, and reading it is the act (2026-08-31, BUILT on Process Map)
+A fourth, small pattern for a setup row whose screen sets NOTHING: it explains how the product behaves and
+the city's only act is to read it and say so. Before the approval model these rows were counted `ready` and
+therefore GREEN before anyone had looked at them — the one colour the model must never hand out for free.
+Mechanics: the reader reports an EMPTY required set (`required: {missing: [], total: 0}`) plus a digest of
+the material. Colours then fall out of the form pattern unchanged — **yellow** "complete — awaiting approval"
+from the first page build (there is nothing to fill in, so it is never red), **green** on the lane owner's
+approval, and **yellow again** if the material changes under it (a release that adds a decision point
+re-opens the row for a fresh read). There is no write path, so no `afterChange` hook and no notification —
+the guide's colour is the whole signal. Process Map is the first (and so far only) screen on this pattern;
+`verify_setup_hub` R4–R5. A screen that sets even one thing is NOT this pattern — it is a form.
 
 ## 3h. HOW TO CONVERT THE NEXT SCREEN — the recipe (2026-08-31)
 Pick the pattern by what the screen is, then do these steps; every converted screen so far follows them.

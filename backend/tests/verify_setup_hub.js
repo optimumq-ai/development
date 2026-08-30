@@ -481,6 +481,38 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
     if (txSave[txk2]) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [txSave[txk2].item_key, txSave[txk2].marked_by, txSave[txk2].marked_by_name, txSave[txk2].marked_at, txSave[txk2].content_hash || null, txSave[txk2].notified_hash || null]);
   }
 
+  console.log('\n=== R. WORKFLOW RULES (list) + PROCESS MAP (acknowledgement — nothing to fill in, reading it is the act) ===');
+  var wfMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'routing_rules'");
+  var pmMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'process_map'");
+  for (var rk5 of ['routing_rules', 'process_map']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/ready'); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('routing_rules','process_map')");
+  var wfNew = await callAs(U.dir, 'POST', '/workflow/rules', { name: 'HUB rule ' + TAG, description: 'harness', priority: 900, conditions: [], actions: {} });
+  var wfId = wfNew.body && wfNew.body.rule && wfNew.body.rule.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var rA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'routing_rules');
+  ok('R1 Workflow Rules is a LIST row — enabled rules are the count', wfNew.status === 200 && !!wfId && rA.approvalModel === 'list' && rA.approval === 'yellow' && /routing rule/.test(rA.approvalWhy || ''), wfNew.status + ' ' + rA.approvalModel + '/' + rA.approval + ': ' + rA.approvalWhy);
+  var wn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'routing_rules'")).n;
+  var wfRdy = await callAs(U.sup, 'POST', '/setup-hub/routing_rules/ready');
+  var wfApv = await callAs(U.dir, 'POST', '/setup-hub/routing_rules/done');
+  var rB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'routing_rules');
+  var wn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'routing_rules'")).n;
+  ok('R2 declared ready (owners told once) then approved → GREEN', wfRdy.status === 200 && wfApv.status === 200 && rB.approval === 'green' && wn1 > wn0, wfRdy.status + '/' + wfApv.status + ' ' + rB.approval + ' · ' + wn0 + '→' + wn1);
+  var wc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'routing_rules'")).n;
+  var wfOff = await callAs(U.dir, 'PATCH', '/workflow/rules/' + wfId, { enabled: false });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var rC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'routing_rules');
+  var wc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'routing_rules'")).n;
+  ok('R3 switching a rule off after approval → YELLOW "changed since approval", the health line says so, one notification', wfOff.status === 200 && rC.approval === 'yellow' && /changed since approval/.test(rC.approvalWhy || '') && /switched off/.test(rC.approvalWhy || '') && wc1 > wc0, wfOff.status + ' ' + rC.approval + ': ' + rC.approvalWhy + ' · ' + wc0 + '→' + wc1);
+  var rD = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'process_map');
+  ok('R4 the Process Map counts as READ, not configured: nothing is missing, so it waits at YELLOW for the lane owner', rD.approvalModel === 'fields' && rD.approval === 'yellow' && /awaiting approval/.test(rD.approvalWhy || '') && /decision points/.test(rD.evidence || ''), rD.approvalModel + '/' + rD.approval + ': ' + rD.approvalWhy + ' · ' + rD.evidence);
+  var pmApv = await callAs(U.dir, 'POST', '/setup-hub/process_map/done');
+  var rE = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'process_map');
+  ok('R5 approving the Process Map is never refused (there is nothing to fill in) → GREEN by name and date', pmApv.status === 200 && rE.approval === 'green' && /approved by/.test(rE.approvalWhy || ''), pmApv.status + ' ' + rE.approval + ': ' + rE.approvalWhy);
+  if (wfId) await db.run('DELETE FROM workflow_rules WHERE id = ?', [wfId]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('routing_rules','process_map')");
+  for (var rk6 of ['routing_rules', 'process_map']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk6 + '/done'); await db.run('DELETE FROM setup_hub_ready WHERE item_key = ?', [rk6]); }
+  for (var rSaved of [wfMark, pmMark]) { if (rSaved) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rSaved.item_key, rSaved.marked_by, rSaved.marked_by_name, rSaved.marked_at, rSaved.content_hash || null, rSaved.notified_hash || null]); }
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);
