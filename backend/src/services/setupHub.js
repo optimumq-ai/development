@@ -105,9 +105,10 @@ const ITEMS = [
   { key: 'mass_schedule', lane: 'fulfillment_redaction', name: 'When bulk redaction runs', door: null, deps: [], noScreen: true },
   { key: 'av_redaction', lane: 'fulfillment_redaction', name: 'Video Redaction Options', door: '/setup/video-redaction', deps: [] },
   // ── Lane 3 ──
-  { key: 'departments', lane: 'organization', name: 'City departments', door: '/org', deps: [] },
-  { key: 'teams', lane: 'organization', name: 'Fulfillment teams', door: '/org', deps: ['departments'] },
-  { key: 'staff', lane: 'organization', name: 'Staff and what each person does', door: '/staff', deps: ['teams'] },
+  // LIST MODEL (2026-08-31): three rows, one Organization screen — each tab wears the strip of its own row.
+  { key: 'departments', lane: 'organization', name: 'City departments', door: '/org?tab=departments', deps: [] },
+  { key: 'teams', lane: 'organization', name: 'Fulfillment teams', door: '/org?tab=teams', deps: ['departments'] },
+  { key: 'staff', lane: 'organization', name: 'Staff and what each person does', door: '/org?tab=staff', deps: ['teams'] },
   { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/setup/taxonomy', deps: ['taxonomy', 'departments'] },
   // ── Lane 4 ──
   // C14 (Kevin 2026-08-30): renamed from 'Where the records live'; the admin Sources tab retired for its own screen.
@@ -330,23 +331,35 @@ const READERS = {
     return (ws || b) ? ev('ready', 'runs ' + (ws || '18:00') + ' · budget ' + (b || 500) + ' · no screen yet') : ev('not_started', 'running on the shipped defaults · no screen yet');
   },
   departments: async function () {
-    var n = await count("SELECT COUNT(*) n FROM departments WHERE active = 1 AND (kind IS NULL OR kind = 'department')");
-    return n ? ev('ready', n + ' departments') : ev('not_started', 'no departments yet');
+    // LIST MODEL (2026-08-31): red until the first department; 'Ready for approval' declares the list complete.
+    var rows = await all("SELECT id, name, code, processed_by, is_open_records, is_catch_all FROM departments WHERE active = 1 AND (kind IS NULL OR kind = 'department') ORDER BY id");
+    var n = rows.length;
+    var x = { list: { count: n, noun: 'department' }, digest: digestOf(rows) };
+    return n ? ev('ready', n + ' departments', x) : ev('not_started', 'no departments yet', x);
   },
   teams: async function () {
-    var teams = await count("SELECT COUNT(*) n FROM departments WHERE active = 1 AND kind = 'team'");
-    if (!teams) return ev('not_started', 'no fulfillment teams yet');
-    var unserved = await count("SELECT COUNT(*) n FROM departments WHERE active = 1 AND (kind IS NULL OR kind = 'department') AND is_open_records = 0 AND processed_by IS NULL");
-    return unserved ? ev('in_progress', teams + ' teams · ' + unserved + ' department' + (unserved > 1 ? 's have' : ' has') + ' no team to serve ' + (unserved > 1 ? 'them' : 'it')) : ev('ready', teams + ' teams · every department served');
+    // LIST MODEL (2026-08-31). Health: departments with no team to serve them (never blocks the colour).
+    var trows = await all("SELECT id, name, code, processed_by FROM departments WHERE active = 1 AND kind = 'team' ORDER BY id");
+    var served = await all("SELECT id, processed_by FROM departments WHERE active = 1 AND (kind IS NULL OR kind = 'department') ORDER BY id");
+    var teams = trows.length;
+    var unserved0 = await count("SELECT COUNT(*) n FROM departments WHERE active = 1 AND (kind IS NULL OR kind = 'department') AND is_open_records = 0 AND processed_by IS NULL");
+    var xt = { list: { count: teams, noun: 'team', health: unserved0 ? unserved0 + ' department' + (unserved0 > 1 ? 's have' : ' has') + ' no team to serve ' + (unserved0 > 1 ? 'them' : 'it') : '' }, digest: digestOf([trows, served]) };
+    if (!teams) return ev('not_started', 'no fulfillment teams yet', xt);
+    var unserved = unserved0;
+    return unserved ? ev('in_progress', teams + ' teams · ' + unserved + ' department' + (unserved > 1 ? 's have' : ' has') + ' no team to serve ' + (unserved > 1 ? 'them' : 'it'), xt) : ev('ready', teams + ' teams · every department served', xt);
   },
   staff: async function () {
-    var n = await count("SELECT COUNT(*) n FROM users WHERE status = 'active'");
+    // LIST MODEL (2026-08-31). Health: people with no user type.
+    var srows = await all("SELECT u.id, u.display_name, u.department_id, u.status, (SELECT string_agg(x.user_type_id || ':' || COALESCE(x.team_id, ''), ',' ORDER BY x.user_type_id) FROM user_user_types x WHERE x.user_id = u.id) AS types FROM users u WHERE u.status = 'active' ORDER BY u.id");
+    var n = srows.length;
+    var untyped0 = srows.filter(function (r) { return !r.types; }).length;
+    var xs = { list: { count: n, noun: 'person', health: untyped0 ? untyped0 + ' with no user type' : '' }, digest: digestOf(srows) };
     var untyped = await count("SELECT COUNT(*) n FROM users u WHERE u.status = 'active' AND NOT EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = u.id)");
     var searchers = await count("SELECT COUNT(DISTINCT user_id) n FROM user_task_types WHERE task_type = 'record_search'");
-    if (!n) return ev('not_started', 'no staff accounts yet');
-    if (untyped) return ev('in_progress', n + ' people · ' + untyped + ' with no user type');
-    if (!searchers) return ev('in_progress', n + ' people · nobody assigned to record search');
-    return ev('ready', n + ' people, all typed · ' + searchers + ' can search records');
+    if (!n) return ev('not_started', 'no staff accounts yet', xs);
+    if (untyped) return ev('in_progress', n + ' people · ' + untyped + ' with no user type', xs);
+    if (!searchers) return ev('in_progress', n + ' people · nobody assigned to record search', xs);
+    return ev('ready', n + ' people, all typed · ' + searchers + ' can search records', xs);
   },
   record_owners: async function () {
     var m = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
@@ -553,7 +566,8 @@ async function build(user) {
     if (r.list) {
       r.approvalModel = 'list';
       var noun = r.list.noun || 'item', n = r.list.count, plural = n === 1 ? noun : noun + 's';
-      var health = r.list.notConnected ? ' · ' + r.list.notConnected + ' not connected' : '';
+      var health = r.list.health ? ' · ' + r.list.health : (r.list.notConnected ? ' · ' + r.list.notConnected + ' not connected' : '');
+      var plural2 = noun === 'person' ? (n === 1 ? 'person' : 'people') : plural; plural = plural2;
       if (!n) { r.approval = 'red'; r.approvalWhy = 'nothing added yet — add the first ' + noun; }
       else if (!m) { r.approval = 'yellow'; r.approvalWhy = rd ? ('ready for approval — declared by ' + (rd.ready_by_name || rd.ready_by) + ' on ' + String(rd.ready_at).slice(0, 10) + ' · ' + n + ' ' + plural + health) : ('in progress — ' + n + ' ' + plural + health + ' · say "Ready for approval" when the list is complete'); }
       else if (changed) { r.approval = 'yellow'; r.approvalWhy = 'changed since approval by ' + (m.marked_by_name || m.marked_by) + ' on ' + String(m.marked_at).slice(0, 10) + ' — awaiting re-approval · ' + n + ' ' + plural + health; }

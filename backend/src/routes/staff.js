@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+// LIST MODEL (approval, 2026-08-31): every mutation reports a change so an approved list drops to yellow and the
+// lane owners hear once. After the response — best effort.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { var HUBr = require('../services/setupHub'); ['staff'].forEach(function (k) { HUBr.afterChange(k, req.user && (req.user.name || req.user.email)).catch(function () {}); }); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth, requireAuthority, requirePermission, hasAuthority } = require('../middleware/auth');
 // v3 (S2, SPEC_user_type_model §5 "Staff records split", §8 rows 3–4): creating/deactivating accounts and assigning
 // USER TYPES is the manage_users authority (sysadmin, director); editing a person's profile / team / specialization /

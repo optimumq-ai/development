@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+// LIST MODEL (approval, 2026-08-31): every mutation reports a change so an approved list drops to yellow and the
+// lane owners hear once. After the response — best effort.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { var HUBr = require('../services/setupHub'); ['departments','teams'].forEach(function (k) { HUBr.afterChange(k, req.user && (req.user.name || req.user.email)).catch(function () {}); }); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth, requirePermission } = require('../middleware/auth');
 // v3 (S2): departments / teams / record ownership are the operations_config group (§8 row 2). Reads stay requireAuth.
 const OPS = requirePermission('operations_config');

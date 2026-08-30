@@ -290,6 +290,25 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'DELETE', '/setup-hub/auth_policy/done');
   if (auMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [auMark.item_key, auMark.marked_by, auMark.marked_by_name, auMark.marked_at, auMark.content_hash || null]);
 
+  console.log('\n=== M. ORGANIZATION LISTS — departments / teams / staff on the list model ===');
+  var mSave = {}; for (var mkey of ['departments', 'teams', 'staff']) { mSave[mkey] = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = ?", [mkey]); await callAs(U.dir, 'DELETE', '/setup-hub/' + mkey + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + mkey + '/ready'); }
+  var mp = (await callAs(U.dir, 'GET', '/setup-hub')).body; var mD = find(mp, 'departments'), mT = find(mp, 'teams'), mS = find(mp, 'staff');
+  ok('M1 all three are list rows and yellow "in progress" on a populated fixture (counts in the line)', mD.approvalModel === 'list' && mT.approvalModel === 'list' && mS.approvalModel === 'list' && mD.approval === 'yellow' && mT.approval === 'yellow' && mS.approval === 'yellow' && /departments/.test(mD.approvalWhy || '') && /teams/.test(mT.approvalWhy || '') && /people|person/.test(mS.approvalWhy || ''), [mD, mT, mS].map(function (x) { return x.approval + ': ' + x.approvalWhy; }).join(' | '));
+  var mR = await callAs(U.sup, 'POST', '/setup-hub/departments/ready');
+  var mA = await callAs(U.dir, 'POST', '/setup-hub/departments/done');
+  var mD2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'departments');
+  ok('M2 a supervisor declares departments ready; the Director approves → GREEN', mR.status === 200 && mA.status === 200 && mD2.approval === 'green', mR.status + '/' + mA.status + ' ' + mD2.approval);
+  var mn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'departments'")).n;
+  var nd = await callAs(U.dir, 'POST', '/departments', { name: 'Hub Test Dept ' + TAG, code: 'HT' + TAG.slice(-4), kind: 'department' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var mD3 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'departments');
+  var mn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'departments'")).n;
+  ok('M3 adding a department after approval → YELLOW "changed since approval" + one notification', nd.status < 300 && mD3.approval === 'yellow' && /changed since approval/.test(mD3.approvalWhy || '') && mn1 > mn0, nd.status + ' ' + mD3.approval + ': ' + mD3.approvalWhy + ' · ' + mn0 + '→' + mn1);
+  var ndId = nd.body && (nd.body.id || (nd.body.department && nd.body.department.id));
+  if (ndId) await db.run('DELETE FROM departments WHERE id = ?', [ndId]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('departments','teams','staff')");
+  for (var mk2 of ['departments', 'teams', 'staff']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + mk2 + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + mk2 + '/ready'); if (mSave[mk2]) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [mSave[mk2].item_key, mSave[mk2].marked_by, mSave[mk2].marked_by_name, mSave[mk2].marked_at, mSave[mk2].content_hash || null]); }
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

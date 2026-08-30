@@ -9729,3 +9729,17 @@ pill). `verify_setup_hub` 54/54 (+K1–K5, L1–L3; C4 configures email first; D
 **NEXT:** City departments / Fulfillment teams / Staff (list pattern) · then the compliance lane's screens
 (Fee rules, Request rules tabs — the tabbed pattern with decisions as the required set) · Kevin's live
 walk-through · MFA · Jurisdiction Configuration retirement.
+
+## 2026-08-31 — City departments / Fulfillment teams / Staff on the list model; suite 2790/2791 (E1a the only red)
+
+The three organization rows share the Organization screen (`/org?tab=departments|teams|staff`); each tab
+wears the strip of its own row (SetupScreen keyed by tab). Readers report `list` + digest: departments (≥1),
+teams (health: departments with no team to serve them), staff (health: people with no user type).
+`routes/departments.js` (reports departments + teams) and `routes/staff.js` carry finish hooks. Hub harness
+57/57 (+M1–M3: supervisor declares departments ready, Director approves, an added department re-opens it with
+one notification), golden 39/39, user-types 77/77. SPEC §3g.
+
+**Converted so far (8):** Agency · Record Sources · AI configuration · Email · User Authentication ·
+Departments · Teams · Staff. **NEXT:** the compliance lane — Fee rules and the Request rules tabs (decisions
+as the required set; the tabbed pattern), Redaction rules library (list), Update Configuration; then
+Taxonomy / Workflow Rules / Process Map and the features lane.

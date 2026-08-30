@@ -111,6 +111,11 @@ Government adds region, Titan model, Bedrock key + secret). `verify_setup_hub` J
 | AI configuration (`ai_config`) | tabs | Keys: Anthropic + Voyage (environment counts) · Deployment: a model; Government adds region, Titan model, Bedrock key + secret | `routes/integrations.js` POST |
 | Email configuration (`email`) | form | provider; SMTP: host, port, from address · Resend: key, from address (the test send is evidence only) | `routes/integrations.js` POST (+ `routes/config.js` for the alert address) |
 | User Authentication Setup (`auth_policy`) | form | auth mode, MFA mode, session timeout, minimum password length — SAVED, a shipped default is not a decision | `routes/config.js` POST |
+| City departments (`departments`) | list | ≥1 department; "Ready for approval" | `routes/departments.js` finish hook (reports `departments` + `teams`) |
+| Fulfillment teams (`teams`) | list | ≥1 team; health: departments with no team to serve them | same hook |
+| Staff (`staff`) | list | ≥1 active person; health: people with no user type | `routes/staff.js` finish hook |
+The three organization rows share the Organization screen (`/org?tab=…`); each tab wears the strip of its own row.
+
 `routes/config.js` also reports changes to `notifications` and `av_redaction` (still derived until converted).
 
 ## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)

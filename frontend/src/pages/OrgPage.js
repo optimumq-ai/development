@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import SetupScreen from '../components/setup/SetupScreen';
 import api from '../lib/api';
 import StaffManagementPage from './StaffManagementPage';
 
@@ -26,7 +27,12 @@ function CodeChip({ code, color }) {
 }
 
 export default function OrgPage() {
-  const [tab, setTab] = useState('departments');
+  // LIST MODEL (2026-08-31): three hub rows share this screen — each tab wears the strip of its own row.
+  const [params, setParams] = useSearchParams();
+  const HUB_KEY = { departments: 'departments', teams: 'teams', staff: 'staff' };
+  const tabParam = params.get('tab');
+  const [tab, setTabState] = useState(HUB_KEY[tabParam] ? tabParam : 'departments');
+  function setTab(t) { setTabState(t); setParams({ tab: t }); }
   const nav = useNavigate();
   const [departments, setDepartments] = useState([]);
   const [staff, setStaff] = useState([]);
@@ -98,11 +104,10 @@ export default function OrgPage() {
   const TABS = [['departments', 'City Departments'], ['teams', 'Teams'], ['staff', 'Staff']];
 
   return (
-    <div style={{ maxWidth: '1100px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-      <div>
-        <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Organization</h1>
-        <p style={{ color: '#9CA3AF', fontSize: '14px', margin: 0 }}>City departments, the teams that fulfill their requests, and the staff on those teams — all in one place.</p>
-      </div>
+    <SetupScreen hubKey={HUB_KEY[tab]} laneLabel="Organization Departments, Teams, and Staff Setup" title="Organization" maxWidth="1100px"
+      intro="City departments, the teams that fulfill their requests, and the staff on those teams — all in one place.">
+    {function () { return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
       <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid #E5E7EB' }}>
         {TABS.map(t => (
@@ -338,5 +343,7 @@ export default function OrgPage() {
         </div>
       )}
     </div>
+    ); }}
+    </SetupScreen>
   );
 }
