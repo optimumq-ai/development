@@ -8,7 +8,7 @@ const PHASE_META = {
   departments:  { link: '/departments', linkLabel: 'Open City Departments', guide: "Confirm your city's departments so they match your org chart \u2014 add, remove, or rename as needed." },
   teams:        { link: '/departments', linkLabel: 'Open Fulfillment Teams', guide: "Define your Request Fulfillment Teams and select which departments each one serves." },
   ownership:    { link: '/taxonomy', linkLabel: 'Open Taxonomy', guide: "Confirm the owning City Department for each record type. AI proposes sensible defaults; you adjust." },
-  repositories: { link: '/sources', linkLabel: 'Open Sources', guide: "Connect your source systems and run discovery to catalog record types. Discovered types arrive as drafts for your review." },
+  repositories: { link: '/setup/record-sources', linkLabel: 'Open Record Sources and Connectors', guide: "Connect your source systems and run discovery to catalog record types. Discovered types arrive as drafts for your review." },
   fees:         { link: '/setup/fee-law', linkLabel: 'Open Fee rules', guide: "Set the fee schedule on Fee rules (what the law sets, what the city decides, and a test estimate); estimate calibration is per record type on Taxonomy." },
   redaction:    { link: '/redaction-rules', linkLabel: 'Open Redaction Rules', guide: "Review the AI-suggested jurisdiction redaction rules (drafts). Add, edit, or remove as needed \u2014 nothing takes effect until you approve it." },
 };

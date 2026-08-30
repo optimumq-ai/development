@@ -9482,3 +9482,25 @@ Map · Sources · Redaction Rules · Portal Agent Security (hidden: Taxonomy, Us
 **NEXT:** Kevin's remaining cleanup calls (the hidden Taxonomy / User Types tabs; whether Portal Agent
 Security wants a hub row now that `agent_rules` is its own screen) · the "How many days a task should take"
 design pass he deferred · then redaction planning.
+
+## 2026-08-30 (C13–C14) — Portal Agent Security folded into AI configuration; "Record Sources and Connectors" screen; suite 2701/2702 (E1a the only red)
+
+- **C13 (Kevin):** the Portal Agent Security admin page was informational quick-reference → it is now the AI
+  configuration screen's FOURTH tab, **"AI Portal Security Information"** (`components/setup/PortalSecurityInfo.js`,
+  the page body without its title). Tab deleted; `/portal-security` and `?tab=security` redirect. Fixed in
+  passing: 27 `\uXXXX` escapes sat in JSX text (✓ ↓ ✕ → rendered literally — inherited from v1); real
+  characters now. Zones tightened to fit the 860px setup width.
+- **C14 (Kevin):** hub row `sources` renamed **"Record Sources and Connectors"** (was "Where the records
+  live"), dooring to its own screen `/setup/record-sources` (`RecordSourcesPage` = the SetupScreen strip
+  around the unchanged `SourcesConfig`). The admin Sources tab deleted; `/sources` and `?tab=sources`
+  redirect; the old wizard's link repointed.
+
+**Admin strip now:** Setup · Update Configuration · Workflow · Process Map · Redaction Rules (hidden:
+Taxonomy, User Types). Hub still 33 items, lanes [10,2,6,4,5,5].
+
+**Suite: 2701/2702, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged).**
+(The C13-only run before the escape fix was 2700/2701 on the same red; `verify_magic_reset` completed both.)
+
+**NEXT:** Kevin's remaining cleanup calls (Update Configuration / Workflow / Process Map / Redaction Rules
+tabs; the hidden Taxonomy and User Types tabs) · the "How many days a task should take" design pass ·
+then redaction planning.

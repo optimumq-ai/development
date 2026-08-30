@@ -103,7 +103,8 @@ const ITEMS = [
   { key: 'staff', lane: 'organization', name: 'Staff and what each person does', door: '/staff', deps: ['teams'] },
   { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/admin?tab=taxonomy', deps: ['taxonomy', 'departments'] },
   // ── Lane 4 ──
-  { key: 'sources', lane: 'technical', name: 'Where the records live', door: '/admin?tab=sources', deps: [] },
+  // C14 (Kevin 2026-08-30): renamed from 'Where the records live'; the admin Sources tab retired for its own screen.
+  { key: 'sources', lane: 'technical', name: 'Record Sources and Connectors', door: '/setup/record-sources', deps: [] },
   // C12 (Kevin 2026-08-30): 'AI service keys' + 'Where AI processing happens' become ONE row and ONE screen
   // with three tabs (AI Service Keys · Deployment Model · AI Touchpoints Information); the hidden Integrations
   // tab and the AI Data Flow admin tab are retired.

@@ -6,9 +6,7 @@ import RuleUpdatesPage from './RuleUpdatesPage';
 import TaxonomyPage from './TaxonomyPage';
 import WorkflowPage from './WorkflowPage';
 import WorkflowMapPage from './WorkflowMapPage';
-import SourcesPage from './SourcesPage';
 import RedactionRulesPage from './RedactionRulesPage';
-import SecurityPage from './SecurityPage';
 import UserTypesPage from './UserTypesPage';
 
 // ADMINISTRATION (2026-08-01, Kevin's menu reorganization): the thirteen technical-setup screens under
@@ -30,11 +28,12 @@ const TABS = [
   { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage, hidden: true },
   { key: 'workflow',     label: 'Workflow',             el: WorkflowPage },
   { key: 'map',          label: 'Process Map',          el: WorkflowMapPage },
-  { key: 'sources',      label: 'Sources',              el: SourcesPage },
+  // C14 (Kevin 2026-08-30): the Sources tab is RETIRED — Record Sources and Connectors is /setup/record-sources.
   { key: 'redaction',    label: 'Redaction Rules',      el: RedactionRulesPage },
   // C3 (2026-08-29) hid the Integrations tab; C12 (Kevin 2026-08-30) RETIRED it and the AI Data Flow tab —
   // both live on the hub's one 'AI configuration' row (/setup/ai-configuration, three tabs).
-  { key: 'security',     label: 'Portal Agent Security', el: SecurityPage, admin: true },
+  // C13 (Kevin 2026-08-30): the Portal Agent Security tab is RETIRED — its reference content is the AI
+  // configuration screen's fourth tab, "AI Portal Security Information".
   // v3 user-type model (SPEC_user_type_model §10.2, S3): the catalog matrix. Visible to anyone who may see Administration.
   // C6 cleanup (Kevin 2026-08-29): the nav tab is gone — reached from the Organization page's Staff tab
   // ("View user types"); ?tab=user-types stays routable.
@@ -58,6 +57,8 @@ export default function AdministrationPage() {
   // RETIRED 2026-08-30 (C12): the Integrations and AI Data Flow tabs — AI configuration is one /setup screen.
   if (activeKey === 'integrations') return <Navigate to="/setup/ai-configuration?tab=keys" replace />;
   if (activeKey === 'ai-data') return <Navigate to="/setup/ai-configuration?tab=deployment" replace />;
+  if (activeKey === 'security') return <Navigate to="/setup/ai-configuration?tab=security" replace />;
+  if (activeKey === 'sources') return <Navigate to="/setup/record-sources" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
 import SetupScreen, { lbl, inp, hint, field, Msg, PrimaryButton, BLUE } from '../components/setup/SetupScreen';
+import PortalSecurityInfo from '../components/setup/PortalSecurityInfo';
 
 // AI CONFIGURATION — the hub's `ai_config` row (C12, Kevin 2026-08-30: the "AI Service Keys" and
 // "AI Data Flow and Compliance" items become ONE row and ONE screen with three tabs). Tab 1 "AI Service
@@ -9,9 +10,10 @@ import SetupScreen, { lbl, inp, hint, field, Msg, PrimaryButton, BLUE } from '..
 // profile section under its new name; tab 3 "AI Touchpoints Information" is that page's touchpoint
 // inspector. The hidden Integrations tab and the AI Data Flow admin tab are retired; /integrations,
 // /ai-data-flow, ?tab=integrations and ?tab=ai-data land here. Data: GET/POST /api/integrations ·
-// POST /api/integrations/test/:service · GET /api/integrations/touchpoint-code/:id.
+// POST /api/integrations/test/:service · GET /api/integrations/touchpoint-code/:id. Tab 4 "AI Portal
+// Security Information" (C13) is the retired Portal Agent Security admin page — static reference content.
 
-var TABS = [['keys', 'AI Service Keys'], ['deployment', 'Deployment Model'], ['touchpoints', 'AI Touchpoints Information']];
+var TABS = [['keys', 'AI Service Keys'], ['deployment', 'Deployment Model'], ['touchpoints', 'AI Touchpoints Information'], ['security', 'AI Portal Security Information']];
 var TOUCHPOINTS = [
   { id: 'zone-discovery', feature: 'Redaction zone discovery', fn: 'services/zoneDiscovery.js → discoverZones()', data: 'Full unredacted page text of the document', sensitive: true, core: false, kind: 'llm' },
   { id: 'intake-extract', feature: 'Intake document extraction', fn: 'routes/extract.js', data: 'Raw uploaded request letter (PDF / image)', sensitive: true, core: false, kind: 'llm' },
@@ -117,7 +119,7 @@ export default function AiConfigurationPage() {
 
   return (
     <SetupScreen hubKey="ai_config" laneLabel="Technical Setup" title="AI configuration"
-      intro="Everything about how this installation uses AI: the service keys it signs in with, the deployment model that decides where AI processing runs, and a plain inventory of every place the software calls an AI service and what it sends.">
+      intro="Everything about how this installation uses AI: the service keys it signs in with, the deployment model that decides where AI processing runs, a plain inventory of every place the software calls an AI service and what it sends, and how the public portal assistant is kept away from sensitive data.">
       {function (s) {
         if (!status) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
         var a = (status.ai && status.ai.anthropic) || {}, v = (status.ai && status.ai.voyage) || {}, dep = status.deployment || {};
@@ -214,6 +216,8 @@ export default function AiConfigurationPage() {
                 </div>
               </div>
             ) : null}
+
+            {tab === 'security' ? <PortalSecurityInfo /> : null}
           </div>
         );
       }}

@@ -20,6 +20,7 @@ import TimeCapturePage from './pages/TimeCapturePage';
 import TimeBudgetsPage from './pages/TimeBudgetsPage';
 import AgentRulesPage from './pages/AgentRulesPage';
 import AiConfigurationPage from './pages/AiConfigurationPage';
+import RecordSourcesPage from './pages/RecordSourcesPage';
 import FeeLawPage from './pages/FeeLawPage';
 import RequestRulesPage from './pages/RequestRulesPage';
 import ReportsHubPage from './pages/ReportsHubPage';
@@ -150,7 +151,7 @@ export default function App() {
           <Route path="admin" element={<AdministrationPage />} />
           <Route path="integrations" element={<Navigate to="/setup/ai-configuration?tab=keys" replace />} />
           <Route path="ai-data-flow" element={<Navigate to="/setup/ai-configuration?tab=deployment" replace />} />
-          <Route path="portal-security" element={<Navigate to="/admin?tab=security" replace />} />
+          <Route path="portal-security" element={<Navigate to="/setup/ai-configuration?tab=security" replace />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="setup" element={<Navigate to="/admin?tab=setup" replace />} />
@@ -164,6 +165,7 @@ export default function App() {
           <Route path="setup/time-budgets" element={<TimeBudgetsPage />} />
           <Route path="setup/agent-rules" element={<AgentRulesPage />} />
           <Route path="setup/ai-configuration" element={<AiConfigurationPage />} />
+          <Route path="setup/record-sources" element={<RecordSourcesPage />} />
           <Route path="setup/fee-law" element={<FeeLawPage />} />
           {/* Clarification · Exemptions · Requestor eligibility — three hub rows, one screen (2026-08-27). */}
           <Route path="setup/request-rules" element={<RequestRulesPage />} />
@@ -171,7 +173,7 @@ export default function App() {
           <Route path="workflow" element={<Navigate to="/admin?tab=workflow" replace />} />
           <Route path="workflow-map" element={<Navigate to="/admin?tab=map" replace />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
-          <Route path="sources" element={<Navigate to="/admin?tab=sources" replace />} />
+          <Route path="sources" element={<Navigate to="/setup/record-sources" replace />} />
           <Route path="redaction-rules" element={<Navigate to="/admin?tab=redaction" replace />} />
           {/* Redaction TEMPLATE authoring — samples on the SYS-TEMPLATE-SAMPLES pseudo-request, which has
               no task and never will. Citizen records are redacted through /redaction/:taskId instead. */}
