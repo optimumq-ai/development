@@ -181,7 +181,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   ok('H6 a second change does not pile up notifications (dedupe per item)', nAgain === nAfter, nAfter + '→' + nAgain);
   var pg = (await callAs(U.dir, 'GET', '/setup-hub')).body;
   ok('H7 the page carries the colour counts and a go-live colour (' + pg.goLiveColour + ')', pg.colours && typeof pg.colours.red === 'number' && ['red', 'yellow', 'green'].indexOf(pg.goLiveColour) >= 0);
-  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'agency'"); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'agency'");
   for (var rk in agSave) { if (agSave[rk] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk, agSave[rk]]); }
   await callAs(U.sa, 'DELETE', '/setup-hub/agency/done');
   if (agMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [agMark.item_key, agMark.marked_by, agMark.marked_by_name, agMark.marked_at, agMark.content_hash || null]);
@@ -242,7 +242,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'POST', '/integrations', { deployment: { profile: 'government' } });
   var jF = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'ai_config');
   ok('J7 Government chosen with no GovCloud connection → RED again, naming the four fields', jF.approval === 'red' && /GovCloud region/.test(jF.approvalWhy || '') && /Bedrock secret key/.test(jF.approvalWhy || ''), jF.approval + ': ' + jF.approvalWhy);
-  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'ai_config'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'ai_config'"); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'ai_config'");
   for (var rk2 in aiSave) { if (aiSave[rk2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk2, aiSave[rk2]]); }
   await callAs(U.sa, 'DELETE', '/setup-hub/ai_config/done');
   if (aiMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [aiMark.item_key, aiMark.marked_by, aiMark.marked_by_name, aiMark.marked_at, aiMark.content_hash || null]);
@@ -255,19 +255,34 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   for (var ek2 of EM_KEYS) await db.run('DELETE FROM system_config WHERE key = ?', [ek2]);
   var kA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
   ok('K1 nothing set → RED, "Provider"', kA.approval === 'red' && /Provider/.test(kA.approvalWhy || ''), kA.approval + ': ' + kA.approvalWhy);
+  await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'email'"); await db.run("DELETE FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email'"); // C4 configured email earlier; emit() dedupes undismissed notices per user/kind/context
+  var kn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email'")).n;
   await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test' } });
   var kB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
   ok('K2 SMTP with only a host → RED naming Port and From address', kB.approval === 'red' && /Port/.test(kB.approvalWhy || '') && /From address/.test(kB.approvalWhy || ''), kB.approval + ': ' + kB.approvalWhy);
+  var kn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email'")).n;
+  ok('K2b a save that leaves the form red tells nobody', kn1 === kn0, kn0 + '→' + kn1);
   await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '587', smtp_from: 'records@hub.test' } });
   var kC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
   ok('K3 host + port + from address → YELLOW (a test send is evidence, not a requirement)', kC.approval === 'yellow', kC.approval + ': ' + kC.approvalWhy);
+  var kn2 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email'")).n;
+  ok('K3b the save that filled the last required field is the submission — owners told once, recorded by name', kn2 > kn1 && kC.ready && /approver notified/.test(kC.approvalWhy || ''), kn1 + '→' + kn2 + ' ' + JSON.stringify(kC.ready));
+  await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '587', smtp_from: 'records@hub.test', email_from_name: 'Records' } });
+  var kn3 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email'")).n;
+  ok('K3c a further save while still complete and unapproved does not notify again', kn3 === kn2, kn2 + '→' + kn3);
+  await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '', smtp_from: 'records@hub.test' } });
+  var kR = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
+  await db.run("UPDATE notifications SET dismissed_at = now() WHERE kind = 'setup_ready' AND context_id = 'email'"); // the owners read the first notice (emit() dedupes against undismissed ones)
+  await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '587', smtp_from: 'records@hub.test' } });
+  var kn4 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email'")).n;
+  ok('K3d back to red (port cleared) then complete again → the submission is re-armed and fires once more', kR.approval === 'red' && !kR.ready && kn4 === kn3 + (kn2 - kn1), kR.approval + ' ' + kn3 + '→' + kn4);
   var kM = await callAs(U.sa, 'POST', '/setup-hub/email/done');
   var kD = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
   ok('K4 approval → GREEN', kM.status === 200 && kD.approval === 'green', kM.status + ' ' + kD.approval);
   await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail2.hub.test' } });
   var kE = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
   ok('K5 a changed host after approval → YELLOW "changed since approval"', kE.approval === 'yellow' && /changed since approval/.test(kE.approvalWhy || ''), kE.approval + ': ' + kE.approvalWhy);
-  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'email'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'email'"); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'email'");
   for (var rk3 in emSave) { if (emSave[rk3] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk3]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk3, emSave[rk3]]); }
   await callAs(U.sa, 'DELETE', '/setup-hub/email/done');
   if (emMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [emMark.item_key, emMark.marked_by, emMark.marked_by_name, emMark.marked_at, emMark.content_hash || null]);
@@ -287,7 +302,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'POST', '/config', { session_timeout: '4h' });
   var lC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'auth_policy');
   ok('L3 approved, then a change saved through POST /config → YELLOW again', lM.status === 200 && lC.approval === 'yellow' && /changed since approval/.test(lC.approvalWhy || ''), lM.status + ' ' + lC.approval + ': ' + lC.approvalWhy);
-  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'auth_policy'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'auth_policy'"); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'auth_policy'");
   for (var rk4 in auSave) { if (auSave[rk4] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk4]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk4, auSave[rk4]]); }
   await callAs(U.sa, 'DELETE', '/setup-hub/auth_policy/done');
   if (auMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [auMark.item_key, auMark.marked_by, auMark.marked_by_name, auMark.marked_at, auMark.content_hash || null]);

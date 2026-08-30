@@ -120,6 +120,18 @@ The three organization rows share the Organization screen (`/org?tab=…`); each
 
 `routes/config.js` also reports changes to `notifications` and `av_redaction` (still derived until converted).
 
+## 3g′. FORM AND TABBED SCREENS SUBMIT THEMSELVES (Kevin 2026-08-30, BUILT)
+
+A form or tabbed screen has no "Ready for approval" button — the save that fills the LAST required field is the
+submission. `afterChange(key, actor)` on an unapproved item with a `required` set: if nothing is missing and
+no `setup_hub_ready` row exists, it records the saver's name there and sends the lane owners the same
+`setup_ready` notice a list screen's declaration sends ("Ready for approval: <screen> — <who> saved the last
+required item…"). Further saves while still complete send nothing; a save that empties a required field
+clears the record so the next completion notifies again; approval clears it (`mark()`). The guide's yellow
+text carries "submitted by <who> on <date>, approver notified". `notifications.emit` dedupes per
+user/kind/context while the earlier notice is undismissed, so an approver never sees two identical nudges.
+Harness: `verify_setup_hub` K2b, K3b–K3d.
+
 ## 3h. HOW TO CONVERT THE NEXT SCREEN — the recipe (2026-08-31)
 Pick the pattern by what the screen is, then do these steps; every converted screen so far follows them.
 1. **Reader** (`services/setupHub.js` READERS[key]) — keep the counted state/evidence and ADD, via `ev(state, line, extra)`:

@@ -496,31 +496,49 @@ async function declareReady(itemKey, user) {
     [itemKey, user.sub || user.id, user.name || user.email || user.sub, new Date().toISOString().slice(0, 19).replace('T', ' ')]);
   var sent = 0;
   if (!already) {
-    var groups = groupsFor(it); if (it.legal) groups = ['legal_rules'];
-    var ph = groups.map(function () { return '?'; }).join(',');
-    var owners = await all('SELECT DISTINCT uut.user_id FROM user_user_types uut JOIN user_type_permission utp ON utp.user_type_id = uut.user_type_id JOIN users u ON u.id = uut.user_id WHERE utp.permission_group IN (' + ph + ") AND u.status = 'active'", groups);
-    var N = require('./notifications');
-    for (var i = 0; i < owners.length; i++) { try { await N.emit({ userId: owners[i].user_id, kind: 'setup_ready', contextType: 'setup_item', contextId: itemKey, link: it.door, title: 'Ready for approval: ' + it.name, body: (user.name || user.email || 'Someone') + ' says ' + it.name + ' is complete. Open it and approve.' }); sent++; } catch (eN) { console.error('[setupHub declareReady]', eN && eN.message); } }
+    sent = await notifyOwners(it, 'setup_ready', 'Ready for approval: ' + it.name, (user.name || user.email || 'Someone') + ' says ' + it.name + ' is complete. Open it and approve.', 'declareReady');
   }
   return { ready: true, notified: sent };
 }
 async function withdrawReady(itemKey) { await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]); }
 // Called by a screen's write path after a save: if the item was approved and its content changed, tell the
 // lane owners ONCE per change (the guide already shows yellow from the digest alone).
-async function afterChange(itemKey, actorName) {
-  var it = BY_KEY[itemKey]; if (!it) return { notified: false };
-  var m = (await signoffs())[itemKey]; if (!m || !m.content_hash) return { notified: false, reason: 'not approved' };
-  var e = await readOne(itemKey); if (!e.digest || e.digest === m.content_hash) return { notified: false, reason: 'unchanged' };
-  if (m.notified_hash === e.digest) return { notified: false, reason: 'already notified' };
+// Lane owners of an item (legal items → Senior Legal); one notification each, best effort.
+async function notifyOwners(it, kind, title, body, where) {
   var groups = groupsFor(it); if (it.legal) groups = ['legal_rules'];
   var ph = groups.map(function () { return '?'; }).join(',');
   var owners = await all('SELECT DISTINCT uut.user_id FROM user_user_types uut JOIN user_type_permission utp ON utp.user_type_id = uut.user_type_id JOIN users u ON u.id = uut.user_id WHERE utp.permission_group IN (' + ph + ") AND u.status = 'active'", groups);
   var N = require('./notifications'); var sent = 0;
   for (var i = 0; i < owners.length; i++) {
-    try { await N.emit({ userId: owners[i].user_id, kind: 'setup_reapproval', contextType: 'setup_item', contextId: itemKey, link: it.door, title: 'Re-approval needed: ' + it.name, body: (actorName || 'Someone') + ' changed and saved ' + it.name + ' after it was approved. Open it and approve again.' }); sent++; } catch (eN) { console.error('[setupHub afterChange]', eN && eN.message); }
+    try { await N.emit({ userId: owners[i].user_id, kind: kind, contextType: 'setup_item', contextId: it.key, link: it.door, title: title, body: body }); sent++; } catch (eN) { console.error('[setupHub ' + where + ']', eN && eN.message); }
   }
+  return sent;
+}
+// Called by a screen's write path after a save.
+//  · Not yet approved (form / tabbed screens, Kevin 2026-08-31): the save that fills the LAST required field is
+//    the submission — record it in setup_hub_ready under the saver's name and tell the lane owners once
+//    ('setup_ready', the same notice a list screen's "Ready for approval" sends). A later save that empties a
+//    required field clears the record, so the next completion notifies again. Approval clears it (mark()).
+//  · Approved and the content changed: tell the lane owners ONCE per change (the guide already shows yellow
+//    from the digest alone).
+async function afterChange(itemKey, actorName) {
+  var it = BY_KEY[itemKey]; if (!it) return { notified: false };
+  var m = (await signoffs())[itemKey];
+  var e = await readOne(itemKey);
+  if (!m || !m.content_hash) {
+    if (!e.required) return { notified: false, reason: 'not approved' };
+    var already = (await readies())[itemKey];
+    if (e.required.missing && e.required.missing.length) { if (already) await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]); return { notified: false, reason: 'required missing' }; }
+    if (already) return { notified: false, reason: 'already submitted' };
+    await run('INSERT INTO setup_hub_ready (item_key, ready_by, ready_by_name, ready_at) VALUES (?, ?, ?, ?) ON CONFLICT (item_key) DO NOTHING', [itemKey, actorName || 'unknown', actorName || 'Someone', new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+    var sentR = await notifyOwners(it, 'setup_ready', 'Ready for approval: ' + it.name, (actorName || 'Someone') + ' saved the last required item on ' + it.name + ' — it is complete. Open it and approve.', 'afterChange:ready');
+    return { notified: true, kind: 'setup_ready', recipients: sentR };
+  }
+  if (!e.digest || e.digest === m.content_hash) return { notified: false, reason: 'unchanged' };
+  if (m.notified_hash === e.digest) return { notified: false, reason: 'already notified' };
+  var sent = await notifyOwners(it, 'setup_reapproval', 'Re-approval needed: ' + it.name, (actorName || 'Someone') + ' changed and saved ' + it.name + ' after it was approved. Open it and approve again.', 'afterChange');
   await run('UPDATE setup_hub_signoffs SET notified_hash = ? WHERE item_key = ?', [e.digest, itemKey]);
-  return { notified: true, recipients: sent };
+  return { notified: true, kind: 'setup_reapproval', recipients: sent };
 }
 async function unmark(itemKey) { await run('DELETE FROM setup_hub_signoffs WHERE item_key = ?', [itemKey]); }
 
@@ -596,7 +614,7 @@ async function build(user) {
     } else if (r.required) {
       r.approvalModel = 'fields';
       if (r.required.missing.length) { var mm = r.required.missing; r.approval = 'red'; r.approvalWhy = mm.length + ' of ' + Math.max(r.required.total, mm.length) + ' required items missing — ' + mm.slice(0, 6).join(', ') + (mm.length > 6 ? ' … and ' + (mm.length - 6) + ' more' : ''); }
-      else if (!m) { r.approval = 'yellow'; r.approvalWhy = 'complete — awaiting approval by ' + (it.legal ? 'Senior Legal' : LANE_BY_KEY[it.lane].ownerLabel.split(' · ')[0]); }
+      else if (!m) { r.approval = 'yellow'; r.approvalWhy = 'complete — awaiting approval by ' + (it.legal ? 'Senior Legal' : LANE_BY_KEY[it.lane].ownerLabel.split(' · ')[0]) + (rd ? ' · submitted by ' + (rd.ready_by_name || rd.ready_by) + ' on ' + String(rd.ready_at).slice(0, 10) + ', approver notified' : ''); }
       else if (changed) { r.approval = 'yellow'; r.approvalWhy = 'changed since approval by ' + (m.marked_by_name || m.marked_by) + ' on ' + String(m.marked_at).slice(0, 10) + ' — awaiting re-approval'; }
       else { r.approval = 'green'; r.approvalWhy = 'approved by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10); }
     } else {
