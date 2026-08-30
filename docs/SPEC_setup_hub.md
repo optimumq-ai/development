@@ -56,6 +56,28 @@ estimate. It runs LAST in the suite (before the reset) and cleans its marks and 
 way is printed as a NOTE — the harness exists to say where the product cannot be configured through its
 own doors.
 
+## 3d. THE APPROVAL MODEL — three colours, the screen owns its indicator (Kevin 2026-08-31, BUILT for Agency first)
+Supersedes "Mark it done" as the user-facing sign-off (the mark is still the record). Every setup item shows
+one of three colours, and **the screen is the source of truth** — the Set Up Guide's bar only reads it:
+- **RED** — a required field is empty (forms), or nothing is entered. Required fields are marked on the
+  screen (red border + "Required — enter a value and save") until saved.
+- **YELLOW** — every required field is saved and the item awaits the lane owner's **approval** ("Approve —
+  attest as complete", one approver per screen, the existing group gate); OR the item was approved and a
+  saved change moved it since ("changed since approval by X on date — awaiting re-approval").
+- **GREEN** — approved and unchanged since.
+Mechanics (`services/setupHub.js`): a reader may report `required {missing, total}` and a `digest` of the
+screen's content; `mark()` is refused 422 `REQUIRED_MISSING` while red and stores the digest; a screen's
+write path calls `afterChange(key, actor)` after a save, which notifies the lane owners ONCE per change
+(`notifications` kind `setup_reapproval`, dedupe per item); `build()` computes `approval` /
+`approvalWhy` / `changedSinceApproval` per item and page-level `colours` + `goLiveColour`. Items whose
+reader has no `required` yet derive a colour from the counted state (ready → green; in progress / needs
+attention → yellow; else red) — each such screen is converted one at a time (list screens like Staff get a
+"Complete — submit for approval" act instead of required fields). **Agency is the first converted screen**
+(`verify_setup_hub` H1–H7). **Settings and Configuration is navigation only** (`SetupHubPage`: four logical
+groups, no status, no marks). **Go Live lives on the Set Up Guide's header**: red until nothing is red,
+yellow while anything is yellow, green (confirmation dialog, `go_live` authority) when every bar is green;
+"Live" once flipped — the Jurisdiction Configuration flip is no longer the only door.
+
 ## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)
 The Administration page has two tabs: **Settings and Configuration** (the hub, above) and **Set Up Guide** —
 Plan A from `docs/mockups/setup_hub/PlanGantt.dc.html` (chosen 2026-08-24, built 2026-08-30 as

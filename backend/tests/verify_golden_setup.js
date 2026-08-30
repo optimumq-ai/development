@@ -58,7 +58,7 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   console.log('\n=== A. FOUNDATION — agency + state lock ===');
   var ag = await callAs(DIR, 'GET', '/agency');
   ok('A1 the agency screen reads', ag.status === 200 && ag.body && Array.isArray(ag.body.states), err(ag));
-  var put = await callAs(DIR, 'PUT', '/agency', { agency_name: 'City of Golden Test', contact_email: 'records@golden.test', contact_phone: '555-0100', address_line1: '1 Main St', address_city: 'Golden', address_zip: '75001' });
+  var put = await callAs(DIR, 'PUT', '/agency', { agency_name: 'City of Golden Test', agency_short_name: 'Golden', jurisdiction_type: 'city', contact_email: 'records@golden.test', contact_phone: '555-0100', address_line1: '1 Main St', address_city: 'Golden', address_state: 'TX', address_zip: '75001' });
   ok('A2 agency fields save', put.status === 200, err(put));
   if (!(ag.body && ag.body.lock && ag.body.lock.state)) {
     var lk = await callAs(DIR, 'POST', '/agency/lock-state', { state: 'TX' });

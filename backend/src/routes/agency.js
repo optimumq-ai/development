@@ -75,6 +75,7 @@ router.put('/', requireAuth, async function (req, res) {
         await upsert('state', s);
       }
     }
+    var chg = null; try { chg = await HUB.afterChange('agency', req.user && (req.user.name || req.user.email)); } catch (eC) {}
     res.json(await payload(req.user));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -101,6 +102,7 @@ router.post('/lock-state', requireAuth, async function (req, res) {
     await upsert('state_locked_by', who);
 
     var rep = result.report || {};
+    try { await HUB.afterChange('agency', req.user && (req.user.name || req.user.email)); } catch (eC) { /* notify is best-effort */ }
     res.json({
       ok: true,
       lock: { state: code, name: STATE_NAMES[code], at: now, by: who },

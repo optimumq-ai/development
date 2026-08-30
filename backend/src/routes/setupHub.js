@@ -48,7 +48,7 @@ router.post('/:key/done', requireAuth, async function (req, res) {
         catch (e) { return res.status(422).json({ error: 'The ' + section + ' section refused attestation: ' + e.message, code: 'ATTEST_REFUSED', section: section }); }
       }
     }
-    await HUB.mark(item.key, req.user);
+    try { await HUB.mark(item.key, req.user); } catch (eM) { if (eM && eM.code === 'REQUIRED_MISSING') return res.status(422).json({ error: eM.message, code: 'REQUIRED_MISSING', missing: eM.missing }); throw eM; }
     res.json({ ok: true, key: item.key, attested: attested, skipped: skipped });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

@@ -1914,3 +1914,7 @@ INSERT INTO legacy_perm_map (user_type_key, perm) VALUES
   ('team_staff', 'REDACTION_WORKER'),
   ('team_staff', 'FEE_MANAGER')
 ON CONFLICT DO NOTHING;
+-- Approval model (2026-08-31): a mark records the item's content digest; a later change flips the item to
+-- yellow (awaiting re-approval) and the lane owners are notified once per change.
+ALTER TABLE setup_hub_signoffs ADD COLUMN IF NOT EXISTS content_hash TEXT;
+ALTER TABLE setup_hub_signoffs ADD COLUMN IF NOT EXISTS notified_hash TEXT;

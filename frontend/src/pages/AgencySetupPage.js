@@ -38,6 +38,12 @@ var USSTATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID'
 function errText(e, fallback) { return (e && e.response && e.response.data && e.response.data.error) || fallback; }
 function fmtDate(s) { if (!s) return ''; var d = new Date(String(s).replace(' ', 'T') + (String(s).length <= 19 ? 'Z' : '')); return isNaN(d) ? String(s).slice(0, 10) : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); }
 
+var APPROVAL = {
+  red:    { label: 'Not started',       bg: '#FEE2E2', color: '#991B1B' },
+  yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' },
+  green:  { label: 'Approved',          bg: '#E1F2E9', color: '#1B8A5A' },
+};
+
 export default function AgencySetupPage() {
   var nav = useNavigate();
   var [data, setData] = useState(null);      // GET /agency
@@ -71,7 +77,7 @@ export default function AgencySetupPage() {
     mailing_line1: mailing && !f.mailing_line1, mailing_city: mailing && !f.mailing_city, mailing_state: mailing && !f.mailing_state, mailing_zip: mailing && !f.mailing_zip
   };
   var complete = Object.keys(miss).every(function (k) { return !miss[k]; });
-  var attested = hub && hub.signoff;
+  var attested = hub && hub.signoff && !(hub.changedSinceApproval);
   var mayAttest = can && complete && !!lock && hub && hub.state !== 'waiting' && hub.state !== 'needs_attention';
 
   async function save() {
@@ -106,7 +112,11 @@ export default function AgencySetupPage() {
   if (err && !data) return <div style={{ padding: '24px', color: C.red }}>{err}</div>;
   if (!data || !form) return <div style={{ padding: '24px', color: C.ph }}>Reading the agency setup…</div>;
 
-  var st = STATE[(hub && hub.state) || 'not_started'];
+  // APPROVAL MODEL (Kevin 2026-08-31): the strip's pill is this screen's own indicator — red until every required
+  // field is saved, yellow while awaiting (re-)approval, green once approved; the Set Up Guide's bar reads it.
+  var ap = (hub && hub.approval) || 'red';
+  var st = APPROVAL[ap];
+  var reLabel = hub && hub.changedSinceApproval ? 'Re-approve — attest as complete' : 'Approve — attest as complete';
   var pickName = (data.states.filter(function (s) { return s.code === pickState; })[0] || {}).name || pickState;
   var pickHasRules = !!(data.states.filter(function (s) { return s.code === pickState; })[0] || {}).rulesAvailable;
 
@@ -118,13 +128,13 @@ export default function AgencySetupPage() {
     </div>;
   }
   function Text(props) {
-    return <input value={f[props.k] || ''} disabled={!can} onChange={function (e) { set(props.k, e.target.value); }} placeholder={props.ph || ''}
-      style={inp(props.req && miss[props.k])} />;
+    return <><input value={f[props.k] || ''} disabled={!can} onChange={function (e) { set(props.k, e.target.value); }} placeholder={props.ph || ''}
+      style={inp(props.req && miss[props.k])} />{props.req && miss[props.k] ? <div style={{ fontSize: '11.5px', color: C.red, fontWeight: 600, marginTop: '4px' }}>Required — enter a value and save</div> : null}</>;
   }
   function StateSel(props) {
-    return <select value={f[props.k] || ''} disabled={!can} onChange={function (e) { set(props.k, e.target.value); }} style={inp(props.req && miss[props.k], { color: f[props.k] ? C.ink : C.ph })}>
+    return <><select value={f[props.k] || ''} disabled={!can} onChange={function (e) { set(props.k, e.target.value); }} style={inp(props.req && miss[props.k], { color: f[props.k] ? C.ink : C.ph })}>
       <option value="">Select</option>{USSTATES.map(function (s) { return <option key={s} value={s}>{s}</option>; })}
-    </select>;
+    </select>{props.req && miss[props.k] ? <div style={{ fontSize: '11.5px', color: C.red, fontWeight: 600, marginTop: '4px' }}>Required — choose a value and save</div> : null}</>;
   }
 
   return (
@@ -136,15 +146,16 @@ export default function AgencySetupPage() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           {st.label}
         </button>
-        <span style={{ flexGrow: 1, fontSize: '12px', color: C.mute, lineHeight: '1.35' }}>{hub ? hub.evidence : ''}</span>
-        <span style={{ fontSize: '11.5px', color: C.faint }}>Setup and Configuration · start here</span>
+        <span style={{ flexGrow: 1, fontSize: '12px', color: C.mute, lineHeight: '1.35' }}>{hub ? (hub.approvalWhy || hub.evidence) : ''}</span>
+        <span style={{ fontSize: '11.5px', color: C.faint }}>Settings and Configuration · start here</span>
         {attested
-          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>Attested · undo</button>
+          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>Approved · undo</button>
           : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })}
-              title={mayAttest ? 'Record that this item is complete' : 'Fill every required field and lock the state first'}>Attest as complete</button>}
+              title={mayAttest ? 'Approve: record that this item is complete' : 'Fill every required field and lock the state first'}>{reLabel}</button>}
       </div>
 
       {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
+      {hub && hub.changedSinceApproval ? <div style={{ background: '#FFF8E8', border: '1px solid #F0D9A8', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: '#7A5210', marginBottom: '12px' }}><strong>Changed since approval.</strong> {hub.approvalWhy}. The lane owner has been notified to approve again.</div> : null}
 
       {loaded ? (
         <div style={{ background: '#E1F2E9', border: '1px solid #A7D9BF', borderRadius: '10px', padding: '14px 16px', marginBottom: '14px', fontSize: '13px', lineHeight: '1.55' }}>

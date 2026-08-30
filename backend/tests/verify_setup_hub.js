@@ -147,6 +147,41 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   ok('G4 system authority writes any key, incl. av_redaction_mode (now in the allow-list)', g4.status === 200, g4.status);
   if (ack0) await db.run("UPDATE system_config SET value = ? WHERE key = 'ack_email'", [ack0.value]); else await db.run("DELETE FROM system_config WHERE key = 'ack_email'");
 
+  console.log('\n=== H. THE APPROVAL MODEL (Kevin 2026-08-31) — red / yellow / green on the agency item ===');
+  var AG_KEYS = ['agency_name', 'agency_short_name', 'jurisdiction_type', 'address_line1', 'address_city', 'address_state', 'address_zip', 'contact_email', 'contact_phone', 'state', 'state_locked_at', 'state_locked_by'];
+  var agSave = {}; for (var ak of AG_KEYS) { var arow = await db.get('SELECT value FROM system_config WHERE key = ?', [ak]); agSave[ak] = arow ? arow.value : null; }
+  var agMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'agency'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/agency/done');
+  // Every required field but one, through the screen's own route; the lock is simulated (a real lock is one-shot
+  // and verify_agency_setup tests it later) — this section is about the approval colours, not the import.
+  await callAs(U.sa, 'PUT', '/agency', { agency_name: 'Hub Approval City', jurisdiction_type: 'city', address_line1: '1 Hub St', address_city: 'Hubville', address_state: 'TX', address_zip: '75001', contact_email: 'hub@test.optimumq.ai', contact_phone: '555-0100' });
+  for (var lk of [['state', 'TX'], ['state_locked_at', '2026-08-31 00:00:00'], ['state_locked_by', 'harness']]) await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", lk);
+  await db.run("DELETE FROM system_config WHERE key = 'agency_short_name'");
+  var hA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'agency');
+  ok('H1 a required field empty → RED, naming it', hA.approval === 'red' && /Short name/.test(hA.approvalWhy || ''), hA.approval + ': ' + hA.approvalWhy);
+  var mR = await callAs(U.sa, 'POST', '/setup-hub/agency/done');
+  ok('H2 approval is REFUSED while red (422 REQUIRED_MISSING, naming the field)', mR.status === 422 && mR.body && mR.body.code === 'REQUIRED_MISSING' && /Short name/.test(mR.body.error), mR.status + ' ' + JSON.stringify(mR.body));
+  var pA = await callAs(U.sa, 'PUT', '/agency', { agency_short_name: 'HubTest' });
+  var hB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'agency');
+  ok('H3 every required field saved → YELLOW, awaiting approval', pA.status === 200 && hB.approval === 'yellow' && /awaiting approval/.test(hB.approvalWhy || ''), pA.status + ' ' + hB.approval + ': ' + hB.approvalWhy);
+  var mG = await callAs(U.sa, 'POST', '/setup-hub/agency/done');
+  var hC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'agency');
+  ok('H4 approval → GREEN by name and date', mG.status === 200 && hC.approval === 'green' && /approved by/.test(hC.approvalWhy || ''), mG.status + ' ' + hC.approval + ': ' + hC.approvalWhy);
+  var nBefore = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency'")).n;
+  await callAs(U.sa, 'PUT', '/agency', { contact_phone: '555-0199' });
+  var hD = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'agency');
+  var nAfter = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency'")).n;
+  ok('H5 a saved change after approval → YELLOW again ("changed since approval"), and the owners are notified', hD.approval === 'yellow' && /changed since approval/.test(hD.approvalWhy || '') && nAfter > nBefore, hD.approval + ': ' + hD.approvalWhy + ' · notifications ' + nBefore + '→' + nAfter);
+  await callAs(U.sa, 'PUT', '/agency', { contact_phone: '555-0198' });
+  var nAgain = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency'")).n;
+  ok('H6 a second change does not pile up notifications (dedupe per item)', nAgain === nAfter, nAfter + '→' + nAgain);
+  var pg = (await callAs(U.dir, 'GET', '/setup-hub')).body;
+  ok('H7 the page carries the colour counts and a go-live colour (' + pg.goLiveColour + ')', pg.colours && typeof pg.colours.red === 'number' && ['red', 'yellow', 'green'].indexOf(pg.goLiveColour) >= 0);
+  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency'");
+  for (var rk in agSave) { if (agSave[rk] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk, agSave[rk]]); }
+  await callAs(U.sa, 'DELETE', '/setup-hub/agency/done');
+  if (agMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [agMark.item_key, agMark.marked_by, agMark.marked_by_name, agMark.marked_at, agMark.content_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

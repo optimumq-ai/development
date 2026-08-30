@@ -19,6 +19,8 @@
 // The evidence readers below are DEFENSIVE by design: a reader that throws yields `not_started` with an
 // honest "could not read …" line rather than taking the page down. The page must always render.
 const { all, get, run } = require('../db');
+const crypto = require('crypto');
+function digestOf(obj) { return crypto.createHash('sha1').update(JSON.stringify(obj)).digest('hex').slice(0, 20); }
 
 const LANES = [
   { key: 'compliance', title: 'Compliance and Policies Setup', ownerLabel: 'ORO Director · Senior Legal on the legal sections',
@@ -168,8 +170,17 @@ const READERS = {
   agency: async function () {
     // H3 (WORKING_hub_linked_screens §1): ready = name, short name, jurisdiction type, street address, contact
     // email + phone, AND the jurisdiction state LOCKED (the lock is what loaded the rules).
-    var name = await cfg('agency_name'), state = await cfg('state'), email = await cfg('contact_email');
-    if (!name) return ev('not_started', 'no agency name yet');
+    // APPROVAL MODEL (Kevin 2026-08-31): the reader also reports the REQUIRED fields still empty (red until
+    // every one is saved) and a DIGEST of everything the screen holds (a saved change after approval → yellow).
+    var REQ = [['agency_name', 'Agency name'], ['agency_short_name', 'Short name'], ['jurisdiction_type', 'Jurisdiction type'], ['address_line1', 'Address line 1'], ['address_city', 'City'], ['address_state', 'State'], ['address_zip', 'ZIP'], ['contact_email', 'Contact email'], ['contact_phone', 'Contact phone']];
+    var vals = {}; for (var qi = 0; qi < REQ.length; qi++) vals[REQ[qi][0]] = await cfg(REQ[qi][0]);
+    var extra = {}; for (var xk of ['address_line2', 'mailing_differs', 'mailing_line1', 'mailing_line2', 'mailing_city', 'mailing_state', 'mailing_zip', 'state', 'state_locked_at']) extra[xk] = await cfg(xk);
+    var missingReq = REQ.filter(function (r) { return !vals[r[0]]; }).map(function (r) { return r[1]; });
+    if (extra.state && !extra.state_locked_at) missingReq.push('State not locked');
+    var required = { missing: missingReq, total: REQ.length + 1 };
+    var digest = digestOf([vals, extra]);
+    var name = vals.agency_name, state = extra.state, email = vals.contact_email;
+    if (!name) return ev('not_started', 'no agency name yet', { required: required, digest: digest });
     var lockedAt = await cfg('state_locked_at'), lockedBy = await cfg('state_locked_by');
     var missing = [];
     if (!(await cfg('agency_short_name'))) missing.push('short name');
@@ -180,8 +191,8 @@ const READERS = {
     if (!state) missing.push('state');
     else if (!lockedAt) missing.push('state not locked');
     var head = name + (state ? ', ' + state : '');
-    if (missing.length) return ev('in_progress', head + ' · ' + missing.map(function (m) { return m === 'state not locked' ? m : m + ' missing'; }).join(' · '));
-    return ev('ready', head + ' · ' + email + ' · ' + state + ' rules loaded' + (lockedBy ? ' by ' + lockedBy : '') + ', ' + String(lockedAt).slice(0, 10));
+    if (missing.length) return ev('in_progress', head + ' · ' + missing.map(function (m) { return m === 'state not locked' ? m : m + ' missing'; }).join(' · '), { required: required, digest: digest });
+    return ev('ready', head + ' · ' + email + ' · ' + state + ' rules loaded' + (lockedBy ? ' by ' + lockedBy : '') + ', ' + String(lockedAt).slice(0, 10), { required: required, digest: digest });
   },
   deadlines: async function (ctx) { return sectionEvidence(ctx.sections.deadlines); },
   fee_law: async function (ctx) {
@@ -384,14 +395,43 @@ const READERS = {
 
 // ---- sign-offs (Option A) --------------------------------------------------------------------------
 async function signoffs() {
-  var rows = await all('SELECT item_key, marked_by, marked_by_name, marked_at FROM setup_hub_signoffs');
+  var rows = await all('SELECT item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash FROM setup_hub_signoffs');
   var m = {}; rows.forEach(function (r) { m[r.item_key] = r; }); return m;
+}
+// APPROVAL (Kevin 2026-08-31): a mark IS the lane owner's approval. For an item whose reader reports required
+// fields, it is refused while any is empty (red); it records the item's content digest so a later saved change
+// is detected (yellow again) and the owners are told.
+async function readOne(itemKey) {
+  var ctx = await profileSections();
+  try { return await READERS[itemKey](ctx); } catch (e) { return ev('not_started', 'could not read: ' + (e && e.message)); }
 }
 async function mark(itemKey, user) {
   if (!BY_KEY[itemKey]) throw new Error('Unknown setup item: ' + itemKey);
-  await run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at) VALUES (?, ?, ?, ?) ' +
-    'ON CONFLICT (item_key) DO UPDATE SET marked_by = EXCLUDED.marked_by, marked_by_name = EXCLUDED.marked_by_name, marked_at = EXCLUDED.marked_at',
-    [itemKey, user.sub || user.id, user.name || user.email || user.sub, new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+  var e = await readOne(itemKey);
+  if (e.required && e.required.missing && e.required.missing.length) {
+    var err = new Error('Not ready to approve — ' + e.required.missing.length + ' required item(s) still missing: ' + e.required.missing.join(', ') + '. Fill and save each one first.');
+    err.code = 'REQUIRED_MISSING'; err.status = 422; err.missing = e.required.missing; throw err;
+  }
+  await run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?, ?, ?, ?, ?, NULL) ' +
+    'ON CONFLICT (item_key) DO UPDATE SET marked_by = EXCLUDED.marked_by, marked_by_name = EXCLUDED.marked_by_name, marked_at = EXCLUDED.marked_at, content_hash = EXCLUDED.content_hash, notified_hash = NULL',
+    [itemKey, user.sub || user.id, user.name || user.email || user.sub, new Date().toISOString().slice(0, 19).replace('T', ' '), e.digest || null]);
+}
+// Called by a screen's write path after a save: if the item was approved and its content changed, tell the
+// lane owners ONCE per change (the guide already shows yellow from the digest alone).
+async function afterChange(itemKey, actorName) {
+  var it = BY_KEY[itemKey]; if (!it) return { notified: false };
+  var m = (await signoffs())[itemKey]; if (!m || !m.content_hash) return { notified: false, reason: 'not approved' };
+  var e = await readOne(itemKey); if (!e.digest || e.digest === m.content_hash) return { notified: false, reason: 'unchanged' };
+  if (m.notified_hash === e.digest) return { notified: false, reason: 'already notified' };
+  var groups = groupsFor(it); if (it.legal) groups = ['legal_rules'];
+  var ph = groups.map(function () { return '?'; }).join(',');
+  var owners = await all('SELECT DISTINCT uut.user_id FROM user_user_types uut JOIN user_type_permission utp ON utp.user_type_id = uut.user_type_id JOIN users u ON u.id = uut.user_id WHERE utp.permission_group IN (' + ph + ") AND u.status = 'active'", groups);
+  var N = require('./notifications'); var sent = 0;
+  for (var i = 0; i < owners.length; i++) {
+    try { await N.emit({ userId: owners[i].user_id, kind: 'setup_reapproval', contextType: 'setup_item', contextId: itemKey, link: it.door, title: 'Re-approval needed: ' + it.name, body: (actorName || 'Someone') + ' changed and saved ' + it.name + ' after it was approved. Open it and approve again.' }); sent++; } catch (eN) { console.error('[setupHub afterChange]', eN && eN.message); }
+  }
+  await run('UPDATE setup_hub_signoffs SET notified_hash = ? WHERE item_key = ?', [e.digest, itemKey]);
+  return { notified: true, recipients: sent };
 }
 async function unmark(itemKey) { await run('DELETE FROM setup_hub_signoffs WHERE item_key = ?', [itemKey]); }
 
@@ -448,11 +488,31 @@ async function build(user) {
     }
     var m = marks[it.key];
     r.signoff = m ? { by: m.marked_by_name || m.marked_by, at: m.marked_at } : null;
+    // THE THREE-COLOUR APPROVAL (Kevin 2026-08-31) — what the Set Up Guide's bars and each screen's indicator show.
+    // fields model (reader reports required + digest): red = a required field is empty · yellow = complete but not
+    // approved, or changed since approval · green = approved and unchanged. Other items derive from the counted state.
+    var changed = !!(m && m.content_hash && r.digest && r.digest !== m.content_hash);
+    if (r.required) {
+      r.approvalModel = 'fields';
+      if (r.required.missing.length) { r.approval = 'red'; r.approvalWhy = r.required.missing.length + ' of ' + r.required.total + ' required items missing — ' + r.required.missing.join(', '); }
+      else if (!m) { r.approval = 'yellow'; r.approvalWhy = 'complete — awaiting approval by ' + (it.legal ? 'Senior Legal' : LANE_BY_KEY[it.lane].ownerLabel.split(' · ')[0]); }
+      else if (changed) { r.approval = 'yellow'; r.approvalWhy = 'changed since approval by ' + (m.marked_by_name || m.marked_by) + ' on ' + String(m.marked_at).slice(0, 10) + ' — awaiting re-approval'; }
+      else { r.approval = 'green'; r.approvalWhy = 'approved by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10); }
+    } else {
+      r.approvalModel = 'derived';
+      r.approval = (m && !changed && r.state !== 'needs_attention') ? 'green' : (r.state === 'ready' ? 'green' : ((r.state === 'in_progress' || r.state === 'needs_attention') ? 'yellow' : 'red'));
+      r.approvalWhy = m ? ((changed ? 'changed since approval by ' : 'approved by ') + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10)) : r.evidence;
+    }
+    r.changedSinceApproval = changed;
+    delete r.required; delete r.digest;
     if (m && r.state !== 'needs_attention' && r.state !== 'waiting') { r.state = 'ready'; r.evidence = r.evidence + ' · marked done by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10); }
     r.canEdit = mayEdit(it, user);
   });
   var counts = { ready: 0, in_progress: 0, not_started: 0, waiting: 0, needs_attention: 0 };
   ITEMS.forEach(function (it) { counts[out[it.key].state] = (counts[out[it.key].state] || 0) + 1; });
+  var colours = { red: 0, yellow: 0, green: 0 };
+  ITEMS.forEach(function (it) { if (!it.goLive) colours[out[it.key].approval] = (colours[out[it.key].approval] || 0) + 1; });
+  var goLiveColour = colours.red ? 'red' : (colours.yellow ? 'yellow' : 'green');
   var lanes = LANES.map(function (l) {
     var items = ITEMS.filter(function (it) { return it.lane === l.key && !it.top; }).map(function (it) {
       return Object.assign({ key: it.key, name: it.name, door: it.door, noScreen: !!it.noScreen, legal: !!it.legal, goLive: !!it.goLive, deps: it.deps, note: it.note || null }, out[it.key]);
@@ -462,7 +522,7 @@ async function build(user) {
       canEdit: !!user && Array.isArray(user.permissionGroups) && l.groups.some(function (g) { return user.permissionGroups.indexOf(g) !== -1; }) };
   });
   var top = ITEMS.filter(function (it) { return it.top; }).map(function (it) { return Object.assign({ key: it.key, name: it.name, door: it.door, note: it.note }, out[it.key]); });
-  return { counts: counts, top: top, lanes: lanes, jurisdiction: ctx.jid, profileError: ctx.error || null };
+  return { counts: counts, colours: colours, goLiveColour: goLiveColour, top: top, lanes: lanes, jurisdiction: ctx.jid, profileError: ctx.error || null };
 }
 
-module.exports = { LANES: LANES, ITEMS: ITEMS, BY_KEY: BY_KEY, build: build, mark: mark, unmark: unmark, mayEdit: mayEdit, READERS: READERS, testEstimateStatus: testEstimateStatus };
+module.exports = { LANES: LANES, ITEMS: ITEMS, BY_KEY: BY_KEY, build: build, mark: mark, unmark: unmark, mayEdit: mayEdit, READERS: READERS, testEstimateStatus: testEstimateStatus, afterChange: afterChange, readOne: readOne };

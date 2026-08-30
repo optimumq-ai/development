@@ -1,0 +1,13 @@
+{
+  "artboards": [
+    { "file": "AgencyRed.dc.html", "x": 0, "y": 0, "w": 860, "h": 700, "title": "1 · Agency — required fields missing (RED)" },
+    { "file": "AgencyYellow.dc.html", "x": 940, "y": 0, "w": 860, "h": 700, "title": "2 · Agency — complete, awaiting approval (YELLOW)" },
+    { "file": "AgencyChanged.dc.html", "x": 1880, "y": 0, "w": 860, "h": 760, "title": "3 · Agency — changed after approval (back to YELLOW)" },
+    { "file": "Main.dc.html", "x": 0, "y": 900, "w": 1120, "h": 900, "title": "4 · Set Up Guide — the gantt, big colour bars, Go Live in the header" },
+    { "file": "SettingsNav.dc.html", "x": 1240, "y": 900, "w": 1000, "h": 900, "title": "5 · Settings and Configuration — navigation only" }
+  ],
+  "annotations": [
+    { "id": "rule", "x": 0, "y": -130, "w": 560, "text": "The rule (Kevin + Claude, 2026-08-31): a screen owns its indicator. RED = a required field is empty. YELLOW = everything saved, awaiting the lane owner's approval (Attest). GREEN = approved. Any saved change to approved data → YELLOW + a notification to the approver. The Set Up Guide (gantt) reads the screens and carries Go Live; Settings and Configuration is navigation only." }
+  ],
+  "launch": { "view": "canvas" }
+}

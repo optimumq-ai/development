@@ -2,136 +2,64 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 
-// SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (H1). The artboard docs/mockups/setup_hub/Main.dc.html, built:
-// a header with the five state counts; the "Start here" agency card; five lanes, each a list of rows. The ROW is
-// the button (one click into the screen that sets it); the chip is the counted state; the evidence line says what
-// the system found. A waiting row stays open and carries a Why button. "Mark it done" is the sign-off.
+// SETTINGS AND CONFIGURATION — navigation only (Kevin 2026-08-31). Initial setup and its approvals happen on the
+// Set Up Guide (the gantt: every item's own screen reports red / yellow / green, approval is the lane owner's
+// act on that screen); this page is the way back to any screen afterwards, grouped by what it is about — no
+// status, no marks, no dependencies. Same GET /api/setup-hub catalog; only the doors are used here.
 
-var STATE = {
-  ready:           { label: 'Ready',           bg: '#DCFCE7', color: '#166534' },
-  in_progress:     { label: 'In progress',     bg: '#FEF3C7', color: '#92400E' },
-  not_started:     { label: 'Not started',     bg: '#F3F4F6', color: '#4B5563' },
-  needs_attention: { label: 'Needs attention', bg: '#FEE2E2', color: '#991B1B' },
-  waiting:         { label: 'Waiting',         bg: '#EDE9FE', color: '#5B21B6' },
-};
-
-function Chip(props) {
-  var s = STATE[props.state] || STATE.not_started;
-  return <span style={{ display: 'inline-block', background: s.bg, color: s.color, fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '12px', whiteSpace: 'nowrap' }}>{s.label}</span>;
-}
+var GROUPS = [
+  { title: 'The city and its people', keys: ['agency', 'departments', 'teams', 'staff', 'record_owners'] },
+  { title: 'The rules the law set', keys: ['fee_law', 'clarification', 'exemptions', 'eligibility', 'intake', 'deadlines', 'redaction_rules', 'city_choices', 'law_updates'] },
+  { title: 'How a request is worked', keys: ['taxonomy', 'calibration', 'routing_rules', 'process_map', 'time_budgets', 'time_tracking', 'notifications', 'agent_rules', 'av_redaction', 'redaction_auto', 'release_review', 'layout_templates', 'decision_reasons', 'mass_schedule'] },
+  { title: 'Technical', keys: ['sources', 'ai_config', 'email', 'auth_policy', 'settlement'] },
+];
+var EXTRA = [{ title: 'The city and its people', name: 'User types', door: '/setup/user-types', hint: 'the catalog of what each type may do' }];
 
 export default function SetupHubPage() {
   var nav = useNavigate();
   var [data, setData] = useState(null);
   var [err, setErr] = useState('');
-  var [why, setWhy] = useState(null);       // item
-  var [busy, setBusy] = useState('');
-
-  function load() {
-    api.get('/setup-hub').then(function (r) { setData(r.data); setErr(''); })
-      .catch(function (e) { setErr((e.response && e.response.data && e.response.data.error) || 'The setup page could not load.'); });
-  }
-  useEffect(load, []);
-
-  function open(item) {
-    if (!item.door) return;
-    nav(item.door);
-  }
-  async function toggleDone(item, e) {
-    e.stopPropagation();
-    setBusy(item.key);
-    try {
-      if (item.signoff) await api.delete('/setup-hub/' + item.key + '/done');
-      else await api.post('/setup-hub/' + item.key + '/done');
-      load();
-    } catch (ex) { setErr((ex.response && ex.response.data && ex.response.data.error) || 'Could not update.'); }
-    setBusy('');
-  }
-
-  if (err && !data) return <div style={{ padding: '24px', color: '#DC2626' }}>{err}</div>;
-  if (!data) return <div style={{ padding: '24px', color: '#9CA3AF' }}>Reading what is configured…</div>;
-
-  var c = data.counts;
-  var headerCounts = [['ready', c.ready], ['in_progress', c.in_progress], ['not_started', c.not_started], ['waiting', c.waiting], ['needs_attention', c.needs_attention]];
-
-  function Row(props) {
-    var it = props.item;
-    var dim = it.state === 'waiting';
-    var clickable = !!it.door;
-    return (
-      <div onClick={function () { open(it); }} title={clickable ? 'Open the screen that sets this' : 'No screen for this yet'}
-        style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'start', padding: '12px 14px', borderTop: '1px solid #F3F4F6', cursor: clickable ? 'pointer' : 'default', opacity: dim ? 0.72 : 1, background: 'white' }}
-        onMouseEnter={function (e) { if (clickable) e.currentTarget.style.background = '#F8FAFC'; }} onMouseLeave={function (e) { e.currentTarget.style.background = 'white'; }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{it.name}</span>
-            <Chip state={it.state} />
-            {it.legal ? <span style={{ fontSize: '10px', fontWeight: '700', color: '#6D28D9' }}>LEGAL SECTION</span> : null}
-          </div>
-          <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '3px', lineHeight: '1.5' }}>{it.evidence}</div>
-          {it.note ? <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>{it.note}</div> : null}
-        </div>
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          {it.state === 'waiting' ? <button type="button" onClick={function (e) { e.stopPropagation(); setWhy(it); }}
-            style={{ padding: '4px 10px', background: 'white', color: '#5B21B6', border: '1px solid #DDD6FE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Why</button> : null}
-          {it.canEdit && !it.goLive ? <button type="button" disabled={busy === it.key} onClick={function (e) { toggleDone(it, e); }}
-            title={it.signoff ? 'Remove the done mark' : 'Record that this item is ready'}
-            style={{ padding: '4px 10px', background: it.signoff ? 'white' : '#1F4E79', color: it.signoff ? '#6B7280' : 'white', border: '1px solid ' + (it.signoff ? '#E5E7EB' : '#1F4E79'), borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
-            {it.signoff ? 'Marked done' : 'Mark it done'}</button> : null}
-        </div>
-      </div>
-    );
-  }
+  useEffect(function () {
+    api.get('/setup-hub').then(function (r) { setData(r.data); }).catch(function (e) { setErr((e.response && e.response.data && e.response.data.error) || 'The settings list could not load.'); });
+  }, []);
+  if (err) return <div style={{ color: '#B91C1C', padding: '24px' }}>{err}</div>;
+  if (!data) return <div style={{ color: '#9CA3AF', padding: '24px' }}>Loading…</div>;
+  var byKey = {};
+  (data.top || []).forEach(function (it) { byKey[it.key] = it; });
+  (data.lanes || []).forEach(function (l) { (l.items || []).forEach(function (it) { byKey[it.key] = it; }); });
+  var placed = {};
+  var groups = GROUPS.map(function (gr) {
+    var rows = gr.keys.map(function (k) { placed[k] = true; return byKey[k]; }).filter(Boolean).map(function (it) { return { name: it.name, door: it.door, hint: it.noScreen ? 'no screen yet' : '' }; });
+    EXTRA.filter(function (x) { return x.title === gr.title; }).forEach(function (x) { rows.push({ name: x.name, door: x.door, hint: x.hint }); });
+    return { title: gr.title, rows: rows };
+  });
+  var leftovers = Object.keys(byKey).filter(function (k) { return !placed[k] && !byKey[k].goLive; }).map(function (k) { return { name: byKey[k].name, door: byKey[k].door, hint: byKey[k].noScreen ? 'no screen yet' : '' }; });
+  if (leftovers.length) groups.push({ title: 'Other', rows: leftovers });
 
   return (
-    <div style={{ padding: '4px 0 32px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap', marginBottom: '14px' }}>
-        <div style={{ maxWidth: '640px' }}>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: '#111827' }}>Setup and Configuration</div>
-          <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px', lineHeight: '1.55' }}>Everything this city has to decide before it can answer records requests for real. Each item opens the screen that sets it.</div>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {headerCounts.map(function (h) { var s = STATE[h[0]]; return <span key={h[0]} style={{ background: s.bg, color: s.color, fontSize: '12px', fontWeight: '700', padding: '5px 12px', borderRadius: '14px' }}>{h[1]} {s.label.toLowerCase()}</span>; })}
-        </div>
-      </div>
-      {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: '#DC2626', marginBottom: '12px' }}>{err}</div> : null}
-
-      {data.top.map(function (it) {
-        return <div key={it.key} style={{ border: '2px solid #1F4E79', borderRadius: '12px', overflow: 'hidden', marginBottom: '18px', background: 'white' }}>
-          <div style={{ padding: '8px 14px', background: '#EFF6FF', fontSize: '11px', fontWeight: '700', color: '#1F4E79', letterSpacing: '0.04em' }}>START HERE</div>
-          <Row item={it} />
-        </div>;
-      })}
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '16px' }}>
-        {data.lanes.map(function (l) {
-          return <div key={l.key} style={{ border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', background: 'white' }}>
-            <div style={{ padding: '12px 14px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-              <div style={{ fontSize: '15px', fontWeight: '700', color: '#111827' }}>{l.title}</div>
-              <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '2px' }}>{l.ownerLabel}{l.canEdit ? '' : ' · view only for you'}</div>
-              <div style={{ fontSize: '12px', color: '#374151', marginTop: '4px', fontWeight: '600' }}>{l.ready} of {l.total} ready</div>
+    <div style={{ color: '#12232E' }}>
+      <div style={{ fontSize: '20px', fontWeight: 700, marginBottom: '4px' }}>Settings and Configuration</div>
+      <div style={{ fontSize: '13px', color: '#5C6F7C', marginBottom: '18px', lineHeight: 1.5 }}>Every screen that shapes how the system runs, grouped by what it is about. Initial setup and its approvals happen on the Set Up Guide; this page is the way back to any screen afterwards.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '14px' }}>
+        {groups.map(function (gr) {
+          return (
+            <div key={gr.title} style={{ background: 'white', border: '1px solid #D2DCE3', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{ padding: '10px 14px', fontSize: '13px', fontWeight: 700, color: '#1E6091', background: '#F2F6F9' }}>{gr.title}</div>
+              {gr.rows.map(function (row, i) {
+                var open = row.door ? function () { nav(row.door); } : null;
+                return (
+                  <div key={row.name + i} onClick={open} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderTop: '1px solid #EEF2F5', fontSize: '13px', cursor: open ? 'pointer' : 'default', color: open ? '#12232E' : '#8296A4' }}
+                    onMouseEnter={function (e) { if (open) e.currentTarget.style.background = '#F8FAFC'; }} onMouseLeave={function (e) { e.currentTarget.style.background = 'white'; }}>
+                    <span style={{ flexGrow: 1 }}>{row.name}</span>
+                    {row.hint ? <span style={{ fontSize: '12px', color: '#8296A4' }}>{row.hint}</span> : null}
+                    {open ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg> : null}
+                  </div>
+                );
+              })}
             </div>
-            {l.items.map(function (it) { return <Row key={it.key} item={it} />; })}
-          </div>;
+          );
         })}
       </div>
-
-      {why ? (
-        <div onClick={function () { setWhy(null); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', padding: '22px', width: '520px', maxWidth: '92%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-            <div style={{ fontSize: '16px', fontWeight: '700', color: '#111827' }}>{why.name} is waiting</div>
-            <div style={{ fontSize: '13px', color: '#374151', marginTop: '10px', lineHeight: '1.6' }}>{why.why}</div>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
-              {why.door ? <button type="button" onClick={function () { setWhy(null); open(why); }} style={{ padding: '8px 14px', background: '#1F4E79', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Open it anyway</button> : null}
-              {(why.waitingOn || []).map(function (k) {
-                var dep = null; data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === k) dep = x; }); }); data.top.forEach(function (x) { if (x.key === k) dep = x; });
-                return dep && dep.door ? <button key={k} type="button" onClick={function () { setWhy(null); open(dep); }} style={{ padding: '8px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Go to {dep.name}</button> : null;
-              })}
-              <button type="button" onClick={function () { setWhy(null); }} style={{ padding: '8px 14px', background: 'white', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>Close</button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

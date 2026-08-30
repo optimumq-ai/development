@@ -9650,3 +9650,34 @@ SPEC_parent_child_lifecycle §6.5 records the rules and the 12 remaining MEDIUM/
 
 **NEXT:** Kevin is walking through how attestation for initial setup should work (design, no build yet) ·
 his live walk-through · MFA decision · the Jurisdiction Configuration retirement plan.
+
+## 2026-08-31 — the APPROVAL MODEL (three colours) built, Agency first; Settings tab is navigation only; Go Live on the guide; suite 2765/2766 (E1a the only red)
+
+**Kevin's design (walk-through, this session; mockup docs/mockups/setup_attestation, canvas
+https://claude.ai/code/artifact/9a5d1a0f-c396-419e-8bf0-bcad83bc502c):** every setup item shows RED (a required
+field is empty) · YELLOW (all saved, awaiting the lane owner's approval — or changed since approval) · GREEN
+(approved). The SCREEN owns its indicator; the Set Up Guide's bars only read it. Approval = "Approve — attest as
+complete" on the screen, one approver per screen (the existing group gate). A saved change to approved data
+drops it to yellow automatically and notifies the approver (my improvement, Kevin accepted). Settings and
+Configuration is navigation only; initial setup runs off the guide. Go Live is a button on the guide's header.
+
+**Built:** `setupHub.js` — readers may report `required` + `digest`; `mark()` refused 422 `REQUIRED_MISSING`
+while red and stores the digest; `afterChange(key, actor)` notifies lane owners once per change
+(`notifications` kind `setup_reapproval`); `build()` emits `approval` / `approvalWhy` / `changedSinceApproval`
+per item and page `colours` + `goLiveColour`; schema: `setup_hub_signoffs.content_hash/notified_hash`.
+Agency is the first converted reader (9 required fields + the lock) and its route calls `afterChange` after
+save and lock. Frontend: AgencySetupPage (required-field lines, three-colour pill, Approve/Re-approve, changed
+notice); the shared `SetupScreen` strip does the same for every screen; `SetupGuidePage` bars carry the
+colour + state text, Go Live button (red/yellow/green/Live, confirmation, `go_live` authority →
+`POST /jurisdiction-profile/enforcement`); `SetupHubPage` rewritten as a grouped navigation list. SPEC §3d.
+Tests: `verify_setup_hub` 34/34 (+H1–H7), golden 37/37 (agency save fills every required field; approval
+refusal enforced end to end).
+
+**Not yet converted (derive their colour from the counted state):** every other screen. Kevin: one at a time;
+list screens (Staff, Taxonomy, Workflow Rules, Record Sources) get a "Complete — submit for approval" act
+instead of required fields, then the same green→yellow-on-change rule. Next candidates in guide order:
+Record Sources and Connectors, AI configuration, Email, User Authentication (forms) · Departments / Teams /
+Staff (lists).
+
+**NEXT:** convert the next screens (Kevin picks) · his live walk-through · MFA decision · Jurisdiction
+Configuration retirement (the go-live flip now has its second door on the guide).

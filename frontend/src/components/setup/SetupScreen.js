@@ -18,6 +18,11 @@ export var STATE = {
   needs_attention: { label: 'Needs attention', bg: '#FEE2E2', color: '#991B1B' },
   waiting:         { label: 'Waiting',         bg: '#EDE9FE', color: '#5B21B6' },
 };
+export var APPROVAL = {
+  red:    { label: 'Not started',       bg: '#FEE2E2', color: '#991B1B' },
+  yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' },
+  green:  { label: 'Approved',          bg: '#E1F2E9', color: '#1B8A5A' },
+};
 export var lbl = { fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' };
 export var inp = { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', boxSizing: 'border-box', background: 'white', fontFamily: 'inherit' };
 export var hint = { fontSize: '12px', color: '#8296A4', marginTop: '5px', lineHeight: 1.45 };
@@ -74,9 +79,14 @@ export default function SetupScreen(props) {
     setBusy('');
   }
 
-  var st = STATE[(row && row.state) || 'not_started'];
+  // APPROVAL MODEL (Kevin 2026-08-31): when the hub row carries an approval colour, the pill is that colour and
+  // the line is why; the button approves (or re-approves). Rows without one keep the five-state pill.
+  var ap = row && row.approval;
+  var st = ap ? APPROVAL[ap] : STATE[(row && row.state) || 'not_started'];
   var can = !!(row && row.canEdit);
-  var attested = !!(row && row.signoff);
+  var attested = !!(row && row.signoff) && !(row && row.changedSinceApproval);
+  var redLock = ap === 'red';
+  var approveLabel = row && row.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
 
   return (
     <div style={{ maxWidth: props.maxWidth || '860px', color: '#12232E' }}>
@@ -86,13 +96,14 @@ export default function SetupScreen(props) {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           {hubKey ? st.label : 'Settings and Configuration'}
         </button>
-        <span style={{ flexGrow: 1, fontSize: '12px', color: '#5C6F7C', lineHeight: '1.35' }}>{row ? row.evidence : (hubKey ? '' : (props.note || ''))}</span>
+        <span style={{ flexGrow: 1, fontSize: '12px', color: '#5C6F7C', lineHeight: '1.35' }}>{row ? (row.approvalWhy || row.evidence) : (hubKey ? '' : (props.note || ''))}</span>
         <span style={{ fontSize: '11.5px', color: '#8296A4', whiteSpace: 'nowrap' }}>{props.laneLabel}</span>
         {!hubKey ? null : attested
-          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'white', color: '#12232E', border: '1px solid #BECAD3', cursor: 'pointer', whiteSpace: 'nowrap' }}>Attested · undo</button>
-          : <button type="button" disabled={!can || busy === 'attest'} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: can ? BLUE : '#F2F6F9', color: can ? 'white' : '#A9B7C2', border: '1px solid ' + (can ? BLUE : '#D2DCE3'), cursor: can ? 'pointer' : 'default', whiteSpace: 'nowrap' }}>Attest as complete</button>}
+          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'white', color: '#12232E', border: '1px solid #BECAD3', cursor: 'pointer', whiteSpace: 'nowrap' }}>{ap ? 'Approved · undo' : 'Attested · undo'}</button>
+          : <button type="button" disabled={!can || redLock || busy === 'attest'} onClick={toggleAttest} title={redLock ? 'Fill and save every required item first' : ''} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: (can && !redLock) ? BLUE : '#F2F6F9', color: (can && !redLock) ? 'white' : '#A9B7C2', border: '1px solid ' + ((can && !redLock) ? BLUE : '#D2DCE3'), cursor: (can && !redLock) ? 'pointer' : 'default', whiteSpace: 'nowrap' }}>{approveLabel}</button>}
       </div>
       {err ? <Msg text={err} ok={false} /> : null}
+      {row && row.changedSinceApproval ? <div style={{ background: '#FFF8E8', border: '1px solid #F0D9A8', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: '#7A5210', marginBottom: '14px' }}><strong>Changed since approval.</strong> {row.approvalWhy}. The lane owner has been notified to approve again.</div> : null}
       <div style={Object.assign({}, card, { padding: '20px 22px' })}>
         <div style={{ fontSize: '19px', fontWeight: 700, marginBottom: '3px' }}>{props.title}</div>
         <div style={{ fontSize: '12.5px', color: '#5C6F7C', marginBottom: '18px', lineHeight: 1.5 }}>{props.intro}</div>
