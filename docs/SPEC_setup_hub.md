@@ -119,6 +119,10 @@ The three organization rows share the Organization screen (`/org?tab=…`); each
 | Clarification · Exemptions · Eligibility · Intake · Deadlines (5 rows) | decisions | every unconfirmed local policy setting of the row's section (`sectionRequired`) — the same rule go-live counts | `routes/requestRules.js` hook + `policy-settings/confirm` (domain → item) |
 | Redaction rules library (`redaction_rules`) | list | ≥1 rule approved AND in effect; health: rules waiting for a supervisor's approval · rules approved but switched off; "Ready for approval" and the approval are `legal_rules` acts (the row is a legal section) | `routes/redactionRules.js` finish hook (+ `policy-settings/confirm` domain `redaction`, already mapped) |
 | Update Configuration (`law_updates`) | form | the review queue is EMPTY (every proposed change approved or discarded) + both reminder settings SAVED (how often, who receives it) | `routes/configFreshness.js` finish hook |
+| Taxonomy (`taxonomy`) | list | ≥1 active record type; health: discovered drafts to review | `routes/taxonomy.js` finish hook (reports all three rows) |
+| How much work each record type takes (`calibration`) | list | ≥1 calibrated record type; health: how many are still to calibrate | same hook + `routes/estimateProfiles.js` finish hook |
+| Which department owns which records (`record_owners`) | list | ≥1 ownership assignment; health: record types with no owner | `routes/taxonomy.js` finish hook |
+The three taxonomy rows share the Taxonomy screen (`/setup/taxonomy?tab=calibration|owners`); the body is one page (the content really is shared) and the `?tab=` chooses which row the strip signs off.
 
 `routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
 
@@ -140,6 +144,16 @@ precedent: the 182-day cadence and the fall-back-to-`contact_email` recipient ar
 status payload now carries `saved: {cadenceDays, recipient}` so the screen can outline an unsaved one in red.
 OPEN (see `WORKING_setup_conversion_questions.md` Q1): a proposal created by the nightly freshness scan turns
 the row red with NO notification — only screen-driven changes report through `afterChange`.
+
+**Taxonomy, calibration and record ownership — three rows, one shared body (2026-08-31).** Organization
+splits its three rows into three TABS because departments, teams and staff are three different lists. The
+Taxonomy screen's three rows are three different QUESTIONS about the SAME list of record types, so splitting
+the body would mean showing the record types three times. The screen therefore keeps one body and the
+`?tab=` picks which row the strip is signing off (a "Setting up" pill row switches it without leaving the
+page). Counts are what the row can honestly claim: calibration counts the types actually CALIBRATED (a city
+may stop before covering all of them — the rest is health, not a blocker), ownership counts the assignments
+made. `routes/taxonomy.js` reports all three (a deleted record type moves every one of them);
+`routes/estimateProfiles.js` reports `calibration`.
 
 ## 3g′. FORM AND TABBED SCREENS SUBMIT THEMSELVES (Kevin 2026-08-30, BUILT)
 

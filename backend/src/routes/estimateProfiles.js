@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+// Calibration is a LIST row on the Taxonomy screen (approval model, SPEC_setup_hub §3e): seeding, adding
+// actuals or clearing a profile is a change on `calibration`. Router-level finish hook — best effort.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { require('../services/setupHub').afterChange('calibration', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth, requirePermission } = require('../middleware/auth');
 const ep = require('../services/estimateProfile');
 

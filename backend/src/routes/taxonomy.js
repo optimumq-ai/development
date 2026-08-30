@@ -1,5 +1,14 @@
 const express = require('express');
 const router = express.Router();
+// The Taxonomy screen is a LIST screen and carries THREE hub rows (approval model, SPEC_setup_hub §3e/§3g):
+// Taxonomy, calibration, and record ownership all read the same record types, so every mutation here reports
+// all three. Router-level finish hook, after the response — best effort.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { var HUBt = require('../services/setupHub'); ['taxonomy', 'calibration', 'record_owners'].forEach(function (k) { HUBt.afterChange(k, req.user && (req.user.name || req.user.email)).catch(function () {}); }); } catch (e) {} } });
+  }
+  next();
+});
 const { get, all, run } = require('../db');
 const { requireAuth, requireTaxonomyEdit } = require('../middleware/auth');
 // EDIT = the taxonomy-edit gate (SYSTEM_ADMIN/DIRECTOR). Every write below takes it; reads and the

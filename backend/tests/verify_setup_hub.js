@@ -426,6 +426,61 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   for (var uck2 in ucSave) { if (ucSave[uck2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [uck2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [uck2, ucSave[uck2]]); }
   if (ucMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [ucMark.item_key, ucMark.marked_by, ucMark.marked_by_name, ucMark.marked_at, ucMark.content_hash || null, ucMark.notified_hash || null]);
 
+  console.log('\n=== Q. TAXONOMY / CALIBRATION / RECORD OWNERS (list) — three rows over one screen, three approvals ===');
+  var TX_ROWS = ['taxonomy', 'calibration', 'record_owners'];
+  var txSave = {};
+  for (var txk of TX_ROWS) { txSave[txk] = await db.get('SELECT * FROM setup_hub_signoffs WHERE item_key = ?', [txk]); await callAs(U.dir, 'DELETE', '/setup-hub/' + txk + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + txk + '/ready'); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('taxonomy','calibration','record_owners')");
+  var txCat = await db.get('SELECT id FROM categories ORDER BY id LIMIT 1');
+  var txDept = await db.get("SELECT id FROM departments WHERE active = 1 ORDER BY id LIMIT 1");
+  var txNew = await callAs(U.dir, 'POST', '/taxonomy/record-types', { category_id: txCat && txCat.id, name: 'HUB Type ' + TAG, code: 'HUBT' + TAG.slice(-5) });
+  var txId = txNew.body && txNew.body.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txPage = (await callAs(U.dir, 'GET', '/setup-hub')).body;
+  var txT = find(txPage, 'taxonomy'), txC = find(txPage, 'calibration'), txO = find(txPage, 'record_owners');
+  ok('Q1 all three are LIST rows over the same record types, each with its own counted line', txNew.status === 200 && !!txId && txT.approvalModel === 'list' && txC.approvalModel === 'list' && txO.approvalModel === 'list' && /record types/.test(txT.evidence || '') && /calibrated/.test(txC.evidence || '') && /have an owner/.test(txO.evidence || ''), txNew.status + ' | ' + [txT, txC, txO].map(function (x) { return x.approvalModel + '/' + x.approval + ': ' + x.evidence; }).join(' | '));
+  ok('Q2 the three doors are the one screen, each with its own ?tab= (the Organization pattern)', txT.door === '/setup/taxonomy' && txC.door === '/setup/taxonomy?tab=calibration' && txO.door === '/setup/taxonomy?tab=owners', [txT.door, txC.door, txO.door].join(' | '));
+  var txn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'taxonomy'")).n;
+  var txRdy = await callAs(U.sup, 'POST', '/setup-hub/taxonomy/ready');
+  var txApv = await callAs(U.dir, 'POST', '/setup-hub/taxonomy/done');
+  var txT2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'taxonomy');
+  var txn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'taxonomy'")).n;
+  ok('Q3 a supervisor declares the taxonomy complete (owners told once); the Director approves → GREEN, declaration cleared', txRdy.status === 200 && txApv.status === 200 && txT2.approval === 'green' && !txT2.ready && txn1 > txn0, txRdy.status + '/' + txApv.status + ' ' + txT2.approval + ' · ' + txn0 + '→' + txn1);
+  var txc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'taxonomy'")).n;
+  var txEdit = await callAs(U.dir, 'PATCH', '/taxonomy/record-types/' + txId, { name: 'HUB Type ' + TAG + ' (renamed)' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txT3 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'taxonomy');
+  var txc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'taxonomy'")).n;
+  ok('Q4 editing a record type after approval → YELLOW "changed since approval" + one notification (routes/taxonomy.js hook)', txEdit.status === 200 && txT3.approval === 'yellow' && /changed since approval/.test(txT3.approvalWhy || '') && txc1 > txc0, txEdit.status + ' ' + txT3.approval + ': ' + txT3.approvalWhy + ' · ' + txc0 + '→' + txc1);
+  var txCalApv = await callAs(U.dir, 'POST', '/setup-hub/calibration/done');
+  var txcal0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'calibration'")).n;
+  var txSeed = await callAs(U.dir, 'PUT', '/estimate-profiles/' + txId, { quantities: { searchHours: 2, reviewHours: 1, bwPages: 40 }, notes: 'hub harness' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txC2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'calibration');
+  var txcal1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'calibration'")).n;
+  ok('Q5 calibration is its OWN row: approved green, then a seeded profile → YELLOW + one notification (routes/estimateProfiles.js hook)', txCalApv.status === 200 && txSeed.status === 200 && txC2.approval === 'yellow' && /changed since approval/.test(txC2.approvalWhy || '') && txcal1 > txcal0, txCalApv.status + '/' + txSeed.status + ' ' + txC2.approval + ' · ' + txcal0 + '→' + txcal1);
+  var txOwnApv = await callAs(U.dir, 'POST', '/setup-hub/record_owners/done');
+  var txown0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'record_owners'")).n;
+  var txLink = txDept ? await callAs(U.dir, 'POST', '/taxonomy/record-types/' + txId + '/departments', { department_id: txDept.id, role: 'owner' }) : { status: 0 };
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var txO2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'record_owners');
+  var txown1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'record_owners'")).n;
+  ok('Q6 record ownership is its OWN row: approved green, then a new owner assignment → YELLOW + one notification', txOwnApv.status === 200 && txLink.status === 200 && txO2.approval === 'yellow' && /changed since approval/.test(txO2.approvalWhy || '') && txown1 > txown0, txOwnApv.status + '/' + txLink.status + ' ' + txO2.approval + ' · ' + txown0 + '→' + txown1);
+  if (txId) {
+    await callAs(U.dir, 'DELETE', '/estimate-profiles/' + txId);
+    await callAs(U.dir, 'DELETE', '/taxonomy/record-types/' + txId);
+    await db.run('DELETE FROM record_type_estimate_profiles WHERE record_type_id = ?', [txId]);
+    await db.run('DELETE FROM record_type_departments WHERE record_type_id = ?', [txId]);
+    await db.run('DELETE FROM record_types WHERE id = ?', [txId]);
+    await db.run("DELETE FROM taxonomy_audit WHERE entity_id = ? OR details LIKE '%' || ? || '%'", [txId, txId]);
+    try { await db.run("DELETE FROM embeddings WHERE owner_type = 'record_type' AND owner_id = ?", [txId]); } catch (e) {}
+  }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('taxonomy','calibration','record_owners')");
+  for (var txk2 of TX_ROWS) {
+    await callAs(U.dir, 'DELETE', '/setup-hub/' + txk2 + '/done'); await db.run('DELETE FROM setup_hub_ready WHERE item_key = ?', [txk2]);
+    if (txSave[txk2]) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [txSave[txk2].item_key, txSave[txk2].marked_by, txSave[txk2].marked_by_name, txSave[txk2].marked_at, txSave[txk2].content_hash || null, txSave[txk2].notified_hash || null]);
+  }
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

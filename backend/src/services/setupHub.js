@@ -82,6 +82,8 @@ const ITEMS = [
   // `testEstimateStatus` for the Fee rules screen's tab badge.
   // C7 (Kevin 2026-08-29): 'Record types and categories' becomes 'Taxonomy' under System Features and
   // Options — same key, so the calibration dependency and the counted evidence carry over unchanged.
+  // LIST MODEL (2026-08-31): three rows share the Taxonomy screen (the Organization pattern) — the strip
+  // follows the door's ?tab=, so each row is declared ready and approved on its own.
   { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/setup/taxonomy', deps: ['sources'], softDeps: true },
   { key: 'time_budgets', lane: 'features', name: 'How many days a task should take', door: '/setup/time-budgets', deps: [] },
   { key: 'time_tracking', lane: 'features', name: 'Task Processing Time Capture', door: '/setup/time-capture', deps: [] },
@@ -89,7 +91,7 @@ const ITEMS = [
   // The agent-rules API is system-authority (routes/agentRules.js) — the row's gate says so too, or a Director
   // sees live controls that 403 (spec/architecture audit 2026-08-31).
   { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [], groups: ['system_admin'] },
-  { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/setup/taxonomy', deps: ['taxonomy'] },
+  { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/setup/taxonomy?tab=calibration', deps: ['taxonomy'] },
   // C15 (Kevin 2026-08-30): the admin Workflow and Process Map tabs become dedicated screens behind these rows.
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Workflow Rules', door: '/setup/workflow-rules', deps: ['departments', 'teams'] },
   { key: 'process_map', lane: 'fulfillment_fees', name: 'Process Map', door: '/setup/process-map', deps: [] },
@@ -109,7 +111,7 @@ const ITEMS = [
   { key: 'departments', lane: 'organization', name: 'City departments', door: '/org?tab=departments', deps: [] },
   { key: 'teams', lane: 'organization', name: 'Fulfillment teams', door: '/org?tab=teams', deps: ['departments'] },
   { key: 'staff', lane: 'organization', name: 'Staff and what each person does', door: '/org?tab=staff', deps: ['teams'] },
-  { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/setup/taxonomy', deps: ['taxonomy', 'departments'] },
+  { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/setup/taxonomy?tab=owners', deps: ['taxonomy', 'departments'] },
   // ── Lane 4 ──
   // C14 (Kevin 2026-08-30): renamed from 'Where the records live'; the admin Sources tab retired for its own screen.
   { key: 'sources', lane: 'technical', name: 'Record Sources and Connectors', door: '/setup/record-sources', deps: [] },
@@ -312,17 +314,29 @@ const READERS = {
     return ev('in_progress', 'everything is confirmed — ready to flip', { goLiveSummary: s });
   },
   taxonomy: async function () {
-    var n = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
-    var drafts = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'draft' OR status = 'discovered'");
-    if (!n) return ev('not_started', 'no record types yet');
-    return ev(drafts ? 'in_progress' : 'ready', n + ' record types' + (drafts ? ' · ' + drafts + ' discovered drafts to review' : ''));
+    // LIST MODEL (§3e, 2026-08-31): the taxonomy is written type by type over weeks. Health = the discovered
+    // drafts nobody has ruled on yet; they never block the colour, but the approver sees them.
+    var trows = await all('SELECT id, name, code, category_id, status, public_availability, auto_release_eligible FROM record_types ORDER BY id');
+    var n = trows.filter(function (t) { return t.status === 'active' || t.status == null; }).length;
+    var drafts = trows.filter(function (t) { return t.status === 'draft' || t.status === 'discovered'; }).length;
+    var xtx = { list: { count: n, noun: 'record type', health: drafts ? drafts + ' discovered draft' + (drafts > 1 ? 's' : '') + ' to review' : '' },
+      digest: digestOf(trows.map(function (t) { return [t.id, t.name, t.code, t.category_id, t.status, t.public_availability, t.auto_release_eligible]; })) };
+    if (!n) return ev('not_started', 'no record types yet', xtx);
+    return ev(drafts ? 'in_progress' : 'ready', n + ' record types' + (drafts ? ' · ' + drafts + ' discovered drafts to review' : ''), xtx);
   },
   calibration: async function () {
+    // LIST MODEL (§3e, 2026-08-31): calibration is done type by type, and a city may honestly stop before
+    // every type is covered — so the COUNT is the types actually calibrated and the rest is health. The
+    // digest carries each profile's seed/sample so a re-calibration after approval re-opens the row.
     var m = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
-    var n = await count('SELECT COUNT(*) n FROM record_type_estimate_profiles WHERE has_expert_seed = 1 OR sample_size > 0');
-    if (!m) return ev('waiting', 'until there are record types to estimate', { waitingOn: ['taxonomy'] });
-    if (!n) return ev('not_started', 'none of ' + m + ' record types calibrated');
-    return ev(n >= m ? 'ready' : 'in_progress', n + ' of ' + m + ' record types calibrated');
+    var prows = await all('SELECT record_type_id, sample_size, has_expert_seed, updated_at FROM record_type_estimate_profiles ORDER BY record_type_id');
+    var done = prows.filter(function (p) { return Number(p.has_expert_seed) === 1 || Number(p.sample_size) > 0; });
+    var n = done.length;
+    var xcal = { list: { count: n, noun: 'calibrated record type', health: !m ? 'no record types yet' : (n < m ? (m - n) + ' of ' + m + ' still to calibrate' : '') },
+      digest: digestOf(prows.map(function (p) { return [p.record_type_id, p.sample_size, p.has_expert_seed, p.updated_at]; })) };
+    if (!m) return ev('waiting', 'until there are record types to estimate', { waitingOn: ['taxonomy'], list: xcal.list, digest: xcal.digest });
+    if (!n) return ev('not_started', 'none of ' + m + ' record types calibrated', xcal);
+    return ev(n >= m ? 'ready' : 'in_progress', n + ' of ' + m + ' record types calibrated', xcal);
   },
   routing_rules: async function () {
     var n = await count('SELECT COUNT(*) n FROM workflow_rules WHERE enabled = 1');
@@ -420,10 +434,16 @@ const READERS = {
     return ev('ready', n + ' people, all typed · ' + searchers + ' can search records', xs);
   },
   record_owners: async function () {
+    // LIST MODEL (§3e, 2026-08-31): ownership is assigned type by type. The count is the assignments made;
+    // record types still without an owner are health.
     var m = await count("SELECT COUNT(*) n FROM record_types WHERE status = 'active' OR status IS NULL");
-    if (!m) return ev('waiting', 'until there are record types to assign', { waitingOn: ['taxonomy'] });
-    var n = await count("SELECT COUNT(DISTINCT record_type_id) n FROM record_type_departments WHERE role = 'owner'");
-    return ev(n >= m ? 'ready' : (n ? 'in_progress' : 'not_started'), n + ' of ' + m + ' record types have an owner');
+    var orows = await all("SELECT record_type_id, department_id FROM record_type_departments WHERE role = 'owner' ORDER BY record_type_id, department_id");
+    var seen = {}; orows.forEach(function (o) { seen[o.record_type_id] = 1; });
+    var n = Object.keys(seen).length;
+    var xown = { list: { count: n, noun: 'ownership assignment', health: !m ? 'no record types yet' : (n < m ? (m - n) + ' record type' + ((m - n) > 1 ? 's have' : ' has') + ' no owner' : '') },
+      digest: digestOf(orows.map(function (o) { return [o.record_type_id, o.department_id]; })) };
+    if (!m) return ev('waiting', 'until there are record types to assign', { waitingOn: ['taxonomy'], list: xown.list, digest: xown.digest });
+    return ev(n >= m ? 'ready' : (n ? 'in_progress' : 'not_started'), n + ' of ' + m + ' record types have an owner', xown);
   },
   sources: async function () {
     // LIST MODEL (Kevin 2026-08-31): red until the first connector, yellow while the list grows (quietly — no
