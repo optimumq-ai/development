@@ -85,24 +85,31 @@ async function makeUser(suffix, name, roleIds) {
   var snapRules = await db.all('SELECT * FROM jurisdiction_rules WHERE jurisdiction_id = ?', [JID]);
   var snapSections = await db.all('SELECT * FROM jurisdiction_profile_sections WHERE jurisdiction_id = ?', [JID]);
   var snapProposals = await db.all('SELECT * FROM config_proposals WHERE jurisdiction_id = ?', [JID]);
+  // RESTORE, race-proof (2026-08-30): a screen's write hooks (routes/configFreshness.js finish hook →
+  // setupHub.afterChange → jurisdictionProfile.getProfile → sync) can INSERT a section row a few ms after the
+  // last response, in the gap between a DELETE and this INSERT — the duplicate then aborted the whole restore
+  // before the proposals were cleared, and a stray 'for scoping test' fee proposal reached golden's F (which
+  // applies everything pending) and un-confirmed eight fee knobs. So: proposals first (the rows that leak
+  // downstream), and the section rows are UPSERTED, never bare-inserted.
   async function restore() {
-    await db.run('DELETE FROM jurisdiction_rules WHERE jurisdiction_id = ?', [JID]);
-    for (var i = 0; i < snapRules.length; i++) {
-      var r = snapRules[i];
-      await db.run('INSERT INTO jurisdiction_rules (id, jurisdiction_id, domain, config_json, updated_by, updated_at) VALUES (?,?,?,?,?,?)',
-        [r.id, r.jurisdiction_id, r.domain, r.config_json, r.updated_by, r.updated_at]);
-    }
-    await db.run('DELETE FROM jurisdiction_profile_sections WHERE jurisdiction_id = ?', [JID]);
-    for (var j = 0; j < snapSections.length; j++) {
-      var s = snapSections[j];
-      await db.run('INSERT INTO jurisdiction_profile_sections (id, jurisdiction_id, section, label, content_hash, version, status, source, last_changed_at, last_changed_by, attested_by, attested_at, attested_version, attested_hash, notes, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-        [s.id, s.jurisdiction_id, s.section, s.label, s.content_hash, s.version, s.status, s.source, s.last_changed_at, s.last_changed_by, s.attested_by, s.attested_at, s.attested_version, s.attested_hash, s.notes, s.created_at, s.updated_at]);
-    }
     await db.run('DELETE FROM config_proposals WHERE jurisdiction_id = ?', [JID]);
     for (var k = 0; k < snapProposals.length; k++) {
       var p = snapProposals[k];
       await db.run('INSERT INTO config_proposals (id, jurisdiction_id, domain, status, summary, proposed_json, current_json, source_ref, created_by, created_at, reviewed_by, reviewed_at, snapshot_id, applied_json, attested_by, attested_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
         [p.id, p.jurisdiction_id, p.domain, p.status, p.summary, p.proposed_json, p.current_json, p.source_ref, p.created_by, p.created_at, p.reviewed_by, p.reviewed_at, p.snapshot_id, p.applied_json, p.attested_by, p.attested_at]);
+    }
+    await db.run('DELETE FROM jurisdiction_rules WHERE jurisdiction_id = ?', [JID]);
+    for (var i = 0; i < snapRules.length; i++) {
+      var r = snapRules[i];
+      await db.run('INSERT INTO jurisdiction_rules (id, jurisdiction_id, domain, config_json, updated_by, updated_at) VALUES (?,?,?,?,?,?) ON CONFLICT (jurisdiction_id, domain) DO UPDATE SET id = EXCLUDED.id, config_json = EXCLUDED.config_json, updated_by = EXCLUDED.updated_by, updated_at = EXCLUDED.updated_at',
+        [r.id, r.jurisdiction_id, r.domain, r.config_json, r.updated_by, r.updated_at]);
+    }
+    await db.run('DELETE FROM jurisdiction_profile_sections WHERE jurisdiction_id = ?', [JID]);
+    for (var j = 0; j < snapSections.length; j++) {
+      var s = snapSections[j];
+      await db.run('INSERT INTO jurisdiction_profile_sections (id, jurisdiction_id, section, label, content_hash, version, status, source, last_changed_at, last_changed_by, attested_by, attested_at, attested_version, attested_hash, notes, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ' +
+        'ON CONFLICT (jurisdiction_id, section) DO UPDATE SET id = EXCLUDED.id, label = EXCLUDED.label, content_hash = EXCLUDED.content_hash, version = EXCLUDED.version, status = EXCLUDED.status, source = EXCLUDED.source, last_changed_at = EXCLUDED.last_changed_at, last_changed_by = EXCLUDED.last_changed_by, attested_by = EXCLUDED.attested_by, attested_at = EXCLUDED.attested_at, attested_version = EXCLUDED.attested_version, attested_hash = EXCLUDED.attested_hash, notes = EXCLUDED.notes, created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at',
+        [s.id, s.jurisdiction_id, s.section, s.label, s.content_hash, s.version, s.status, s.source, s.last_changed_at, s.last_changed_by, s.attested_by, s.attested_at, s.attested_version, s.attested_hash, s.notes, s.created_at, s.updated_at]);
     }
   }
 

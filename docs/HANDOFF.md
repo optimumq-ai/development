@@ -9846,3 +9846,16 @@ red line quotes the proposal's raw title (file name + sha from the nightly scan)
 Kevin's rulings still wanted on the agent's four questions in `docs/WORKING_setup_conversion_questions.md`.
 **Every screen with a door is now on the approval model** except `city_choices` (→ Jurisdiction Configuration
 retirement). Full `npm test` not yet run on the merged tree — run it detached before the next slice.
+
+## 2026-08-30 — full suite on the merged tree: golden G3/H1 red traced to a harness race; bw9b restore made race-proof
+
+First full run: 2839/2842 (E1a + golden G3/H1). Bisected by subset (`bw9b_editors → e2e_tx → e2e_oh → golden`
+reproduces; green at 726ff77): bw9b's `restore()` died on `duplicate key … jps_jur_section` — the agent's
+`routes/configFreshness.js` finish hook fires `afterChange('law_updates')` a few ms AFTER the dismiss response,
+the hub reader's `getProfile()` → `sync()` inserts a section row in the gap between restore's DELETE and INSERT,
+the restore aborts BEFORE clearing proposals, bw9b's "for scoping test" fee proposal survives, golden F applies
+it, and eight fee knobs go unconfirmed → template_import not_configured → go-live not ready. Harness-only race
+(production never deletes section rows): restore now clears proposals FIRST and upserts rules + sections.
+Note E1a ("known red") passes when bw9b_golive runs alone — it is order-dependent too, not a code fail.
+Lesson: `SUITE_DUMP_DIR=<dir> node tests/run_suite.js …` keeps a failed harness's full output (`failed_<h>.log`);
+instrumenting golden with probes + a forced fail is the fast way to see mid-run state.
