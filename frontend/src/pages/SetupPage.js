@@ -9,7 +9,7 @@ const PHASE_META = {
   teams:        { link: '/departments', linkLabel: 'Open Fulfillment Teams', guide: "Define your Request Fulfillment Teams and select which departments each one serves." },
   ownership:    { link: '/taxonomy', linkLabel: 'Open Taxonomy', guide: "Confirm the owning City Department for each record type. AI proposes sensible defaults; you adjust." },
   repositories: { link: '/sources', linkLabel: 'Open Sources', guide: "Connect your source systems and run discovery to catalog record types. Discovered types arrive as drafts for your review." },
-  fees:         { link: '/fee-config', linkLabel: 'Open Fee Configuration', guide: "Configure your fee schedule and per-record-type estimate calibration." },
+  fees:         { link: '/setup/fee-law', linkLabel: 'Open Fee rules', guide: "Set the fee schedule on Fee rules (what the law sets, what the city decides, and a test estimate); estimate calibration is per record type on Taxonomy." },
   redaction:    { link: '/redaction-rules', linkLabel: 'Open Redaction Rules', guide: "Review the AI-suggested jurisdiction redaction rules (drafts). Add, edit, or remove as needed \u2014 nothing takes effect until you approve it." },
 };
 

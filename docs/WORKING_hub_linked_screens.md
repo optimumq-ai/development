@@ -83,7 +83,7 @@ state (branches/clocks on or off), the section set never does; residency is a ye
 - State load writes only the fee SENTENCES (`jurisdiction_rules.fee.fee_schedule` ← template
   `fee_schedule.statutory_evidence`) → shown on /jurisdiction-config/fees Content tab. The 35 verified
   dollar items per template (`fee_schedule.items`, each tagged with `engine_field`) are READ BY NOTHING.
-- Administration → Fee Configuration: skeleton hardcoded (`FeeConfigPage.js DEFAULT_CONFIG`), values from
+- Administration → Fee Configuration (RETIRED 2026-08-30, C9 — screen deleted; Fee rules is the schedule): skeleton hardcoded (`FeeConfigPage.js DEFAULT_CONFIG`), values from
   `fee_profiles` (hand-seeded TX row). Profile dropdown = `fee_profiles` rows. Save config = in-place UPDATE,
   no version; only gate is `feeBounds` (422 above a statutory ceiling). "Configure from policy text (AI)" =
   paste box → `feePolicyExtract` (real model call) → proposes into the form, persists nothing.

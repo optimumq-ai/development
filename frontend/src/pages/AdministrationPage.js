@@ -4,7 +4,6 @@ import { useAuthStore } from '../store/authStore';
 import SetupHubPage from './SetupHubPage';
 import ConfigurationPage from './ConfigurationPage';
 import RuleUpdatesPage from './RuleUpdatesPage';
-import FeeConfigPage from './FeeConfigPage';
 import TaxonomyPage from './TaxonomyPage';
 import WorkflowPage from './WorkflowPage';
 import WorkflowMapPage from './WorkflowMapPage';
@@ -25,9 +24,8 @@ const TABS = [
   { key: 'setup',        label: 'Setup',                el: SetupHubPage },
   { key: 'config',       label: 'Configuration',        el: ConfigurationPage, admin: true },
   { key: 'updates',      label: 'Update Configuration', el: RuleUpdatesPage },
-  // C4 cleanup (Kevin 2026-08-29): the nav tab is gone — fee setup lives on Fee rules; the hub's
-  // "What this city actually charges" row remains the one door here (?tab=fees stays routable).
-  { key: 'fees',         label: 'Fee Configuration',    el: FeeConfigPage, hidden: true },
+  // C4 (Kevin 2026-08-29) hid the v1 "Fee Configuration" rate-table tab; C9 (Kevin 2026-08-30) RETIRED it — the
+  // screen was blank and Fee rules (/setup/fee-law) is the fee schedule now. /fee-config and ?tab=fees land on Fee rules.
   // C7 cleanup (Kevin 2026-08-29): the nav tab is gone — the hub's Taxonomy row (System Features and
   // Options) and the calibration row are the doors; ?tab=taxonomy stays routable.
   { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage, hidden: true },
@@ -56,6 +54,8 @@ export default function AdministrationPage() {
   // go-live checklist, section screens and rule editors live at /jurisdiction-config. Deep links
   // (help assistant, bookmarks) land there instead of silently falling to the first tab.
   if (activeKey === 'jurisdiction') return <Navigate to="/jurisdiction-config" replace />;
+  // RETIRED 2026-08-30 (C9): the v1 Fee Configuration rate-table tab — Fee rules is the fee schedule now.
+  if (activeKey === 'fees') return <Navigate to="/setup/fee-law" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (

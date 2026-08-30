@@ -166,7 +166,7 @@ export default function App() {
           <Route path="redact-fields/:fileId" element={<StructuredRedactionFieldsPage />} />
           <Route path="released" element={<ReleasedRecordsPage />} />
           <Route path="mass-redaction" element={<MassRedactionPage />} />
-          <Route path="fee-config" element={<Navigate to="/admin?tab=fees" replace />} />
+          <Route path="fee-config" element={<Navigate to="/setup/fee-law" replace />} />
           <Route path="cash-drawer" element={<CashDrawerPage />} />
           <Route path="config" element={<Navigate to="/admin?tab=config" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

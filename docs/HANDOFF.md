@@ -9374,3 +9374,32 @@ content is REDACTION only (+ the go-live flip). **NEXT SESSION: redaction planni
 a lot of planning").** Kevin's walk-through remains the critical path for E1a and the smoke's estimate
 beat (decision brief + clock switch + holiday-calendar load + tab attests + waiver choices + fee schedule
 v1 + the two pending proposals).
+
+## 2026-08-30 — cleanup C8–C9: the two fee rows retired from the hub; the v1 Fee Configuration screen deleted; suite 2696/2697 (E1a the only red)
+
+**Kevin's calls:** more cleanup before redaction migrates. C8: the fulfillment lane's top two rows —
+"What this city actually charges" (the old screen's pre-migration name; its door loaded blank) and "Try a
+test estimate" (a tab on Fee rules) — DELETED. C9: the blank v1 Fee Configuration screen itself RETIRED.
+
+- **C8 (caa74ba):** `fee_rates` + `fee_test` rows gone; `settlement` waits on `fee_law`; the fee_test
+  reader survives as `setupHub.testEstimateStatus`, attached to `GET /fee-law` as `testStatus` for the
+  "Test an estimate" tab's badge (FeeLawPage no longer scans the hub for it). Hub 33 items, lanes
+  [10,5,5,4,7,1]. SPEC §2/§3 updated.
+- **runner (de6bc61):** a harness that "did not complete" now prints its
+  last 30 lines, not 4 — the first C8 run's `verify_magic_reset` crash tail was just `}` and the Node
+  version; the single-harness rerun (`node tests/run_suite.js verify_magic_reset`, the supported way)
+  passed 29/29, so it was transient in the slow tail. Cause not identified.
+- **C9 (this commit):** `FeeConfigPage.js` deleted, the hidden `fees` admin tab removed; `/fee-config`
+  and `/admin?tab=fees` redirect to `/setup/fee-law` (the retired-jurisdiction-tab precedent); the old
+  wizard's Fees phase link points at Fee rules. Graduated page bands (the one thing only the rate table
+  edited) are API-only (`PUT /api/fee-profiles/:id`) until they get a Fee rules surface — noted on F1.
+
+**Suite: 2696/2697 twice today (C8 run + C9 run), live census clean — the one red is the deferred
+verify_bw9_golive E1a (unchanged).** Screenshots: hub lane 2a at 5 rows, counts sum to 33; both redirects
+land on Fee rules; "Fee Configuration" absent from the admin strip.
+
+**Memory fix:** the screenshot helper's admin lookup — `user_function_roles` no longer exists; use
+`user_user_types` → `user_types.key IN ('oro_director','oro_sysadmin')`.
+
+**NEXT:** Kevin names further cleanup items, or redaction planning begins. Kevin's walk-through remains
+the E1a critical path.
