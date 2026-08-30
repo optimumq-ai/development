@@ -9833,3 +9833,16 @@ decision · Q3 is "approved" meaningful on a reference screen (Process Map) · Q
 get its own `/setup/redaction-templates` screen instead of putting setup chrome on Mass Redaction.
 
 **Skipped as instructed:** `city_choices` and every `noScreen: true` row.
+
+## 2026-08-30 — the Opus agent's ten screens MERGED and verified here (`6a781b1`); hub 101/101, golden 44/44
+
+Merged `worktree-agent-a5d22d1a013755919` (10 screens, one commit each; only `docs/HANDOFF.md` conflicted — both
+entries kept). Verified on this box in suite order: hub 101/101, agency 20/20, fee-law 43/43, request-rules 48/48,
+taxonomy-variants 14/14, mass-handoff 14/14, redaction-audit 14/14, golden 44/44, live untouched. Built,
+restarted, screenshots of Redaction rules / Update Configuration / Taxonomy / Process Map / Time budgets /
+Mass Redaction all wear the strip with the right colour. Two cosmetic follow-ups: (1) Update Configuration's
+red line quotes the proposal's raw title (file name + sha from the nightly scan) — use a plain title;
+(2) the Mass Redaction strip squeezes its evidence text between "Ready for approval" and "Approve".
+Kevin's rulings still wanted on the agent's four questions in `docs/WORKING_setup_conversion_questions.md`.
+**Every screen with a door is now on the approval model** except `city_choices` (→ Jurisdiction Configuration
+retirement). Full `npm test` not yet run on the merged tree — run it detached before the next slice.
