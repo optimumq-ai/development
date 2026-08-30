@@ -92,6 +92,9 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   // Time capture: off everywhere is a valid posture, but it has to be SAVED to be the city's decision (§3g).
   var tc = await callAs(DIR, 'PUT', '/config/time-capture', { config: { search: 'discretion', estimate: 'off', legal_redaction: 'off', legal: 'off' } });
   ok('B10 task processing time capture saved', tc.status === 200, err(tc));
+  // Video Redaction Options: the screen shows "internal" by default, but the default is not a decision (§3g).
+  var avm = await callAs(DIR, 'POST', '/config', { av_redaction_mode: 'internal' });
+  ok('B11 the video/audio redaction mode saved', avm.status === 200, err(avm));
 
   console.log('\n=== C. FEE RULES — decide, waiver, clock, APPROVE ===');
   var fl = await callAs(DIR, 'GET', '/fee-law');

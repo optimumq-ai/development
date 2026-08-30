@@ -599,6 +599,31 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'DELETE', '/setup-hub/agent_rules/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'agent_rules'");
   if (arMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [arMark.item_key, arMark.marked_by, arMark.marked_by_name, arMark.marked_at, arMark.content_hash || null, arMark.notified_hash || null]);
 
+  console.log('\n=== V. VIDEO REDACTION OPTIONS (form) — one choice, and it has to be saved ===');
+  var avRow = await db.get("SELECT value FROM system_config WHERE key = 'av_redaction_mode'");
+  var avMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'av_redaction'");
+  await callAs(U.sup, 'DELETE', '/setup-hub/av_redaction/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'av_redaction'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'av_redaction'");
+  await db.run("DELETE FROM system_config WHERE key = 'av_redaction_mode'");
+  var vA = find((await callAs(U.sup, 'GET', '/setup-hub')).body, 'av_redaction');
+  var vRef = await callAs(U.sup, 'POST', '/setup-hub/av_redaction/done');
+  ok('V1 nothing saved → RED (the screen shows "internal", but that is the shipped default), approval refused 422', vA.approval === 'red' && /not decided/.test(vA.approvalWhy || '') && vRef.status === 422 && vRef.body.code === 'REQUIRED_MISSING', vA.approval + ': ' + vA.approvalWhy + ' · ' + vRef.status);
+  var vn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'av_redaction'")).n;
+  var vSave = await callAs(U.sup, 'POST', '/config', { av_redaction_mode: 'internal' });
+  var vB = find((await callAs(U.sup, 'GET', '/setup-hub')).body, 'av_redaction');
+  var vn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'av_redaction'")).n;
+  ok('V2 saving the SAME value deliberately is a decision → YELLOW, submitted, owners told once', vSave.status === 200 && vB.approval === 'yellow' && vB.ready && vn1 > vn0, vSave.status + ' ' + vB.approval + ': ' + vB.approvalWhy + ' · ' + vn0 + '→' + vn1);
+  var vApv = await callAs(U.sup, 'POST', '/setup-hub/av_redaction/done');
+  var vc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'av_redaction'")).n;
+  var vChg = await callAs(U.sup, 'POST', '/config', { av_redaction_mode: 'external' });
+  var vC = find((await callAs(U.sup, 'GET', '/setup-hub')).body, 'av_redaction');
+  var vc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'av_redaction'")).n;
+  ok('V3 approved, then the mode changed → YELLOW "changed since approval" + one notification', vApv.status === 200 && vChg.status === 200 && vC.approval === 'yellow' && /changed since approval/.test(vC.approvalWhy || '') && vc1 > vc0, vApv.status + '/' + vChg.status + ' ' + vC.approval + ' · ' + vc0 + '→' + vc1);
+  if (avRow) await db.run("INSERT INTO system_config (key, value) VALUES ('av_redaction_mode', ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [avRow.value]); else await db.run("DELETE FROM system_config WHERE key = 'av_redaction_mode'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'av_redaction'");
+  await callAs(U.sup, 'DELETE', '/setup-hub/av_redaction/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'av_redaction'");
+  if (avMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [avMark.item_key, avMark.marked_by, avMark.marked_by_name, avMark.marked_at, avMark.content_hash || null, avMark.notified_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

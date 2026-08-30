@@ -394,9 +394,13 @@ const READERS = {
     return ev('ready', on.length + ' of ' + avail + ' task screens capture time · ' + on.map(function (u) { return u.label + ': ' + c[u.key]; }).join(', '), extraT);
   },
   av_redaction: async function () {
+    // FORM (approval model, §3h): one choice, and it must be SAVED. The screen shows "internal" when nothing
+    // is stored, which is the shipped default — and a shipped default is not a decision (Authentication).
+    // Choosing internal deliberately IS one, and saving it says so.
     var m = await cfg('av_redaction_mode');
     var words = { internal: 'redacted inside Optimum Q', external: 'redacted in the city\'s own tool', not_required: 'presumptively releasable, reviewed before release' };
-    return m ? ev('ready', words[m] || m) : ev('not_started', 'running on the shipped default (internal)');
+    var extraV = { required: { missing: m ? [] : ['Default video and audio redaction mode — not decided'], total: 1 }, digest: digestOf([m || null]) };
+    return m ? ev('ready', words[m] || m, extraV) : ev('not_started', 'running on the shipped default (internal) — nothing saved yet', extraV);
   },
   notifications: async function () {
     // STAFF ALERTS (Kevin 2026-08-30, §3i): two tabs. Alerts = the catalogue (services/alertCatalog.js), read-only,
