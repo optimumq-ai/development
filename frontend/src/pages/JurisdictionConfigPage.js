@@ -857,7 +857,7 @@ export default function JurisdictionConfigPage() {
                       </div>
                     );
                   })}
-                <div style={kv}>Review and apply happen in the ordinary flow: <Link to="/admin?tab=updates" style={{ color: C.blue }}>open the review queue →</Link>
+                <div style={kv}>Review and apply happen in the ordinary flow: <Link to="/setup/update-configuration" style={{ color: C.blue }}>open the review queue →</Link>
                   {isLegalSection ? ' Editor proposals on Legal Rules domains apply under Senior Legal.' : ''}</div>
               </div>
             ) : null}
@@ -909,7 +909,7 @@ export default function JurisdictionConfigPage() {
                 {proposals.length > 0
                   ? <span><b style={{ color: G.amberInk }}>{proposals.length}</b> on this section — until approved, the engine runs the previous configuration. </span>
                   : <span>None on this section. </span>}
-                <Link to="/admin?tab=updates" style={{ color: C.blue }}>Open the review queue →</Link>
+                <Link to="/setup/update-configuration" style={{ color: C.blue }}>Open the review queue →</Link>
               </div>
             </div>
             <div style={Object.assign({}, panel, { marginTop: 10 })}>
@@ -1023,7 +1023,7 @@ export default function JurisdictionConfigPage() {
             {summary.proposalsPending > 0
               ? <span><b style={{ color: G.amberInk }}>{summary.proposalsPending}</b> proposal(s) await review — part of go-live, not a separate chore: until approved, the engine runs the previous configuration. </span>
               : <span>None pending. </span>}
-            <Link to="/admin?tab=updates" style={{ color: C.blue }}>Open the review queue →</Link>
+            <Link to="/setup/update-configuration" style={{ color: C.blue }}>Open the review queue →</Link>
           </div>
         </div>
         <div style={Object.assign({}, panel, { flex: '1 1 380px' })}>

@@ -9524,3 +9524,27 @@ ADDED with an informational reader ("55 decision points · 21 built · 12 partia
 
 **NEXT:** Update Configuration and Redaction Rules tabs; the hidden Taxonomy / User Types tabs; the lane
 rename; the "How many days a task should take" design pass; then redaction planning.
+
+## 2026-08-30 (C16) — Update Configuration and Redaction Rules Library → dedicated screens; the admin strip is down to Setup; suite 2701/2702 (E1a the only red)
+
+**Kevin's call:** the hub rows already existed — migrate each tab's content to its own screen behind its
+row; rename "Keeping up with changes in the law" → **"Update Configuration"** (the tab's name).
+
+**Built:** `RuleUpdatesPage.js` → `/setup/update-configuration` and `RedactionRulesPage.js` →
+`/setup/redaction-rules`, both wearing the SetupScreen strip (bodies unchanged; the library's action
+buttons became a right-aligned bar under the intro). Tabs deleted; `/rule-updates`, `/redaction-rules`,
+`?tab=updates`, `?tab=redaction` redirect. In-app links repointed: jurisdiction-config's "Open the review
+queue", request-rules' library link, `ruleEditors.areaEditor`, `jurisdictionProfile` redaction editor, the
+old wizard's link. Hub still 34 items.
+
+**Admin strip now: Setup only** (hidden-but-routable: Taxonomy, User Types). The Administration page is
+effectively the hub.
+
+**Incident (mine, ~2 min):** the first wrap of RuleUpdatesPage closed the wrong function (the file holds a
+second component, ReviewModal); the CRA build failed and — because CRA empties `build/` first — nginx served
+403 until the fix + rebuild. Memory updated: build into `BUILD_PATH=build-next` and swap on success.
+
+**Suite: 2701/2702, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged).**
+
+**NEXT:** the hidden Taxonomy / User Types tabs; the fulfillment lane rename; the "How many days a task
+should take" design pass; then redaction planning.

@@ -31,7 +31,7 @@ var CORE_SECTIONS = [
   { key: 'payment',   label: 'Deposit & payment clock',            editor: '/setup/fee-law?tab=city', foldedInto: { item: 'fee_law', name: 'Fee rules', door: '/setup/fee-law?tab=city' } },
   { key: 'fee_waiver', label: 'Fee-waiver policy',                 editor: '/setup/fee-law', foldedInto: { item: 'fee_law', name: 'Fee rules', door: '/setup/fee-law' } },
   { key: 'exemption', label: 'Exemption model & appeals',        editor: '/setup/request-rules?tab=exemptions', foldedInto: { item: 'exemptions', name: 'Request rules · Exemptions', door: '/setup/request-rules?tab=exemptions' } },
-  { key: 'redaction', label: 'Redaction / exemption rules',      editor: '/redaction-rules' },
+  { key: 'redaction', label: 'Redaction / exemption rules',      editor: '/setup/redaction-rules' },
   { key: 'taxonomy',  label: 'Record types & taxonomy',          editor: '/taxonomy' }
 ];
 

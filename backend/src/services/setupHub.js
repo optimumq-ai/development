@@ -68,9 +68,10 @@ const ITEMS = [
   { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['agency'], section: 'eligibility', foldSections: ['eligibility'] },
   // I1 (Kevin 2026-08-29): intake gets its own row and lives as the request-rules screen's 5th tab.
   { key: 'intake', lane: 'compliance', name: 'Request Intake', door: '/setup/request-rules?tab=intake', deps: ['agency'], section: 'intake', foldSections: ['intake'] },
-  { key: 'redaction_rules', lane: 'compliance', name: 'Redaction rules library', door: '/admin?tab=redaction', deps: ['agency'], section: 'redaction', legal: true },
+  // C16 (Kevin 2026-08-30): the admin Redaction Rules and Update Configuration tabs become dedicated screens.
+  { key: 'redaction_rules', lane: 'compliance', name: 'Redaction rules library', door: '/setup/redaction-rules', deps: ['agency'], section: 'redaction', legal: true },
   { key: 'city_choices', lane: 'compliance', name: 'Choices the statute left to the city', door: '/jurisdiction-config', deps: ['agency'] },
-  { key: 'law_updates', lane: 'compliance', name: 'Keeping up with changes in the law', door: '/admin?tab=updates', deps: ['agency'] },
+  { key: 'law_updates', lane: 'compliance', name: 'Update Configuration', door: '/setup/update-configuration', deps: ['agency'] },
   { key: 'go_live', lane: 'compliance', name: 'Turn the rules on for real', door: '/jurisdiction-config', deps: [], goLive: true },
   // ── Lane 2a ──
   // C8 (Kevin 2026-08-30): the 'fee_rates' ("What this city actually charges", the pre-migration name for

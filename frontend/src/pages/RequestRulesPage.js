@@ -329,7 +329,7 @@ export default function RequestRulesPage() {
             <span>Understood — denials will pick their reasons from that library once it is loaded</span>
           </label> : null}
           {decided(nreason)}
-          <div style={hint}><button type="button" onClick={function () { nav('/admin?tab=redaction'); }} style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer' }}>Open the Redaction rules library →</button></div>
+          <div style={hint}><button type="button" onClick={function () { nav('/setup/redaction-rules'); }} style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer' }}>Open the Redaction rules library →</button></div>
         </div>, { background: '#FDF9F0', borderColor: '#F1D9A8' }) : null}
 
         {dlegal ? cardBox(<div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>

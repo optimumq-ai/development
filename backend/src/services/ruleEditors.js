@@ -215,7 +215,7 @@ async function content(jid, section) {
     var jur = await get('SELECT exemption_model FROM jurisdiction_profiles WHERE id = ?', [jid]);
     body = { kind: 'exemptionList', exemptions: await exemptionList(jid),
       exemptionModel: (jur && jur.exemption_model) || null,
-      areaEditor: '/admin?tab=redaction',
+      areaEditor: '/setup/redaction-rules',
       areaEditorNote: 'Rule rows are authored and approved in the Redaction Rules area — its draft → legal-approval flow is the audit path for row-level changes. The domain configuration below edits as a proposal here.' };
   } else if (section === 'identity') {
     // The one section whose substance lives OUTSIDE the rules store — the jurisdiction profile row

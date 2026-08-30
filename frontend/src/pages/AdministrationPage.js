@@ -2,9 +2,7 @@ import React from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import SetupHubPage from './SetupHubPage';
-import RuleUpdatesPage from './RuleUpdatesPage';
 import TaxonomyPage from './TaxonomyPage';
-import RedactionRulesPage from './RedactionRulesPage';
 import UserTypesPage from './UserTypesPage';
 
 // ADMINISTRATION (2026-08-01, Kevin's menu reorganization): the thirteen technical-setup screens under
@@ -18,7 +16,7 @@ const TABS = [
   // C10–C11 (Kevin 2026-08-30): the v1 Configuration tab is RETIRED — its six sections are dedicated /setup
   // screens behind hub rows (authentication, notifications, video-redaction, time-capture, time-budgets,
   // agent-rules); ?tab=config lands on the hub.
-  { key: 'updates',      label: 'Update Configuration', el: RuleUpdatesPage },
+  // C16 (Kevin 2026-08-30): the Update Configuration and Redaction Rules tabs are RETIRED — /setup screens.
   // C4 (Kevin 2026-08-29) hid the v1 "Fee Configuration" rate-table tab; C9 (Kevin 2026-08-30) RETIRED it — the
   // screen was blank and Fee rules (/setup/fee-law) is the fee schedule now. /fee-config and ?tab=fees land on Fee rules.
   // C7 cleanup (Kevin 2026-08-29): the nav tab is gone — the hub's Taxonomy row (System Features and
@@ -26,7 +24,6 @@ const TABS = [
   { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage, hidden: true },
   // C15 (Kevin 2026-08-30): the Workflow and Process Map tabs are RETIRED — /setup/workflow-rules and /setup/process-map.
   // C14 (Kevin 2026-08-30): the Sources tab is RETIRED — Record Sources and Connectors is /setup/record-sources.
-  { key: 'redaction',    label: 'Redaction Rules',      el: RedactionRulesPage },
   // C3 (2026-08-29) hid the Integrations tab; C12 (Kevin 2026-08-30) RETIRED it and the AI Data Flow tab —
   // both live on the hub's one 'AI configuration' row (/setup/ai-configuration, three tabs).
   // C13 (Kevin 2026-08-30): the Portal Agent Security tab is RETIRED — its reference content is the AI
@@ -58,6 +55,8 @@ export default function AdministrationPage() {
   if (activeKey === 'sources') return <Navigate to="/setup/record-sources" replace />;
   if (activeKey === 'workflow') return <Navigate to="/setup/workflow-rules" replace />;
   if (activeKey === 'map') return <Navigate to="/setup/process-map" replace />;
+  if (activeKey === 'updates') return <Navigate to="/setup/update-configuration" replace />;
+  if (activeKey === 'redaction') return <Navigate to="/setup/redaction-rules" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (

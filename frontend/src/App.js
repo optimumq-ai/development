@@ -23,6 +23,8 @@ import AiConfigurationPage from './pages/AiConfigurationPage';
 import RecordSourcesPage from './pages/RecordSourcesPage';
 import WorkflowPage from './pages/WorkflowPage';
 import WorkflowMapPage from './pages/WorkflowMapPage';
+import RuleUpdatesPage from './pages/RuleUpdatesPage';
+import RedactionRulesPage from './pages/RedactionRulesPage';
 import FeeLawPage from './pages/FeeLawPage';
 import RequestRulesPage from './pages/RequestRulesPage';
 import ReportsHubPage from './pages/ReportsHubPage';
@@ -141,7 +143,7 @@ export default function App() {
               Director, SysAdmin, Supervisor (read) and Senior Legal (their sections). */}
           <Route path="jurisdiction-config" element={<JurisdictionConfigPage />} />
           <Route path="jurisdiction-config/:section" element={<JurisdictionConfigPage />} />
-          <Route path="rule-updates" element={<Navigate to="/admin?tab=updates" replace />} />
+          <Route path="rule-updates" element={<Navigate to="/setup/update-configuration" replace />} />
           {/* RETIRED 2026-08-12: the v1 Jurisdiction Profile tab — superseded by the BW9 checklist + editors. */}
           <Route path="jurisdiction-profile" element={<Navigate to="/jurisdiction-config" replace />} />
           {/* MENU REORGANIZATION 2026-08-01 (Kevin): Reports unified under one item with top tabs;
@@ -170,6 +172,8 @@ export default function App() {
           <Route path="setup/record-sources" element={<RecordSourcesPage />} />
           <Route path="setup/workflow-rules" element={<WorkflowPage />} />
           <Route path="setup/process-map" element={<WorkflowMapPage />} />
+          <Route path="setup/update-configuration" element={<RuleUpdatesPage />} />
+          <Route path="setup/redaction-rules" element={<RedactionRulesPage />} />
           <Route path="setup/fee-law" element={<FeeLawPage />} />
           {/* Clarification · Exemptions · Requestor eligibility — three hub rows, one screen (2026-08-27). */}
           <Route path="setup/request-rules" element={<RequestRulesPage />} />
@@ -178,7 +182,7 @@ export default function App() {
           <Route path="workflow-map" element={<Navigate to="/setup/process-map" replace />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
           <Route path="sources" element={<Navigate to="/setup/record-sources" replace />} />
-          <Route path="redaction-rules" element={<Navigate to="/admin?tab=redaction" replace />} />
+          <Route path="redaction-rules" element={<Navigate to="/setup/redaction-rules" replace />} />
           {/* Redaction TEMPLATE authoring — samples on the SYS-TEMPLATE-SAMPLES pseudo-request, which has
               no task and never will. Citizen records are redacted through /redaction/:taskId instead. */}
           <Route path="redact/:fileId" element={<RedactionWorkspacePage />} />

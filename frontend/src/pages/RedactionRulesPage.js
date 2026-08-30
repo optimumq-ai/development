@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 import { Link } from 'react-router-dom';
+import SetupScreen from '../components/setup/SetupScreen';
+
+// REDACTION RULES LIBRARY — the hub's `redaction_rules` row (C16, Kevin 2026-08-30: the admin Redaction Rules
+// tab becomes this dedicated screen at /setup/redaction-rules). Body unchanged.
 
 var CAT_COLORS = {
   privacy: { bg: '#DBEAFE', fg: '#1E40AF' },
@@ -122,13 +126,12 @@ export default function RedactionRulesPage() {
   };
 
   return (
-    <div style={{ padding: '28px 32px', maxWidth: '900px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 6px' }}>Redaction Rules Library</h1>
-          <p style={{ color: '#6B7280', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>The redaction rules library defines what information must be withheld or redacted from public records before release. Rules are applied during AI redaction review and staff processing. All changes are logged.</p>
-        </div>
+    <SetupScreen hubKey="redaction_rules" laneLabel="Compliance and Policies Setup" title="Redaction Rules Library" maxWidth="900px"
+      intro="The redaction rules library defines what information must be withheld or redacted from public records before release. Rules are applied during AI redaction review and staff processing. All changes are logged.">
+    {function () { return (
+    <div>
+      {/* Actions */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', gap: '16px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
           <button onClick={openSources} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>View Legal Sources</button>
           <button disabled={discovering} onClick={discover} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: discovering ? 'wait' : 'pointer' }}>{discovering ? 'Checking...' : 'Check for Updates'}</button>
@@ -333,5 +336,7 @@ export default function RedactionRulesPage() {
         </div>
       ) : null}
     </div>
+    ); }}
+    </SetupScreen>
   );
 }

@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
+import SetupScreen from '../components/setup/SetupScreen';
+
+// UPDATE CONFIGURATION — the hub's `law_updates` row (C16, Kevin 2026-08-30: the admin Update Configuration
+// tab becomes this dedicated screen at /setup/update-configuration; the row takes the tab's name). Body unchanged.
 
 var DOMAINS = [
   { key: 'fee', label: 'Fee & cost schedule' },
@@ -67,12 +71,11 @@ export default function RuleUpdatesPage() {
   async function saveSettings() { setBusy(true); setMsg(''); try { await api.post('/config-freshness/settings', { cadenceDays: Number(cadenceInput) || 182, recipient: recipientInput }); setMsg('Reminder settings saved.'); } catch (e) { setMsg('Could not save settings.'); } await load(); setBusy(false); }
   async function uploadFile(file) { if (!file) return; setBusy(true); setMsg(''); try { var fd = new FormData(); fd.append('file', file); fd.append('domain', pasteDomain); var r = await api.post('/config-freshness/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } }); if (r.data && r.data.ok === false) setMsg('Could not read that file: ' + r.data.error); else setMsg('Document received — Optimum Q drafted a proposed update below for your review.'); } catch (e) { setMsg('Upload failed.'); } await load(); setBusy(false); }
 
-  if (!status) return <div style={{ padding: '32px', color: '#6B7280' }}>Loading…</div>;
-
   return (
-    <div style={{ padding: '32px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111', margin: '0 0 4px' }}>Update Configuration</h1>
-      <p style={{ fontSize: '14px', color: '#6B7280', margin: '0 0 20px', lineHeight: 1.5 }}>When a change to the laws, codes, ordinances, or fee rules that affect records requests is adopted, upload an approved copy of the change here. Optimum Q drafts the matching configuration update for you to review and approve. Keeping configuration current with applicable law is your office&rsquo;s responsibility.</p>
+    <SetupScreen hubKey="law_updates" laneLabel="Compliance and Policies Setup" title="Update Configuration" maxWidth="1000px"
+      intro="When a change to the laws, codes, ordinances, or fee rules that affect records requests is adopted, upload an approved copy of the change here. Optimum Q drafts the matching configuration update for you to review and approve. Keeping configuration current with applicable law is your office&rsquo;s responsibility.">
+    {function () { if (!status) return <div style={{ color: '#9CA3AF' }}>Loading…</div>; return (
+    <div>
 
       {msg ? <div style={{ background: '#EBF3FB', border: '1px solid #BFD9F2', color: navy, borderRadius: '8px', padding: '10px 14px', fontSize: '13px', marginBottom: '16px' }}>{msg}</div> : null}
 
@@ -147,6 +150,8 @@ export default function RuleUpdatesPage() {
 
       {review ? <ReviewModal review={review} setReview={setReview} busy={busy} onApply={applyProposal} onDismiss={dismiss} /> : null}
     </div>
+    ); }}
+    </SetupScreen>
   );
 }
 
