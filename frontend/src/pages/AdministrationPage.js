@@ -22,7 +22,9 @@ import UserTypesPage from './UserTypesPage';
 const TABS = [
   // H1 (2026-08-25): the Setup & Configuration HUB replaces the 7-phase wizard as the front door (SPEC_setup_hub.md).
   { key: 'setup',        label: 'Setup',                el: SetupHubPage },
-  { key: 'config',       label: 'Configuration',        el: ConfigurationPage, admin: true },
+  // C10 (Kevin 2026-08-30): the nav tab is gone — the hub's 'User Authentication Setup' row (and, for now, the
+  // time-budgets / time-tracking / notifications rows) door here; ?tab=config stays routable.
+  { key: 'config',       label: 'Configuration',        el: ConfigurationPage, admin: true, hidden: true },
   { key: 'updates',      label: 'Update Configuration', el: RuleUpdatesPage },
   // C4 (Kevin 2026-08-29) hid the v1 "Fee Configuration" rate-table tab; C9 (Kevin 2026-08-30) RETIRED it — the
   // screen was blank and Fee rules (/setup/fee-law) is the fee schedule now. /fee-config and ?tab=fees land on Fee rules.

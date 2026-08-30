@@ -104,7 +104,7 @@ const ITEMS = [
   // moved to its own screen behind this row (Integrations keeps the AI keys; the v1 Configuration email
   // tab is retired — its alert-recipient field moved along).
   { key: 'email', lane: 'technical', name: 'Email configuration', door: '/setup/email', deps: [] },
-  { key: 'auth_policy', lane: 'technical', name: 'How staff sign in', door: '/admin?tab=config', deps: [] },
+  { key: 'auth_policy', lane: 'technical', name: 'User Authentication Setup', door: '/admin?tab=config', deps: [] },
   { key: 'agent_rules', lane: 'technical', name: 'What the public portal assistant may say', door: '/admin?tab=security', deps: [] },
   { key: 'settlement', lane: 'technical', name: 'Sending charges to the finance system', door: null, deps: ['fee_law'], noScreen: true },
 ];

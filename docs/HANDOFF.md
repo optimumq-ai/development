@@ -9403,3 +9403,19 @@ land on Fee rules; "Fee Configuration" absent from the admin strip.
 
 **NEXT:** Kevin names further cleanup items, or redaction planning begins. Kevin's walk-through remains
 the E1a critical path.
+
+## 2026-08-30 (later) — C10: "User Authentication Setup" rename; the admin "Configuration" nav tab hidden; suite 2696/2697 (E1a the only red)
+
+**Kevin's calls:** rename the `auth_policy` hub row "How staff sign in" → **"User Authentication Setup"**;
+the admin "Configuration" nav tab opened the same screen (ConfigurationPage, defaulting to its
+Authentication section) → tab hidden (`hidden: true`, the C3–C6 pattern; `?tab=config` stays routable).
+Admin strip is now: Setup · Update Configuration · Workflow · Process Map · Sources · Redaction Rules ·
+AI Data Flow · Portal Agent Security. SPEC §2 lane-4 row notes it.
+
+**Still dooring to `/admin?tab=config` (the v1 Configuration page):** the fulfillment lane's
+`time_budgets` (Task Time Budgets section), `time_tracking` (Time Tracking) and `notifications`
+(Notifications) rows, plus `auth_policy` itself — none deep-links to its section (the page opens on
+Authentication). **Kevin: work through those three one at a time next.** ConfigurationPage also still
+carries Redaction and Agent Rules sections.
+
+**Suite: 2696/2697, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged).**

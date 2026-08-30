@@ -18,7 +18,7 @@ configured**, never from a checkbox; a person may additionally **mark it done** 
 | 2a | Request Fulfillment Process Setup — Fees, Estimates and Routing (C8, 2026-08-30: the `fee_rates` "What this city actually charges" and `fee_test` "Try a test estimate" rows retired — both are Fee rules content, the schedule and its "Test an estimate" tab; `settlement` now waits on `fee_law`) | `operations_config` |
 | 2b | Request Fulfillment Process Setup — Redaction and Release | `operations_config` |
 | 3 | Organization Departments, Teams, and Staff Setup | `operations_config` |
-| 4 | Technical Setup | `system_admin` |
+| 4 | Technical Setup (C10, 2026-08-30: the `auth_policy` row is named "User Authentication Setup"; the admin "Configuration" nav tab is hidden — that screen is reached only through the hub rows that door to `/admin?tab=config`: auth, time budgets, time tracking, notifications) | `system_admin` |
 | 5 | System Features and Options (added 2026-08-29, C7: feature-catalog screens — Taxonomy first; the fulfillment lane's "Record types and categories" row moved here renamed, same key/deps/reader; the admin Taxonomy nav tab retired) | `operations_config` |
 The **agency identity** card sits above the lanes ("Start here"; `operations_config` or `system_admin`). **Go-live**
 is the last row of lane 1; it is flipped on the Jurisdiction Configuration page by the `go_live` authority
