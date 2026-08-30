@@ -85,7 +85,7 @@ const ITEMS = [
   { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/setup/taxonomy', deps: ['sources'], softDeps: true },
   { key: 'time_budgets', lane: 'features', name: 'How many days a task should take', door: '/setup/time-budgets', deps: [] },
   { key: 'time_tracking', lane: 'features', name: 'Task Processing Time Capture', door: '/setup/time-capture', deps: [] },
-  { key: 'notifications', lane: 'features', name: 'System Notifications', door: '/setup/notifications', deps: ['email'] },
+  { key: 'notifications', lane: 'features', name: 'Staff Alerts', door: '/setup/staff-alerts', deps: ['email'] },
   // The agent-rules API is system-authority (routes/agentRules.js) — the row's gate says so too, or a Director
   // sees live controls that 403 (spec/architecture audit 2026-08-31).
   { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [], groups: ['system_admin'] },
@@ -241,7 +241,15 @@ const READERS = {
     return withSection(r, ctx.sections.clarification);
   },
   exemptions: async function (ctx) { return withSection(sectionEvidence(ctx.sections.exemption), ctx.sections.exemption); },
-  intake: async function (ctx) { return withSection(sectionEvidence(ctx.sections.intake), ctx.sections.intake); },
+  intake: async function (ctx) {
+    // + the requestor acknowledgement email (ack_email) — correspondence to the citizen, so it is an intake decision
+    // (moved from the Staff Alerts screen, 2026-08-30). It must be SAVED on or off; the wire key is unchanged.
+    var r = withSection(sectionEvidence(ctx.sections.intake), ctx.sections.intake);
+    var ack = await cfg('ack_email');
+    if (r.required) { r.required.total += 1; if (!ack) r.required.missing.push('Requestor acknowledgement email — not decided'); }
+    r.digest = digestOf([r.digest, ack || null]);
+    return r;
+  },
   eligibility: async function (ctx) {
     var sec = ctx.sections.eligibility;
     var r = sectionEvidence(sec);
@@ -323,11 +331,15 @@ const READERS = {
     return m ? ev('ready', words[m] || m) : ev('not_started', 'running on the shipped default (internal)');
   },
   notifications: async function () {
+    // STAFF ALERTS (Kevin 2026-08-30, §3i): two tabs. Alerts = the catalogue (services/alertCatalog.js), read-only,
+    // counts nothing. Deadline alerts = the overdue warning and the supervisor escalation, both SAVED (a shipped
+    // default is not a decision). The requestor acknowledgement switch moved to Request rules → Request Intake.
     var od = await cfg('overdue_alert_days'), es = await cfg('escalation_days');
-    if (!od && !es) return ev('not_started', 'running on the shipped defaults');
-    if (!es) return ev('in_progress', 'overdue alerts set · no escalation day set');
-    if (!od) return ev('in_progress', 'escalation set · no overdue alert days set');
-    return ev('ready', 'overdue at ' + od + ' days · escalate at ' + es + ' days');
+    var missingN = []; if (!od) missingN.push('Deadline alerts: Overdue alert'); if (!es) missingN.push('Deadline alerts: Supervisor escalation');
+    var extraN = { required: { missing: missingN, total: 2 }, tabs: { alerts: 'ok', deadlines: missingN.length ? 'red' : 'ok' }, digest: digestOf([od || null, es || null]), alerts: require('./alertCatalog').list().length };
+    if (!od && !es) return ev('not_started', 'running on the shipped defaults — nothing saved yet', extraN);
+    if (missingN.length) return ev('in_progress', 'saved: 1 of 2 deadline settings', extraN);
+    return ev('ready', 'overdue at ' + od + ' days · escalate at ' + es + ' days · ' + extraN.alerts + ' alerts listed', extraN);
   },
   redaction_auto: async function () {
     try { var c = await require('./redactionConfig').read(); return ev(c && c.enabled === false ? 'in_progress' : 'ready', (c && c.enabled === false ? 'automation OFF' : 'automation ON') + ' · no screen yet'); }

@@ -125,6 +125,10 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   var ints = ((tabs.intake || {}).choices || []); dFails = [];
   for (var i of ints) { var iv = i.value != null ? i.value : (i.suggested != null ? i.suggested : null); if (iv == null) continue; var r3 = await callAs(DIR, 'POST', '/request-rules/intake/confirm', { path: 'knobs/' + i.key, value: iv }); if (r3.status !== 200) dFails.push('intake ' + i.key + ': ' + err(r3)); }
   ok('D5 intake choices confirmed (' + ints.length + ')', dFails.length === 0, dFails.join(' | '));
+  var dAck = await callAs(DIR, 'POST', '/config', { ack_email: 'on' });
+  ok('D5b the requestor acknowledgement decision (an intake decision) recorded by the Director', dAck.status === 200, err(dAck));
+  var dDl = await callAs(SA, 'POST', '/config', { overdue_alert_days: '1', escalation_days: '3' });
+  ok('D5c Staff Alerts: both deadline settings saved (a shipped default is not a decision)', dDl.status === 200, err(dDl));
   var clocks = ((tabs.deadlines || {}).timers || (tabs.deadlines || {}).clocks || (tabs.deadlines || {}).rows || []); dFails = []; var targeted = 0;
   for (var t of clocks) { if (t.statutory || t.kind === 'statutory' || t.days != null || t.duration != null) continue; var r4 = await callAs(LEGAL, 'POST', '/request-rules/deadlines/target', { clock: t.key || t.clock || t.id, days: 2 }); if (r4.status === 200) targeted++; else if (r4.status !== 422) dFails.push('target ' + (t.key || t.clock) + ': ' + err(r4)); }
   ok('D6 deadline service targets set where the law is silent (' + targeted + ')', dFails.length === 0, dFails.join(' | '));

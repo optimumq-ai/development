@@ -14,7 +14,7 @@ import AdministrationPage from './pages/AdministrationPage';
 import AgencySetupPage from './pages/AgencySetupPage';
 import EmailConfigPage from './pages/EmailConfigPage';
 import AuthenticationSetupPage from './pages/AuthenticationSetupPage';
-import SystemNotificationsPage from './pages/SystemNotificationsPage';
+import StaffAlertsPage from './pages/StaffAlertsPage';
 import VideoRedactionOptionsPage from './pages/VideoRedactionOptionsPage';
 import TimeCapturePage from './pages/TimeCapturePage';
 import TimeBudgetsPage from './pages/TimeBudgetsPage';
@@ -165,7 +165,8 @@ export default function App() {
           <Route path="setup/agency" element={<AgencySetupPage />} />
           <Route path="setup/email" element={<EmailConfigPage />} />
           <Route path="setup/authentication" element={<AuthenticationSetupPage />} />
-          <Route path="setup/notifications" element={<SystemNotificationsPage />} />
+          <Route path="setup/staff-alerts" element={<StaffAlertsPage />} />
+          <Route path="setup/notifications" element={<Navigate to="/setup/staff-alerts" replace />} />
           <Route path="setup/video-redaction" element={<VideoRedactionOptionsPage />} />
           <Route path="setup/time-capture" element={<TimeCapturePage />} />
           <Route path="setup/time-budgets" element={<TimeBudgetsPage />} />

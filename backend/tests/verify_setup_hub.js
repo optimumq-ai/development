@@ -326,6 +326,30 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('departments','teams','staff')");
   for (var mk2 of ['departments', 'teams', 'staff']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + mk2 + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + mk2 + '/ready'); if (mSave[mk2]) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [mSave[mk2].item_key, mSave[mk2].marked_by, mSave[mk2].marked_by_name, mSave[mk2].marked_at, mSave[mk2].content_hash || null]); }
 
+  console.log('\n=== N. STAFF ALERTS (tabs) + the acknowledgement decision on Request Intake ===');
+  var nSave = {}; for (var nk of ['overdue_alert_days', 'escalation_days', 'ack_email']) { var nrow = await db.get('SELECT value FROM system_config WHERE key = ?', [nk]); nSave[nk] = nrow ? nrow.value : null; await db.run('DELETE FROM system_config WHERE key = ?', [nk]); }
+  var nMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'notifications'"); await callAs(U.sa, 'DELETE', '/setup-hub/notifications/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'notifications'");
+  var nA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'notifications');
+  ok('N1 the row is "Staff Alerts", doors to /setup/staff-alerts, RED naming both deadline settings, Deadline alerts tab marked red', nA.name === 'Staff Alerts' && nA.door === '/setup/staff-alerts' && nA.approval === 'red' && /Overdue alert/.test(nA.approvalWhy || '') && /Supervisor escalation/.test(nA.approvalWhy || '') && nA.tabs && nA.tabs.deadlines === 'red', nA.name + ' ' + nA.door + ' ' + nA.approval + ': ' + nA.approvalWhy + ' ' + JSON.stringify(nA.tabs));
+  var nCat = await callAs(U.staff, 'GET', '/setup-hub/alerts');
+  var nKinds = (nCat.body.alerts || []).map(function (a) { return a.kind; });
+  ok('N2 the alert catalogue lists every bell alert in plain words (any signed-in user may read it)', nCat.status === 200 && nKinds.indexOf('setup_ready') >= 0 && nKinds.indexOf('work_returned') >= 0 && nKinds.indexOf('coverage_gap') >= 0 && (nCat.body.alerts || []).every(function (a) { return a.title && a.when && a.who; }), nCat.status + ' ' + nKinds.join(','));
+  var nR = await callAs(U.sa, 'POST', '/setup-hub/notifications/done');
+  await callAs(U.sa, 'POST', '/config', { overdue_alert_days: '1' });
+  var nB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'notifications');
+  await callAs(U.sa, 'POST', '/config', { escalation_days: '3' });
+  var nC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'notifications');
+  ok('N3 approval refused while red; one setting saved → still RED; both saved → YELLOW, tab mark clears', nR.status === 422 && nB.approval === 'red' && nC.approval === 'yellow' && nC.tabs.deadlines !== 'red', nR.status + ' ' + nB.approval + ' → ' + nC.approval);
+  var nI0 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'intake');
+  var nAckBad = await callAs(U.staff, 'POST', '/config', { ack_email: 'off' });
+  var nAck = await callAs(U.legal, 'POST', '/config', { ack_email: 'off' });
+  var nI1 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'intake');
+  ok('N4 the acknowledgement email is an INTAKE decision: missing there until saved; Senior Legal may record it; plain staff may not (403)', /acknowledgement/.test(nI0.approvalWhy || '') && nAck.status === 200 && nAckBad.status === 403 && !/acknowledgement/.test(nI1.approvalWhy || ''), nAck.status + '/' + nAckBad.status + ' · ' + nI0.approvalWhy + ' → ' + nI1.approvalWhy);
+  for (var nk2 in nSave) { if (nSave[nk2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [nk2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [nk2, nSave[nk2]]); }
+  await callAs(U.sa, 'DELETE', '/setup-hub/notifications/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key IN ('notifications','intake')");
+  if (nMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (item_key) DO NOTHING', [nMark.item_key, nMark.marked_by, nMark.marked_by_name, nMark.marked_at, nMark.content_hash, nMark.notified_hash]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('notifications','intake')");
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

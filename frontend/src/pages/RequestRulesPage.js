@@ -106,6 +106,7 @@ function ChoiceHead(props) {
 export default function RequestRulesPage() {
   var nav = useNavigate();
   var [params, setParams] = useSearchParams();
+  var [ack, setAck] = useState(null); // ack_email — the requestor acknowledgement decision (Intake tab); '' = not saved
   var tab = TABS.some(function (t) { return t.key === params.get('tab'); }) ? params.get('tab') : 'clarification';
   function goTab(k) { setParams(k === 'clarification' ? {} : { tab: k }); }
 
@@ -120,6 +121,7 @@ export default function RequestRulesPage() {
   var [letter, setLetter] = useState(false);
 
   function load() {
+    api.get('/config').then(function (c) { setAck((c.data && c.data.ack_email) || ''); }).catch(function () { setAck(''); });
     return Promise.all([api.get('/request-rules'), api.get('/setup-hub')]).then(function (r) {
       setData(r[0].data); setEdits({}); setPosture({});
       var h = {};
@@ -522,6 +524,12 @@ export default function RequestRulesPage() {
     catch (e) { setErr(errText(e, 'The choice could not be recorded.')); }
     setBusy('');
   }
+  async function saveAck(v) {
+    setBusy('ack'); setErr(''); setMsg('');
+    try { await api.post('/config', { ack_email: v }); setAck(v); setMsg('Recorded.'); await load(); }
+    catch (e) { setErr(errText(e, 'Could not save.')); }
+    setBusy('');
+  }
   function intakeBody() {
     var d = data.tabs.intake;
     function listVal(c) { return edits[c.path] !== undefined ? edits[c.path] : (Array.isArray(c.value) ? c.value : (Array.isArray(c.suggested) ? c.suggested : [])); }
@@ -582,6 +590,23 @@ export default function RequestRulesPage() {
           </select>
         )) : null}
         {p3 ? row(p3, checks(p3, false)) : null}
+
+        {/* the requestor acknowledgement email — correspondence to the citizen, so an intake decision (moved from the
+            Staff Alerts screen, 2026-08-30). Saved on or off; counted in this tab's required set. Wire key: ack_email. */}
+        <div style={{ display: 'grid', gridTemplateColumns: '200px minmax(0, 1fr) 110px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid #EEF2F5' }}>
+          <div style={{ fontSize: '12.5px', fontWeight: '600', lineHeight: '1.35', paddingTop: '2px' }}>Requestor acknowledgement email{ack === '' ? <div style={{ color: C.red, fontWeight: 500, fontSize: '11.5px' }}>required — not decided</div> : null}</div>
+          <div>
+            <div style={{ display: 'inline-flex', border: '1px solid ' + C.edge, borderRadius: '8px', overflow: 'hidden' }}>
+              {[['on', 'Enabled'], ['off', 'Disabled']].map(function (o) {
+                var on = ack === o[0];
+                return <button key={o[0]} type="button" disabled={!can || busy === 'ack'} onClick={function () { saveAck(o[0]); }}
+                  style={{ padding: '7px 14px', fontWeight: 600, fontSize: '12.5px', fontFamily: 'inherit', border: 'none', cursor: can ? 'pointer' : 'default', background: on ? C.pri : C.wash, color: on ? 'white' : C.ph }}>{o[1]}</button>;
+              })}
+            </div>
+            <div style={Object.assign({}, cite, { marginTop: '6px' })}><Bind kind="soft">Silent</Bind> Send an automatic acknowledgement to the requestor the moment their request is received. Choosing either records the decision.</div>
+          </div>
+          <div />
+        </div>
       </div>
     );
   }

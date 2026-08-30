@@ -19,6 +19,7 @@ function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' 
 async function emit(opts) {
   opts = opts || {};
   if (!opts.userId || !opts.title) throw new Error('notifications.emit requires userId and title');
+  if (opts.kind && !require('./alertCatalog').known(opts.kind)) console.warn('[notifications] alert kind not in the catalogue (services/alertCatalog.js): ' + opts.kind + ' — add a plain-words entry so the Staff Alerts screen lists it');
   const dedupe = opts.dedupe !== false && opts.contextId != null;
   if (dedupe) {
     const existing = await get(

@@ -118,7 +118,7 @@ The three organization rows share the Organization screen (`/org?tab=…`); each
 | Fee rules (`fee_law`) | tabs (decisions) | every deferral decided · both waiver choices · the clock's six when on · an APPROVED schedule version — exactly what the screen offers; the fees/fee_waiver/payment section knobs the screen does not surface stay with go-live (audit §3-E) | `routes/feeLaw.js` hook |
 | Clarification · Exemptions · Eligibility · Intake · Deadlines (5 rows) | decisions | every unconfirmed local policy setting of the row's section (`sectionRequired`) — the same rule go-live counts | `routes/requestRules.js` hook + `policy-settings/confirm` (domain → item) |
 
-`routes/config.js` also reports changes to `notifications` and `av_redaction` (still derived until converted).
+`routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
 
 ## 3g′. FORM AND TABBED SCREENS SUBMIT THEMSELVES (Kevin 2026-08-30, BUILT)
 
@@ -131,6 +131,26 @@ clears the record so the next completion notifies again; approval clears it (`ma
 text carries "submitted by <who> on <date>, approver notified". `notifications.emit` dedupes per
 user/kind/context while the earlier notice is undismissed, so an approver never sees two identical nudges.
 Harness: `verify_setup_hub` K2b, K3b–K3d.
+
+## 3i. STAFF ALERTS — the `notifications` row renamed, two tabs, the alert catalogue (Kevin 2026-08-30, BUILT)
+
+"System Notifications" was a mislabel: the screen held two deadline thresholds and one piece of requestor
+correspondence, and nothing anywhere listed the in-app alerts. Kevin's ruling: the distinction that holds is
+WHO an alert is for, not how it travels. Requestor correspondence (acknowledgement, clarification, estimate,
+closure letters) is configured under Request rules; **Staff Alerts** (`/setup/staff-alerts`; `/setup/notifications`
+redirects) is everything the bell tells staff.
+- **Alerts tab** — the catalogue, rendered from `services/alertCatalog.js` via `GET /setup-hub/alerts`: every
+  `kind` with its bell title, when it is sent, who receives it, in plain words. Read-only; NO per-alert on/off
+  (Kevin: none of these should be switchable off today; a future alert may earn one). `notifications.emit()`
+  warns on a kind missing from the catalogue, so a new alert cannot ship unlisted. Counts nothing toward colour.
+- **Deadline alerts tab** — `overdue_alert_days` + `escalation_days`, both SAVED (tabbed pattern: the tab mark is
+  red until then; the screen's pill is this tab alone; one approval).
+- The **requestor acknowledgement switch** (`ack_email`, wire key unchanged) moved to Request rules → Request
+  Intake as an intake decision: counted in that row's required set ("— not decided" until saved on or off),
+  `POST /config {ack_email}` alone is open to `compliance_policy` / `legal_rules` holders, and reports to `intake`.
+  Open (Kevin): the Intake tab already carries "The acknowledgment, and when it goes out" (`Master.g4`, timing +
+  text) — the on/off may belong INSIDE that choice as a "Do not send" option rather than beside it.
+Harness: `verify_setup_hub` N1–N4; golden D5b/D5c.
 
 ## 3h. HOW TO CONVERT THE NEXT SCREEN — the recipe (2026-08-31)
 Pick the pattern by what the screen is, then do these steps; every converted screen so far follows them.

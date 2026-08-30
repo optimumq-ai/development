@@ -34,6 +34,8 @@ function gate(req, res) {
   }
   return item;
 }
+// The staff alert catalogue — what the bell can say, in plain words (Staff Alerts screen, Alerts tab).
+router.get('/alerts', requireAuth, function (req, res) { res.json({ alerts: require('../services/alertCatalog').list() }); });
 router.post('/:key/done', requireAuth, async function (req, res) {
   var item = gate(req, res); if (!item) return;
   try {

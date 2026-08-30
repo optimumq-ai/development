@@ -9763,3 +9763,27 @@ golden 39/39. The suite's census flagged one live `request_history` row — Kevi
 colours):** Redaction rules library (list), Update Configuration, Choices the statute left to the city
 (→ Jurisdiction Configuration retirement), Taxonomy / calibration / record owners, Workflow Rules, Process Map,
 the features lane's screens, and the no-screen rows.
+
+## 2026-08-30 — forms submit themselves (setup_ready on the completing save); STAFF ALERTS screen (§3i); hub 65/65, golden 41/41
+
+**Slice 1 (`27ad3a7`):** a form/tabbed screen's save that fills the LAST required field is the submission —
+`afterChange` records it in `setup_hub_ready` under the saver's name and sends the lane owners one `setup_ready`
+notice; re-armed if the screen goes red again; approval clears it. Guide text: "submitted by <who>, approver
+notified". `emit()` dedupes per user/kind/context while undismissed (harness had to clear C4's leftovers). §3g′.
+
+**Slice 2 (this commit):** Kevin: "System Notifications" was mislabelled and nothing listed the bell's alerts.
+Ruling — split by AUDIENCE: requestor correspondence stays under Request rules; **Staff Alerts** (renamed row +
+screen, `/setup/staff-alerts`, old URL redirects) = Alerts tab (catalogue from `services/alertCatalog.js`,
+`GET /setup-hub/alerts`, read-only, no per-alert toggles — Kevin: not for now) + Deadline alerts tab (overdue +
+escalation, both saved; tabbed pattern). `ack_email` moved to Request rules → Request Intake as a counted intake
+decision, writable alone by compliance/legal. Mockup approved: canvas
+https://claude.ai/code/artifact/30c3dc52-f312-4785-bc6b-934f2f7c891e. Verified by screenshot (both tabs, the
+red marks, the redirect). Hub 65/65 (+N1–N4), golden 41/41 (+D5b/D5c), request-rules 47/47; config_integrity
+17/17 alone (it reads 15/17 if golden runs BEFORE it in a subset — golden is last in the real suite; not a bug).
+
+**Open for Kevin:** the Intake tab already has "The acknowledgment, and when it goes out" (`Master.g4`) — should
+the on/off fold into it as a "Do not send" option instead of the separate switch beneath the three choices?
+Also still pending his answer: the parallel Opus agent (worktree, handoff order, harness runs gated through me).
+
+**Converted (15):** + Staff Alerts. **NEXT:** Redaction rules library (list) · Update Configuration · Taxonomy /
+Workflow Rules / Process Map · features lane · full suite run.
