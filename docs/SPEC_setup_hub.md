@@ -125,6 +125,7 @@ The three organization rows share the Organization screen (`/org?tab=…`); each
 The three taxonomy rows share the Taxonomy screen (`/setup/taxonomy?tab=calibration|owners`); the body is one page (the content really is shared) and the `?tab=` chooses which row the strip signs off.
 | Workflow Rules (`routing_rules`) | list | ≥1 ENABLED routing rule; health: rules written but switched off | `routes/workflow.js` finish hook |
 | Process Map (`process_map`) | acknowledgement (§3j) | nothing — the required set is empty; the lane owner's approval IS the act | none (no write path; the digest is the shipped model) |
+| How many days a task should take (`time_budgets`) | form | every task type's budget REVIEWED by the city (`source = 'supervisor'`) — the catalog seeds a figure into every row, so "has a number" proves nothing | `routes/config.js` PUT `/config/time-budgets` |
 
 `routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i — converted) and `av_redaction` (still derived until converted).
 

@@ -84,6 +84,11 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   ok('B7 AI configuration: both keys and a deployment model (technical lane)', ai.status < 300, err(ai));
   var au = await callAs(SA, 'POST', '/config', { auth_mode: 'local', mfa_mode: 'optional', session_timeout: '8h', min_password_length: '10' });
   ok('B8 sign-in settings saved (technical lane)', au.status < 300, err(au));
+  // System Features and Options: a seeded task budget is a provisional default, not the city's decision (§3g).
+  var tb = await callAs(DIR, 'GET', '/config/time-budgets');
+  var tbFails = [];
+  for (var tbr of ((tb.body && tb.body.budgets) || [])) { var tbw = await callAs(DIR, 'PUT', '/config/time-budgets', { taskType: tbr.task_type, budgetDays: Number(tbr.budget_days) || 3 }); if (tbw.status !== 200) tbFails.push(tbr.task_type + ': ' + err(tbw)); }
+  ok('B9 every task time budget reviewed and saved (' + ((tb.body && tb.body.budgets) || []).length + ')', tb.status === 200 && tbFails.length === 0, tbFails.join(' | '));
 
   console.log('\n=== C. FEE RULES — decide, waiver, clock, APPROVE ===');
   var fl = await callAs(DIR, 'GET', '/fee-law');

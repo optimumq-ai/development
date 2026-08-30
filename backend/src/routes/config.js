@@ -96,6 +96,8 @@ router.put('/time-budgets', requireAuth, requirePermission('operations_config'),
     await run("UPDATE time_budgets SET budget_days = ?, source = 'supervisor', updated_by = ?, updated_at = datetime('now') WHERE record_type_id IS NULL AND task_type = ?",
       [d, (req.user && req.user.name) || req.user.sub, t]);
     var out = await get('SELECT task_type, budget_days, source, updated_by, updated_at FROM time_budgets WHERE record_type_id IS NULL AND task_type = ?', [t]);
+    // Approval model: a reviewed budget is a change on the `time_budgets` row (best effort, after the write).
+    try { await require('../services/setupHub').afterChange('time_budgets', req.user && (req.user.name || req.user.email)); } catch (eB) {}
     res.json({ ok: true, budget: out });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

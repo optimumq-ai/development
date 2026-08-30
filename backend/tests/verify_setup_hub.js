@@ -105,11 +105,13 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   } else ok('C4 (skipped: email row is ' + (emBefore && emBefore.state) + ' on this fixture)', true);
 
   console.log('\n=== D. MARK IT DONE (Option A) ===');
-  var item = 'time_budgets';   // System Features and Options: operations_config
+  // A row with no required set and no list — the gate is what D1/D2/D3 are about, not readiness.
+  // (Was `time_budgets` until it became a FORM row on 2026-08-31: approving it now needs its budgets reviewed.)
+  var item = 'mass_schedule';   // Redaction and Release: operations_config
   var m1 = await callAs(U.sup, 'POST', '/setup-hub/' + item + '/done');
   var m2 = await callAs(U.staff, 'POST', '/setup-hub/' + item + '/done');
   var m3 = await callAs(U.none, 'POST', '/setup-hub/' + item + '/done');
-  ok('D1 a team supervisor (operations_config) may mark a lane-2a item; team staff and a typeless account get 403 PERMISSION_REQUIRED', m1.status === 200 && m2.status === 403 && m2.body.code === 'PERMISSION_REQUIRED' && m3.status === 403);
+  ok('D1 a team supervisor (operations_config) may mark an operations item; team staff and a typeless account get 403 PERMISSION_REQUIRED', m1.status === 200 && m2.status === 403 && m2.body.code === 'PERMISSION_REQUIRED' && m3.status === 403, m1.status + '/' + m2.status + '/' + m3.status);
   var after = find((await callAs(U.staff, 'GET', '/setup-hub')).body, item);
   ok('D2 the mark shows by name and date on the row, the row reads ready, and a non-holder sees canEdit=false', after.signoff && /HUB team_supervisor/.test(after.signoff.by) && after.state === 'ready' && /marked done by/.test(after.evidence) && after.canEdit === false);
   var un = await callAs(U.sup, 'DELETE', '/setup-hub/' + item + '/done');
@@ -512,6 +514,34 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('routing_rules','process_map')");
   for (var rk6 of ['routing_rules', 'process_map']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk6 + '/done'); await db.run('DELETE FROM setup_hub_ready WHERE item_key = ?', [rk6]); }
   for (var rSaved of [wfMark, pmMark]) { if (rSaved) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rSaved.item_key, rSaved.marked_by, rSaved.marked_by_name, rSaved.marked_at, rSaved.content_hash || null, rSaved.notified_hash || null]); }
+
+  console.log('\n=== S. TASK TIME BUDGETS (form) — a seeded figure is not a decision; the city has to review each one ===');
+  var tbSaved = await db.all('SELECT task_type, budget_days, source, updated_by, updated_at FROM time_budgets WHERE record_type_id IS NULL ORDER BY task_type');
+  var tbMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'time_budgets'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_budgets/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_budgets'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_budgets'");
+  await db.run("UPDATE time_budgets SET source = 'seed', updated_by = NULL WHERE record_type_id IS NULL");
+  var sA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_budgets');
+  ok('S1 every budget still on its provisional default → RED, naming the task types', sA.approval === 'red' && /provisional default, not yet reviewed/.test(sA.approvalWhy || ''), sA.approval + ': ' + sA.approvalWhy);
+  var sRef = await callAs(U.dir, 'POST', '/setup-hub/time_budgets/done');
+  ok('S2 approval is refused while any budget is unreviewed (422 REQUIRED_MISSING)', sRef.status === 422 && sRef.body && sRef.body.code === 'REQUIRED_MISSING', sRef.status);
+  var sFails = [];
+  for (var sb of tbSaved) { var sr = await callAs(U.dir, 'PUT', '/config/time-budgets', { taskType: sb.task_type, budgetDays: Number(sb.budget_days) || 3 }); if (sr.status !== 200) sFails.push(sb.task_type + ':' + sr.status); }
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var sn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'time_budgets'")).n;
+  var sB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_budgets');
+  ok('S3 saving every budget through the screen → YELLOW, and the completing save submits it (owners told once)', sFails.length === 0 && sB.approval === 'yellow' && sB.ready && sn1 > 0, sFails.join(',') + ' ' + sB.approval + ': ' + sB.approvalWhy + ' · setup_ready ' + sn1);
+  var sApv = await callAs(U.dir, 'POST', '/setup-hub/time_budgets/done');
+  var sc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_budgets'")).n;
+  var sEdit = await callAs(U.dir, 'PUT', '/config/time-budgets', { taskType: tbSaved[0] && tbSaved[0].task_type, budgetDays: (Number(tbSaved[0] && tbSaved[0].budget_days) || 3) + 1 });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var sC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_budgets');
+  var sc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_budgets'")).n;
+  ok('S4 approved, then a changed budget → YELLOW "changed since approval" + one notification', sApv.status === 200 && sEdit.status === 200 && sC.approval === 'yellow' && /changed since approval/.test(sC.approvalWhy || '') && sc1 > sc0, sApv.status + '/' + sEdit.status + ' ' + sC.approval + ' · ' + sc0 + '→' + sc1);
+  for (var tbRow of tbSaved) await db.run('UPDATE time_budgets SET budget_days = ?, source = ?, updated_by = ?, updated_at = ? WHERE record_type_id IS NULL AND task_type = ?', [tbRow.budget_days, tbRow.source, tbRow.updated_by, tbRow.updated_at, tbRow.task_type]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_budgets'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_budgets/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_budgets'");
+  if (tbMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [tbMark.item_key, tbMark.marked_by, tbMark.marked_by_name, tbMark.marked_at, tbMark.content_hash || null, tbMark.notified_hash || null]);
 
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }

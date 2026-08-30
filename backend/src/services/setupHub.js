@@ -364,10 +364,19 @@ const READERS = {
     return ev('ready', total + ' decision points · ' + c.built + ' built · ' + c.partial + ' partial · ' + c.planned + ' planned', xpm);
   },
   time_budgets: async function () {
-    var rows = await all('SELECT task_type, budget_days FROM time_budgets WHERE record_type_id IS NULL');
-    var set = rows.filter(function (r) { return r.budget_days != null; }).length;
-    if (!rows.length) return ev('not_started', 'no task budgets yet');
-    return ev(set === rows.length ? 'ready' : 'in_progress', set + ' of ' + rows.length + ' task types have a day budget');
+    // FORM (approval model, §3h): the task catalog SEEDS a row per task type and every row already carries a
+    // figure, so "has a number" proves nothing. What counts is a figure the city REVIEWED — the screen's own
+    // "Provisional default — not yet reviewed by your office" (`source = 'supervisor'`). A shipped default is
+    // not a decision (the Authentication precedent).
+    var rows = await all('SELECT task_type, budget_days, source, updated_by FROM time_budgets WHERE record_type_id IS NULL ORDER BY task_type');
+    if (!rows.length) return ev('not_started', 'no task budgets yet', { required: { missing: ['No task types are budgeted yet — the task catalog seeds them'], total: 1 }, digest: 'none' });
+    var pretty = function (t) { return String(t).replace(/_/g, ' ').replace(/\b\w/g, function (ch) { return ch.toUpperCase(); }); };
+    var unset = rows.filter(function (b) { return b.source !== 'supervisor'; });
+    var extraB = { required: { missing: unset.map(function (b) { return pretty(b.task_type) + ' — provisional default, not yet reviewed'; }), total: rows.length },
+      digest: digestOf(rows.map(function (b) { return [b.task_type, b.budget_days, b.source, b.updated_by]; })) };
+    var done = rows.length - unset.length;
+    if (!done) return ev('not_started', 'all ' + rows.length + ' task types still on the provisional defaults', extraB);
+    return ev(unset.length ? 'in_progress' : 'ready', done + ' of ' + rows.length + ' task budgets set by your office', extraB);
   },
   time_tracking: async function () {
     // C11: reads the real per-screen setting (services/timeCaptureConfig), not a key nothing ever wrote.
