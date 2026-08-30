@@ -383,16 +383,29 @@ const READERS = {
     return ev(p ? 'ready' : 'in_progress', 'both keys set · ' + model, extra);
   },
   email: async function () {
+    // FORM (approval model, 2026-08-31): required = a provider and, for SMTP, host + port + from address; for Resend,
+    // the key + from address. The test send is evidence, not a requirement.
     var prov = await cfg('email_provider'); var resend = await cfg('resend_api_key'); var smtp = await cfg('smtp_host');
-    if (!prov && !resend && !smtp) return ev('not_started', 'no email provider set');
+    var port = await cfg('smtp_port'), sfrom = await cfg('smtp_from'), rfrom = await cfg('resend_from'), fromName = await cfg('email_from_name'), spass = await cfg('smtp_pass'), suser = await cfg('smtp_user');
+    var effProv = prov || (resend ? 'resend' : (smtp ? 'smtp' : null));
+    var missingE = [];
+    if (!effProv) missingE.push('Provider');
+    else if (effProv === 'smtp') { if (!smtp) missingE.push('SMTP host'); if (!port) missingE.push('Port'); if (!sfrom) missingE.push('From address'); }
+    else { if (!resend) missingE.push('Resend API key'); if (!rfrom) missingE.push('From address'); }
+    var extraE = { required: { missing: missingE, total: effProv === 'resend' ? 3 : 4 }, digest: digestOf([effProv, smtp, port, suser, !!spass, sfrom, !!resend, rfrom, fromName, await cfg('new_request_alert_email')]) };
+    if (!prov && !resend && !smtp) return ev('not_started', 'no email provider set', extraE);
     var have = prov === 'smtp' ? !!smtp : (prov === 'resend' ? !!resend : !!(smtp || resend));
     var tested = await cfg('email_last_test_ok');
-    if (!have) return ev('in_progress', 'provider chosen · not configured');
-    return tested ? ev('ready', (prov || (resend ? 'resend' : 'smtp')) + ' · test message sent') : ev('in_progress', (prov || (resend ? 'resend' : 'smtp')) + ' set · no test message sent');
+    if (!have) return ev('in_progress', 'provider chosen · not configured', extraE);
+    return tested ? ev('ready', (prov || (resend ? 'resend' : 'smtp')) + ' · test message sent', extraE) : ev('in_progress', (prov || (resend ? 'resend' : 'smtp')) + ' set · no test message sent', extraE);
   },
   auth_policy: async function () {
-    var mode = await cfg('auth_mode') || 'local', mfa = await cfg('mfa_mode'), to = await cfg('session_timeout'), pl = await cfg('min_password_length');
-    return ev('ready', mode + (mfa ? ' + MFA ' + mfa : '') + (to ? ' · ' + to + ' session timeout' : '') + (pl ? ' · ' + pl + '+ character passwords' : ''));
+    // FORM (approval model, 2026-08-31): the four sign-in settings must be SAVED (a shipped default is not a decision).
+    var rawMode = await cfg('auth_mode'); var mode = rawMode || 'local', mfa = await cfg('mfa_mode'), to = await cfg('session_timeout'), pl = await cfg('min_password_length');
+    var missingA = []; if (!rawMode) missingA.push('Authentication mode'); if (!mfa) missingA.push('Multi-factor authentication'); if (!to) missingA.push('Session timeout'); if (!pl) missingA.push('Minimum password length');
+    var extraA = { required: { missing: missingA, total: 4 }, digest: digestOf([rawMode, mfa, to, pl]) };
+    if (missingA.length) return ev('not_started', missingA.length === 4 ? 'running on the shipped defaults — nothing saved yet' : 'saved: ' + (4 - missingA.length) + ' of 4 settings', extraA);
+    return ev('ready', mode + (mfa ? ' + MFA ' + mfa : '') + (to ? ' · ' + to + ' session timeout' : '') + (pl ? ' · ' + pl + '+ character passwords' : ''), extraA);
   },
   agent_rules: async function () {
     var n = await count('SELECT COUNT(*) n FROM agent_rules WHERE enabled = 1');

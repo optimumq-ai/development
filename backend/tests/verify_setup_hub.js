@@ -94,6 +94,8 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   ok('C2 the go-live row sits in lane 1, is never markable, and says who flips it', page.lanes[0].items.some(function (x) { return x.key === 'go_live'; }) && gl.goLive === true && (gl.state === 'ready' || /ORO System Administrator or ORO Director|ready to flip|enforcement/.test(gl.evidence)), gl && (gl.state + ': ' + gl.evidence));
 
   // C4 (2026-08-30): a prerequisite MARKED done counts as ready for its dependents.
+  // (2026-08-31) email is a form now: approval needs its required fields, so configure it first (restored in K).
+  await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '587', smtp_from: 'records@hub.test' } });
   var emBefore = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
   if (emBefore && emBefore.state !== 'needs_attention' && emBefore.state !== 'ready') {
     await callAs(U.sa, 'POST', '/setup-hub/email/done');
@@ -120,10 +122,10 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.legal, 'DELETE', '/setup-hub/exemptions/done');
   var glm = await callAs(U.dir, 'POST', '/setup-hub/go_live/done');
   ok('D5 go-live cannot be "marked done" (400 NOT_MARKABLE) — it is flipped, not declared', glm.status === 400 && glm.body.code === 'NOT_MARKABLE');
-  var t1 = await callAs(U.sa, 'POST', '/setup-hub/auth_policy/done');
-  var t2 = await callAs(U.dir, 'POST', '/setup-hub/auth_policy/done');
+  var t1 = await callAs(U.sa, 'POST', '/setup-hub/settlement/done');
+  var t2 = await callAs(U.dir, 'POST', '/setup-hub/settlement/done');
   ok('D6 a Technical Setup item is the system_admin group: SysAdmin may, Director 403', t1.status === 200 && t2.status === 403, t1.status + '/' + t2.status);
-  await callAs(U.sa, 'DELETE', '/setup-hub/auth_policy/done');
+  await callAs(U.sa, 'DELETE', '/setup-hub/settlement/done');
   ok('D7 an unknown item is 404', (await callAs(U.dir, 'POST', '/setup-hub/no-such-item/done')).status === 404);
 
   console.log('\n=== E. THE PAGE ALWAYS RENDERS ===');
@@ -242,6 +244,51 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   for (var rk2 in aiSave) { if (aiSave[rk2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk2, aiSave[rk2]]); }
   await callAs(U.sa, 'DELETE', '/setup-hub/ai_config/done');
   if (aiMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [aiMark.item_key, aiMark.marked_by, aiMark.marked_by_name, aiMark.marked_at, aiMark.content_hash || null]);
+
+  console.log('\n=== K. EMAIL CONFIGURATION (form) — required per provider ===');
+  var EM_KEYS = ['email_provider', 'smtp_host', 'smtp_port', 'smtp_from', 'smtp_user', 'smtp_pass', 'resend_api_key', 'resend_from', 'email_from_name'];
+  var emSave = {}; for (var ek of EM_KEYS) { var erow = await db.get('SELECT value FROM system_config WHERE key = ?', [ek]); emSave[ek] = erow ? erow.value : null; }
+  var emMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'email'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/email/done');
+  for (var ek2 of EM_KEYS) await db.run('DELETE FROM system_config WHERE key = ?', [ek2]);
+  var kA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
+  ok('K1 nothing set → RED, "Provider"', kA.approval === 'red' && /Provider/.test(kA.approvalWhy || ''), kA.approval + ': ' + kA.approvalWhy);
+  await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test' } });
+  var kB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
+  ok('K2 SMTP with only a host → RED naming Port and From address', kB.approval === 'red' && /Port/.test(kB.approvalWhy || '') && /From address/.test(kB.approvalWhy || ''), kB.approval + ': ' + kB.approvalWhy);
+  await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '587', smtp_from: 'records@hub.test' } });
+  var kC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
+  ok('K3 host + port + from address → YELLOW (a test send is evidence, not a requirement)', kC.approval === 'yellow', kC.approval + ': ' + kC.approvalWhy);
+  var kM = await callAs(U.sa, 'POST', '/setup-hub/email/done');
+  var kD = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
+  ok('K4 approval → GREEN', kM.status === 200 && kD.approval === 'green', kM.status + ' ' + kD.approval);
+  await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail2.hub.test' } });
+  var kE = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
+  ok('K5 a changed host after approval → YELLOW "changed since approval"', kE.approval === 'yellow' && /changed since approval/.test(kE.approvalWhy || ''), kE.approval + ': ' + kE.approvalWhy);
+  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'email'");
+  for (var rk3 in emSave) { if (emSave[rk3] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk3]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk3, emSave[rk3]]); }
+  await callAs(U.sa, 'DELETE', '/setup-hub/email/done');
+  if (emMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [emMark.item_key, emMark.marked_by, emMark.marked_by_name, emMark.marked_at, emMark.content_hash || null]);
+
+  console.log('\n=== L. USER AUTHENTICATION SETUP (form) — a shipped default is not a decision ===');
+  var AU_KEYS = ['auth_mode', 'mfa_mode', 'session_timeout', 'min_password_length'];
+  var auSave = {}; for (var uk of AU_KEYS) { var urow = await db.get('SELECT value FROM system_config WHERE key = ?', [uk]); auSave[uk] = urow ? urow.value : null; }
+  var auMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'auth_policy'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/auth_policy/done');
+  for (var uk2 of AU_KEYS) await db.run('DELETE FROM system_config WHERE key = ?', [uk2]);
+  var lA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'auth_policy');
+  ok('L1 nothing saved → RED naming all four', lA.approval === 'red' && /Authentication mode/.test(lA.approvalWhy || '') && /Minimum password length/.test(lA.approvalWhy || ''), lA.approval + ': ' + lA.approvalWhy);
+  await callAs(U.sa, 'POST', '/config', { auth_mode: 'local', mfa_mode: 'optional', session_timeout: '8h', min_password_length: '10' });
+  var lB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'auth_policy');
+  ok('L2 all four saved (even at their defaults) → YELLOW', lB.approval === 'yellow', lB.approval + ': ' + lB.approvalWhy);
+  var lM = await callAs(U.sa, 'POST', '/setup-hub/auth_policy/done');
+  await callAs(U.sa, 'POST', '/config', { session_timeout: '4h' });
+  var lC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'auth_policy');
+  ok('L3 approved, then a change saved through POST /config → YELLOW again', lM.status === 200 && lC.approval === 'yellow' && /changed since approval/.test(lC.approvalWhy || ''), lM.status + ' ' + lC.approval + ': ' + lC.approvalWhy);
+  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'auth_policy'");
+  for (var rk4 in auSave) { if (auSave[rk4] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk4]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk4, auSave[rk4]]); }
+  await callAs(U.sa, 'DELETE', '/setup-hub/auth_policy/done');
+  if (auMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [auMark.item_key, auMark.marked_by, auMark.marked_by_name, auMark.marked_at, auMark.content_hash || null]);
 
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }

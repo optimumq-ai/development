@@ -82,6 +82,8 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   ok('B6 email configured (technical lane)', em.status < 300, err(em));
   var ai = await callAs(SA, 'POST', '/integrations', { ai: { anthropic_api_key: 'sk-ant-golden-000000000000', voyage_api_key: 'pa-golden-000000000000' }, deployment: { profile: 'standard' } });
   ok('B7 AI configuration: both keys and a deployment model (technical lane)', ai.status < 300, err(ai));
+  var au = await callAs(SA, 'POST', '/config', { auth_mode: 'local', mfa_mode: 'optional', session_timeout: '8h', min_password_length: '10' });
+  ok('B8 sign-in settings saved (technical lane)', au.status < 300, err(au));
 
   console.log('\n=== C. FEE RULES — decide, waiver, clock, APPROVE ===');
   var fl = await callAs(DIR, 'GET', '/fee-law');

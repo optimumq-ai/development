@@ -35,6 +35,14 @@ router.post('/', requireAuth, async function(req, res) {
       }
     }
   }
+  // Approval model: the items whose settings live in system_config hear about a save (best effort, after the write).
+  try {
+    var HUBc = require('../services/setupHub'); var whoC = req.user && (req.user.name || req.user.email);
+    if (['auth_mode', 'mfa_mode', 'session_timeout', 'min_password_length'].some(function (k) { return body[k] !== undefined; })) await HUBc.afterChange('auth_policy', whoC);
+    if (body.new_request_alert_email !== undefined) await HUBc.afterChange('email', whoC);
+    if (['overdue_alert_days', 'escalation_days', 'ack_email'].some(function (k) { return body[k] !== undefined; })) await HUBc.afterChange('notifications', whoC);
+    if (body.av_redaction_mode !== undefined) await HUBc.afterChange('av_redaction', whoC);
+  } catch (eC) { /* notify is best-effort */ }
   res.json({ success: true });
 });
 

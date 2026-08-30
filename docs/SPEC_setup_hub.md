@@ -103,6 +103,16 @@ prefixed by tab and it reports `tabs {key: 'red'|'ok'}`; `build()` turns that in
 bar shows as marks. AI configuration: Service Keys (Anthropic + Voyage) · Deployment Model (a model chosen;
 Government adds region, Titan model, Bedrock key + secret). `verify_setup_hub` J1–J7.
 
+## 3g. Converted screens (running list)
+| Item | Pattern | Required set | Change hook |
+|---|---|---|---|
+| Agency (`agency`) | form | name, short name, jurisdiction type, address line 1, city, state, ZIP, contact email, contact phone + the state lock | `routes/agency.js` PUT + lock |
+| Record Sources (`sources`) | list | ≥1 connector; "Ready for approval" | `routes/repositories.js` finish hook |
+| AI configuration (`ai_config`) | tabs | Keys: Anthropic + Voyage (environment counts) · Deployment: a model; Government adds region, Titan model, Bedrock key + secret | `routes/integrations.js` POST |
+| Email configuration (`email`) | form | provider; SMTP: host, port, from address · Resend: key, from address (the test send is evidence only) | `routes/integrations.js` POST (+ `routes/config.js` for the alert address) |
+| User Authentication Setup (`auth_policy`) | form | auth mode, MFA mode, session timeout, minimum password length — SAVED, a shipped default is not a decision | `routes/config.js` POST |
+`routes/config.js` also reports changes to `notifications` and `av_redaction` (still derived until converted).
+
 ## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)
 The Administration page has two tabs: **Settings and Configuration** (the hub, above) and **Set Up Guide** —
 Plan A from `docs/mockups/setup_hub/PlanGantt.dc.html` (chosen 2026-08-24, built 2026-08-30 as

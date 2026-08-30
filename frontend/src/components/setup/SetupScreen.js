@@ -90,7 +90,7 @@ export default function SetupScreen(props) {
   var ap = row && row.approval;
   var st = ap ? APPROVAL[ap] : STATE[(row && row.state) || 'not_started'];
   var can = !!(row && row.canEdit);
-  var attested = !!(row && row.signoff) && !(row && row.changedSinceApproval);
+  var attested = !!(row && row.signoff) && !(row && row.changedSinceApproval) && ap !== 'red';
   var redLock = ap === 'red';
   var approveLabel = row && row.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
 

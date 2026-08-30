@@ -17,6 +17,12 @@ var STATE = {
   needs_attention: { label: 'Needs attention', bg: '#FEE2E2', color: '#991B1B' },
   waiting:         { label: 'Waiting',         bg: '#EDE9FE', color: '#5B21B6' },
 };
+var APPROVAL = {
+  red:    { label: 'Not started',       bg: '#FEE2E2', color: '#991B1B' },
+  yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' },
+  green:  { label: 'Approved',          bg: '#E1F2E9', color: '#1B8A5A' },
+};
+var REQ_LINE = { fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginTop: '4px' };
 var lbl = { fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' };
 var inp = { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
 var card = { background: 'white', border: '1px solid #D2DCE3', borderRadius: '10px' };
@@ -78,9 +84,14 @@ export default function EmailConfigPage() {
 
   if (denied) return <div style={{ color: '#5C6F7C', padding: '40px' }}>Email configuration is set up by the System Administrator — your user type can't view these settings.</div>;
   if (!status) return <div style={{ color: '#9CA3AF', padding: '40px' }}>Loading email settings…</div>;
-  var st = STATE[(hubRow && hubRow.state) || 'not_started'];
+  // APPROVAL MODEL (2026-08-31): the pill is this screen's own three-colour indicator; required fields are marked.
+  var ap = (hubRow && hubRow.approval) || null;
+  var st = ap ? APPROVAL[ap] : STATE[(hubRow && hubRow.state) || 'not_started'];
+  var missE = { host: form.provider === 'smtp' && !form.smtp_host, port: form.provider === 'smtp' && !form.smtp_port, sfrom: form.provider === 'smtp' && !form.smtp_from, rkey: form.provider === 'resend' && !form.resend_api_key && !(status.email && status.email.resend_key_set), rfrom: form.provider === 'resend' && !form.resend_from };
+  var RED = { border: '2px solid #DC2626' };
+  var reLabel = hubRow && hubRow.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
   var can = !!(hubRow && hubRow.canEdit);
-  var attested = hubRow && hubRow.signoff;
+  var attested = hubRow && hubRow.signoff && !(hubRow.changedSinceApproval) && ap !== 'red';
 
   return (
     <div style={{ maxWidth: '860px', color: '#12232E' }}>
@@ -91,14 +102,15 @@ export default function EmailConfigPage() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           {st.label}
         </button>
-        <span style={{ flexGrow: 1, fontSize: '12px', color: '#5C6F7C', lineHeight: '1.35' }}>{hubRow ? hubRow.evidence : ''}</span>
+        <span style={{ flexGrow: 1, fontSize: '12px', color: '#5C6F7C', lineHeight: '1.35' }}>{hubRow ? (hubRow.approvalWhy || hubRow.evidence) : ''}</span>
         <span style={{ fontSize: '11.5px', color: '#8296A4' }}>Technical Setup</span>
         {attested
-          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'white', color: '#12232E', border: '1px solid #BECAD3', cursor: 'pointer' }}>Attested · undo</button>
-          : <button type="button" disabled={!can || busy === 'attest'} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: can ? BLUE : '#F2F6F9', color: can ? 'white' : '#A9B7C2', border: '1px solid ' + (can ? BLUE : '#D2DCE3'), cursor: can ? 'pointer' : 'default' }}>Attest as complete</button>}
+          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'white', color: '#12232E', border: '1px solid #BECAD3', cursor: 'pointer' }}>{ap ? 'Approved · undo' : 'Attested · undo'}</button>
+          : <button type="button" disabled={!can || ap === 'red' || busy === 'attest'} onClick={toggleAttest} title={ap === 'red' ? 'Fill and save every required field first' : ''} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: can ? BLUE : '#F2F6F9', color: can ? 'white' : '#A9B7C2', border: '1px solid ' + (can ? BLUE : '#D2DCE3'), cursor: can ? 'pointer' : 'default' }}>{reLabel}</button>}
       </div>
 
       <div style={Object.assign({}, card, { padding: '20px 22px' })}>
+        {hubRow && hubRow.changedSinceApproval ? <div style={{ background: '#FFF8E8', border: '1px solid #F0D9A8', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: '#7A5210', marginBottom: '12px' }}><strong>Changed since approval.</strong> {hubRow.approvalWhy}. The System Administrator has been notified to approve again.</div> : null}
         <div style={{ fontSize: '19px', fontWeight: 700, marginBottom: '3px' }}>Email configuration</div>
         <div style={{ fontSize: '12.5px', color: '#5C6F7C', marginBottom: '18px', lineHeight: 1.5 }}>How this installation sends mail — acknowledgments, notices, and staff notifications. On-premise installs typically use their own mail server (SMTP). Credentials are stored on this server and never displayed again after saving.</div>
 
@@ -115,19 +127,20 @@ export default function EmailConfigPage() {
         {form.provider === 'smtp' ? (
           <div>
             <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
-              <div style={{ flex: 2 }}><label style={lbl}>SMTP host</label><input value={form.smtp_host} onChange={function (e) { set('smtp_host', e.target.value); }} placeholder="mail.city.gov" style={inp} /></div>
-              <div style={{ flex: 1 }}><label style={lbl}>Port</label><input value={form.smtp_port} onChange={function (e) { set('smtp_port', e.target.value); }} placeholder="587" style={inp} /></div>
+              <div style={{ flex: 2 }}><label style={lbl}>SMTP host</label><input value={form.smtp_host} onChange={function (e) { set('smtp_host', e.target.value); }} placeholder="mail.city.gov" style={Object.assign({}, inp, missE.host ? RED : {})} /></div>
+              <div style={{ flex: 1 }}><label style={lbl}>Port</label><input value={form.smtp_port} onChange={function (e) { set('smtp_port', e.target.value); }} placeholder="587" style={Object.assign({}, inp, missE.port ? RED : {})} /></div>
             </div>
             <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
               <div style={{ flex: 1 }}><label style={lbl}>Username</label><input value={form.smtp_user} onChange={function (e) { set('smtp_user', e.target.value); }} placeholder="records@city.gov" style={inp} autoComplete="off" /></div>
               <div style={{ flex: 1 }}><label style={lbl}>Password {status.email.smtp_pass_set ? <span style={{ color: '#03543F' }}>&middot; set</span> : null}</label><input type="password" value={form.smtp_pass} onChange={function (e) { set('smtp_pass', e.target.value); }} placeholder={status.email.smtp_pass_set ? 'Saved — enter to replace' : ''} style={inp} autoComplete="new-password" /></div>
             </div>
-            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address</label><input value={form.smtp_from} onChange={function (e) { set('smtp_from', e.target.value); }} placeholder="records@city.gov" style={inp} /></div>
+            {(missE.host || missE.port) ? <div style={Object.assign({}, REQ_LINE, { marginTop: '-8px', marginBottom: '12px' })}>Required — {[missE.host ? 'SMTP host' : null, missE.port ? 'port' : null].filter(Boolean).join(' and ')}: enter and save</div> : null}
+            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address{missE.sfrom ? <span style={{ color: '#DC2626' }}> · required</span> : null}</label><input value={form.smtp_from} onChange={function (e) { set('smtp_from', e.target.value); }} placeholder="records@city.gov" style={Object.assign({}, inp, missE.sfrom ? RED : {})} /></div>
           </div>
         ) : (
           <div>
-            <div style={{ marginBottom: '14px' }}><label style={lbl}>Resend API key {status.email.resend_key_set ? <span style={{ color: '#03543F' }}>&middot; set</span> : null}</label><input type="password" value={form.resend_api_key} onChange={function (e) { set('resend_api_key', e.target.value); }} placeholder={status.email.resend_key_set ? 'Saved — enter to replace' : 're_…'} style={inp} autoComplete="new-password" /></div>
-            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address (verified domain)</label><input value={form.resend_from} onChange={function (e) { set('resend_from', e.target.value); }} placeholder="records@city.gov" style={inp} /></div>
+            <div style={{ marginBottom: '14px' }}><label style={lbl}>Resend API key {status.email.resend_key_set ? <span style={{ color: '#03543F' }}>&middot; set</span> : null}</label><input type="password" value={form.resend_api_key} onChange={function (e) { set('resend_api_key', e.target.value); }} placeholder={status.email.resend_key_set ? 'Saved — enter to replace' : 're_…'} style={Object.assign({}, inp, missE.rkey ? RED : {})} autoComplete="new-password" /></div>
+            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address (verified domain){missE.rfrom ? <span style={{ color: '#DC2626' }}> · required</span> : null}</label><input value={form.resend_from} onChange={function (e) { set('resend_from', e.target.value); }} placeholder="records@city.gov" style={Object.assign({}, inp, missE.rfrom ? RED : {})} /></div>
           </div>
         )}
 

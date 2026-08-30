@@ -12,16 +12,18 @@ export default function AuthenticationSetupPage() {
   var [form, setForm] = useState(null);
   var [saving, setSaving] = useState(false);
   var [msg, setMsg] = useState(null);
+  var [saved, setSaved] = useState({});     // which of the four are actually SAVED (a shipped default is not a decision)
   useEffect(function () {
     api.get('/config').then(function (r) {
       var c = r.data || {};
+      setSaved({ auth_mode: !!c.auth_mode, mfa_mode: !!c.mfa_mode, session_timeout: !!c.session_timeout, min_password_length: !!c.min_password_length });
       setForm({ auth_mode: c.auth_mode || 'local', mfa_mode: c.mfa_mode || 'optional', session_timeout: c.session_timeout || '8h', min_password_length: c.min_password_length || '10' });
     }).catch(function () { setForm({}); setMsg({ ok: false, text: 'The current settings could not be read.' }); });
   }, []);
   function set(k, v) { setForm(function (f) { var n = Object.assign({}, f); n[k] = v; return n; }); }
   async function save(reload) {
     setSaving(true); setMsg(null);
-    try { var body = {}; KEYS.forEach(function (k) { body[k] = form[k]; }); await api.post('/config', body); setMsg({ ok: true, text: 'Authentication settings saved.' }); await reload(); }
+    try { var body = {}; KEYS.forEach(function (k) { body[k] = form[k]; }); await api.post('/config', body); setSaved({ auth_mode: true, mfa_mode: true, session_timeout: true, min_password_length: true }); setMsg({ ok: true, text: 'Authentication settings saved.' }); await reload(); }
     catch (e) { setMsg({ ok: false, text: (e.response && e.response.data && e.response.data.error) || 'Could not save.' }); }
     setSaving(false);
   }
@@ -33,9 +35,10 @@ export default function AuthenticationSetupPage() {
         return (
           <div>
             {msg ? <Msg text={msg.text} ok={msg.ok} /> : null}
+            {Object.keys(saved).some(function (k) { return !saved[k]; }) ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '12px' }}>Required — the settings outlined in red show the shipped default; choose each one and save to record the city's decision.</div> : null}
             <div style={field}>
               <label style={lbl}>Authentication mode</label>
-              <select value={form.auth_mode} disabled={!s.can} onChange={function (e) { set('auth_mode', e.target.value); }} style={inp}>
+              <select value={form.auth_mode} disabled={!s.can} onChange={function (e) { set('auth_mode', e.target.value); }} style={Object.assign({}, inp, saved.auth_mode ? {} : { border: '2px solid #DC2626' })}>
                 <option value="local">Local credentials</option>
                 <option value="sso">Single sign-on (SSO)</option>
               </select>
@@ -43,7 +46,7 @@ export default function AuthenticationSetupPage() {
             </div>
             <div style={field}>
               <label style={lbl}>Multi-factor authentication</label>
-              <select value={form.mfa_mode} disabled={!s.can} onChange={function (e) { set('mfa_mode', e.target.value); }} style={inp}>
+              <select value={form.mfa_mode} disabled={!s.can} onChange={function (e) { set('mfa_mode', e.target.value); }} style={Object.assign({}, inp, saved.mfa_mode ? {} : { border: '2px solid #DC2626' })}>
                 <option value="off">Off — not available</option>
                 <option value="optional">Optional — staff may enroll</option>
                 <option value="required">Required — all staff must enroll</option>
@@ -52,7 +55,7 @@ export default function AuthenticationSetupPage() {
             </div>
             <div style={field}>
               <label style={lbl}>Session timeout</label>
-              <select value={form.session_timeout} disabled={!s.can} onChange={function (e) { set('session_timeout', e.target.value); }} style={inp}>
+              <select value={form.session_timeout} disabled={!s.can} onChange={function (e) { set('session_timeout', e.target.value); }} style={Object.assign({}, inp, saved.session_timeout ? {} : { border: '2px solid #DC2626' })}>
                 <option value="2h">2 hours</option>
                 <option value="4h">4 hours</option>
                 <option value="8h">8 hours (recommended)</option>
@@ -62,7 +65,7 @@ export default function AuthenticationSetupPage() {
             </div>
             <div style={field}>
               <label style={lbl}>Minimum password length</label>
-              <select value={form.min_password_length} disabled={!s.can} onChange={function (e) { set('min_password_length', e.target.value); }} style={inp}>
+              <select value={form.min_password_length} disabled={!s.can} onChange={function (e) { set('min_password_length', e.target.value); }} style={Object.assign({}, inp, saved.min_password_length ? {} : { border: '2px solid #DC2626' })}>
                 {['8', '10', '12', '14', '16'].map(function (n) { return <option key={n} value={n}>{n} characters</option>; })}
               </select>
             </div>

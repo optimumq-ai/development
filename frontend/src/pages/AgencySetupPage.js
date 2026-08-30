@@ -77,7 +77,7 @@ export default function AgencySetupPage() {
     mailing_line1: mailing && !f.mailing_line1, mailing_city: mailing && !f.mailing_city, mailing_state: mailing && !f.mailing_state, mailing_zip: mailing && !f.mailing_zip
   };
   var complete = Object.keys(miss).every(function (k) { return !miss[k]; });
-  var attested = hub && hub.signoff && !(hub.changedSinceApproval);
+  var attested = hub && hub.signoff && !(hub.changedSinceApproval) && ap !== 'red';
   var mayAttest = can && complete && !!lock && hub && hub.state !== 'waiting' && hub.state !== 'needs_attention';
 
   async function save() {

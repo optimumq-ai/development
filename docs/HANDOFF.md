@@ -9716,3 +9716,16 @@ The three patterns (form / list / tabs) now cover every setup screen; conversion
 
 **NEXT:** Email configuration and User Authentication Setup (forms) · Departments / Teams / Staff (lists) ·
 Kevin's live walk-through · MFA · Jurisdiction Configuration retirement.
+
+## 2026-08-31 — Email configuration + User Authentication Setup converted (forms); suite 2787/2788 (E1a the only red)
+
+Email: required = provider; SMTP host/port/from address or Resend key/from address (the test send stays
+evidence). Auth: the four sign-in settings must be SAVED — a shipped default is not a decision; unsaved
+selects are outlined red with a line saying so. `routes/config.js` reports saves to `auth_policy`, `email`
+(alert address), `notifications` and `av_redaction`. Red wins the button (no "Approved · undo" beside a red
+pill). `verify_setup_hub` 54/54 (+K1–K5, L1–L3; C4 configures email first; D6 uses `settlement`), golden
+39/39 (+B8). SPEC §3g lists the converted screens.
+
+**NEXT:** City departments / Fulfillment teams / Staff (list pattern) · then the compliance lane's screens
+(Fee rules, Request rules tabs — the tabbed pattern with decisions as the required set) · Kevin's live
+walk-through · MFA · Jurisdiction Configuration retirement.
