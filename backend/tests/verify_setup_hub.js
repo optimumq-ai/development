@@ -543,6 +543,34 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.dir, 'DELETE', '/setup-hub/time_budgets/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_budgets'");
   if (tbMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [tbMark.item_key, tbMark.marked_by, tbMark.marked_by_name, tbMark.marked_at, tbMark.content_hash || null, tbMark.notified_hash || null]);
 
+  console.log('\n=== T. TASK PROCESSING TIME CAPTURE (form) — "off everywhere" is a decision only once it is SAVED ===');
+  var TC_KEY = require('/opt/optimumq/backend/src/services/timeCaptureConfig').KEY;
+  var tcRow = await db.get('SELECT value FROM system_config WHERE key = ?', [TC_KEY]);
+  var tcMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'time_tracking'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_tracking/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_tracking'");
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_tracking'");
+  await db.run('DELETE FROM system_config WHERE key = ?', [TC_KEY]);
+  var tA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_tracking');
+  var tRef = await callAs(U.dir, 'POST', '/setup-hub/time_tracking/done');
+  ok('T1 nothing saved → RED ("the shipped default"), and approval is refused 422', tA.approval === 'red' && /not decided/.test(tA.approvalWhy || '') && tRef.status === 422 && tRef.body.code === 'REQUIRED_MISSING', tA.approval + ': ' + tA.approvalWhy + ' · ' + tRef.status);
+  var tn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'time_tracking'")).n;
+  var tSave = await callAs(U.dir, 'PUT', '/config/time-capture', { config: { search: 'off', estimate: 'off', legal_redaction: 'off', legal: 'off' } });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var tB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_tracking');
+  var tn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'time_tracking'")).n;
+  ok('T2 saved as OFF everywhere → YELLOW: off is a valid posture once the city records it; the save submits the screen', tSave.status === 200 && tB.approval === 'yellow' && /off on every task screen — saved/.test(tB.evidence || '') && tB.ready && tn1 > tn0, tSave.status + ' ' + tB.approval + ': ' + tB.evidence + ' · ' + tn0 + '→' + tn1);
+  var tApv = await callAs(U.dir, 'POST', '/setup-hub/time_tracking/done');
+  var tc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_tracking'")).n;
+  var tOn = await callAs(U.dir, 'PUT', '/config/time-capture', { config: { search: 'always' } });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var tC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'time_tracking');
+  var tc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'time_tracking'")).n;
+  ok('T3 approved, then a screen switched on → YELLOW "changed since approval" + one notification', tApv.status === 200 && tOn.status === 200 && tC.approval === 'yellow' && /changed since approval/.test(tC.approvalWhy || '') && tc1 > tc0, tApv.status + '/' + tOn.status + ' ' + tC.approval + ' · ' + tc0 + '→' + tc1);
+  if (tcRow) await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [TC_KEY, tcRow.value]); else await db.run('DELETE FROM system_config WHERE key = ?', [TC_KEY]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'time_tracking'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/time_tracking/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'time_tracking'");
+  if (tcMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [tcMark.item_key, tcMark.marked_by, tcMark.marked_by_name, tcMark.marked_at, tcMark.content_hash || null, tcMark.notified_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

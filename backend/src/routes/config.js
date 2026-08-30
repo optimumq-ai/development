@@ -60,6 +60,8 @@ router.get('/time-capture', requireAuth, async function (req, res) {
 router.put('/time-capture', requireAuth, requirePermission('operations_config'), async function (req, res) {
   try {
     var next = await timeCapture.set(db, (req.body && req.body.config) || req.body || {});
+    // Approval model: saving the blob IS the decision on the `time_tracking` row (best effort, after the write).
+    try { await require('../services/setupHub').afterChange('time_tracking', req.user && (req.user.name || req.user.email)); } catch (eT) {}
     res.json({ config: next, uis: timeCapture.UIS, modes: timeCapture.MODES });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

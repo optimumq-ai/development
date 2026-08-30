@@ -380,11 +380,18 @@ const READERS = {
   },
   time_tracking: async function () {
     // C11: reads the real per-screen setting (services/timeCaptureConfig), not a key nothing ever wrote.
+    // FORM (approval model, §3h): the whole screen SAVES ONE blob, and every screen starts at 'off' by
+    // default — so the required item is that the blob has been saved at all. Off everywhere is a perfectly
+    // good posture (states differ on which labor is chargeable), but it has to be the city's answer, not
+    // the shipped silence. One required item, because one Save records all of them.
     var TC = require('./timeCaptureConfig'); var c = await TC.get({ get: get, run: run });
+    var raw = await cfg(TC.KEY);
     var on = TC.UIS.filter(function (u) { return u.available && c[u.key] && c[u.key] !== 'off'; });
     var avail = TC.UIS.filter(function (u) { return u.available; }).length;
-    if (!on.length) return ev('not_started', 'off on every task screen (the shipped default)');
-    return ev('ready', on.length + ' of ' + avail + ' task screens capture time · ' + on.map(function (u) { return u.label + ': ' + c[u.key]; }).join(', '));
+    var extraT = { required: { missing: raw ? [] : ['Task screens — not decided; choose each screen\'s setting and save'], total: 1 }, digest: digestOf([raw || null]) };
+    if (!raw) return ev('not_started', 'off on every task screen (the shipped default) — nothing saved yet', extraT);
+    if (!on.length) return ev('ready', 'off on every task screen — saved as the city\'s decision', extraT);
+    return ev('ready', on.length + ' of ' + avail + ' task screens capture time · ' + on.map(function (u) { return u.label + ': ' + c[u.key]; }).join(', '), extraT);
   },
   av_redaction: async function () {
     var m = await cfg('av_redaction_mode');

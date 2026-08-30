@@ -89,6 +89,9 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
   var tbFails = [];
   for (var tbr of ((tb.body && tb.body.budgets) || [])) { var tbw = await callAs(DIR, 'PUT', '/config/time-budgets', { taskType: tbr.task_type, budgetDays: Number(tbr.budget_days) || 3 }); if (tbw.status !== 200) tbFails.push(tbr.task_type + ': ' + err(tbw)); }
   ok('B9 every task time budget reviewed and saved (' + ((tb.body && tb.body.budgets) || []).length + ')', tb.status === 200 && tbFails.length === 0, tbFails.join(' | '));
+  // Time capture: off everywhere is a valid posture, but it has to be SAVED to be the city's decision (§3g).
+  var tc = await callAs(DIR, 'PUT', '/config/time-capture', { config: { search: 'discretion', estimate: 'off', legal_redaction: 'off', legal: 'off' } });
+  ok('B10 task processing time capture saved', tc.status === 200, err(tc));
 
   console.log('\n=== C. FEE RULES — decide, waiver, clock, APPROVE ===');
   var fl = await callAs(DIR, 'GET', '/fee-law');
