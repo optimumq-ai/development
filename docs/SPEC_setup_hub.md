@@ -129,6 +129,7 @@ The three taxonomy rows share the Taxonomy screen (`/setup/taxonomy?tab=calibrat
 | Task Processing Time Capture (`time_tracking`) | form | ONE item — the per-screen blob has been saved. Off on every screen is a valid posture (states differ on which labor is chargeable); shipped silence is not | `routes/config.js` PUT `/config/time-capture` |
 | Portal Agent Rules (`agent_rules`) | list | ≥1 rule IN FORCE; health: rules written but switched off. Declared and approved by `system_admin` (the row's own gate, matching its API) | `routes/agentRules.js` finish hook |
 | Video Redaction Options (`av_redaction`) | form | the mode SAVED — the screen shows "internal" with nothing stored, which is the shipped default; choosing internal deliberately is a decision and saving it says so | `routes/config.js` POST (already mapped) |
+| Redaction layout templates (`layout_templates`) | list | ≥1 template; health: record piles the variant scan flagged that still have no template. The Mass Redaction screen (`/mass-redaction`) now wears the strip — it is the row's only approval home | `routes/redactionTemplates.js` finish hook, LIBRARY CRUD ONLY (`POST /`, `PATCH /:id`, `DELETE /:id`) — applying, staging, matching and batch-running a template is work, not setup |
 
 `routes/config.js` also reports changes to `notifications` (Staff Alerts, §3i), `av_redaction`, `time_budgets` (PUT `/config/time-budgets`) and `time_tracking` (PUT `/config/time-capture`) — all converted.
 

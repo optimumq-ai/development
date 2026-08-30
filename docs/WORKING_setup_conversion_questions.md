@@ -22,6 +22,16 @@ of Staff Alerts, which counts nothing). The reason the conservative build gives 
 approval model it read GREEN before anybody had opened it, and green-for-free is the one thing the model
 must not do.
 
+## Q4 — Mass Redaction is two things: the templates library (setup) and the job runner (work)
+`layout_templates` doors to `/mass-redaction`, and that page is both the reusable-template library (its own
+heading says so) and the screen where batch jobs are staged and run — plus the 911 incremental-pull demo.
+Converting the row to the list model needed an approval home, and the row has no other door, so the page now
+wears the shared setup strip (its heading and intro moved into the strip's card; the body is untouched).
+Without it the row could never turn green, and Go Live could never turn green either.
+**The question:** should the templates library get its own `/setup/redaction-templates` screen, leaving
+`/mass-redaction` as a pure work screen? That is the C11 treatment and would keep setup chrome off a screen
+redaction staff use daily.
+
 ## Q2 — Update Configuration: is the reminder cadence really the city's decision?
 Built as required-and-saved (the Authentication precedent: a shipped default is not a decision). It is the
 weakest of the required sets so far — 182 days is a courtesy reminder, not a legal posture. If Kevin would

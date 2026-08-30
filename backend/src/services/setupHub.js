@@ -424,8 +424,16 @@ const READERS = {
     catch (e) { return ev('not_started', 'no screen yet'); }
   },
   layout_templates: async function () {
-    var n = await count("SELECT COUNT(*) n FROM layout_profiles WHERE status IS NULL OR status <> 'retired'");
-    return n ? ev('ready', n + ' template' + (n > 1 ? 's' : '')) : ev('not_started', '0 templates');
+    // LIST MODEL (§3e, 2026-08-31): templates are authored one form type at a time. Health = the record
+    // piles the variant scan flagged as mass-redaction candidates that still have no template (the Mass
+    // Redaction screen's own "Waiting for a template" cards) — it never blocks the colour.
+    var lrows = await all("SELECT id, name, record_type_id, kind, status, safety_threshold, layout_fingerprint FROM layout_profiles WHERE status IS NULL OR status NOT IN ('retired', 'deleted') ORDER BY id");
+    var waiting = await count('SELECT COUNT(*) n FROM record_types rt WHERE rt.mass_redaction_candidate = 1 ' +
+      "AND NOT EXISTS (SELECT 1 FROM layout_profiles lp WHERE lp.record_type_id = rt.id AND (lp.status IS NULL OR lp.status <> 'deleted'))");
+    var n = lrows.length;
+    var xlt = { list: { count: n, noun: 'template', health: waiting ? waiting + ' record pile' + (waiting > 1 ? 's are' : ' is') + ' waiting for a template' : '' },
+      digest: digestOf(lrows.map(function (l) { return [l.id, l.name, l.record_type_id, l.kind, l.status, l.safety_threshold, l.layout_fingerprint]; })) };
+    return n ? ev('ready', n + ' template' + (n > 1 ? 's' : '') + (waiting ? ' · ' + waiting + ' waiting for one' : ''), xlt) : ev('not_started', '0 templates', xlt);
   },
   decision_reasons: async function () {
     var n = await count('SELECT COUNT(*) n FROM decision_reasons WHERE is_active = 1');

@@ -624,6 +624,32 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sup, 'DELETE', '/setup-hub/av_redaction/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'av_redaction'");
   if (avMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [avMark.item_key, avMark.marked_by, avMark.marked_by_name, avMark.marked_at, avMark.content_hash || null, avMark.notified_hash || null]);
 
+  console.log('\n=== W. REDACTION LAYOUT TEMPLATES (list) — the Mass Redaction screen wears the strip ===');
+  var ltMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'layout_templates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/layout_templates/done'); await callAs(U.dir, 'DELETE', '/setup-hub/layout_templates/ready');
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'layout_templates'");
+  var ltNew = await callAs(U.dir, 'POST', '/redaction-templates', { name: 'HUB template ' + TAG, zones: [{ page_no: 1, x: 0.1, y: 0.1, w: 0.2, h: 0.05, label: 'harness' }] });
+  var ltId = ltNew.body && ltNew.body.template && ltNew.body.template.id;
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var wA = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'layout_templates');
+  ok('W1 the templates library is a LIST row and the row still doors to /mass-redaction (which now wears the strip)', ltNew.status === 200 && !!ltId && wA.approvalModel === 'list' && wA.approval === 'yellow' && wA.door === '/mass-redaction' && /template/.test(wA.approvalWhy || ''), ltNew.status + ' ' + wA.approvalModel + '/' + wA.approval + ' ' + wA.door + ': ' + wA.approvalWhy);
+  var wn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'layout_templates'")).n;
+  var ltRdy = await callAs(U.sup, 'POST', '/setup-hub/layout_templates/ready');
+  var ltApv = await callAs(U.dir, 'POST', '/setup-hub/layout_templates/done');
+  var wB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'layout_templates');
+  var wn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'layout_templates'")).n;
+  ok('W2 declared ready (owners told once) then approved → GREEN', ltRdy.status === 200 && ltApv.status === 200 && wB.approval === 'green' && !wB.ready && wn1 > wn0, ltRdy.status + '/' + ltApv.status + ' ' + wB.approval + ' · ' + wn0 + '→' + wn1);
+  var wc0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'layout_templates'")).n;
+  var ltEdit = await callAs(U.dir, 'PATCH', '/redaction-templates/' + ltId, { name: 'HUB template ' + TAG + ' (renamed)' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var wC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'layout_templates');
+  var wc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'layout_templates'")).n;
+  ok('W3 renaming a template after approval → YELLOW "changed since approval" + one notification (library CRUD only)', ltEdit.status === 200 && wC.approval === 'yellow' && /changed since approval/.test(wC.approvalWhy || '') && wc1 > wc0, ltEdit.status + ' ' + wC.approval + ': ' + wC.approvalWhy + ' · ' + wc0 + '→' + wc1);
+  if (ltId) await db.run('DELETE FROM layout_profiles WHERE id = ?', [ltId]);
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'layout_templates'");
+  await callAs(U.dir, 'DELETE', '/setup-hub/layout_templates/done'); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'layout_templates'");
+  if (ltMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [ltMark.item_key, ltMark.marked_by, ltMark.marked_by_name, ltMark.marked_at, ltMark.content_hash || null, ltMark.notified_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);
