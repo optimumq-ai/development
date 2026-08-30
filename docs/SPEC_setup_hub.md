@@ -93,6 +93,16 @@ carries health ("3 connectors · 1 not connected") — never blocks the colour, 
 green-unchanged. `verify_setup_hub` I1–I5. Same model next for Departments, Teams, Staff, Taxonomy, Workflow
 Rules.
 
+## 3f. TABBED SCREENS — sections of one item (Kevin 2026-08-31, BUILT for AI configuration first)
+A configurable tab has its own required set and its own colour: red while any of its required fields is
+empty, yellow when complete, green once the SCREEN is approved. Informational tabs carry nothing. The screen's
+pill is the WORST tab; its line names the tab and the field ("AI Service Keys: Anthropic key · Deployment
+Model: GovCloud region"); ONE approval for the whole screen (refused while any tab is red); a change on any
+tab after approval → yellow with one notification. Mechanics: the reader's `required.missing` entries are
+prefixed by tab and it reports `tabs {key: 'red'|'ok'}`; `build()` turns that into per-tab colours the tab
+bar shows as marks. AI configuration: Service Keys (Anthropic + Voyage) · Deployment Model (a model chosen;
+Government adds region, Titan model, Bedrock key + secret). `verify_setup_hub` J1–J7.
+
 ## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)
 The Administration page has two tabs: **Settings and Configuration** (the hub, above) and **Set Up Guide** —
 Plan A from `docs/mockups/setup_hub/PlanGantt.dc.html` (chosen 2026-08-24, built 2026-08-30 as

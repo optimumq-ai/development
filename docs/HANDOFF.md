@@ -9702,3 +9702,17 @@ SPEC §3e. `verify_setup_hub` 39/39 (+I1–I5), golden 37/37.
 **NEXT:** the next guide rows (AI configuration, Email, User Authentication are forms → the Agency pattern;
 Departments / Teams / Staff → this list pattern) · Kevin's live walk-through · MFA · Jurisdiction
 Configuration retirement.
+
+## 2026-08-31 — the TABBED model built on AI configuration; suite 2778/2779 (E1a the only red)
+
+**Kevin's design:** tabs are sections of one item — each configurable tab has its own required set and colour
+(tab-label mark); the screen's pill is the worst tab and names tab + field; ONE approval for the screen,
+refused while any tab is red; a change on any tab after approval → yellow + one notification. Built on
+AI configuration: Service Keys (Anthropic + Voyage — a key from the server environment counts, matching the
+screen's "configured") · Deployment Model (a model chosen; Government adds region, Titan model, Bedrock
+key + secret). `routes/integrations.js` reports ai/deployment changes to `ai_config` and email changes to
+`email`. SPEC §3f. `verify_setup_hub` 46/46 (+J1–J7), golden 38/38 (configures AI before approving).
+The three patterns (form / list / tabs) now cover every setup screen; conversion continues one at a time.
+
+**NEXT:** Email configuration and User Authentication Setup (forms) · Departments / Teams / Staff (lists) ·
+Kevin's live walk-through · MFA · Jurisdiction Configuration retirement.

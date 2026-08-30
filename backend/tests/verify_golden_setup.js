@@ -80,6 +80,8 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
 
   var em = await callAs(SA, 'POST', '/integrations', { email: { provider: 'smtp', from_name: 'Golden Records', smtp_host: 'mail.golden.test', smtp_port: '587', smtp_user: 'records', smtp_pass: 'x', smtp_from: 'records@golden.test' } });
   ok('B6 email configured (technical lane)', em.status < 300, err(em));
+  var ai = await callAs(SA, 'POST', '/integrations', { ai: { anthropic_api_key: 'sk-ant-golden-000000000000', voyage_api_key: 'pa-golden-000000000000' }, deployment: { profile: 'standard' } });
+  ok('B7 AI configuration: both keys and a deployment model (technical lane)', ai.status < 300, err(ai));
 
   console.log('\n=== C. FEE RULES — decide, waiver, clock, APPROVE ===');
   var fl = await callAs(DIR, 'GET', '/fee-law');

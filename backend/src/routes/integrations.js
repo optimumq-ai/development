@@ -85,6 +85,7 @@ router.post('/', requireAuth, admin, async function (req, res) {
         if (isNewSecret(e.resend_api_key)) await setCfg('resend_api_key', e.resend_api_key.trim());
       }
     }
+    try { var HUBx = require('../services/setupHub'); var who = req.user && (req.user.name || req.user.email); if (b.ai || b.deployment) await HUBx.afterChange('ai_config', who); if (b.email) await HUBx.afterChange('email', who); } catch (eC) { /* best effort */ }
     res.json({ ok: true });
   } catch (e) { console.error('[integrations POST]', e && e.message); res.status(500).json({ error: 'Could not save integration settings.' }); }
 });

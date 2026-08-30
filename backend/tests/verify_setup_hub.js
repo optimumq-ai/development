@@ -120,10 +120,10 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.legal, 'DELETE', '/setup-hub/exemptions/done');
   var glm = await callAs(U.dir, 'POST', '/setup-hub/go_live/done');
   ok('D5 go-live cannot be "marked done" (400 NOT_MARKABLE) — it is flipped, not declared', glm.status === 400 && glm.body.code === 'NOT_MARKABLE');
-  var t1 = await callAs(U.sa, 'POST', '/setup-hub/ai_config/done');
-  var t2 = await callAs(U.dir, 'POST', '/setup-hub/ai_config/done');
-  ok('D6 a Technical Setup item is the system_admin group: SysAdmin may, Director 403', t1.status === 200 && t2.status === 403);
-  await callAs(U.sa, 'DELETE', '/setup-hub/ai_config/done');
+  var t1 = await callAs(U.sa, 'POST', '/setup-hub/auth_policy/done');
+  var t2 = await callAs(U.dir, 'POST', '/setup-hub/auth_policy/done');
+  ok('D6 a Technical Setup item is the system_admin group: SysAdmin may, Director 403', t1.status === 200 && t2.status === 403, t1.status + '/' + t2.status);
+  await callAs(U.sa, 'DELETE', '/setup-hub/auth_policy/done');
   ok('D7 an unknown item is 404', (await callAs(U.dir, 'POST', '/setup-hub/no-such-item/done')).status === 404);
 
   console.log('\n=== E. THE PAGE ALWAYS RENDERS ===');
@@ -208,6 +208,40 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'sources'");
   await callAs(U.sa, 'DELETE', '/setup-hub/sources/done'); await callAs(U.sa, 'DELETE', '/setup-hub/sources/ready');
   if (srcMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [srcMark.item_key, srcMark.marked_by, srcMark.marked_by_name, srcMark.marked_at, srcMark.content_hash || null]);
+
+  console.log('\n=== J. THE TABBED SCREEN (Kevin 2026-08-31) — AI configuration: per-tab required sets, one approval ===');
+  var AI_KEYS = ['anthropic_api_key', 'voyage_api_key', 'ai_deployment_profile', 'aws_region', 'titan_embed_model', 'bedrock_access_key_id', 'bedrock_secret_key'];
+  var aiSave = {}; for (var qk of AI_KEYS) { var qrow = await db.get('SELECT value FROM system_config WHERE key = ?', [qk]); aiSave[qk] = qrow ? qrow.value : null; }
+  var aiMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'ai_config'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/ai_config/done');
+  for (var dk of AI_KEYS) await db.run('DELETE FROM system_config WHERE key = ?', [dk]);
+  // The test API inherits the server environment: keys in .env count as set (the screen says so too).
+  var envKeys = !!(process.env.ANTHROPIC_API_KEY && process.env.VOYAGE_API_KEY);
+  var jA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'ai_config');
+  ok('J1 nothing saved → RED, the line names the tab and the item (keys tab red unless the environment provides keys)', jA.approval === 'red' && /Deployment Model: deployment model not chosen/.test(jA.approvalWhy || '') && jA.tabs && jA.tabs.deployment === 'red' && (envKeys ? jA.tabs.keys !== 'red' : (jA.tabs.keys === 'red' && /AI Service Keys: Anthropic key/.test(jA.approvalWhy || ''))), jA.approval + ': ' + jA.approvalWhy + ' ' + JSON.stringify(jA.tabs) + ' env=' + envKeys);
+  var k1 = await callAs(U.sa, 'POST', '/integrations', { ai: { anthropic_api_key: 'sk-ant-hubtest-0000000000', voyage_api_key: 'pa-hubtest-0000000000' } });
+  var jB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'ai_config');
+  ok('J2 keys saved → the keys tab is no longer red; the screen stays RED for the deployment tab', k1.status === 200 && jB.approval === 'red' && jB.tabs.keys !== 'red' && jB.tabs.deployment === 'red' && !/AI Service Keys/.test(jB.approvalWhy || ''), k1.status + ' ' + jB.approval + ': ' + jB.approvalWhy);
+  var jR = await callAs(U.sa, 'POST', '/setup-hub/ai_config/done');
+  ok('J3 approval refused while a tab is red, naming the tab', jR.status === 422 && /Deployment Model/.test(jR.body && jR.body.error || ''), jR.status);
+  var d1 = await callAs(U.sa, 'POST', '/integrations', { deployment: { profile: 'standard' } });
+  var jC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'ai_config');
+  ok('J4 deployment model chosen → YELLOW, both tab marks yellow', d1.status === 200 && jC.approval === 'yellow' && jC.tabs.keys === 'yellow' && jC.tabs.deployment === 'yellow', jC.approval + ' ' + JSON.stringify(jC.tabs));
+  var jG = await callAs(U.sa, 'POST', '/setup-hub/ai_config/done');
+  var jD = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'ai_config');
+  ok('J5 one approval → GREEN on the screen and every tab', jG.status === 200 && jD.approval === 'green' && jD.tabs.keys === 'green' && jD.tabs.deployment === 'green', jG.status + ' ' + jD.approval);
+  var jn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'ai_config'")).n;
+  await callAs(U.sa, 'POST', '/integrations', { deployment: { profile: 'airgapped' } });
+  var jE = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'ai_config');
+  var jn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'ai_config'")).n;
+  ok('J6 a change on one tab after approval → YELLOW again and the owners are notified', jE.approval === 'yellow' && /changed since approval/.test(jE.approvalWhy || '') && jn1 > jn0, jE.approval + ': ' + jE.approvalWhy + ' · ' + jn0 + '→' + jn1);
+  await callAs(U.sa, 'POST', '/integrations', { deployment: { profile: 'government' } });
+  var jF = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'ai_config');
+  ok('J7 Government chosen with no GovCloud connection → RED again, naming the four fields', jF.approval === 'red' && /GovCloud region/.test(jF.approvalWhy || '') && /Bedrock secret key/.test(jF.approvalWhy || ''), jF.approval + ': ' + jF.approvalWhy);
+  await db.run("DELETE FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'ai_config'");
+  for (var rk2 in aiSave) { if (aiSave[rk2] == null) await db.run('DELETE FROM system_config WHERE key = ?', [rk2]); else await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [rk2, aiSave[rk2]]); }
+  await callAs(U.sa, 'DELETE', '/setup-hub/ai_config/done');
+  if (aiMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [aiMark.item_key, aiMark.marked_by, aiMark.marked_by_name, aiMark.marked_at, aiMark.content_hash || null]);
 
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }

@@ -366,11 +366,21 @@ const READERS = {
     return bad ? ev('needs_attention', (rows.length - bad) + ' of ' + rows.length + ' connected · ' + bad + ' not working', { list: list, digest: digest }) : ev('ready', rows.length + ' record system' + (rows.length > 1 ? 's' : '') + ' connected', { list: list, digest: digest });
   },
   ai_config: async function () {
-    var a = await cfg('anthropic_api_key'), v = await cfg('voyage_api_key'), p = await cfg('ai_deployment_profile');
-    var model = (p || 'standard') + ' deployment model' + (p ? '' : ' (default)');
-    if (!a && !v) return ev('not_started', 'no AI keys entered · ' + model);
-    if (!a || !v) return ev('in_progress', (a ? 'Anthropic' : 'Voyage') + ' key set · the other missing · ' + model);
-    return ev('ready', 'both keys set · ' + model);
+    // TABBED SCREEN (Kevin 2026-08-31): each tab has its own required set and colour; the screen's colour is the
+    // worst tab; one approval for the whole screen. Informational tabs (touchpoints, security) count nothing.
+    // A key from the server environment counts as set (the screen says 'configured' for it — routes/integrations.js).
+    var a = (await cfg('anthropic_api_key')) || process.env.ANTHROPIC_API_KEY, v = (await cfg('voyage_api_key')) || process.env.VOYAGE_API_KEY, p = await cfg('ai_deployment_profile');
+    var region = await cfg('aws_region'), titan = await cfg('titan_embed_model'), bk = await cfg('bedrock_access_key_id'), bs = await cfg('bedrock_secret_key');
+    var keysMissing = []; if (!a) keysMissing.push('Anthropic key'); if (!v) keysMissing.push('Voyage key');
+    var depMissing = []; if (!p) depMissing.push('deployment model not chosen');
+    if (p === 'government') { if (!region) depMissing.push('GovCloud region'); if (!titan) depMissing.push('Titan embedding model'); if (!bk) depMissing.push('Bedrock access key'); if (!bs) depMissing.push('Bedrock secret key'); }
+    var missing = keysMissing.map(function (m) { return 'AI Service Keys: ' + m; }).concat(depMissing.map(function (m) { return 'Deployment Model: ' + m; }));
+    var tabs = { keys: keysMissing.length ? 'red' : 'ok', deployment: depMissing.length ? 'red' : 'ok' };
+    var extra = { required: { missing: missing, total: 2 + (p === 'government' ? 5 : 1) }, tabs: tabs, digest: digestOf([!!a, !!v, p || null, region || null, titan || null, !!bk, !!bs]) };
+    var model = (p || 'standard') + ' deployment model' + (p ? '' : ' (not chosen — standard by default)');
+    if (!a && !v) return ev('not_started', 'no AI keys entered · ' + model, extra);
+    if (!a || !v) return ev('in_progress', (a ? 'Anthropic' : 'Voyage') + ' key set · the other missing · ' + model, extra);
+    return ev(p ? 'ready' : 'in_progress', 'both keys set · ' + model, extra);
   },
   email: async function () {
     var prov = await cfg('email_provider'); var resend = await cfg('resend_api_key'); var smtp = await cfg('smtp_host');
@@ -547,6 +557,9 @@ async function build(user) {
       r.approvalWhy = m ? ((changed ? 'changed since approval by ' : 'approved by ') + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10)) : r.evidence;
     }
     r.changedSinceApproval = changed;
+    // per-tab colours for tabbed screens: a tab is red while its required set is empty, else the screen's colour
+    // a tab's own state: red while its required set is empty; otherwise yellow until the screen is approved, then green
+    if (r.tabs) { var tc = {}; Object.keys(r.tabs).forEach(function (k) { tc[k] = r.tabs[k] === 'red' ? 'red' : (r.approval === 'green' ? 'green' : 'yellow'); }); r.tabs = tc; }
     delete r.required; delete r.digest; delete r.list;
     if (m && r.state !== 'needs_attention' && r.state !== 'waiting') { r.state = 'ready'; r.evidence = r.evidence + ' · marked done by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10); }
     r.canEdit = mayEdit(it, user);

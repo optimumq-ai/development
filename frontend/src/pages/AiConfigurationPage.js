@@ -108,14 +108,20 @@ export default function AiConfigurationPage() {
   }
   function placeholder(isSet, h) { return isSet ? ('Saved (' + (h || '••••') + ') — enter a new value to replace it') : 'Not set'; }
 
-  var tabBar = (
-    <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #D2DCE3', marginBottom: '18px' }}>
-      {TABS.map(function (t) {
-        var on = tab === t[0];
-        return <button key={t[0]} type="button" onClick={function () { goTab(t[0]); }} style={{ padding: '9px 16px', background: 'none', border: 'none', borderBottom: '2px solid ' + (on ? BLUE : 'transparent'), marginBottom: '-1px', fontSize: '13.5px', fontWeight: on ? 700 : 500, color: on ? BLUE : '#5C6F7C', cursor: 'pointer', fontFamily: 'inherit' }}>{t[1]}</button>;
-      })}
-    </div>
-  );
+  // Tab marks (Kevin 2026-08-31): each configurable tab carries the colour of its own required set; the strip's
+  // pill is the worst tab and one approval covers the screen. Informational tabs carry no mark.
+  var TABCOL = { red: '#DC2626', yellow: '#D97706', green: '#16A34A' };
+  function tabBar(row) {
+    var marks = (row && row.tabs) || {};
+    return (
+      <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #D2DCE3', marginBottom: '18px' }}>
+        {TABS.map(function (t) {
+          var on = tab === t[0]; var mk = marks[t[0]];
+          return <button key={t[0]} type="button" onClick={function () { goTab(t[0]); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', background: 'none', border: 'none', borderBottom: '2px solid ' + (on ? BLUE : 'transparent'), marginBottom: '-1px', fontSize: '13.5px', fontWeight: on ? 700 : 500, color: on ? BLUE : '#5C6F7C', cursor: 'pointer', fontFamily: 'inherit' }}>{mk ? <span title={mk === 'red' ? 'Required items missing on this tab' : (mk === 'yellow' ? 'Complete — awaiting approval' : 'Approved')} style={{ width: '9px', height: '9px', borderRadius: '50%', background: TABCOL[mk] || '#C7D0D8', flexShrink: 0 }} /> : null}{t[1]}</button>;
+        })}
+      </div>
+    );
+  }
 
   return (
     <SetupScreen hubKey="ai_config" laneLabel="Technical Setup" title="AI configuration"
@@ -126,21 +132,23 @@ export default function AiConfigurationPage() {
         var sensitiveCount = TOUCHPOINTS.filter(function (t) { return t.sensitive; }).length;
         return (
           <div>
-            {tabBar}
+            {tabBar(s.row)}
             {msg ? <Msg text={msg.text} ok={msg.ok} /> : null}
 
             {tab === 'keys' ? (
               <div>
                 <div style={Object.assign({}, hint, { marginTop: 0, marginBottom: '16px' })}>Used for request classification, redaction assistance, semantic search and reporting. Create accounts at Anthropic and Voyage AI and paste the keys here; values are stored on this server and never shown again after saving. Email sending has its own screen: <button type="button" onClick={function () { nav('/setup/email'); }} style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: BLUE, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline dotted' }}>Email configuration</button>.</div>
                 <div style={field}>
-                  <label style={lbl}>Anthropic API key <Flag set={a.set} /></label>
-                  <input type="password" value={form.anthropic_api_key} disabled={!s.can} onChange={function (e) { set('anthropic_api_key', e.target.value); }} placeholder={placeholder(a.set, a.hint)} style={Object.assign({}, inp, { marginBottom: '8px' })} autoComplete="new-password" />
+                  <label style={lbl}>Anthropic API key <span style={{ color: '#DC2626' }}>*</span> <Flag set={a.set} /></label>
+                  <input type="password" value={form.anthropic_api_key} disabled={!s.can} onChange={function (e) { set('anthropic_api_key', e.target.value); }} placeholder={placeholder(a.set, a.hint)} style={Object.assign({}, inp, { marginBottom: '8px' }, (!a.set && !form.anthropic_api_key) ? { border: '2px solid #DC2626' } : {})} autoComplete="new-password" />
+                  {(!a.set && !form.anthropic_api_key) ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '6px' }}>Required — enter the key and save</div> : null}
                   <TestBtn which="anthropic" disabled={!s.can} onClick={function () { runTest('anthropic', { key: form.anthropic_api_key }); }} />
                   <div style={hint}>Test uses the value typed above, or the saved key when the field is empty.</div>
                 </div>
                 <div style={field}>
-                  <label style={lbl}>Voyage AI API key <Flag set={v.set} /></label>
-                  <input type="password" value={form.voyage_api_key} disabled={!s.can} onChange={function (e) { set('voyage_api_key', e.target.value); }} placeholder={placeholder(v.set, v.hint)} style={Object.assign({}, inp, { marginBottom: '8px' })} autoComplete="new-password" />
+                  <label style={lbl}>Voyage AI API key <span style={{ color: '#DC2626' }}>*</span> <Flag set={v.set} /></label>
+                  <input type="password" value={form.voyage_api_key} disabled={!s.can} onChange={function (e) { set('voyage_api_key', e.target.value); }} placeholder={placeholder(v.set, v.hint)} style={Object.assign({}, inp, { marginBottom: '8px' }, (!v.set && !form.voyage_api_key) ? { border: '2px solid #DC2626' } : {})} autoComplete="new-password" />
+                  {(!v.set && !form.voyage_api_key) ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '6px' }}>Required — enter the key and save</div> : null}
                   <TestBtn which="voyage" disabled={!s.can} onClick={function () { runTest('voyage', { key: form.voyage_api_key }); }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}><PrimaryButton disabled={!s.can || saving || (!form.anthropic_api_key && !form.voyage_api_key)} onClick={function () { saveKeys(s.reload); }}>{saving ? 'Saving…' : 'Save keys'}</PrimaryButton></div>
@@ -149,6 +157,7 @@ export default function AiConfigurationPage() {
 
             {tab === 'deployment' ? (
               <div>
+                {(s.row && s.row.tabs && s.row.tabs.deployment === 'red') ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '8px' }}>Required — {(s.row.approvalWhy || '').indexOf('not chosen') >= 0 ? 'choose a deployment model and save (Standard applies until you do)' : 'complete the GovCloud connection and save'}</div> : null}
                 <div style={Object.assign({}, hint, { marginTop: 0, marginBottom: '14px' })}>Where AI processing happens. The Government and Air-gapped routing targets are the <strong>configured targets</strong>; activating live routing to Bedrock GovCloud is a validated deployment step performed with the city's cloud environment.</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: '10px', marginBottom: '16px' }}>
                   {PROFILES.map(function (p) {
