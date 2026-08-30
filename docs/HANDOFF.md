@@ -9859,3 +9859,4 @@ it, and eight fee knobs go unconfirmed → template_import not_configured → go
 Note E1a ("known red") passes when bw9b_golive runs alone — it is order-dependent too, not a code fail.
 Lesson: `SUITE_DUMP_DIR=<dir> node tests/run_suite.js …` keeps a failed harness's full output (`failed_<h>.log`);
 instrumenting golden with probes + a forced fail is the fast way to see mid-run state.
+**Full suite after the fix: 2841/2842, live untouched — E1a the only red (the standing one). The merged tree is verified.**
