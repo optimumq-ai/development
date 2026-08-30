@@ -182,6 +182,33 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'DELETE', '/setup-hub/agency/done');
   if (agMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [agMark.item_key, agMark.marked_by, agMark.marked_by_name, agMark.marked_at, agMark.content_hash || null]);
 
+  console.log('\n=== I. THE LIST MODEL (Kevin 2026-08-31) — Record Sources: in progress → ready → approved → changed ===');
+  var srcMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'sources'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/sources/done'); await callAs(U.sa, 'DELETE', '/setup-hub/sources/ready');
+  var sA = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'sources');
+  ok('I1 with connectors but no approval → YELLOW "in progress" (quiet — no notification yet)', sA.approvalModel === 'list' && sA.approval === 'yellow' && /in progress/.test(sA.approvalWhy || '') && !sA.ready, sA.approval + ': ' + sA.approvalWhy);
+  var rn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'sources'")).n;
+  var rdy = await callAs(U.sa, 'POST', '/setup-hub/sources/ready');
+  var sB = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'sources');
+  var rn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'sources'")).n;
+  ok('I2 "Ready for approval" is recorded by name, the bar says so, and the owners are told once', rdy.status === 200 && sB.ready && sB.approval === 'yellow' && /ready for approval/.test(sB.approvalWhy || '') && rn1 > rn0, rdy.status + ' ' + JSON.stringify(sB.ready) + ' ' + sB.approvalWhy + ' · ' + rn0 + '→' + rn1);
+  var rdy2 = await callAs(U.dir, 'POST', '/setup-hub/sources/ready');
+  ok('I3 a Director (not the technical lane) may not declare a technical list ready (403)', rdy2.status === 403, rdy2.status);
+  var ap1 = await callAs(U.sa, 'POST', '/setup-hub/sources/done');
+  var sC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'sources');
+  ok('I4 approval → GREEN and the ready flag is cleared', ap1.status === 200 && sC.approval === 'green' && !sC.ready, ap1.status + ' ' + sC.approval);
+  var repo = await db.get("SELECT id, name FROM record_repositories ORDER BY id LIMIT 1");
+  var cn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'sources'")).n;
+  var pt = await callAs(U.sa, 'PATCH', '/repositories/' + repo.id, { name: repo.name + ' (hub test)' });
+  await new Promise(function (r) { setTimeout(r, 400); });
+  var sD = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'sources');
+  var cn1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'sources'")).n;
+  ok('I5 an edit after approval → YELLOW "changed since approval" and the owners are notified', pt.status < 300 && sD.approval === 'yellow' && /changed since approval/.test(sD.approvalWhy || '') && cn1 > cn0, pt.status + ' ' + sD.approval + ': ' + sD.approvalWhy + ' · ' + cn0 + '→' + cn1);
+  await callAs(U.sa, 'PATCH', '/repositories/' + repo.id, { name: repo.name });
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'sources'");
+  await callAs(U.sa, 'DELETE', '/setup-hub/sources/done'); await callAs(U.sa, 'DELETE', '/setup-hub/sources/ready');
+  if (srcMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [srcMark.item_key, srcMark.marked_by, srcMark.marked_by_name, srcMark.marked_at, srcMark.content_hash || null]);
+
   console.log('\n=== F. CLEANUP ===');
   for (var k in U) { await ut.revokeAll(U[k]); await db.run('DELETE FROM users WHERE id = ?', [U[k]]); }
   await db.run("DELETE FROM setup_hub_signoffs WHERE marked_by LIKE 'u-' || ? || '-%'", [TAG]);

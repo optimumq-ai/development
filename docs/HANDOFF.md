@@ -9681,3 +9681,24 @@ Staff (lists).
 
 **NEXT:** convert the next screens (Kevin picks) · his live walk-through · MFA decision · Jurisdiction
 Configuration retirement (the go-live flip now has its second door on the guide).
+
+## 2026-08-31 — the LIST MODEL ("Ready for approval") built on Record Sources and Connectors; suite 2770/2771 (E1a the only red)
+
+**Kevin's call (with my refinement, accepted):** list screens have no save button and no required fields.
+RED = nothing added · YELLOW in progress = one or more items, quiet while the list grows over days/weeks ·
+**"Ready for approval"** = a strip button for anyone who may edit the screen — the adder's declaration that
+the list is complete, recorded by name, ONE notification to the lane owners, withdrawable, never an approval
+· GREEN = the lane owner approves (clears the declaration) · any add/edit/delete after approval → YELLOW
+"changed since approval" + one notification. Evidence carries health ("20 connectors · 1 not connected")
+without blocking colour.
+
+**Built:** `setupHub` — `list {count, notConnected, noun}` + `digest` on the `sources` reader; `readies()`,
+`declareReady()`, `withdrawReady()`; `setup_hub_ready` table; `POST/DELETE /setup-hub/:key/ready` (mayEdit
+gate; 422 NOTHING_ADDED while red, 400 ALREADY_APPROVED while green-unchanged); `routes/repositories.js` reports
+every mutation through a router-level finish hook. Frontend: `SetupScreen` shows Ready for approval / Ready ·
+withdraw on list screens; the guide's bar says IN PROGRESS / READY FOR APPROVAL / RE-APPROVAL / APPROVED.
+SPEC §3e. `verify_setup_hub` 39/39 (+I1–I5), golden 37/37.
+
+**NEXT:** the next guide rows (AI configuration, Email, User Authentication are forms → the Agency pattern;
+Departments / Teams / Staff → this list pattern) · Kevin's live walk-through · MFA · Jurisdiction
+Configuration retirement.

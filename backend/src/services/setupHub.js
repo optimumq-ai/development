@@ -355,10 +355,15 @@ const READERS = {
     return ev(n >= m ? 'ready' : (n ? 'in_progress' : 'not_started'), n + ' of ' + m + ' record types have an owner');
   },
   sources: async function () {
-    var rows = await all("SELECT status FROM record_repositories");
-    if (!rows.length) return ev('not_started', 'no record systems connected');
-    var bad = rows.filter(function (r) { return r.status && r.status !== 'active'; }).length;
-    return bad ? ev('needs_attention', (rows.length - bad) + ' of ' + rows.length + ' connected · ' + bad + ' not working') : ev('ready', rows.length + ' record system' + (rows.length > 1 ? 's' : '') + ' connected');
+    // LIST MODEL (Kevin 2026-08-31): red until the first connector, yellow while the list grows (quietly — no
+    // notifications), 'Ready for approval' is the adder's declaration, green on approval, yellow again on any
+    // add/edit/delete after approval. `list` + `digest` drive the colours in build().
+    var rows = await all("SELECT id, name, connector_type, status, config FROM record_repositories ORDER BY id");
+    var list = { count: rows.length, notConnected: rows.filter(function (r) { return r.status && r.status !== 'active'; }).length, noun: 'connector' };
+    var digest = digestOf(rows.map(function (r) { return [r.id, r.name, r.connector_type, r.status, r.config]; }));
+    if (!rows.length) return ev('not_started', 'no record systems connected', { list: list, digest: digest });
+    var bad = list.notConnected;
+    return bad ? ev('needs_attention', (rows.length - bad) + ' of ' + rows.length + ' connected · ' + bad + ' not working', { list: list, digest: digest }) : ev('ready', rows.length + ' record system' + (rows.length > 1 ? 's' : '') + ' connected', { list: list, digest: digest });
   },
   ai_config: async function () {
     var a = await cfg('anthropic_api_key'), v = await cfg('voyage_api_key'), p = await cfg('ai_deployment_profile');
@@ -394,6 +399,10 @@ const READERS = {
 };
 
 // ---- sign-offs (Option A) --------------------------------------------------------------------------
+async function readies() {
+  var rows = await all('SELECT item_key, ready_by, ready_by_name, ready_at FROM setup_hub_ready');
+  var m = {}; rows.forEach(function (r) { m[r.item_key] = r; }); return m;
+}
 async function signoffs() {
   var rows = await all('SELECT item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash FROM setup_hub_signoffs');
   var m = {}; rows.forEach(function (r) { m[r.item_key] = r; }); return m;
@@ -415,7 +424,30 @@ async function mark(itemKey, user) {
   await run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?, ?, ?, ?, ?, NULL) ' +
     'ON CONFLICT (item_key) DO UPDATE SET marked_by = EXCLUDED.marked_by, marked_by_name = EXCLUDED.marked_by_name, marked_at = EXCLUDED.marked_at, content_hash = EXCLUDED.content_hash, notified_hash = NULL',
     [itemKey, user.sub || user.id, user.name || user.email || user.sub, new Date().toISOString().slice(0, 19).replace('T', ' '), e.digest || null]);
+  await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]);
 }
+// LIST SCREENS: the adder says the list is complete. A signal to the lane owners (one notification), never an
+// approval. Refused while red (nothing added) and meaningless while green (already approved, unchanged).
+async function declareReady(itemKey, user) {
+  var it = BY_KEY[itemKey]; if (!it) throw new Error('Unknown setup item: ' + itemKey);
+  var e = await readOne(itemKey);
+  if (e.list && !e.list.count) { var er = new Error('Nothing has been added yet — add the first ' + (e.list.noun || 'item') + ' before declaring the list complete.'); er.code = 'NOTHING_ADDED'; er.status = 422; throw er; }
+  var m = (await signoffs())[itemKey];
+  if (m && m.content_hash && e.digest === m.content_hash) { var eg = new Error('This item is already approved and unchanged.'); eg.code = 'ALREADY_APPROVED'; eg.status = 400; throw eg; }
+  var already = (await readies())[itemKey];
+  await run('INSERT INTO setup_hub_ready (item_key, ready_by, ready_by_name, ready_at) VALUES (?, ?, ?, ?) ON CONFLICT (item_key) DO UPDATE SET ready_by = EXCLUDED.ready_by, ready_by_name = EXCLUDED.ready_by_name, ready_at = EXCLUDED.ready_at',
+    [itemKey, user.sub || user.id, user.name || user.email || user.sub, new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+  var sent = 0;
+  if (!already) {
+    var groups = groupsFor(it); if (it.legal) groups = ['legal_rules'];
+    var ph = groups.map(function () { return '?'; }).join(',');
+    var owners = await all('SELECT DISTINCT uut.user_id FROM user_user_types uut JOIN user_type_permission utp ON utp.user_type_id = uut.user_type_id JOIN users u ON u.id = uut.user_id WHERE utp.permission_group IN (' + ph + ") AND u.status = 'active'", groups);
+    var N = require('./notifications');
+    for (var i = 0; i < owners.length; i++) { try { await N.emit({ userId: owners[i].user_id, kind: 'setup_ready', contextType: 'setup_item', contextId: itemKey, link: it.door, title: 'Ready for approval: ' + it.name, body: (user.name || user.email || 'Someone') + ' says ' + it.name + ' is complete. Open it and approve.' }); sent++; } catch (eN) { console.error('[setupHub declareReady]', eN && eN.message); } }
+  }
+  return { ready: true, notified: sent };
+}
+async function withdrawReady(itemKey) { await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]); }
 // Called by a screen's write path after a save: if the item was approved and its content changed, tell the
 // lane owners ONCE per change (the guide already shows yellow from the digest alone).
 async function afterChange(itemKey, actorName) {
@@ -449,6 +481,7 @@ function mayEdit(item, user) {
 async function build(user) {
   var ctx = await profileSections();
   var marks = await signoffs();
+  var readyMap = await readies();
   var out = {};
   for (var i = 0; i < ITEMS.length; i++) {
     var it = ITEMS[i];
@@ -492,7 +525,17 @@ async function build(user) {
     // fields model (reader reports required + digest): red = a required field is empty · yellow = complete but not
     // approved, or changed since approval · green = approved and unchanged. Other items derive from the counted state.
     var changed = !!(m && m.content_hash && r.digest && r.digest !== m.content_hash);
-    if (r.required) {
+    var rd = readyMap[it.key] || null;
+    r.ready = rd ? { by: rd.ready_by_name || rd.ready_by, at: rd.ready_at } : null;
+    if (r.list) {
+      r.approvalModel = 'list';
+      var noun = r.list.noun || 'item', n = r.list.count, plural = n === 1 ? noun : noun + 's';
+      var health = r.list.notConnected ? ' · ' + r.list.notConnected + ' not connected' : '';
+      if (!n) { r.approval = 'red'; r.approvalWhy = 'nothing added yet — add the first ' + noun; }
+      else if (!m) { r.approval = 'yellow'; r.approvalWhy = rd ? ('ready for approval — declared by ' + (rd.ready_by_name || rd.ready_by) + ' on ' + String(rd.ready_at).slice(0, 10) + ' · ' + n + ' ' + plural + health) : ('in progress — ' + n + ' ' + plural + health + ' · say "Ready for approval" when the list is complete'); }
+      else if (changed) { r.approval = 'yellow'; r.approvalWhy = 'changed since approval by ' + (m.marked_by_name || m.marked_by) + ' on ' + String(m.marked_at).slice(0, 10) + ' — awaiting re-approval · ' + n + ' ' + plural + health; }
+      else { r.approval = 'green'; r.approvalWhy = 'approved by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10) + ' · ' + n + ' ' + plural + health; }
+    } else if (r.required) {
       r.approvalModel = 'fields';
       if (r.required.missing.length) { r.approval = 'red'; r.approvalWhy = r.required.missing.length + ' of ' + r.required.total + ' required items missing — ' + r.required.missing.join(', '); }
       else if (!m) { r.approval = 'yellow'; r.approvalWhy = 'complete — awaiting approval by ' + (it.legal ? 'Senior Legal' : LANE_BY_KEY[it.lane].ownerLabel.split(' · ')[0]); }
@@ -504,7 +547,7 @@ async function build(user) {
       r.approvalWhy = m ? ((changed ? 'changed since approval by ' : 'approved by ') + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10)) : r.evidence;
     }
     r.changedSinceApproval = changed;
-    delete r.required; delete r.digest;
+    delete r.required; delete r.digest; delete r.list;
     if (m && r.state !== 'needs_attention' && r.state !== 'waiting') { r.state = 'ready'; r.evidence = r.evidence + ' · marked done by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10); }
     r.canEdit = mayEdit(it, user);
   });
@@ -525,4 +568,4 @@ async function build(user) {
   return { counts: counts, colours: colours, goLiveColour: goLiveColour, top: top, lanes: lanes, jurisdiction: ctx.jid, profileError: ctx.error || null };
 }
 
-module.exports = { LANES: LANES, ITEMS: ITEMS, BY_KEY: BY_KEY, build: build, mark: mark, unmark: unmark, mayEdit: mayEdit, READERS: READERS, testEstimateStatus: testEstimateStatus, afterChange: afterChange, readOne: readOne };
+module.exports = { LANES: LANES, ITEMS: ITEMS, BY_KEY: BY_KEY, build: build, mark: mark, unmark: unmark, mayEdit: mayEdit, READERS: READERS, testEstimateStatus: testEstimateStatus, afterChange: afterChange, readOne: readOne, declareReady: declareReady, withdrawReady: withdrawReady };

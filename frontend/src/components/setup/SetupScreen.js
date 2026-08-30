@@ -72,6 +72,12 @@ export default function SetupScreen(props) {
   }, [hubKey]);
   useEffect(function () { if (hubKey) reload(); else setLoaded(true); }, [reload, hubKey]);
 
+  async function toggleReady() {
+    setBusy('ready'); setErr('');
+    try { if (row && row.ready) await api.delete('/setup-hub/' + hubKey + '/ready'); else await api.post('/setup-hub/' + hubKey + '/ready'); await reload(); }
+    catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Could not update.'); }
+    setBusy('');
+  }
   async function toggleAttest() {
     setBusy('attest'); setErr('');
     try { if (row && row.signoff) await api.delete('/setup-hub/' + hubKey + '/done'); else await api.post('/setup-hub/' + hubKey + '/done'); await reload(); }
@@ -98,6 +104,10 @@ export default function SetupScreen(props) {
         </button>
         <span style={{ flexGrow: 1, fontSize: '12px', color: '#5C6F7C', lineHeight: '1.35' }}>{row ? (row.approvalWhy || row.evidence) : (hubKey ? '' : (props.note || ''))}</span>
         <span style={{ fontSize: '11.5px', color: '#8296A4', whiteSpace: 'nowrap' }}>{props.laneLabel}</span>
+        {hubKey && row && row.approvalModel === 'list' && ap === 'yellow' && !attested && can
+          ? <button type="button" disabled={busy === 'ready'} onClick={toggleReady} title={row.ready ? 'Withdraw the declaration that this list is complete' : 'Tell the approver this list is complete'}
+              style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: row.ready ? 'white' : '#F6EBD6', color: row.ready ? '#12232E' : '#9A6512', border: '1px solid ' + (row.ready ? '#BECAD3' : '#E5C98A'), cursor: 'pointer', whiteSpace: 'nowrap' }}>{row.ready ? 'Ready · withdraw' : 'Ready for approval'}</button>
+          : null}
         {!hubKey ? null : attested
           ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'white', color: '#12232E', border: '1px solid #BECAD3', cursor: 'pointer', whiteSpace: 'nowrap' }}>{ap ? 'Approved · undo' : 'Attested · undo'}</button>
           : <button type="button" disabled={!can || redLock || busy === 'attest'} onClick={toggleAttest} title={redLock ? 'Fill and save every required item first' : ''} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: (can && !redLock) ? BLUE : '#F2F6F9', color: (can && !redLock) ? 'white' : '#A9B7C2', border: '1px solid ' + ((can && !redLock) ? BLUE : '#D2DCE3'), cursor: (can && !redLock) ? 'pointer' : 'default', whiteSpace: 'nowrap' }}>{approveLabel}</button>}

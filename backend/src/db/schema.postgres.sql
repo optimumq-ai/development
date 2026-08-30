@@ -1918,3 +1918,5 @@ ON CONFLICT DO NOTHING;
 -- yellow (awaiting re-approval) and the lane owners are notified once per change.
 ALTER TABLE setup_hub_signoffs ADD COLUMN IF NOT EXISTS content_hash TEXT;
 ALTER TABLE setup_hub_signoffs ADD COLUMN IF NOT EXISTS notified_hash TEXT;
+-- List-screen model (2026-08-31): 'Ready for approval' is the adder's declaration that the list is complete.
+CREATE TABLE IF NOT EXISTS setup_hub_ready (item_key TEXT PRIMARY KEY, ready_by TEXT, ready_by_name TEXT, ready_at TEXT);

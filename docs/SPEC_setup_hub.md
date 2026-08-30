@@ -78,6 +78,21 @@ groups, no status, no marks). **Go Live lives on the Set Up Guide's header**: re
 yellow while anything is yellow, green (confirmation dialog, `go_live` authority) when every bar is green;
 "Live" once flipped — the Jurisdiction Configuration flip is no longer the only door.
 
+## 3e. LIST SCREENS — "Ready for approval" (Kevin 2026-08-31, BUILT for Record Sources first)
+A list screen has no save button and no required fields — items are added and deleted, over days or weeks.
+Its reader reports `list {count, notConnected, noun}` + a `digest` of the list. Colours: **red** = nothing
+added · **yellow, in progress** = one or more items, nobody has declared the list complete (quiet: no
+notifications while it grows) · **"Ready for approval"** = a button in the strip for anyone who may edit the
+screen — the adder's declaration that the list is complete; recorded by name (`setup_hub_ready`), the bar
+reads READY FOR APPROVAL, ONE notification to the lane owners (`setup_ready`); a signal, never an approval;
+withdrawable · **green** = the lane owner approves (clears the declaration) · **green → yellow** = any
+add/edit/delete after approval, automatically, with the one re-approval notification (the routes report
+through `afterChange`; `routes/repositories.js` does it in a router-level finish hook). The evidence line
+carries health ("3 connectors · 1 not connected") — never blocks the colour, but the approver sees it.
+`POST/DELETE /setup-hub/:key/ready`; refused 422 `NOTHING_ADDED` while red, 400 `ALREADY_APPROVED` while
+green-unchanged. `verify_setup_hub` I1–I5. Same model next for Departments, Teams, Staff, Taxonomy, Workflow
+Rules.
+
 ## 3a. The Set Up Guide tab (G1, Kevin 2026-08-30)
 The Administration page has two tabs: **Settings and Configuration** (the hub, above) and **Set Up Guide** —
 Plan A from `docs/mockups/setup_hub/PlanGantt.dc.html` (chosen 2026-08-24, built 2026-08-30 as

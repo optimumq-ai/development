@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+// The Record Sources screen is a LIST screen (approval model, 2026-08-31): every add / edit / delete reports a
+// change so an approved list drops to yellow and the lane owners hear once. After the response — best effort.
+router.use(function (req, res, next) {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].indexOf(req.method) !== -1 && !/\/ingest\//.test(req.path)) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { require('../services/setupHub').afterChange('sources', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth, requireRedactionWork, requirePermission } = require('../middleware/auth');
 // Connecting/reconfiguring a records repository is system configuration (the redactionConfig EDIT
 // precedent); running an ingest sweep is processing work, so it takes the shared redaction gate.

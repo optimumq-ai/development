@@ -68,4 +68,19 @@ router.delete('/:key/done', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// LIST SCREENS (Kevin 2026-08-31): "Ready for approval" — the adder's declaration that the list is complete.
+router.post('/:key/ready', requireAuth, async function (req, res) {
+  var it = HUB.BY_KEY[req.params.key];
+  if (!it) return res.status(404).json({ error: 'No such setup item.' });
+  if (!HUB.mayEdit(it, req.user)) return res.status(403).json({ error: 'Your user type does not set this item up.', code: 'PERMISSION_REQUIRED' });
+  try { res.json(await HUB.declareReady(req.params.key, req.user)); }
+  catch (e) { res.status(e.status || 500).json({ error: e.message, code: e.code || null }); }
+});
+router.delete('/:key/ready', requireAuth, async function (req, res) {
+  var it = HUB.BY_KEY[req.params.key];
+  if (!it) return res.status(404).json({ error: 'No such setup item.' });
+  if (!HUB.mayEdit(it, req.user)) return res.status(403).json({ error: 'Your user type does not set this item up.', code: 'PERMISSION_REQUIRED' });
+  try { await HUB.withdrawReady(req.params.key); res.json({ ready: false }); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;

@@ -177,7 +177,7 @@ export default function SetupGuidePage() {
             var it = r.item, st = stepOf[it.key];
             var col = it.goLive ? (goColour === 'live' ? 'green' : (data.goLiveColour || 'red')) : (it.approval || 'red');
             var s = COLOUR[col];
-            var barText = it.goLive ? (goColour === 'live' ? 'LIVE' : (col === 'green' ? 'READY TO GO LIVE' : 'WAITING ON THE ROWS ABOVE')) : (it.changedSinceApproval ? 'RE-APPROVAL' : s.label.toUpperCase());
+            var barText = it.goLive ? (goColour === 'live' ? 'LIVE' : (col === 'green' ? 'READY TO GO LIVE' : 'WAITING ON THE ROWS ABOVE')) : (it.changedSinceApproval ? 'RE-APPROVAL' : (it.approvalModel === 'list' && col === 'yellow' ? (it.ready ? 'READY FOR APPROVAL' : 'IN PROGRESS') : s.label.toUpperCase()));
             var open = it.door ? function () { nav(it.door); } : null;
             return (
               <div key={it.key} onClick={open} title={it.approvalWhy || it.evidence || ''} style={{ position: 'absolute', left: 0, top: r.y + 'px', width: '100%', height: ROW_H + 'px', cursor: open ? 'pointer' : 'default' }}
