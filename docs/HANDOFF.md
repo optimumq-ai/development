@@ -9504,3 +9504,23 @@ Taxonomy, User Types). Hub still 33 items, lanes [10,2,6,4,5,5].
 **NEXT:** Kevin's remaining cleanup calls (Update Configuration / Workflow / Process Map / Redaction Rules
 tabs; the hidden Taxonomy and User Types tabs) · the "How many days a task should take" design pass ·
 then redaction planning.
+
+## 2026-08-30 (C15) — Workflow and Process Map tabs → dedicated screens in the fulfillment lane; suite 2701/2702 (E1a the only red)
+
+**Kevin's call:** migrate the admin Workflow and Process Map tabs; both become items in "Request
+Fulfillment Process Setup — Fees, Estimates and Routing" (he will rename that lane once its contents settle).
+
+**Built:** `WorkflowPage.js` and `WorkflowMapPage.js` keep their file names (verify_stages lints
+`pages/WorkflowPage.js` by path) but now wear the SetupScreen strip (new optional `maxWidth` prop for the
+wide map) at `/setup/workflow-rules` and `/setup/process-map`. Hub: `routing_rules` renamed **"Workflow
+Rules"** (it already WAS the workflow item — its reader counts `workflow_rules`; I renamed rather than add a
+duplicate beside "Who gets which request" — flag for Kevin) and re-doored; `process_map` **"Process Map"**
+ADDED with an informational reader ("55 decision points · 21 built · 12 partial · 22 planned"). Tabs deleted;
+`/workflow`, `/workflow-map`, `?tab=workflow`, `?tab=map` redirect. Hub 34 items, lanes [10,3,6,4,5,5].
+
+**Admin strip now:** Setup · Update Configuration · Redaction Rules (hidden: Taxonomy, User Types).
+
+**Suite: 2701/2702, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged).**
+
+**NEXT:** Update Configuration and Redaction Rules tabs; the hidden Taxonomy / User Types tabs; the lane
+rename; the "How many days a task should take" design pass; then redaction planning.

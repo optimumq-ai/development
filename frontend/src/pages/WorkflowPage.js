@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 import { STAGE_LABELS } from '../lib/stages';
+import SetupScreen from '../components/setup/SetupScreen';
+
+// WORKFLOW RULES — the hub's `routing_rules` row (C15, Kevin 2026-08-30: the admin Workflow tab becomes this
+// dedicated screen at /setup/workflow-rules, on the shared SetupScreen strip). Body unchanged.
 
 var NAVY = '#1F4E79';
 // Was a PRIVATE 4-stage label map — the same divergent-vocabulary defect verify_stages exists to prevent,
@@ -54,9 +58,10 @@ export default function WorkflowPage(){
   async function del(rule){ if(!window.confirm('Delete rule "'+rule.name+'"?'))return; try{ await api.delete('/workflow/rules/'+rule.id); await load(); }catch(e){} }
 
   return (
-    <div style={{maxWidth:'1000px',margin:'0 auto',padding:'24px'}}>
-      <h1 style={{fontSize:'22px',fontWeight:'700',color:'#111',margin:'0 0 4px'}}>Workflow Rules</h1>
-      <p style={{fontSize:'14px',color:'#6B7280',margin:'0 0 20px',lineHeight:'1.6'}}>The AI reads each incoming request and matches it to a record type. These rules then decide &mdash; in priority order, top to bottom, first match wins &mdash; where the request goes. The same inputs always produce the same routing, and every decision is recorded on the request's Routing tab.</p>
+    <SetupScreen hubKey="routing_rules" laneLabel="Request Fulfillment Process Setup — Fees, Estimates and Routing" title="Workflow Rules" maxWidth="1000px"
+      intro="The AI reads each incoming request and matches it to a record type. These rules then decide — in priority order, top to bottom, first match wins — where the request goes. The same inputs always produce the same routing, and every decision is recorded on the request's Routing tab.">
+    {function () { return (
+    <div>
 
       <div style={{background:'white',border:'1px solid #DBEAFE',borderRadius:'12px',padding:'18px 20px',marginBottom:'20px'}}>
         <div style={{fontSize:'14px',fontWeight:'700',color:NAVY,marginBottom:'8px'}}>Add a rule in plain English</div>
@@ -109,5 +114,7 @@ export default function WorkflowPage(){
         </div>
       )}
     </div>
+    ); }}
+    </SetupScreen>
   );
 }

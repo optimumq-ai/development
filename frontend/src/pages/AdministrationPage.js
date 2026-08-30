@@ -4,8 +4,6 @@ import { useAuthStore } from '../store/authStore';
 import SetupHubPage from './SetupHubPage';
 import RuleUpdatesPage from './RuleUpdatesPage';
 import TaxonomyPage from './TaxonomyPage';
-import WorkflowPage from './WorkflowPage';
-import WorkflowMapPage from './WorkflowMapPage';
 import RedactionRulesPage from './RedactionRulesPage';
 import UserTypesPage from './UserTypesPage';
 
@@ -26,8 +24,7 @@ const TABS = [
   // C7 cleanup (Kevin 2026-08-29): the nav tab is gone — the hub's Taxonomy row (System Features and
   // Options) and the calibration row are the doors; ?tab=taxonomy stays routable.
   { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage, hidden: true },
-  { key: 'workflow',     label: 'Workflow',             el: WorkflowPage },
-  { key: 'map',          label: 'Process Map',          el: WorkflowMapPage },
+  // C15 (Kevin 2026-08-30): the Workflow and Process Map tabs are RETIRED — /setup/workflow-rules and /setup/process-map.
   // C14 (Kevin 2026-08-30): the Sources tab is RETIRED — Record Sources and Connectors is /setup/record-sources.
   { key: 'redaction',    label: 'Redaction Rules',      el: RedactionRulesPage },
   // C3 (2026-08-29) hid the Integrations tab; C12 (Kevin 2026-08-30) RETIRED it and the AI Data Flow tab —
@@ -59,6 +56,8 @@ export default function AdministrationPage() {
   if (activeKey === 'ai-data') return <Navigate to="/setup/ai-configuration?tab=deployment" replace />;
   if (activeKey === 'security') return <Navigate to="/setup/ai-configuration?tab=security" replace />;
   if (activeKey === 'sources') return <Navigate to="/setup/record-sources" replace />;
+  if (activeKey === 'workflow') return <Navigate to="/setup/workflow-rules" replace />;
+  if (activeKey === 'map') return <Navigate to="/setup/process-map" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (

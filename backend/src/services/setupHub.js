@@ -2,7 +2,7 @@
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (design closed 2026-08-24; inventory in
 // WORKING_setup_inventory.md; canvas artboards in docs/mockups/setup_hub/).
 //
-// One page, six lanes, thirty-three items. Every item is: a plain-language NAME, the DOOR that sets it (an
+// One page, six lanes, thirty-four items. Every item is: a plain-language NAME, the DOOR that sets it (an
 // existing screen), an OWNER (a permission group — the hub gates on the user-type model, nothing else), an
 // EVIDENCE line counted from what is actually configured, and a STATE derived from that evidence:
 //
@@ -85,7 +85,9 @@ const ITEMS = [
   { key: 'notifications', lane: 'features', name: 'System Notifications', door: '/setup/notifications', deps: ['email'] },
   { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [] },
   { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/admin?tab=taxonomy', deps: ['taxonomy'] },
-  { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Who gets which request', door: '/admin?tab=workflow', deps: ['departments', 'teams'] },
+  // C15 (Kevin 2026-08-30): the admin Workflow and Process Map tabs become dedicated screens behind these rows.
+  { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Workflow Rules', door: '/setup/workflow-rules', deps: ['departments', 'teams'] },
+  { key: 'process_map', lane: 'fulfillment_fees', name: 'Process Map', door: '/setup/process-map', deps: [] },
   // C11 (Kevin 2026-08-30): the v1 Configuration page is RETIRED — each of its six tabs became a dedicated
   // /setup screen behind a hub row. time_budgets, time_tracking (renamed 'Task Processing Time Capture'),
   // notifications (renamed 'System Notifications') and agent_rules moved to System Features and Options;
@@ -256,6 +258,14 @@ const READERS = {
   routing_rules: async function () {
     var n = await count('SELECT COUNT(*) n FROM workflow_rules WHERE enabled = 1');
     return n ? ev('ready', n + ' routing rule' + (n > 1 ? 's' : '') + ' enabled') : ev('not_started', 'no routing rules written');
+  },
+  process_map: async function () {
+    // Informational: the decision inventory (data/workflowModel) and how much of it is built today.
+    var M = require('../data/workflowModel'); var nodes = M.nodes || (typeof M.build === 'function' ? M.build().nodes : null) || {};
+    var c = { built: 0, partial: 0, planned: 0 }; Object.keys(nodes).forEach(function (k) { var st = nodes[k].status; c[st] = (c[st] || 0) + 1; });
+    var total = Object.keys(nodes).length;
+    if (!total) return ev('not_started', 'no process model loaded');
+    return ev('ready', total + ' decision points · ' + c.built + ' built · ' + c.partial + ' partial · ' + c.planned + ' planned');
   },
   time_budgets: async function () {
     var rows = await all('SELECT task_type, budget_days FROM time_budgets WHERE record_type_id IS NULL');

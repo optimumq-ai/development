@@ -79,7 +79,7 @@ export default function SetupScreen(props) {
   var attested = !!(row && row.signoff);
 
   return (
-    <div style={{ maxWidth: '860px', color: '#12232E' }}>
+    <div style={{ maxWidth: props.maxWidth || '860px', color: '#12232E' }}>
       <div style={Object.assign({}, card, { display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 14px', marginBottom: '14px' })}>
         <button type="button" onClick={function () { nav('/admin?tab=setup'); }} title="Back to Setup and Configuration"
           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '26px', padding: '0 11px', border: 0, borderRadius: '999px', background: st.bg, color: st.color, fontSize: '11px', fontWeight: '700', fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap' }}>

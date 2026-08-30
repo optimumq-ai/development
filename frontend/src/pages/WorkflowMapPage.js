@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
+import SetupScreen from '../components/setup/SetupScreen';
+
+// PROCESS MAP — the hub's `process_map` row (C15, Kevin 2026-08-30: the admin Process Map tab becomes this
+// dedicated screen at /setup/process-map, on the shared SetupScreen strip). Body unchanged.
 
 function chip(bg, color){ return { display:'inline-block', background:bg, color:color, fontSize:'10px', fontWeight:'700', padding:'2px 7px', borderRadius:'20px' }; }
 
@@ -7,19 +11,18 @@ export default function WorkflowMapPage(){
   var [model, setModel] = useState(null);
   var [sel, setSel] = useState(null);
   useEffect(function(){ api.get('/workflow-model').then(function(r){ setModel(r.data); }).catch(function(){}); }, []);
-  if (!model) return <div style={{ padding:'24px', color:'#9CA3AF' }}>Loading process map...</div>;
-
-  var D = model.legend.deciders, S = model.legend.statuses;
-  function nodesIn(pid){ return Object.keys(model.nodes).map(function(k){ return model.nodes[k]; }).filter(function(n){ return n.phase === pid; }); }
+  var D = model ? model.legend.deciders : {}, S = model ? model.legend.statuses : {};
+  function nodesIn(pid){ if (!model) return []; return Object.keys(model.nodes).map(function(k){ return model.nodes[k]; }).filter(function(n){ return n.phase === pid; }); }
   var counts = { built:0, partial:0, planned:0 };
-  Object.keys(model.nodes).forEach(function(k){ var st = model.nodes[k].status; counts[st] = (counts[st]||0)+1; });
-  var node = sel ? model.nodes[sel] : null;
+  if (model) Object.keys(model.nodes).forEach(function(k){ var st = model.nodes[k].status; counts[st] = (counts[st]||0)+1; });
+  var node = sel && model ? model.nodes[sel] : null;
   var phaseName = node ? (model.phases.filter(function(p){ return p.id === node.phase; })[0]||{}).name : '';
 
   return (
-    <div style={{ maxWidth:'1200px', margin:'0 auto', padding:'24px' }}>
-      <h1 style={{ fontSize:'22px', fontWeight:'700', color:'#111', margin:'0 0 4px' }}>Process Map</h1>
-      <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 16px', lineHeight:'1.6' }}>Every decision a request passes through, in order. Color shows who decides; the badge shows what is built today. Click any decision to see the criteria it uses and the one-time configuration that automates it.</p>
+    <SetupScreen hubKey="process_map" laneLabel="Request Fulfillment Process Setup — Fees, Estimates and Routing" title="Process Map" maxWidth="1200px"
+      intro="Every decision a request passes through, in order. Color shows who decides; the badge shows what is built today. Click any decision to see the criteria it uses and the one-time configuration that automates it.">
+    {function () { if (!model) return <div style={{ color:'#9CA3AF' }}>Loading process map...</div>; return (
+    <div>
 
       <div style={{ display:'flex', gap:'14px', flexWrap:'wrap', alignItems:'center', marginBottom:'8px' }}>
         {Object.keys(D).map(function(k){ return <span key={k} style={{ display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', color:'#374151' }}><span style={{ width:'12px', height:'12px', borderRadius:'3px', background:D[k].color, display:'inline-block' }}></span>{D[k].label}</span>; })}
@@ -99,5 +102,7 @@ export default function WorkflowMapPage(){
         </div>
       </div>
     </div>
+    ); }}
+    </SetupScreen>
   );
 }
