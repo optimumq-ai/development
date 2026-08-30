@@ -9460,3 +9460,25 @@ anything C11 changed. Runner now prints a broken harness's last 30 lines + its e
 **NEXT (in flight):** C12 — AI Service Keys gets the same treatment (`/setup/ai-keys`; the hidden
 Integrations tab retired). Then the remaining hidden admin tabs (Taxonomy, User Types, Portal Agent
 Security's status) and the "How many days a task should take" design pass Kevin deferred.
+
+## 2026-08-30 (C12) — "AI configuration": one hub row, one screen, three tabs; suite 2700/2701 (E1a the only red)
+
+**Kevin's call (supersedes the interim plan of a standalone AI Service Keys screen):** the Technical Setup
+lane's "AI Service Keys" and "AI Data Flow and Compliance" items become ONE item, **"AI configuration"**,
+opening a screen with three tabs — **AI Service Keys** (the retired IntegrationsPage) · **Deployment Model**
+(the AI Data Flow page's "Deployment profile" section, renamed) · **AI Touchpoints Information** (that page's
+touchpoint inventory, routed under the selected model). The AI Data Flow admin tab deleted.
+
+**Built:** `pages/AiConfigurationPage.js` (`/setup/ai-configuration?tab=keys|deployment|touchpoints`, on the
+shared SetupScreen strip); hub rows `ai_keys` + `ai_deployment` MERGED into `ai_config` with one reader
+("both keys set · government deployment model" etc.); `IntegrationsPage.js` and `AIDataFlowPage.js`
+DELETED; `/integrations`, `/ai-data-flow`, `?tab=integrations`, `?tab=ai-data` redirect to the right tab.
+Hub: 33 items, lanes [10,2,6,4,5,5]. Admin strip now: Setup · Update Configuration · Workflow · Process
+Map · Sources · Redaction Rules · Portal Agent Security (hidden: Taxonomy, User Types).
+
+**Suite: 2700/2701, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged);
+`verify_magic_reset` completed this run.** verify_setup_hub 26/26 (the mark test now uses `ai_config`).
+
+**NEXT:** Kevin's remaining cleanup calls (the hidden Taxonomy / User Types tabs; whether Portal Agent
+Security wants a hub row now that `agent_rules` is its own screen) · the "How many days a task should take"
+design pass he deferred · then redaction planning.

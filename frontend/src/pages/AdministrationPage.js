@@ -8,9 +8,7 @@ import WorkflowPage from './WorkflowPage';
 import WorkflowMapPage from './WorkflowMapPage';
 import SourcesPage from './SourcesPage';
 import RedactionRulesPage from './RedactionRulesPage';
-import AIDataFlowPage from './AIDataFlowPage';
 import SecurityPage from './SecurityPage';
-import IntegrationsPage from './IntegrationsPage';
 import UserTypesPage from './UserTypesPage';
 
 // ADMINISTRATION (2026-08-01, Kevin's menu reorganization): the thirteen technical-setup screens under
@@ -34,10 +32,8 @@ const TABS = [
   { key: 'map',          label: 'Process Map',          el: WorkflowMapPage },
   { key: 'sources',      label: 'Sources',              el: SourcesPage },
   { key: 'redaction',    label: 'Redaction Rules',      el: RedactionRulesPage },
-  // C3 cleanup (Kevin 2026-08-29): the nav tab is gone — the hub's "AI service keys" row is the one door
-  // (its ?tab=integrations deep link keeps working via `hidden`); the screen is titled "AI Service Keys".
-  { key: 'integrations', label: 'AI Service Keys', el: IntegrationsPage, admin: true, hidden: true },
-  { key: 'ai-data',      label: 'AI Data Flow',         el: AIDataFlowPage, admin: true },
+  // C3 (2026-08-29) hid the Integrations tab; C12 (Kevin 2026-08-30) RETIRED it and the AI Data Flow tab —
+  // both live on the hub's one 'AI configuration' row (/setup/ai-configuration, three tabs).
   { key: 'security',     label: 'Portal Agent Security', el: SecurityPage, admin: true },
   // v3 user-type model (SPEC_user_type_model §10.2, S3): the catalog matrix. Visible to anyone who may see Administration.
   // C6 cleanup (Kevin 2026-08-29): the nav tab is gone — reached from the Organization page's Staff tab
@@ -59,6 +55,9 @@ export default function AdministrationPage() {
   if (activeKey === 'fees') return <Navigate to="/setup/fee-law" replace />;
   // RETIRED 2026-08-30 (C11): the v1 Configuration tab — its sections are /setup screens; land on the hub.
   if (activeKey === 'config') return <Navigate to="/admin?tab=setup" replace />;
+  // RETIRED 2026-08-30 (C12): the Integrations and AI Data Flow tabs — AI configuration is one /setup screen.
+  if (activeKey === 'integrations') return <Navigate to="/setup/ai-configuration?tab=keys" replace />;
+  if (activeKey === 'ai-data') return <Navigate to="/setup/ai-configuration?tab=deployment" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (

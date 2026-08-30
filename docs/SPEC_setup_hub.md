@@ -18,14 +18,14 @@ configured**, never from a checkbox; a person may additionally **mark it done** 
 | 2a | Request Fulfillment Process Setup — Fees, Estimates and Routing (C8, 2026-08-30: the `fee_rates` "What this city actually charges" and `fee_test` "Try a test estimate" rows retired — both are Fee rules content, the schedule and its "Test an estimate" tab; `settlement` now waits on `fee_law`; C11, 2026-08-30: `time_budgets`, `time_tracking`, `notifications` moved to System Features and Options — calibration and routing remain) | `operations_config` |
 | 2b | Request Fulfillment Process Setup — Redaction and Release (C11, 2026-08-30: `av_redaction` "Video Redaction Options" ADDED — the v1 Configuration Redaction tab as a dedicated screen, `/setup/video-redaction`) | `operations_config` |
 | 3 | Organization Departments, Teams, and Staff Setup | `operations_config` |
-| 4 | Technical Setup (C10, 2026-08-30: the `auth_policy` row is named "User Authentication Setup"; C11: it doors to its own screen `/setup/authentication`; `agent_rules` moved to System Features and Options) | `system_admin` |
+| 4 | Technical Setup (C10, 2026-08-30: the `auth_policy` row is named "User Authentication Setup"; C11: it doors to its own screen `/setup/authentication`; `agent_rules` moved to System Features and Options; C12: `ai_keys` + `ai_deployment` MERGED into one row `ai_config` "AI configuration" → `/setup/ai-configuration`, three tabs — AI Service Keys · Deployment Model · AI Touchpoints Information; the hidden Integrations tab and the AI Data Flow admin tab retired, `/integrations`, `/ai-data-flow`, `?tab=integrations`, `?tab=ai-data` redirect there) | `system_admin` |
 | 5 | System Features and Options (added 2026-08-29, C7: feature-catalog screens — Taxonomy first; the fulfillment lane's "Record types and categories" row moved here renamed, same key/deps/reader; the admin Taxonomy nav tab retired; C11, 2026-08-30: `time_budgets` "How many days a task should take" `/setup/time-budgets`, `time_tracking` renamed "Task Processing Time Capture" `/setup/time-capture`, `notifications` renamed "System Notifications" `/setup/notifications`, `agent_rules` renamed "Portal Agent Rules" `/setup/agent-rules` — each a dedicated screen wearing the shared `components/setup/SetupScreen` strip) | `operations_config` |
 The **agency identity** card sits above the lanes ("Start here"; `operations_config` or `system_admin`). **Go-live**
 is the last row of lane 1; it is flipped on the Jurisdiction Configuration page by the `go_live` authority
 (ORO System Administrator **or** ORO Director) and is never "marked done".
 
 ## 3. Items
-The 34 items (35 before C8, 33 after it, 34 with C11's `av_redaction` — all 2026-08-30) and their doors, dependencies and readers are the catalog in `services/setupHub.js` (`ITEMS`) —
+The 33 items (35 before C8; 33 after it; 34 with C11's `av_redaction`; 33 after C12 merged the two AI rows — all 2026-08-30) and their doors, dependencies and readers are the catalog in `services/setupHub.js` (`ITEMS`) —
 the inventory's numbering maps 1:1, with five amendments: `eligibility` ("Requestor eligibility")
 ADDED to the compliance lane (R1, 2026-08-27), `waiver_policy` RETIRED into the fee_law row (F2, 2026-08-27,
 renamed "Fee rules"), `deposits` ("Deposits and payment clock") RETIRED into the same row (F3, 2026-08-29),

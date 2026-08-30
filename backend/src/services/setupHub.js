@@ -2,7 +2,7 @@
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (design closed 2026-08-24; inventory in
 // WORKING_setup_inventory.md; canvas artboards in docs/mockups/setup_hub/).
 //
-// One page, six lanes, thirty-four items. Every item is: a plain-language NAME, the DOOR that sets it (an
+// One page, six lanes, thirty-three items. Every item is: a plain-language NAME, the DOOR that sets it (an
 // existing screen), an OWNER (a permission group — the hub gates on the user-type model, nothing else), an
 // EVIDENCE line counted from what is actually configured, and a STATE derived from that evidence:
 //
@@ -104,8 +104,10 @@ const ITEMS = [
   { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/admin?tab=taxonomy', deps: ['taxonomy', 'departments'] },
   // ── Lane 4 ──
   { key: 'sources', lane: 'technical', name: 'Where the records live', door: '/admin?tab=sources', deps: [] },
-  { key: 'ai_keys', lane: 'technical', name: 'AI service keys', door: '/admin?tab=integrations', deps: [] },
-  { key: 'ai_deployment', lane: 'technical', name: 'Where AI processing happens', door: '/admin?tab=ai-data', deps: ['ai_keys'] },
+  // C12 (Kevin 2026-08-30): 'AI service keys' + 'Where AI processing happens' become ONE row and ONE screen
+  // with three tabs (AI Service Keys · Deployment Model · AI Touchpoints Information); the hidden Integrations
+  // tab and the AI Data Flow admin tab are retired.
+  { key: 'ai_config', lane: 'technical', name: 'AI configuration', door: '/setup/ai-configuration', deps: [] },
   // C2 cleanup (Kevin 2026-08-29): renamed from 'Outgoing email'; the Integrations page's email section
   // moved to its own screen behind this row (Integrations keeps the AI keys; the v1 Configuration email
   // tab is retired — its alert-recipient field moved along).
@@ -333,15 +335,12 @@ const READERS = {
     var bad = rows.filter(function (r) { return r.status && r.status !== 'active'; }).length;
     return bad ? ev('needs_attention', (rows.length - bad) + ' of ' + rows.length + ' connected · ' + bad + ' not working') : ev('ready', rows.length + ' record system' + (rows.length > 1 ? 's' : '') + ' connected');
   },
-  ai_keys: async function () {
-    var a = await cfg('anthropic_api_key'), v = await cfg('voyage_api_key');
-    if (!a && !v) return ev('not_started', 'no AI keys entered');
-    if (!a || !v) return ev('in_progress', (a ? 'Anthropic' : 'Voyage') + ' key set · the other missing');
-    return ev('ready', 'both keys set');
-  },
-  ai_deployment: async function () {
-    var p = await cfg('ai_deployment_profile');
-    return p ? ev('ready', p) : ev('not_started', 'running on the standard profile');
+  ai_config: async function () {
+    var a = await cfg('anthropic_api_key'), v = await cfg('voyage_api_key'), p = await cfg('ai_deployment_profile');
+    var model = (p || 'standard') + ' deployment model' + (p ? '' : ' (default)');
+    if (!a && !v) return ev('not_started', 'no AI keys entered · ' + model);
+    if (!a || !v) return ev('in_progress', (a ? 'Anthropic' : 'Voyage') + ' key set · the other missing · ' + model);
+    return ev('ready', 'both keys set · ' + model);
   },
   email: async function () {
     var prov = await cfg('email_provider'); var resend = await cfg('resend_api_key'); var smtp = await cfg('smtp_host');

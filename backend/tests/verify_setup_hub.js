@@ -1,7 +1,7 @@
 'use strict';
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (H1).
 //
-//   A. The catalog: six lanes, thirty-four items, every item has a name / lane / deps / owner group; every
+//   A. The catalog: six lanes, thirty-three items, every item has a name / lane / deps / owner group; every
 //      dependency points at a real item; lane owners are permission GROUPS (the hub gates on the user-type
 //      model and nothing else — WORKING_setup_inventory "no stopgap").
 //   B. Evidence is COUNTED: a change in what is configured changes the row (a team with no serving department
@@ -46,8 +46,8 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
 
   console.log('\n=== A. THE CATALOG ===');
   ok('A1 six lanes in the decided order and names (System Features and Options added 2026-08-29)', HUB.LANES.length === 6 && /^Compliance and Policies Setup$/.test(HUB.LANES[0].title) && /Fees, Estimates and Routing$/.test(HUB.LANES[1].title) && /Redaction and Release$/.test(HUB.LANES[2].title) && /^Organization Departments, Teams, and Staff Setup$/.test(HUB.LANES[3].title) && HUB.LANES[4].title === 'Technical Setup' && HUB.LANES[5].title === 'System Features and Options');
-  ok('A2 thirty-four items (10 + 2 + 6 + 4 + 6 + 5 + the agency card on top; C11 2026-08-30: the Configuration tabs became /setup screens, four rows moved to System Features and Options, av_redaction added)', HUB.ITEMS.length === 34 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
-    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 2, 6, 4, 6, 5]));
+  ok('A2 thirty-three items (10 + 2 + 6 + 4 + 5 + 5 + the agency card on top; C11/C12 2026-08-30: the Configuration tabs became /setup screens, av_redaction added, ai_keys + ai_deployment merged into ai_config)', HUB.ITEMS.length === 33 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
+    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 2, 6, 4, 5, 5]));
   var badDeps = []; HUB.ITEMS.forEach(function (i) { (i.deps || []).forEach(function (d) { if (!HUB.BY_KEY[d]) badDeps.push(i.key + '->' + d); }); });
   ok('A3 every dependency points at a real item', badDeps.length === 0, badDeps.join(','));
   ok('A4 every lane owner is a permission GROUP from the user-type model (no role names anywhere)', HUB.LANES.every(function (l) { return l.groups.every(function (g) { return ut.PERMISSION_GROUPS.indexOf(g) !== -1; }); }) &&
@@ -62,7 +62,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var states = ['ready', 'in_progress', 'not_started', 'waiting', 'needs_attention'];
   var allItems = []; page.lanes.forEach(function (l) { allItems = allItems.concat(l.items); }); allItems = allItems.concat(page.top);
   ok('B2 every row carries a known state and a non-empty evidence line', allItems.every(function (x) { return states.indexOf(x.state) !== -1 && typeof x.evidence === 'string' && x.evidence.length > 0; }));
-  ok('B3 header counts add up to 34', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 34);
+  ok('B3 header counts add up to 33', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 33);
   var teamsBefore = find(page, 'teams');
   var dept = 'dept-' + TAG;
   await db.run("INSERT INTO departments (id, name, code, kind, is_open_records, active) VALUES (?,?,?,'department',0,1)", [dept, 'HUB Unserved ' + TAG, 'H' + TAG.slice(-5)]);
@@ -111,10 +111,10 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.legal, 'DELETE', '/setup-hub/exemptions/done');
   var glm = await callAs(U.dir, 'POST', '/setup-hub/go_live/done');
   ok('D5 go-live cannot be "marked done" (400 NOT_MARKABLE) — it is flipped, not declared', glm.status === 400 && glm.body.code === 'NOT_MARKABLE');
-  var t1 = await callAs(U.sa, 'POST', '/setup-hub/ai_keys/done');
-  var t2 = await callAs(U.dir, 'POST', '/setup-hub/ai_keys/done');
+  var t1 = await callAs(U.sa, 'POST', '/setup-hub/ai_config/done');
+  var t2 = await callAs(U.dir, 'POST', '/setup-hub/ai_config/done');
   ok('D6 a Technical Setup item is the system_admin group: SysAdmin may, Director 403', t1.status === 200 && t2.status === 403);
-  await callAs(U.sa, 'DELETE', '/setup-hub/ai_keys/done');
+  await callAs(U.sa, 'DELETE', '/setup-hub/ai_config/done');
   ok('D7 an unknown item is 404', (await callAs(U.dir, 'POST', '/setup-hub/no-such-item/done')).status === 404);
 
   console.log('\n=== E. THE PAGE ALWAYS RENDERS ===');

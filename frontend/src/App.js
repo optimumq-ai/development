@@ -19,6 +19,7 @@ import VideoRedactionOptionsPage from './pages/VideoRedactionOptionsPage';
 import TimeCapturePage from './pages/TimeCapturePage';
 import TimeBudgetsPage from './pages/TimeBudgetsPage';
 import AgentRulesPage from './pages/AgentRulesPage';
+import AiConfigurationPage from './pages/AiConfigurationPage';
 import FeeLawPage from './pages/FeeLawPage';
 import RequestRulesPage from './pages/RequestRulesPage';
 import ReportsHubPage from './pages/ReportsHubPage';
@@ -147,8 +148,8 @@ export default function App() {
           <Route path="reports" element={<ReportsHubPage />} />
           <Route path="ai-reporting" element={<Navigate to="/reports?tab=ai" replace />} />
           <Route path="admin" element={<AdministrationPage />} />
-          <Route path="integrations" element={<Navigate to="/admin?tab=integrations" replace />} />
-          <Route path="ai-data-flow" element={<Navigate to="/admin?tab=ai-data" replace />} />
+          <Route path="integrations" element={<Navigate to="/setup/ai-configuration?tab=keys" replace />} />
+          <Route path="ai-data-flow" element={<Navigate to="/setup/ai-configuration?tab=deployment" replace />} />
           <Route path="portal-security" element={<Navigate to="/admin?tab=security" replace />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
@@ -162,6 +163,7 @@ export default function App() {
           <Route path="setup/time-capture" element={<TimeCapturePage />} />
           <Route path="setup/time-budgets" element={<TimeBudgetsPage />} />
           <Route path="setup/agent-rules" element={<AgentRulesPage />} />
+          <Route path="setup/ai-configuration" element={<AiConfigurationPage />} />
           <Route path="setup/fee-law" element={<FeeLawPage />} />
           {/* Clarification · Exemptions · Requestor eligibility — three hub rows, one screen (2026-08-27). */}
           <Route path="setup/request-rules" element={<RequestRulesPage />} />
