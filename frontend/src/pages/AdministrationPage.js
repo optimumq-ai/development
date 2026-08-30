@@ -2,8 +2,6 @@ import React from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import SetupHubPage from './SetupHubPage';
-import TaxonomyPage from './TaxonomyPage';
-import UserTypesPage from './UserTypesPage';
 
 // ADMINISTRATION (2026-08-01, Kevin's menu reorganization): the thirteen technical-setup screens under
 // ONE panel item, tabbed — the Organization-tab pattern applied to the config surface. Each tab RENDERS
@@ -21,7 +19,7 @@ const TABS = [
   // screen was blank and Fee rules (/setup/fee-law) is the fee schedule now. /fee-config and ?tab=fees land on Fee rules.
   // C7 cleanup (Kevin 2026-08-29): the nav tab is gone — the hub's Taxonomy row (System Features and
   // Options) and the calibration row are the doors; ?tab=taxonomy stays routable.
-  { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage, hidden: true },
+  // C17 (Kevin 2026-08-30): the hidden Taxonomy and User Types tabs are RETIRED — /setup/taxonomy, /setup/user-types.
   // C15 (Kevin 2026-08-30): the Workflow and Process Map tabs are RETIRED — /setup/workflow-rules and /setup/process-map.
   // C14 (Kevin 2026-08-30): the Sources tab is RETIRED — Record Sources and Connectors is /setup/record-sources.
   // C3 (2026-08-29) hid the Integrations tab; C12 (Kevin 2026-08-30) RETIRED it and the AI Data Flow tab —
@@ -31,7 +29,6 @@ const TABS = [
   // v3 user-type model (SPEC_user_type_model §10.2, S3): the catalog matrix. Visible to anyone who may see Administration.
   // C6 cleanup (Kevin 2026-08-29): the nav tab is gone — reached from the Organization page's Staff tab
   // ("View user types"); ?tab=user-types stays routable.
-  { key: 'user-types',   label: 'User Types',           el: UserTypesPage, hidden: true },
 ];
 
 export default function AdministrationPage() {
@@ -57,6 +54,8 @@ export default function AdministrationPage() {
   if (activeKey === 'map') return <Navigate to="/setup/process-map" replace />;
   if (activeKey === 'updates') return <Navigate to="/setup/update-configuration" replace />;
   if (activeKey === 'redaction') return <Navigate to="/setup/redaction-rules" replace />;
+  if (activeKey === 'taxonomy') return <Navigate to="/setup/taxonomy" replace />;
+  if (activeKey === 'user-types') return <Navigate to="/setup/user-types" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (
@@ -65,7 +64,8 @@ export default function AdministrationPage() {
         <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 2px' }}>Administration</h1>
         <p style={{ color: '#9CA3AF', fontSize: '13px', margin: 0 }}>Technical setup and configuration — everything that shapes how the system runs.</p>
       </div>
-      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', borderBottom: '2px solid #E5E7EB', marginBottom: '20px' }}>
+      {/* C17: with every tab but Setup retired, a one-tab strip is noise — render it only when there is a choice. */}
+      {tabs.filter(function (t) { return !t.hidden; }).length > 1 ? <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', borderBottom: '2px solid #E5E7EB', marginBottom: '20px' }}>
         {tabs.filter(function (t) { return !t.hidden; }).map(function (t) {
           const on = t.key === active.key;
           return (
@@ -77,7 +77,7 @@ export default function AdministrationPage() {
             </button>
           );
         })}
-      </div>
+      </div> : null}
       <Body />
     </div>
   );

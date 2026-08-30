@@ -218,7 +218,7 @@ export default function OrgPage() {
                     <strong>Staff</strong> belong to a fulfillment team. Each person is assigned a subset of <strong>task types</strong> (record search, redaction, …) — task routing only offers a task to people on the right team who hold its type. Use <em>Edit</em> for team and task types, and <em>Routing</em> for the plain-language specialization that smart-routing matches on.
                   </Guidance>
                 </div>
-                <button onClick={() => nav('/admin?tab=user-types')} title="The catalog of user types: what each may do, which task menus it carries, and who holds it"
+                <button onClick={() => nav('/setup/user-types')} title="The catalog of user types: what each may do, which task menus it carries, and who holds it"
                   style={{ padding: '8px 16px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>View user types</button>
               </div>
               <StaffManagementPage embedded />

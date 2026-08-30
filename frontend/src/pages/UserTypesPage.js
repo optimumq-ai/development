@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+import SetupScreen from '../components/setup/SetupScreen';
+
+// USER TYPES — the catalog (C17, Kevin 2026-08-30: the hidden admin User Types tab becomes this dedicated
+// screen at /setup/user-types; no hub row — reached from the Organization page's Staff tab). Body unchanged.
 
 // USER TYPES — Administration → User types (SPEC_user_type_model §10.2, S3).
 // A read-only matrix of the eleven user types × what each one carries (task menu · authority · permission
@@ -59,7 +63,10 @@ export default function UserTypesPage() {
   if (!data) return <div style={{ padding: '24px', color: '#9CA3AF' }}>Loading user types…</div>;
 
   return (
-    <div style={{ padding: '4px 0 24px' }}>
+    <SetupScreen laneLabel="Organization Departments, Teams, and Staff Setup" title="User Types" maxWidth="960px" note="Reached from Organization → Staff → View user types"
+      intro="The catalog of user types: what each may be routed, what it may do, and which parts of setup it may change.">
+    {function () { return (
+    <div>
       <div style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 14px', lineHeight: '1.6', maxWidth: '860px' }}>
         A person holds one or more <strong>user types</strong>. Everything else follows from the type: the work the system may route to
         them (<strong>task menu</strong>), what they may do to work they don’t own (<strong>authority</strong>), and which parts of setup they
@@ -106,5 +113,7 @@ export default function UserTypesPage() {
         </table>
       </div>
     </div>
+    ); }}
+    </SetupScreen>
   );
 }

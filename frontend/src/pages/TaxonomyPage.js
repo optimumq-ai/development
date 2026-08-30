@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import RecordTypeEditor from '../components/RecordTypeEditor';
+import SetupScreen from '../components/setup/SetupScreen';
+
+// TAXONOMY — the hub's `taxonomy` row, and the door for `calibration` and `record_owners` too (C17, Kevin
+// 2026-08-30: the hidden admin Taxonomy tab becomes this dedicated screen at /setup/taxonomy). Body unchanged.
 
 var AVAIL = {
   releasable: { label: 'Releasable', bg: '#DEF7EC', fg: '#03543F' },
@@ -123,12 +127,12 @@ export default function TaxonomyPage() {
   }
 
   return (
-    <div style={{ maxWidth: '960px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <SetupScreen hubKey="taxonomy" laneLabel="System Features and Options" title="Taxonomy" maxWidth="960px"
+      intro="The record types this city holds, grouped by category, with each type's release posture, owning department and estimate calibration. Three setup rows open here: Taxonomy, how much work each record type takes, and which department owns which records.">
+    {function () { return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-        <div>
-        <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Taxonomy</h1>
-        <p style={{ color: '#9CA3AF', fontSize: '14px', margin: 0 }}>Current, live taxonomy &mdash; {types.length} record types across {cats.filter(function(c){ return types.some(function(t){ return t.category_id === c.id; }); }).length} categories</p>
-        </div>
+        <p style={{ color: '#5C6F7C', fontSize: '13px', margin: 0 }}>Current, live taxonomy &mdash; {types.length} record types across {cats.filter(function(c){ return types.some(function(t){ return t.category_id === c.id; }); }).length} categories</p>
         <div style={{ border: '1px solid #DBEAFE', borderRadius: '10px', padding: '12px 14px', background: '#F8FAFF', minWidth: '300px', flexShrink: 0 }}>
           <div style={{ fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '8px' }}>Add, delete, or edit taxonomy records</div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -365,5 +369,7 @@ export default function TaxonomyPage() {
         </div>
       ) : null}
     </div>
+    ); }}
+    </SetupScreen>
   );
 }

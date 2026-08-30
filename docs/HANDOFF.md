@@ -9548,3 +9548,28 @@ second component, ReviewModal); the CRA build failed and — because CRA empties
 
 **NEXT:** the hidden Taxonomy / User Types tabs; the fulfillment lane rename; the "How many days a task
 should take" design pass; then redaction planning.
+
+## 2026-08-30 (C17) — Taxonomy and User Types → dedicated screens; the Administration tab strip is GONE; suite 2701/2702 (E1a the only red)
+
+**Kevin's call:** the straightforward version — Taxonomy and User Types as /setup screens; the three rows
+that door to Taxonomy (taxonomy, calibration, record_owners) all keep dooring there; the calibration /
+record-ownership question waits for the "How many days a task should take" design pass.
+
+**Built:** `TaxonomyPage.js` → `/setup/taxonomy` (SetupScreen strip, hub row `taxonomy`; the live "N record
+types across M categories" line kept in the body); `UserTypesPage.js` → `/setup/user-types` — no hub row, so
+SetupScreen gained a **rowless mode** (no `hubKey`: plain "Setup and Configuration" back pill, an optional
+`note`, no state/Attest; `can` = true). The two hidden admin tabs deleted; `?tab=taxonomy`, `?tab=user-types`,
+`/taxonomy` redirect; Organization → Staff "View user types" and the sidebar's **"Find Same-Format Records"**
+entry (which already pointed at the Taxonomy tab — flag for Kevin if it was meant to open something else)
+repointed. AdministrationPage renders its tab strip only when more than one visible tab exists — with
+Setup alone, none: the Administration page IS the hub. `ruleEditors.areaEditor` stays `/taxonomy` (pinned by
+verify_bw9b_editors; the redirect carries it). Build now goes through `BUILD_PATH=build-next` + swap.
+
+**Suite: 2701/2702, live census clean — the one red is the deferred verify_bw9_golive E1a (unchanged).**
+
+**Where the cleanup stands after C8–C17 (10 commits today):** every v1 admin tab is retired; every hub row
+doors to a dedicated /setup screen wearing the shared strip (or, for the informational ones, tabs on one).
+Hub 34 items, lanes [10,3,6,4,5,5].
+
+**NEXT:** Kevin renames the fulfillment-fees lane · the "How many days a task should take" design pass
+(+ calibration / record-ownership doors) · then redaction planning.

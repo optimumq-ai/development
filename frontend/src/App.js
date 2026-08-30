@@ -25,6 +25,8 @@ import WorkflowPage from './pages/WorkflowPage';
 import WorkflowMapPage from './pages/WorkflowMapPage';
 import RuleUpdatesPage from './pages/RuleUpdatesPage';
 import RedactionRulesPage from './pages/RedactionRulesPage';
+import TaxonomyPage from './pages/TaxonomyPage';
+import UserTypesPage from './pages/UserTypesPage';
 import FeeLawPage from './pages/FeeLawPage';
 import RequestRulesPage from './pages/RequestRulesPage';
 import ReportsHubPage from './pages/ReportsHubPage';
@@ -174,10 +176,12 @@ export default function App() {
           <Route path="setup/process-map" element={<WorkflowMapPage />} />
           <Route path="setup/update-configuration" element={<RuleUpdatesPage />} />
           <Route path="setup/redaction-rules" element={<RedactionRulesPage />} />
+          <Route path="setup/taxonomy" element={<TaxonomyPage />} />
+          <Route path="setup/user-types" element={<UserTypesPage />} />
           <Route path="setup/fee-law" element={<FeeLawPage />} />
           {/* Clarification · Exemptions · Requestor eligibility — three hub rows, one screen (2026-08-27). */}
           <Route path="setup/request-rules" element={<RequestRulesPage />} />
-          <Route path="taxonomy" element={<Navigate to="/admin?tab=taxonomy" replace />} />
+          <Route path="taxonomy" element={<Navigate to="/setup/taxonomy" replace />} />
           <Route path="workflow" element={<Navigate to="/setup/workflow-rules" replace />} />
           <Route path="workflow-map" element={<Navigate to="/setup/process-map" replace />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />

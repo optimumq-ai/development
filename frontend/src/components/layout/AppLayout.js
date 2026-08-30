@@ -32,7 +32,7 @@ export default function AppLayout() {
     // deliberately NOT a popup: nothing hidden behind hover state, everything one click.
     { header: 'Public Ready Control Center', show: isElev },
     // The variant-discovery entry point ("Find variants" lives per bucket on the Taxonomy tab).
-    { to: '/admin?tab=taxonomy', label: 'Find Same-Format Records', show: isElev, child: true },
+    { to: '/setup/taxonomy', label: 'Find Same-Format Records', show: isElev, child: true },
     { to: '/mass-redaction', label: 'Mass Redaction', show: isElev, child: true },
     { to: '/released', label: 'Released Records', show: isElev, child: true },
     // Label renamed from "Records Map" (Kevin); the ROUTE keeps its old name — wire formats do.

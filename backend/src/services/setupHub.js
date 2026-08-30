@@ -80,12 +80,12 @@ const ITEMS = [
   // `testEstimateStatus` for the Fee rules screen's tab badge.
   // C7 (Kevin 2026-08-29): 'Record types and categories' becomes 'Taxonomy' under System Features and
   // Options — same key, so the calibration dependency and the counted evidence carry over unchanged.
-  { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/admin?tab=taxonomy', deps: ['sources'], softDeps: true },
+  { key: 'taxonomy', lane: 'features', name: 'Taxonomy', door: '/setup/taxonomy', deps: ['sources'], softDeps: true },
   { key: 'time_budgets', lane: 'features', name: 'How many days a task should take', door: '/setup/time-budgets', deps: [] },
   { key: 'time_tracking', lane: 'features', name: 'Task Processing Time Capture', door: '/setup/time-capture', deps: [] },
   { key: 'notifications', lane: 'features', name: 'System Notifications', door: '/setup/notifications', deps: ['email'] },
   { key: 'agent_rules', lane: 'features', name: 'Portal Agent Rules', door: '/setup/agent-rules', deps: [] },
-  { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/admin?tab=taxonomy', deps: ['taxonomy'] },
+  { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/setup/taxonomy', deps: ['taxonomy'] },
   // C15 (Kevin 2026-08-30): the admin Workflow and Process Map tabs become dedicated screens behind these rows.
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Workflow Rules', door: '/setup/workflow-rules', deps: ['departments', 'teams'] },
   { key: 'process_map', lane: 'fulfillment_fees', name: 'Process Map', door: '/setup/process-map', deps: [] },
@@ -104,7 +104,7 @@ const ITEMS = [
   { key: 'departments', lane: 'organization', name: 'City departments', door: '/org', deps: [] },
   { key: 'teams', lane: 'organization', name: 'Fulfillment teams', door: '/org', deps: ['departments'] },
   { key: 'staff', lane: 'organization', name: 'Staff and what each person does', door: '/staff', deps: ['teams'] },
-  { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/admin?tab=taxonomy', deps: ['taxonomy', 'departments'] },
+  { key: 'record_owners', lane: 'organization', name: 'Which department owns which records', door: '/setup/taxonomy', deps: ['taxonomy', 'departments'] },
   // ── Lane 4 ──
   // C14 (Kevin 2026-08-30): renamed from 'Where the records live'; the admin Sources tab retired for its own screen.
   { key: 'sources', lane: 'technical', name: 'Record Sources and Connectors', door: '/setup/record-sources', deps: [] },
