@@ -65,6 +65,12 @@ router.get('/policy-settings', requireAuth, READ, async function (req, res) {
 });
 // The one genuinely missing piece of plumbing Draft 6 named: set value + confirmed + who/when.
 // Never creates a setting — an unknown path is refused in words.
+// DECISION MODEL (2026-08-31): a confirmed setting is a change on the hub row that owns its domain.
+var ITEM_FOR_DOMAIN = { exemption: 'exemptions', clarification: 'clarification', clarification_screen: 'clarification', eligibility: 'eligibility', intake: 'intake', deadline: 'deadlines', clock_matrix: 'deadlines', fee: 'fee_law', fee_waiver: 'fee_law', payment: 'fee_law', fee_de_minimis: 'fee_law', redaction: 'redaction_rules', release_pipeline: 'release_review' };
+router.use('/policy-settings/confirm', function (req, res, next) {
+  res.on('finish', function () { if (res.statusCode < 300 && req.body && ITEM_FOR_DOMAIN[req.body.domain]) { try { require('../services/setupHub').afterChange(ITEM_FOR_DOMAIN[req.body.domain], req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  next();
+});
 router.post('/policy-settings/confirm', requireAuth, ATTEST, async function (req, res) {
   var b = req.body || {};
   var scope = confirmScopeError(req, b.domain);

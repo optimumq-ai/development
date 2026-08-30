@@ -129,9 +129,16 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   await callAs(U.dir, 'POST', '/fee-law/approve', {});
   var h1 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
   ok('E2 after approval the row says "fee schedule v1" and is in_progress until confirmed', /fee schedule v1/.test(h1.evidence) && h1.state === 'in_progress', h1.state + ' | ' + h1.evidence);
+  // APPROVAL MODEL (Kevin 2026-08-31): approval is refused while any city decision is missing — here the two
+  // waiver choices. Decide them, approve, and restore the undecided state afterwards for section F.
+  var atR = await callAs(U.dir, 'POST', '/setup-hub/fee_law/done');
+  ok('E3-pre approval is REFUSED while the waiver choices are undecided (422, naming them)', atR.status === 422 && /Who decides a waiver request/.test((atR.body && atR.body.error) || ''), atR.status + ' ' + JSON.stringify(atR.body).slice(0, 200));
+  var amBeforeE = await db.get("SELECT config_json FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'approval_modules'");
+  var decBeforeE = await db.get("SELECT config_json FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'fee_schedule_decisions'");
+  await callAs(U.dir, 'POST', '/fee-law/waiver', { decider: 'intake_review', denialWording: true });
   var at = await callAs(U.dir, 'POST', '/setup-hub/fee_law/done');
   var h2 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
-  ok('E3 attest from the strip marks it ready by name', at.status === 200 && h2.state === 'ready' && /marked done by FL oro_director/.test(h2.evidence), h2.state + ' | ' + h2.evidence);
+  ok('E3 attest from the strip marks it ready by name', at.status === 200 && h2.state === 'ready' && /marked done by FL oro_director/.test(h2.evidence), at.status + ' ' + h2.state + ' | ' + h2.evidence);
   // Attestation fold (Kevin 2026-08-29): the done-mark also attests the folded sections — fees always
   // (configured once a schedule exists); payment is SKIPPED while the clock switch is off (off is a
   // valid posture; automation stays unarmed because its enabled+attested double gate never half-arms).
@@ -142,6 +149,10 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   await callAs(U.dir, 'DELETE', '/setup-hub/fee_law/done');
   var feesAtt2 = await db.get("SELECT attested_by FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'fees'");
   ok('E3b undoing the mark un-attests the folded sections', !feesAtt2 || feesAtt2.attested_by == null, JSON.stringify(feesAtt2));
+  // restore the undecided waiver state section F starts from — the routing through the API (the engine caches the
+  // approval module), the decisions record straight back to its snapshot
+  await callAs(U.dir, 'POST', '/fee-law/waiver', { decider: 'routed_task', denialWording: false });
+  if (decBeforeE) await db.run("UPDATE jurisdiction_rules SET config_json = ? WHERE jurisdiction_id = 'jur-tx' AND domain = 'fee_schedule_decisions'", [decBeforeE.config_json]);
   ok('E4 the route and page exist', /path="setup\/fee-law"/.test(fs.readFileSync('/opt/optimumq/frontend/src/App.js', 'utf8')) && fs.existsSync('/opt/optimumq/frontend/src/pages/FeeLawPage.js'));
 
   console.log('\n=== F. FEE WAIVERS ON THIS SCREEN (Kevin 2026-08-27; the waiver_policy hub row is retired) ===');

@@ -8,6 +8,13 @@
 // Edit gate = the hub's own gate for the fee_law item (compliance lane groups).
 const express = require('express');
 const router = express.Router();
+// LIST/DECISION MODEL hook (approval, 2026-08-31): every write reports a change so an approved row drops to yellow.
+router.use(function (req, res, next) {
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].indexOf(req.method) !== -1 && !/\/preview/.test(req.path)) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { var HUBr = require('../services/setupHub'); var keyR = 'fee_law'; if (keyR) HUBr.afterChange(keyR, req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth } = require('../middleware/auth');
 const HUB = require('../services/setupHub');
 const FL = require('../services/feeLaw');

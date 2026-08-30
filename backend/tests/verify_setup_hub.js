@@ -118,7 +118,9 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var lg1 = await callAs(U.dir, 'POST', '/setup-hub/exemptions/done');
   var lg2 = await callAs(U.sa, 'POST', '/setup-hub/exemptions/done');
   var lg3 = await callAs(U.legal, 'POST', '/setup-hub/exemptions/done');
-  ok('D4 a LEGAL section needs legal_rules: Director may, Senior Legal may, SysAdmin 403', lg1.status === 200 && lg3.status === 200 && lg2.status === 403);
+  // (2026-08-31) exemptions is a decision row: the gate lets Director / Senior Legal through (200, or 422 while its
+  // choices are undecided), and refuses the SysAdmin outright (403).
+  ok('D4 a LEGAL section needs legal_rules: Director may, Senior Legal may (200 or readiness 422), SysAdmin 403', lg1.status !== 403 && lg3.status !== 403 && lg2.status === 403, lg1.status + '/' + lg3.status + '/' + lg2.status);
   await callAs(U.legal, 'DELETE', '/setup-hub/exemptions/done');
   var glm = await callAs(U.dir, 'POST', '/setup-hub/go_live/done');
   ok('D5 go-live cannot be "marked done" (400 NOT_MARKABLE) — it is flipped, not declared', glm.status === 400 && glm.body.code === 'NOT_MARKABLE');

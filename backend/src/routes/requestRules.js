@@ -10,6 +10,13 @@
 // draws the right line. Clarification and eligibility are compliance-lane acts (hub mayEdit).
 const express = require('express');
 const router = express.Router();
+// LIST/DECISION MODEL hook (approval, 2026-08-31): every write reports a change so an approved row drops to yellow.
+router.use(function (req, res, next) {
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].indexOf(req.method) !== -1) {
+    res.on('finish', function () { if (res.statusCode < 300) { try { var HUBr = require('../services/setupHub'); var keyR = ({ clarification: 'clarification', eligibility: 'eligibility', intake: 'intake', deadlines: 'deadlines', exemptions: 'exemptions' })[String(req.path).split('/')[1]]; if (keyR) HUBr.afterChange(keyR, req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {} } });
+  }
+  next();
+});
 const { requireAuth } = require('../middleware/auth');
 const HUB = require('../services/setupHub');
 const RR = require('../services/requestRules');

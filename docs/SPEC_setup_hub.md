@@ -115,6 +115,8 @@ Government adds region, Titan model, Bedrock key + secret). `verify_setup_hub` J
 | Fulfillment teams (`teams`) | list | ≥1 team; health: departments with no team to serve them | same hook |
 | Staff (`staff`) | list | ≥1 active person; health: people with no user type | `routes/staff.js` finish hook |
 The three organization rows share the Organization screen (`/org?tab=…`); each tab wears the strip of its own row.
+| Fee rules (`fee_law`) | tabs (decisions) | every deferral decided · both waiver choices · the clock's six when on · an APPROVED schedule version — exactly what the screen offers; the fees/fee_waiver/payment section knobs the screen does not surface stay with go-live (audit §3-E) | `routes/feeLaw.js` hook |
+| Clarification · Exemptions · Eligibility · Intake · Deadlines (5 rows) | decisions | every unconfirmed local policy setting of the row's section (`sectionRequired`) — the same rule go-live counts | `routes/requestRules.js` hook + `policy-settings/confirm` (domain → item) |
 
 `routes/config.js` also reports changes to `notifications` and `av_redaction` (still derived until converted).
 

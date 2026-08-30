@@ -94,7 +94,7 @@ function findItem(page, key) { var f = null; (page.lanes || []).forEach(function
     var dc = await callAs(DIR, 'PUT', '/fee-law/decisions', { items: items });
     ok('C2 every undecided city item decided ("none" × ' + undecided.length + ')', dc.status === 200 && dc.body && (!dc.body.refused || !dc.body.refused.length), err(dc) + ' ' + JSON.stringify(dc.body && dc.body.refused));
   } else ok('C2 no undecided deferral items', true);
-  var wv = await callAs(DIR, 'POST', '/fee-law/waiver', { decider: 'intake_review' });
+  var wv = await callAs(DIR, 'POST', '/fee-law/waiver', { decider: 'intake_review', denialWording: true });
   ok('C3 waiver decider recorded', wv.status === 200, err(wv));
   var ck = await callAs(DIR, 'POST', '/fee-law/clock', { enabled: true });
   ok('C4 deposit/payment clock switched on', ck.status === 200, err(ck));

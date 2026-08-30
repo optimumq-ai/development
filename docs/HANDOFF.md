@@ -9743,3 +9743,23 @@ one notification), golden 39/39, user-types 77/77. SPEC §3g.
 Departments · Teams · Staff. **NEXT:** the compliance lane — Fee rules and the Request rules tabs (decisions
 as the required set; the tabbed pattern), Redaction rules library (list), Update Configuration; then
 Taxonomy / Workflow Rules / Process Map and the features lane.
+
+## 2026-08-31 — the compliance lane on the decision model (Fee rules + the five Request rules tabs); suite 2791/2792 (E1a the only red)
+
+Decisions are the required set. `sectionRequired(sec)` turns a section's unconfirmed local policy settings
+into the row's missing list + a digest — clarification, exemptions, eligibility, intake, deadlines converted
+in one move (each tab of Request rules wears its own row's pill and a colour mark). `fee_law` requires exactly
+what its screen offers: every deferral decided, both waiver choices, the clock's six when on, an APPROVED
+schedule version (the City decisions tab carries the mark); the fees/fee_waiver/payment section knobs the
+screen does not surface stay go-live's concern (audit §3-E). Hooks: `routes/feeLaw.js`, `routes/requestRules.js`
+(path → item), `policy-settings/confirm` (domain → item). Long missing lists name six and count the rest.
+Harness adaptations: fee_law E3 now asserts the refusal while waivers are undecided, decides them, approves,
+restores; hub D4 accepts 422-for-readiness as "allowed". Hub 57/57, fee-law 43/43, request-rules 47/47,
+golden 39/39. The suite's census flagged one live `request_history` row — Kevin sending a clarification at
+12:15, a person on the app, not the run.
+
+**Converted (14):** Agency · Record Sources · AI configuration · Email · Authentication · Departments · Teams
+· Staff · Fee rules · Clarification · Exemptions · Eligibility · Intake · Deadlines. **Remaining (derived
+colours):** Redaction rules library (list), Update Configuration, Choices the statute left to the city
+(→ Jurisdiction Configuration retirement), Taxonomy / calibration / record owners, Workflow Rules, Process Map,
+the features lane's screens, and the no-screen rows.

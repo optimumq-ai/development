@@ -145,6 +145,16 @@ async function profileSections() {
     return { jid: jid, sections: map, settings: s, JP: JP };
   } catch (e) { return { jid: null, sections: {}, settings: null, error: e.message }; }
 }
+// DECISIONS AS THE REQUIRED SET (Kevin 2026-08-31): for a row backed by a profile section, every unconfirmed
+// local policy setting is a missing required item — the same rule go-live counts — and the digest is the
+// settings' values + confirmations, so a re-confirmed choice after approval turns the row yellow.
+function sectionRequired(sec) {
+  if (!sec) return { required: { missing: ['State not locked — lock it on the agency screen'], total: 1 }, digest: 'none' };
+  var list = sec.settings || [];
+  var missing = list.filter(function (s) { return s.kind === 'dimension' ? (s.gated && !s.confirmed) : !s.confirmed; }).map(function (s) { return s.label || s.path; });
+  return { required: { missing: missing, total: list.length }, digest: digestOf(list.map(function (s) { return [s.domain, s.path, s.value != null ? s.value : (s.current != null ? s.current : null), !!s.confirmed]; })) };
+}
+function withSection(r, sec) { return Object.assign(r, sectionRequired(sec)); }
 function sectionEvidence(sec, extraLine) {
   if (!sec) return ev('not_started', 'not configured yet');
   if (sec.status === 'not_configured') return ev('not_started', 'not configured yet');
@@ -195,32 +205,43 @@ const READERS = {
     if (missing.length) return ev('in_progress', head + ' · ' + missing.map(function (m) { return m === 'state not locked' ? m : m + ' missing'; }).join(' · '), { required: required, digest: digest });
     return ev('ready', head + ' · ' + email + ' · ' + state + ' rules loaded' + (lockedBy ? ' by ' + lockedBy : '') + ', ' + String(lockedAt).slice(0, 10), { required: required, digest: digest });
   },
-  deadlines: async function (ctx) { return sectionEvidence(ctx.sections.deadlines); },
+  deadlines: async function (ctx) { return withSection(sectionEvidence(ctx.sections.deadlines), ctx.sections.deadlines); },
   fee_law: async function (ctx) {
     // The fee-law screen (services/feeLaw.js): the law's figures load with the state; the city's decisions
     // and an approved fee schedule VERSION are what count. Attest (the `fees` section) still makes it ready.
-    if (!ctx.jid) return ev('not_started', 'no jurisdiction chosen yet');
+    if (!ctx.jid) return ev('not_started', 'no jurisdiction chosen yet', { required: { missing: ['State not locked — lock it on the agency screen'], total: 1 }, digest: 'none', tabs: { city: 'red' } });
     var s = await require('./feeLaw').screen(ctx.jid);
-    if (!s.jurisdiction) return ev('not_started', 'no jurisdiction chosen yet');
+    if (!s.jurisdiction) return ev('not_started', 'no jurisdiction chosen yet', { required: { missing: ['State not locked'], total: 1 }, digest: 'none', tabs: { city: 'red' } });
     var c = s.counts;
+    // required = every city decision (deferral rows), the waiver choices, the clock's six when it is on, an
+    // APPROVED schedule version; plus the fees / fee_waiver / payment sections' unconfirmed settings.
+    var miss = [];
+    (s.rows || []).forEach(function (r0) { if (r0.binding === 'deferral' && r0.city && r0.city.value == null && r0.city.source == null) miss.push('City decisions: ' + (r0.label || r0.key)); });
+    if (s.waiver) (s.waiver.choices || []).forEach(function (w) { if (w.value == null) miss.push('City decisions: ' + (w.label || w.key)); });
+    if (s.clock && s.clock.enabled) (s.clock.choices || []).forEach(function (w) { if (w.value == null) miss.push('City decisions: payment clock — ' + (w.label || w.key)); });
+    if (!s.version) miss.push('City decisions: approve the fee schedule (creates version 1)');
+    // (The fees / fee_waiver / payment SECTION knobs this screen does not surface are go-live's concern, not this
+    // row's — a screen must be able to reach yellow on its own. Audit 2026-08-31 §3-E lists them.)
+    var feeExtra = { required: { missing: miss, total: (c.deferral || 0) + ((s.waiver && s.waiver.choices) ? s.waiver.choices.length : 0) + ((s.clock && s.clock.enabled && s.clock.choices) ? s.clock.choices.length : 0) + 1 }, tabs: { city: miss.length ? 'red' : 'ok' },
+      digest: digestOf([(s.rows || []).map(function (r0) { return [r0.key, r0.city && r0.city.value, r0.city && r0.city.source]; }), s.waiver && s.waiver.choices, s.clock && [s.clock.enabled, s.clock.choices], s.version && s.version.id]) };
     var line = c.mandate + ' figures set by ' + s.jurisdiction.code + ' law' + (c.deferral ? ' · ' + c.decided + ' of ' + c.deferral + ' city choices decided' : '');
     if (s.waiver && s.waiver.choices.length) line += ' · waivers: ' + s.waiver.decided + ' of ' + s.waiver.choices.length + ' decided';
     if (s.clock) line += ' · payment clock: ' + (s.clock.enabled ? s.clock.confirmed + ' of ' + s.clock.choices.length + ' confirmed' : 'off');
-    if (!s.version) return ev(c.decided ? 'in_progress' : 'not_started', line + ' · no fee schedule version yet');
+    if (!s.version) return ev(c.decided ? 'in_progress' : 'not_started', line + ' · no fee schedule version yet', feeExtra);
     var sec = ctx.sections.fees;
     var r = sectionEvidence(sec, 'fee schedule v' + s.version.version);
     if (r.state === 'not_started') r = ev('in_progress', 'not yet confirmed');
     if (r.state !== 'ready') r.evidence = 'fee schedule v' + s.version.version + ' · ' + r.evidence;
     r.evidence = line + ' · ' + r.evidence;
-    return r;
+    return Object.assign(r, feeExtra);
   },
   clarification: async function (ctx) {
     var r = sectionEvidence(ctx.sections.clarification);
     if (r.state === 'not_started') r.evidence = 'not configured yet — clarification is switched off';
-    return r;
+    return withSection(r, ctx.sections.clarification);
   },
-  exemptions: async function (ctx) { return sectionEvidence(ctx.sections.exemption); },
-  intake: async function (ctx) { return sectionEvidence(ctx.sections.intake); },
+  exemptions: async function (ctx) { return withSection(sectionEvidence(ctx.sections.exemption), ctx.sections.exemption); },
+  intake: async function (ctx) { return withSection(sectionEvidence(ctx.sections.intake), ctx.sections.intake); },
   eligibility: async function (ctx) {
     var sec = ctx.sections.eligibility;
     var r = sectionEvidence(sec);
@@ -228,7 +249,7 @@ const READERS = {
       var n = Number(sec.unconfirmed) || 0;
       r.evidence = n === 1 ? 'one decision to confirm' : n > 1 ? n + ' decisions to confirm' : r.evidence;
     }
-    return r;
+    return withSection(r, sec);
   },
   redaction_rules: async function (ctx) {
     var n = await count("SELECT COUNT(*) n FROM redaction_rules WHERE approval_status = 'approved' AND is_active = 1");
@@ -574,7 +595,7 @@ async function build(user) {
       else { r.approval = 'green'; r.approvalWhy = 'approved by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10) + ' · ' + n + ' ' + plural + health; }
     } else if (r.required) {
       r.approvalModel = 'fields';
-      if (r.required.missing.length) { r.approval = 'red'; r.approvalWhy = r.required.missing.length + ' of ' + r.required.total + ' required items missing — ' + r.required.missing.join(', '); }
+      if (r.required.missing.length) { var mm = r.required.missing; r.approval = 'red'; r.approvalWhy = mm.length + ' of ' + Math.max(r.required.total, mm.length) + ' required items missing — ' + mm.slice(0, 6).join(', ') + (mm.length > 6 ? ' … and ' + (mm.length - 6) + ' more' : ''); }
       else if (!m) { r.approval = 'yellow'; r.approvalWhy = 'complete — awaiting approval by ' + (it.legal ? 'Senior Legal' : LANE_BY_KEY[it.lane].ownerLabel.split(' · ')[0]); }
       else if (changed) { r.approval = 'yellow'; r.approvalWhy = 'changed since approval by ' + (m.marked_by_name || m.marked_by) + ' on ' + String(m.marked_at).slice(0, 10) + ' — awaiting re-approval'; }
       else { r.approval = 'green'; r.approvalWhy = 'approved by ' + (m.marked_by_name || m.marked_by) + ', ' + String(m.marked_at).slice(0, 10); }

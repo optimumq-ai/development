@@ -143,11 +143,16 @@ export default function RequestRulesPage() {
 
   var t = TABS.filter(function (x) { return x.key === tab; })[0];
   var hubRow = hub[t.hubKey];
-  var st = STATE[(hubRow && hubRow.state) || 'not_started'];
+  // APPROVAL MODEL (2026-08-31): each tab is its own hub row; the pill is that row's three-colour indicator.
+  var APPROVAL = { red: { label: 'Not started', bg: '#FEE2E2', color: '#991B1B' }, yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' }, green: { label: 'Approved', bg: '#E1F2E9', color: '#1B8A5A' } };
+  var TABCOL = { red: '#DC2626', yellow: '#D97706', green: '#16A34A' };
+  var ap = (hubRow && hubRow.approval) || null;
+  var st = ap ? APPROVAL[ap] : STATE[(hubRow && hubRow.state) || 'not_started'];
+  var reLabel = hubRow && hubRow.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
   var stateName = data.jurisdiction.stateName || data.jurisdiction.name;
   var td = data.tabs[tab === 'exemptions' ? 'exemptions' : tab];
   var can = !!(data.canEdit && data.canEdit[tab]);
-  var attested = hubRow && hubRow.signoff;
+  var attested = hubRow && hubRow.signoff && !(hubRow.changedSinceApproval) && ap !== 'red';
   var laneIndex = { clarification: 'item 3 of 10', exemptions: 'item 4 of 10', eligibility: 'item 5 of 10', deadlines: 'item 1 of 10', intake: 'item 6 of 10' }[tab];
 
   function edited(c) { return edits[c.path] !== undefined ? edits[c.path] : (c.value != null ? c.value : null); }
@@ -202,15 +207,15 @@ export default function RequestRulesPage() {
   }
 
   var clarOn = data.tabs.clarification.enabled;
-  var mayAttest = can && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention' &&
+  var mayAttest = can && hubRow && ap !== 'red' && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention' &&
     (tab === 'clarification' ? (clarOn && td.unconfirmed === 0)
       : tab === 'deadlines' ? td.calendar.holidayCount > 0   // blank service targets are a valid posture; an empty holiday calendar is not
       : td.unconfirmed === 0);
 
   function attestBtn() {
-    if (attested) return <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>Attested · undo</button>;
+    if (attested) return <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>{ap ? 'Approved · undo' : 'Attested · undo'}</button>;
     return <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })}
-      title={mayAttest ? 'Record that this item is complete' : 'Every choice on this tab must be recorded first'}>Attest as complete</button>;
+      title={mayAttest ? 'Approve: record that this item is complete' : 'Every choice on this tab must be recorded first'}>{reLabel}</button>;
   }
 
   // ---------------- tab bodies ----------------
@@ -639,7 +644,7 @@ export default function RequestRulesPage() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           {st.label}
         </button>
-        <span style={{ flexGrow: 1, fontSize: '12px', color: C.mute, lineHeight: '1.35' }}>{hubRow ? hubRow.evidence : ''}</span>
+        <span style={{ flexGrow: 1, fontSize: '12px', color: C.mute, lineHeight: '1.35' }}>{hubRow ? (hubRow.approvalWhy || hubRow.evidence) : ''}</span>
         <span style={{ fontSize: '11.5px', color: C.faint }}>Compliance and Policies Setup · {laneIndex}</span>
         {attestBtn()}
       </div>
@@ -650,7 +655,8 @@ export default function RequestRulesPage() {
         {/* tabs: one screen, three hub rows; each dot shows its row's hub state */}
         <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid ' + C.line, padding: '0 8px' }}>
           {TABS.map(function (x) {
-            var xs = STATE[(hub[x.hubKey] && hub[x.hubKey].state) || 'not_started'];
+            var xa = hub[x.hubKey] && hub[x.hubKey].approval;
+            var xs = xa ? { bg: 'transparent', color: TABCOL[xa] } : STATE[(hub[x.hubKey] && hub[x.hubKey].state) || 'not_started'];
             var on = x.key === tab;
             return <button key={x.key} type="button" onClick={function () { goTab(x.key); }}
               style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '12px 16px', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit', background: 'none', border: 0, cursor: 'pointer', color: on ? C.ink : C.mute, borderBottom: '2px solid ' + (on ? C.pri : 'transparent'), marginBottom: '-1px' }}>

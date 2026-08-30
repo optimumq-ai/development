@@ -95,16 +95,21 @@ export default function FeeLawPage() {
 
   var can = !!data.canEdit;
   var hubRow = hub && hub.fee_law;
-  var st = STATE[(hubRow && hubRow.state) || 'not_started'];
+  // APPROVAL MODEL (2026-08-31): decisions are the required set; the pill is this screen's indicator.
+  var APPROVAL = { red: { label: 'Not started', bg: '#FEE2E2', color: '#991B1B' }, yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' }, green: { label: 'Approved', bg: '#E1F2E9', color: '#1B8A5A' } };
+  var ap = (hubRow && hubRow.approval) || null;
+  var st = ap ? APPROVAL[ap] : STATE[(hubRow && hubRow.state) || 'not_started'];
+  var reLabel = hubRow && hubRow.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
+  var cityMark = hubRow && hubRow.tabs && hubRow.tabs.city;
   var c = data.counts;
   var rows = data.rows;
   var dirty = Object.keys(edits).length > 0;
-  var attested = hubRow && hubRow.signoff;
+  var attested = hubRow && hubRow.signoff && ap !== 'red' && !(hubRow && hubRow.changedSinceApproval);
   var waiver = data.waiver || { choices: [], decided: 0, sentences: [] };
   var waiverOpen = waiver.choices.length - waiver.decided;
   var clock = data.clock || { enabled: false, choices: [], confirmed: 0 };
   var clockOpen = clock.enabled ? clock.choices.length - clock.confirmed : 0;  // off is itself a configured posture
-  var mayAttest = can && !!data.version && waiverOpen === 0 && clockOpen === 0 && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention';
+  var mayAttest = ap !== 'red' && can && !!data.version && waiverOpen === 0 && clockOpen === 0 && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention';
   var stateName = data.jurisdiction.stateName || data.jurisdiction.name;
   var nextVersion = data.version ? data.version.version + 1 : 1;
 
@@ -268,11 +273,11 @@ export default function FeeLawPage() {
           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '26px', padding: '0 11px', border: 0, borderRadius: '999px', background: st.bg, color: st.color, fontSize: '11px', fontWeight: '700', fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap' }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>{st.label}
         </button>
-        <span style={{ flexGrow: 1, fontSize: '12px', color: C.mute, lineHeight: '1.35' }}>{hubRow ? hubRow.evidence : ''}</span>
+        <span style={{ flexGrow: 1, fontSize: '12px', color: C.mute, lineHeight: '1.35' }}>{hubRow ? (hubRow.approvalWhy || hubRow.evidence) : ''}</span>
         <span style={{ fontSize: '11.5px', color: C.faint }}>Compliance and Policies Setup</span>
         {attested
-          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>Attested · undo</button>
-          : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })} title={mayAttest ? 'Record that this item is complete' : (!data.version ? 'Approve a fee schedule version first' : waiverOpen ? 'Record the fee-waiver choices first' : 'Confirm the deposit & payment clock settings first')}>Attest as complete</button>}
+          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>{ap ? 'Approved · undo' : 'Attested · undo'}</button>
+          : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })} title={mayAttest ? 'Record that this item is complete' : (!data.version ? 'Approve a fee schedule version first' : waiverOpen ? 'Record the fee-waiver choices first' : 'Confirm the deposit & payment clock settings first')}>{reLabel}</button>}
       </div>
 
       {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
@@ -300,7 +305,7 @@ export default function FeeLawPage() {
               var badge = t.key === 'mandate' ? c.mandate + ' loaded' : t.key === 'city' ? (c.decided + waiver.decided + (clock.enabled ? clock.confirmed : 0)) + ' of ' + (c.deferral + waiver.choices.length + (clock.enabled ? clock.choices.length : 0)) + ' decided' : t.key === 'document' ? (data.document ? data.document.found + ' from document' : 'none read') : (data.version ? 'v' + data.version.version : 'no version');
               return <button key={t.key} type="button" onClick={function () { goTab(t.key); }}
                 style={{ padding: '9px 16px', background: 'none', border: 'none', borderBottom: active ? '2px solid ' + C.pri : '2px solid transparent', marginBottom: '-1px', fontSize: '13.5px', fontWeight: active ? '700' : '500', color: active ? C.pri : C.mute, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                {t.label}<span style={{ fontSize: '10.5px', fontWeight: '700', color: active ? C.pri : C.faint, background: active ? '#E8EEF4' : C.wash, borderRadius: '999px', padding: '1px 7px' }}>{badge}</span>
+                {t.key === 'city' && cityMark ? <span title={cityMark === 'red' ? 'Decisions still missing on this tab' : (cityMark === 'yellow' ? 'Complete — awaiting approval' : 'Approved')} style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: { red: '#DC2626', yellow: '#D97706', green: '#16A34A' }[cityMark] || '#C7D0D8', marginRight: '7px', verticalAlign: 'middle' }} /> : null}{t.label}<span style={{ fontSize: '10.5px', fontWeight: '700', color: active ? C.pri : C.faint, background: active ? '#E8EEF4' : C.wash, borderRadius: '999px', padding: '1px 7px' }}>{badge}</span>
               </button>;
             })}
           </div>
