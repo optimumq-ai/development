@@ -115,7 +115,35 @@ async function workRow(idOrNumber) {
   return { row: null, addressed: addressed, ambiguous: kids };
 }
 
+// ---------------------------------------------------------------------------------------------------
+// OVERLAY THE PARENT'S FACTS ON AN ADDRESSED ROW.
+//
+// Notices, the financial profile and the waiver decision are addressed with WORK rows (tasks hang off
+// children), but everything they say to the citizen is a PARENT fact — the number the citizen knows, who
+// they are, where the letter goes, the waiver. Reading those off the child gave the citizen a component
+// number ("2026-000045-1") and hid a granted waiver (written on one row, read on another). Audit 2026-08-31.
+//
+// parentFacts(row) returns the row with every parent-level column replaced by the parent's value when the
+// row has a parent; a parent (or a legacy unwrapped row) answers for itself. Child facts (description,
+// stage, routing, component_label, its own id) are untouched.
+var PARENT_COLS = ['request_number', 'is_mrr', 'requestor_name', 'requestor_email', 'requestor_phone', 'requestor_type',
+  'delivery_method', 'mailing_street1', 'mailing_street2', 'mailing_city', 'mailing_state', 'mailing_zip',
+  'fee_waiver_requested', 'fee_waiver_status', 'fee_waiver_reason', 'fee_waiver_decided_by', 'fee_waiver_decided_at',
+  'certification_requested', 'deadline_date', 'purpose', 'classification'];
+async function parentFacts(row) {
+  if (!row || !row.master_request_id) return row;
+  var db = require('../db');
+  var p = await db.get('SELECT * FROM requests WHERE id = ?', [row.master_request_id]);
+  if (!p) return row;
+  var out = Object.assign({}, row, { parent_id: p.id });
+  PARENT_COLS.forEach(function (c) { if (c in p) out[c] = p[c]; });
+  return out;
+}
+// The row a PARENT-level write belongs to (money, waiver, number): the parent when the row is a child.
+function parentIdOf(row) { return row && row.master_request_id ? row.master_request_id : (row && row.id); }
+
 module.exports = {
+  parentFacts: parentFacts, parentIdOf: parentIdOf, PARENT_COLS: PARENT_COLS,
   parent: parent, leaf: leaf, andParent: andParent, andLeaf: andLeaf,
   numberJoin: numberJoin, numberExpr: numberExpr, parentFact: parentFact,
   workRow: workRow

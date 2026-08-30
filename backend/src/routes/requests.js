@@ -598,18 +598,24 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
   if (decision !== 'grant' && decision !== 'deny') return res.status(400).json({ error: 'decision must be grant or deny' });
   var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
+  // THE WAIVER IS A PARENT FACT (SPEC_parent_child_lifecycle §4.3). The route is addressed with whatever the
+  // caller holds — usually the child the task hangs off — but the decision is written on the PARENT, which is
+  // where every notice reads it (audit 2026-08-31: written on one row, read on another, the citizen got billed).
+  var scopeSvc = require('../services/requestScope');
+  var waiverRowId = scopeSvc.parentIdOf(request);
+  request = await scopeSvc.parentFacts(request);
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
-  // Resolve the approval task (spawned at intake) whichever way the decision lands.
-  var closeWaiverTask = "UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned','awaiting_review')";
+  // Resolve the approval task (spawned at intake) whichever way the decision lands — on the addressed row and its family.
+  var closeWaiverTask = "UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE (request_id = ? OR request_id = (SELECT master_request_id FROM requests WHERE id = ?) OR request_id IN (SELECT id FROM requests WHERE master_request_id = ?)) AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned','awaiting_review')";
 
   if (decision === 'grant') {
-    await run("UPDATE requests SET fee_waiver_status='granted', fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [actor, request.id]);
-    await run(closeWaiverTask, [request.id]);
-    await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_GRANTED', 'Fee waiver granted');
+    await run("UPDATE requests SET fee_waiver_status='granted', fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [actor, waiverRowId]);
+    await run(closeWaiverTask, [request.id, request.id, request.id]);
+    await logHistory(waiverRowId, req.user.sub, actor, 'FEE_WAIVER_GRANTED', 'Fee waiver granted');
     // WS5: a granted waiver removes what was invoiced for this request from the requestor's A/R. Without
     // this the waived amount would keep counting as an unpaid prior balance and could trigger a deposit
     // demand on their NEXT request — for money the city has just decided it is not owed.
-    try { await require('../services/requestorLedger').onWaiverGranted(request.id, 'fee waiver granted'); } catch (e) {}
+    try { await require('../services/requestorLedger').onWaiverGranted(waiverRowId, 'fee waiver granted'); } catch (e) {}
     return res.json({ decision: 'granted' });
   }
 
@@ -625,9 +631,9 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
   }
   if (!reasonText) return res.status(400).json({ error: 'A denial reason is required' });
 
-  await run("UPDATE requests SET fee_waiver_status='denied', fee_waiver_reason=?, fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [reasonText, actor, request.id]);
-  await run(closeWaiverTask, [request.id]);
-  await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_DENIED', 'Denied: ' + reasonText);
+  await run("UPDATE requests SET fee_waiver_status='denied', fee_waiver_reason=?, fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [reasonText, actor, waiverRowId]);
+  await run(closeWaiverTask, [request.id, request.id, request.id]);
+  await logHistory(waiverRowId, req.user.sub, actor, 'FEE_WAIVER_DENIED', 'Denied: ' + reasonText);
 
   // PHASE 7 / WS4 — a denial does NOT get its own letter by default. DESIGN_fee_waiver_commercial.md
   // decides that "waiver reviewed and not granted + itemized estimate" is ONE communication: the denial

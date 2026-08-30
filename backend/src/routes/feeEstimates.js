@@ -4,6 +4,7 @@
 // automated projection ladder - profiles/sampling/known-page-counts - will later pre-fill these),
 // persists an immutable feeContext snapshot, and updates the request's headline estimate.
 const express = require('express');
+const scope = require('../services/requestScope');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const { run, get, all } = require('../db');
@@ -102,10 +103,9 @@ async function loadComponents(requestId) {
   // is_mrr) — and estimates run per WORK ROW, so reading it off the addressed row silently dropped a
   // requested certification from every child-keyed estimate. Resolve it through the parent, in the one
   // place both readers (defaultCertification, the panel's `certification.requested`) load the row.
-  if (reqRow.master_request_id) {
-    var pRow = await get('SELECT certification_requested FROM requests WHERE id = ?', [reqRow.master_request_id]);
-    if (pRow) reqRow.certification_requested = pRow.certification_requested;
-  }
+  // Every PARENT fact (number, is_mrr, requestor, waiver, certification) resolves through the parent —
+  // the panel header showed the child's suffixed number and could never show the MRR badge (audit 2026-08-31).
+  reqRow = await scope.parentFacts(reqRow);
   var rows;
   if (reqRow.is_mrr && !reqRow.master_request_id) {
     var kids = await all('SELECT * FROM requests WHERE master_request_id = ?', [requestId]);
@@ -253,7 +253,7 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
 // build the requestor-facing notice (preview) from the latest saved estimate
 router.get('/request/:requestId/notice', requireAuth, async function (req, res) {
   try {
-    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email, fee_waiver_requested, fee_waiver_status, fee_waiver_reason FROM requests WHERE id = ?', [req.params.requestId]);
+    var reqRow = await scope.parentFacts(await get('SELECT id, master_request_id, request_number, requestor_name, requestor_email, fee_waiver_requested, fee_waiver_status, fee_waiver_reason FROM requests WHERE id = ?', [req.params.requestId]));
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var snap = await latestEstimate(req.params.requestId);
     if (!snap) return res.status(400).json({ error: 'No saved estimate yet - calculate an estimate first.' });
@@ -598,7 +598,7 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
 // via the existing /notice/send path. Payment instructions come from the jurisdiction profile config.
 router.get('/request/:requestId/balance-notice', requireAuth, async function (req, res) {
   try {
-    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email FROM requests WHERE id = ?', [req.params.requestId]);
+    var reqRow = await scope.parentFacts(await get('SELECT id, master_request_id, request_number, requestor_name, requestor_email FROM requests WHERE id = ?', [req.params.requestId]));
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var state = await paymentState(req.params.requestId);
     if (!state) return res.status(400).json({ error: 'No estimate on this request.' });
@@ -675,7 +675,7 @@ router.get('/payments/drawer', requireAuth, async function (req, res) {
 router.get('/request/:requestId/adjustment-notice', requireAuth, async function (req, res) {
   try {
     var rid = req.params.requestId;
-    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email, fee_waiver_status FROM requests WHERE id = ?', [rid]);
+    var reqRow = await scope.parentFacts(await get('SELECT id, master_request_id, request_number, requestor_name, requestor_email, fee_waiver_status FROM requests WHERE id = ?', [rid]));
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var est = await latestEstimate(rid);
     var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
@@ -776,7 +776,7 @@ async function computeSnapshot(row, fallbackCfgRow) {
 router.get('/request/:requestId/financial-profile', requireAuth, async function (req, res) {
   try {
     var rid = req.params.requestId;
-    var reqRow = await get("SELECT id, request_number, requestor_name, requestor_email, description, fee_waiver_requested, fee_waiver_status, fee_waiver_decided_by, fee_waiver_decided_at, fee_waiver_reason FROM requests WHERE id = ?", [rid]);
+    var reqRow = await scope.parentFacts(await get("SELECT id, master_request_id, request_number, requestor_name, requestor_email, description, fee_waiver_requested, fee_waiver_status, fee_waiver_decided_by, fee_waiver_decided_at, fee_waiver_reason FROM requests WHERE id = ?", [rid]));
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var jid = await activeJurisdiction();
     var cfgRow = await pickConfig(jid);

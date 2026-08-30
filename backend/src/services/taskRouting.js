@@ -701,6 +701,39 @@ async function applyStageTransition(requestId, toStage, opts) {
   // harness; it was never specific to that path.
   if (toStage === 'closed') {
     await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId]);
+    // PARENT/CHILD CASCADE (audit 2026-08-31). Closing a PARENT is a parent-level terminal event — nonpayment,
+    // no clarification, withdrawal (SPEC_parent_child_lifecycle §4.2/§6.2: "parent-level terminal events
+    // cascade down") — and until now it closed the parent row ONLY: every child stayed live with claimable
+    // tasks, so the citizen's request was closed on paper while staff kept working it. Each child goes
+    // through this same function, so it gets its own history row and its tasks cancelled. Children have no
+    // children, so the recursion ends there. A CHILD closing never cascades up: the parent DERIVES
+    // (disposition.deriveParent).
+    if (!opts.cascade) {
+      var kids = await all("SELECT id, stage FROM requests WHERE master_request_id = ? AND status <> 'closed'", [requestId]);
+      for (var ki = 0; ki < kids.length; ki++) {
+        try {
+          await applyStageTransition(kids[ki].id, 'closed', { actorId: opts.actorId, actorName: opts.actorName || 'System', action: 'CLOSED_CASCADE',
+            notes: 'Closed with the request (' + (opts.action || 'closed at the parent') + ').', createdBy: opts.createdBy, cascade: true });
+          // The mark a parent reopen looks for: only a child closed BY the cascade is reopened by it.
+          await run("UPDATE requests SET closure_reason = 'cascade' WHERE id = ?", [kids[ki].id]);
+        } catch (eK) { console.error('[applyStageTransition cascade close]', kids[ki].id, eK && eK.message); }
+      }
+    }
+  }
+  // The mirror: REOPENING a parent (nonpayment reopen, derived un-derivation, a Director's reopen) restores
+  // every child that was closed BY THE CASCADE to the stage it was in — never a child that ended on its own
+  // (delivered, denied, withdrawn), whose disposition stands.
+  if (fromStage === 'closed' && toStage !== 'closed' && opts.reopen && !opts.cascade) {
+    var closedKids = await all("SELECT id FROM requests WHERE master_request_id = ? AND status = 'closed' AND closure_reason = 'cascade'", [requestId]);
+    for (var kj = 0; kj < closedKids.length; kj++) {
+      var lastH = await get("SELECT stage_from FROM request_history WHERE request_id = ? AND action = 'CLOSED_CASCADE' AND stage_from IS NOT NULL ORDER BY created_at DESC LIMIT 1", [closedKids[kj].id]);
+      if (!lastH) continue;
+      try {
+        await run("UPDATE requests SET closure_reason = NULL WHERE id = ?", [closedKids[kj].id]);
+        await applyStageTransition(closedKids[kj].id, lastH.stage_from, { reopen: true, cascade: true, actorId: opts.actorId, actorName: opts.actorName || 'System', action: 'REOPENED_CASCADE',
+          notes: 'Reopened with the request (' + (opts.action || 'reopened at the parent') + ').', createdBy: opts.createdBy });
+      } catch (eR) { console.error('[applyStageTransition cascade reopen]', closedKids[kj].id, eR && eR.message); }
+    }
   }
   // Redaction automation slice 3b: on ENTERING a redaction stage (once, not on reconciler sweeps of
   // spawnForStage), kick the read-based triage in the BACKGROUND so the AI read's latency/failure never

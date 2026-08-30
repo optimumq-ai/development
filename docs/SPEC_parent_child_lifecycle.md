@@ -683,6 +683,23 @@ Per §12 Layer 3, unchanged and correct: children contribute **quantities** (pag
 
 ---
 
+## 6.5 Cascade and parent facts — BUILT 2026-08-31 (`verify_parent_child_facts` 19/19)
+- **A parent close cascades.** `applyStageTransition(parentId, 'closed')` — the act of the nonpayment and
+  no-clarification sweeps, a withdrawal, a derived Complete — closes every live child through the same function
+  (own `CLOSED_CASCADE` history row remembering its stage, tasks cancelled) and marks it
+  `closure_reason = 'cascade'`. A child closing never cascades up; the parent derives (§6.1).
+- **A parent reopen restores.** A reopen at the parent (`opts.reopen`: nonpayment reopen, Director reopen,
+  un-derivation) reopens only children marked `cascade`, to the stage their cascade row remembers; a child
+  that ended on its own (delivered, denied, no records) stays ended.
+- **Parent facts through the parent.** `requestScope.parentFacts(row)` overlays the parent's number, `is_mrr`,
+  requestor, mailing address, waiver, certification, deadline, purpose and classification onto any addressed
+  row; the estimate panel, the three fee notices, the financial profile and the clarification letter use it.
+  The fee-waiver decision is WRITTEN on the parent (`requestScope.parentIdOf`) whichever row was addressed.
+  (Before: every one of those quoted the child's `-N` number and a granted waiver was invisible to the notice —
+  audit 2026-08-31 §1e.) Still to convert (MEDIUM, same audit): tickler flagged list, coverage-gap notification,
+  ERP charge reference, legal-estimate task title, external-contributor invite; the inverse class (parent
+  `description`/`stage` read where they are NULL by design: MRR hub header, `PATCH /:id/route`, parent finance).
+
 ## 7. Presentation — queue, dashboard, reports
 
 **QUEUE: `[BUILT 2026-07-16 — verify_queue_parent_child 21/21, suite 744/744]`. Dashboard + reports: NOT YET — they consume the same `GET /requests` and inherit the fix, but neither groups by parent.**

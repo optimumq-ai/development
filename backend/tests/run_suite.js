@@ -37,6 +37,7 @@ const ALL = [
   'verify_e2e_tx', 'verify_e2e_oh',
   // LAST on purpose: it benchmarks, SWAPS, and restores the test database — the world it leaves is
   // its own benchmark, but nothing else should have to run after a database swap.
+  'verify_parent_child_facts',
   'verify_golden_setup',   // LAST before the reset: it configures the whole city and attests every section
   'verify_magic_reset',
 ];

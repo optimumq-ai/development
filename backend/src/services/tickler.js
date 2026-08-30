@@ -110,8 +110,9 @@ async function runSweep(opts) {
   // (2) Deposit overdue: a deposit is OWED and unpaid past ITS band's window.
   //
   // PARENT/CHILD (Kevin's decision, 2026-07-14): this sweep is driven by the MONEY AXIS, not by the stage.
-  // It used to require `r.stage = 'awaiting_payment'` — but after the migration the ESTIMATE hangs off the
-  // PARENT while the STAGE lives on the CHILD, so that join would match nothing and the deposit sweep would
+  // It used to require `r.stage = 'awaiting_payment'` — but after the migration the MONEY is a PARENT axis
+  // (the estimate rows are keyed on the child the UI addressed, the payment situation is computed per parent
+  // — see feeRelease.js) while the STAGE lives on the CHILD, so that join would match nothing and the deposit sweep would
   // SILENTLY STOP RUNNING: no dunning, no lapse, no withdrawal, and no error to tell you.
   //
   // The stage predicate was always redundant with the money one. What actually defines "a deposit is

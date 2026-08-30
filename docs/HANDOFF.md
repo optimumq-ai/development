@@ -9634,3 +9634,19 @@ readiness mismatches, now fixed — golden harness green); the app's "not ready 
 otherwise DATA (Kevin's walk-through); and two families of real defects remain for Kevin: MFA is
 non-functional, and 21 parent/child-invariant violations (citizen notices quote child numbers; auto-close
 sweeps don't cascade).
+
+## 2026-08-31 — parent/child HIGH defects fixed (audit §1e); suite 2758/2759 (E1a the only red)
+
+**Kevin's call:** fix the parent/child defects first. Built: (1) `applyStageTransition` cascades a PARENT close
+to every live child (own `CLOSED_CASCADE` history row, tasks cancelled, `closure_reason='cascade'`) and a
+parent reopen restores only cascade-closed children to their remembered stage — the nonpayment and
+no-clarification sweeps no longer leave children live with claimable tasks; (2) `requestScope.parentFacts()` +
+`parentIdOf()` — the estimate panel header (number + MRR badge), the estimate / balance / adjustment notices,
+the financial profile and the clarification letter read the parent's number, identity, mailing address and
+waiver through the parent; (3) the fee-waiver decision is written on the PARENT whichever row was addressed
+(and its task closed across the family). Misleading comments in clarificationTimeout and tickler corrected.
+`tests/verify_parent_child_facts.js` (19/19; two-child request end to end) registered before golden.
+SPEC_parent_child_lifecycle §6.5 records the rules and the 12 remaining MEDIUM/LOW sites.
+
+**NEXT:** Kevin is walking through how attestation for initial setup should work (design, no build yet) ·
+his live walk-through · MFA decision · the Jurisdiction Configuration retirement plan.

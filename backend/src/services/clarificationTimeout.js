@@ -59,8 +59,8 @@ async function timeoutConfig() {
 //     of the citizen's request half-alive.
 //
 // `close_target` is therefore the PARENT of the work row. Today `master_request_id` is NULL, so COALESCE
-// resolves to the row itself and this is a provable no-op; after the migration it closes the parent, which
-// cascades to every child. This sweep AUTO-CLOSES, so an unscoped version would have been the single most
+// resolves to the row itself and this is a provable no-op; after the migration it closes the parent, and
+// applyStageTransition cascades the close to every child (built 2026-08-31 — before that the children stayed live). This sweep AUTO-CLOSES, so an unscoped version would have been the single most
 // destructive query in the migration.
 async function pendingClarifications() {
   return await db.all(
@@ -79,7 +79,7 @@ async function pendingClarifications() {
 // Close the PARENT, not the work row (spec §6.2). Tex. Gov't Code § 552.222(d): an unanswered clarification
 // withdraws "the underlying request", not one record of it. `close_target` is the parent — today that IS the
 // row itself (master_request_id is NULL), so this is a no-op; after the migration it closes the parent and
-// cascades to every child, instead of leaving the citizen's request half-alive.
+// applyStageTransition cascades to every child (2026-08-31), instead of leaving the citizen's request half-alive.
 async function closeForNoClarification(row, cfg, elapsed) {
   var target = row.close_target || row.id;
   var note = 'Auto-closed: no clarification received ' + elapsed + ' days after the request was sent (grace '

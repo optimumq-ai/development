@@ -52,7 +52,9 @@ async function automationState() {
 }
 
 async function findRequest(idOrNumber) {
-  return await get("SELECT id, request_number, delivery_method, stage, requestor_name, requestor_email, description, mailing_street1, mailing_street2, mailing_city, mailing_state, mailing_zip FROM requests WHERE id = ? OR request_number = ?", [idOrNumber, idOrNumber]);
+  // Addressed with the WORK row (the task's request); the letter's number, name and mailing address are the
+  // PARENT's, the description is the child's (audit 2026-08-31: the letter quoted the component number).
+  return await require('./requestScope').parentFacts(await get("SELECT id, master_request_id, request_number, delivery_method, stage, requestor_name, requestor_email, description, mailing_street1, mailing_street2, mailing_city, mailing_state, mailing_zip FROM requests WHERE id = ? OR request_number = ?", [idOrNumber, idOrNumber]));
 }
 
 // Resolve the postal mailing address for a clarification letter. Precedence (spec §5b build recipe):
