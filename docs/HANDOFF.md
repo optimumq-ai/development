@@ -9925,3 +9925,15 @@ Harnesses: request_create 29/29, form_intake 11/11, wrap_parent 43/43, mrr_child
 parent_child_facts 19/19; API restarted. NOTE for the §4.4 field-design pass: the parent workspace's
 "Description of Records Requested" section renders EMPTY (descriptions live on children) — same class, not
 fixed here. 2026-000006 itself stays routed to intake review (the classifier failed at submit time, by design).
+
+## 2026-08-31 — testing superuser created (live, via real APIs — no code change)
+
+Kevin: one login that can work every task so a request can be walked end to end without switching accounts.
+Created through POST /staff + PATCH user-types/task-types as admin: **tester@optimumq.local / TestAll!2026**
+(temp password; "Test Runner (all tasks)", title marks it pre-go-live only). 35 user-type grants (all 8 office
+types + staff/supervisor/manager on every active team) + all 13 routable task types. Verified: its pool view
+lists every open task incl. Kevin's intake_review t-cf74d37b. Flow = claim from the My Tasks pool (one click)
+→ work → next stage's task appears in the pool. NO magnet/auto-assign toggle built (not needed for one-click
+claims; revisit if Kevin wants). CAVEAT: two-eyes on release_review will refuse the tester if it completed the
+request's previous step — use a second login (e.g. admin) for that one review, or decide a test-mode relaxation
+with Kevin. DEACTIVATE (or delete) this account at go-live — it can do everything, everywhere.
