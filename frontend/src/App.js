@@ -22,7 +22,6 @@ import AgentRulesPage from './pages/AgentRulesPage';
 import AiConfigurationPage from './pages/AiConfigurationPage';
 import RecordSourcesPage from './pages/RecordSourcesPage';
 import WorkflowPage from './pages/WorkflowPage';
-import WorkflowMapPage from './pages/WorkflowMapPage';
 import RuleUpdatesPage from './pages/RuleUpdatesPage';
 import RedactionRulesPage from './pages/RedactionRulesPage';
 import TaxonomyPage from './pages/TaxonomyPage';
@@ -174,7 +173,7 @@ export default function App() {
           <Route path="setup/ai-configuration" element={<AiConfigurationPage />} />
           <Route path="setup/record-sources" element={<RecordSourcesPage />} />
           <Route path="setup/workflow-rules" element={<WorkflowPage />} />
-          <Route path="setup/process-map" element={<WorkflowMapPage />} />
+          <Route path="setup/process-map" element={<Navigate to="/setup/workflow-rules" replace />} />
           <Route path="setup/update-configuration" element={<RuleUpdatesPage />} />
           <Route path="setup/redaction-rules" element={<RedactionRulesPage />} />
           <Route path="setup/taxonomy" element={<TaxonomyPage />} />
@@ -184,7 +183,7 @@ export default function App() {
           <Route path="setup/request-rules" element={<RequestRulesPage />} />
           <Route path="taxonomy" element={<Navigate to="/setup/taxonomy" replace />} />
           <Route path="workflow" element={<Navigate to="/setup/workflow-rules" replace />} />
-          <Route path="workflow-map" element={<Navigate to="/setup/process-map" replace />} />
+          <Route path="workflow-map" element={<Navigate to="/setup/workflow-rules" replace />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
           <Route path="sources" element={<Navigate to="/setup/record-sources" replace />} />
           <Route path="redaction-rules" element={<Navigate to="/setup/redaction-rules" replace />} />

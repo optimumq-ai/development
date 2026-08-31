@@ -56,7 +56,7 @@ export default function AdministrationPage() {
   if (activeKey === 'security') return <Navigate to="/setup/ai-configuration?tab=security" replace />;
   if (activeKey === 'sources') return <Navigate to="/setup/record-sources" replace />;
   if (activeKey === 'workflow') return <Navigate to="/setup/workflow-rules" replace />;
-  if (activeKey === 'map') return <Navigate to="/setup/process-map" replace />;
+  if (activeKey === 'map') return <Navigate to="/setup/workflow-rules" replace />; // process map DELETED 2026-08-31
   if (activeKey === 'updates') return <Navigate to="/setup/update-configuration" replace />;
   if (activeKey === 'redaction') return <Navigate to="/setup/redaction-rules" replace />;
   if (activeKey === 'taxonomy') return <Navigate to="/setup/taxonomy" replace />;

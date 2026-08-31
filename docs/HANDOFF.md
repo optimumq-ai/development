@@ -9860,3 +9860,15 @@ Note E1a ("known red") passes when bw9b_golive runs alone — it is order-depend
 Lesson: `SUITE_DUMP_DIR=<dir> node tests/run_suite.js …` keeps a failed harness's full output (`failed_<h>.log`);
 instrumenting golden with probes + a forced fail is the fast way to see mid-run state.
 **Full suite after the fix: 2841/2842, live untouched — E1a the only red (the standing one). The merged tree is verified.**
+
+## 2026-08-31 — Process Map DELETED (Kevin: informational, outdated, feeds nothing — verified)
+
+`data/workflowModel.js` was a hand-maintained inventory read only by its own `/api/workflow-model` route, the
+screen and the hub reader — no runtime consumer. Removed: hub row + reader, route + mount, data file,
+`WorkflowMapPage`; `/setup/process-map`, `/workflow-map`, `?tab=map` → `/setup/workflow-rules`; helpAgent text
+trimmed. Hub items 34→33 (lane counts [10,2,6,4,5,5]); harness A2/B3 updated, R4–R5 removed; SPEC §3g row
+removed, §3j marked dormant (pattern retained, no screen uses it). Hub 99/99, agency 20/20, golden 44/44.
+The templates/calibration investigation report went to Kevin (see session notes): layout_profiles vs
+redaction_rules vs record_type_estimate_profiles; the Taxonomy calibration tab is a no-op body; dead columns
+`record_types.redaction_profile_id` + `fee_estimate_low/high/note`; Mass Redaction's on-screen authoring
+instruction is stale per Kevin (UI rebuilt) — rewrite pending the template-naming decisions.

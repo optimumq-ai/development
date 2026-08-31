@@ -94,7 +94,6 @@ const ITEMS = [
   { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/setup/taxonomy?tab=calibration', deps: ['taxonomy'] },
   // C15 (Kevin 2026-08-30): the admin Workflow and Process Map tabs become dedicated screens behind these rows.
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Workflow Rules', door: '/setup/workflow-rules', deps: ['departments', 'teams'] },
-  { key: 'process_map', lane: 'fulfillment_fees', name: 'Process Map', door: '/setup/process-map', deps: [] },
   // C11 (Kevin 2026-08-30): the v1 Configuration page is RETIRED — each of its six tabs became a dedicated
   // /setup screen behind a hub row. time_budgets, time_tracking (renamed 'Task Processing Time Capture'),
   // notifications (renamed 'System Notifications') and agent_rules moved to System Features and Options;
@@ -341,20 +340,6 @@ const READERS = {
     var xwf = { list: { count: on, noun: 'routing rule', health: off ? off + ' rule' + (off > 1 ? 's' : '') + ' written but switched off' : '' },
       digest: digestOf(wrows.map(function (w) { return [w.id, w.name, w.enabled, w.priority, w.conditions, w.actions]; })) };
     return on ? ev('ready', on + ' routing rule' + (on > 1 ? 's' : '') + ' enabled' + (off ? ' · ' + off + ' switched off' : ''), xwf) : ev('not_started', 'no routing rules written', xwf);
-  },
-  process_map: async function () {
-    // ACKNOWLEDGEMENT (§3j, 2026-08-31): the Process Map sets nothing — it is the decision inventory
-    // (data/workflowModel) and how much of it is built today. There is nothing to fill in, so the required
-    // set is EMPTY: the row is yellow ("read it and approve") until the lane owner signs that they have,
-    // and green after. The digest is the model itself, so a release that adds or changes a decision point
-    // re-opens the row for a fresh read.
-    var M = require('../data/workflowModel'); var nodes = M.nodes || (typeof M.build === 'function' ? M.build().nodes : null) || {};
-    var keys = Object.keys(nodes);
-    var c = { built: 0, partial: 0, planned: 0 }; keys.forEach(function (k) { var st = nodes[k].status; c[st] = (c[st] || 0) + 1; });
-    var total = keys.length;
-    var xpm = { required: { missing: [], total: 0 }, digest: digestOf(keys.sort().map(function (k) { return [k, nodes[k].label, nodes[k].status, nodes[k].decider, nodes[k].phase]; })) };
-    if (!total) return ev('not_started', 'no process model loaded', { required: { missing: ['The process model could not be read'], total: 1 }, digest: 'none' });
-    return ev('ready', total + ' decision points · ' + c.built + ' built · ' + c.partial + ' partial · ' + c.planned + ' planned', xpm);
   },
   time_budgets: async function () {
     // FORM (approval model, §3h): the task catalog SEEDS a row per task type and every row already carries a

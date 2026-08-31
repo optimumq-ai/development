@@ -43,7 +43,6 @@ app.post('/api/requests/public', async function(req, res) {
 app.use('/api/requests', require('./src/routes/requests'));
 app.use('/api/workflow', require('./src/routes/workflow'));
 app.use('/api/estimate-profiles', require('./src/routes/estimateProfiles'));
-app.use('/api/workflow-model', require('./src/routes/workflowModel'));
 app.use('/api/decision-reasons', require('./src/routes/decisionReasons'));
 app.use('/api/tasks', require('./src/routes/tasks'));
 app.use('/api/dispositions', require('./src/routes/dispositions'));

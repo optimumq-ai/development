@@ -46,8 +46,8 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
 
   console.log('\n=== A. THE CATALOG ===');
   ok('A1 six lanes in the decided order and names (System Features and Options added 2026-08-29)', HUB.LANES.length === 6 && /^Compliance and Policies Setup$/.test(HUB.LANES[0].title) && /Fees, Estimates and Routing$/.test(HUB.LANES[1].title) && /Redaction and Release$/.test(HUB.LANES[2].title) && /^Organization Departments, Teams, and Staff Setup$/.test(HUB.LANES[3].title) && HUB.LANES[4].title === 'Technical Setup' && HUB.LANES[5].title === 'System Features and Options');
-  ok('A2 thirty-four items (10 + 3 + 6 + 4 + 5 + 5 + the agency card on top; C11–C15 2026-08-30: Configuration tabs → /setup screens, av_redaction + process_map added, ai_keys + ai_deployment merged)', HUB.ITEMS.length === 34 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
-    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 3, 6, 4, 5, 5]));
+  ok('A2 thirty-three items (the agency card on top; C11–C15 2026-08-30: Configuration tabs → /setup screens, av_redaction added, ai_keys + ai_deployment merged; the Process Map row DELETED 2026-08-31 — informational and outdated, nothing read it)', HUB.ITEMS.length === 33 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
+    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [10, 2, 6, 4, 5, 5]));
   var badDeps = []; HUB.ITEMS.forEach(function (i) { (i.deps || []).forEach(function (d) { if (!HUB.BY_KEY[d]) badDeps.push(i.key + '->' + d); }); });
   ok('A3 every dependency points at a real item', badDeps.length === 0, badDeps.join(','));
   ok('A4 every lane owner is a permission GROUP from the user-type model (no role names anywhere)', HUB.LANES.every(function (l) { return l.groups.every(function (g) { return ut.PERMISSION_GROUPS.indexOf(g) !== -1; }); }) &&
@@ -62,7 +62,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var states = ['ready', 'in_progress', 'not_started', 'waiting', 'needs_attention'];
   var allItems = []; page.lanes.forEach(function (l) { allItems = allItems.concat(l.items); }); allItems = allItems.concat(page.top);
   ok('B2 every row carries a known state and a non-empty evidence line', allItems.every(function (x) { return states.indexOf(x.state) !== -1 && typeof x.evidence === 'string' && x.evidence.length > 0; }));
-  ok('B3 header counts add up to 34', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 34);
+  ok('B3 header counts add up to 33', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 33);
   var teamsBefore = find(page, 'teams');
   var dept = 'dept-' + TAG;
   await db.run("INSERT INTO departments (id, name, code, kind, is_open_records, active) VALUES (?,?,?,'department',0,1)", [dept, 'HUB Unserved ' + TAG, 'H' + TAG.slice(-5)]);
@@ -480,9 +480,8 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
 
   console.log('\n=== R. WORKFLOW RULES (list) + PROCESS MAP (acknowledgement — nothing to fill in, reading it is the act) ===');
   var wfMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'routing_rules'");
-  var pmMark = await db.get("SELECT * FROM setup_hub_signoffs WHERE item_key = 'process_map'");
-  for (var rk5 of ['routing_rules', 'process_map']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/ready'); }
-  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('routing_rules','process_map')");
+  for (var rk5 of ['routing_rules']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/done'); await callAs(U.dir, 'DELETE', '/setup-hub/' + rk5 + '/ready'); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'routing_rules'");
   var wfNew = await callAs(U.dir, 'POST', '/workflow/rules', { name: 'HUB rule ' + TAG, description: 'harness', priority: 900, conditions: [], actions: {} });
   var wfId = wfNew.body && wfNew.body.rule && wfNew.body.rule.id;
   await new Promise(function (r) { setTimeout(r, 400); });
@@ -500,15 +499,10 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var rC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'routing_rules');
   var wc1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'routing_rules'")).n;
   ok('R3 switching a rule off after approval → YELLOW "changed since approval", the health line says so, one notification', wfOff.status === 200 && rC.approval === 'yellow' && /changed since approval/.test(rC.approvalWhy || '') && /switched off/.test(rC.approvalWhy || '') && wc1 > wc0, wfOff.status + ' ' + rC.approval + ': ' + rC.approvalWhy + ' · ' + wc0 + '→' + wc1);
-  var rD = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'process_map');
-  ok('R4 the Process Map counts as READ, not configured: nothing is missing, so it waits at YELLOW for the lane owner', rD.approvalModel === 'fields' && rD.approval === 'yellow' && /awaiting approval/.test(rD.approvalWhy || '') && /decision points/.test(rD.evidence || ''), rD.approvalModel + '/' + rD.approval + ': ' + rD.approvalWhy + ' · ' + rD.evidence);
-  var pmApv = await callAs(U.dir, 'POST', '/setup-hub/process_map/done');
-  var rE = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'process_map');
-  ok('R5 approving the Process Map is never refused (there is nothing to fill in) → GREEN by name and date', pmApv.status === 200 && rE.approval === 'green' && /approved by/.test(rE.approvalWhy || ''), pmApv.status + ' ' + rE.approval + ': ' + rE.approvalWhy);
   if (wfId) await db.run('DELETE FROM workflow_rules WHERE id = ?', [wfId]);
-  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id IN ('routing_rules','process_map')");
-  for (var rk6 of ['routing_rules', 'process_map']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk6 + '/done'); await db.run('DELETE FROM setup_hub_ready WHERE item_key = ?', [rk6]); }
-  for (var rSaved of [wfMark, pmMark]) { if (rSaved) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rSaved.item_key, rSaved.marked_by, rSaved.marked_by_name, rSaved.marked_at, rSaved.content_hash || null, rSaved.notified_hash || null]); }
+  await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'routing_rules'");
+  for (var rk6 of ['routing_rules']) { await callAs(U.dir, 'DELETE', '/setup-hub/' + rk6 + '/done'); await db.run('DELETE FROM setup_hub_ready WHERE item_key = ?', [rk6]); }
+  for (var rSaved of [wfMark]) { if (rSaved) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash, notified_hash) VALUES (?,?,?,?,?,?) ON CONFLICT (item_key) DO NOTHING', [rSaved.item_key, rSaved.marked_by, rSaved.marked_by_name, rSaved.marked_at, rSaved.content_hash || null, rSaved.notified_hash || null]); }
 
   console.log('\n=== S. TASK TIME BUDGETS (form) — a seeded figure is not a decision; the city has to review each one ===');
   var tbSaved = await db.all('SELECT task_type, budget_days, source, updated_by, updated_at FROM time_budgets WHERE record_type_id IS NULL ORDER BY task_type');

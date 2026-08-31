@@ -10,7 +10,7 @@ import api from '../lib/api';
 var GROUPS = [
   { title: 'The city and its people', keys: ['agency', 'departments', 'teams', 'staff', 'record_owners'] },
   { title: 'The rules the law set', keys: ['fee_law', 'clarification', 'exemptions', 'eligibility', 'intake', 'deadlines', 'redaction_rules', 'city_choices', 'law_updates'] },
-  { title: 'How a request is worked', keys: ['taxonomy', 'calibration', 'routing_rules', 'process_map', 'time_budgets', 'time_tracking', 'notifications', 'agent_rules', 'av_redaction', 'redaction_auto', 'release_review', 'layout_templates', 'decision_reasons', 'mass_schedule'] },
+  { title: 'How a request is worked', keys: ['taxonomy', 'calibration', 'routing_rules', 'time_budgets', 'time_tracking', 'notifications', 'agent_rules', 'av_redaction', 'redaction_auto', 'release_review', 'layout_templates', 'decision_reasons', 'mass_schedule'] },
   { title: 'Technical', keys: ['sources', 'ai_config', 'email', 'auth_policy', 'settlement'] },
 ];
 var EXTRA = [{ title: 'The city and its people', name: 'User types', door: '/setup/user-types', hint: 'the catalog of what each type may do' }];
