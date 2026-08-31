@@ -36,7 +36,7 @@ async function ask(question) {
   var msg = await client().messages.create({ model: 'claude-sonnet-5', max_tokens: 400,
     system: 'You translate a plain-English question about a city public-records (FOIA) program into a bounded report spec.\n\n' + SPEC_SCHEMA,
     messages: [{ role: 'user', content: q }] });
-  var text = (msg.content && msg.content[0] && msg.content[0].text ? msg.content[0].text : '').trim().replace(/```json|```/g, '').trim();
+  var text = require('./aiText').textOf(msg).replace(/```json|```/g, '').trim();
   var spec;
   try { spec = JSON.parse(text); } catch (e) { return { error: 'I could not interpret that question. Try rephrasing - for example, "requests by month this year" or "overdue requests by department".' }; }
   if (spec && spec.error) return { error: spec.error };

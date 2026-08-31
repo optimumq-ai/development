@@ -45,6 +45,6 @@ async function answer(messages, page) {
   if (!hist.length) return '';
   var sys = SYSTEM + (page ? ('\n\nThe user is currently on the "' + String(page).slice(0, 80) + '" screen.') : '');
   var msg = await client().messages.create({ model: 'claude-sonnet-5', max_tokens: 500, system: sys, messages: hist });
-  return (msg.content && msg.content[0] && msg.content[0].text ? msg.content[0].text : '').trim();
+  return require('./aiText').textOf(msg);
 }
 module.exports = { answer: answer };

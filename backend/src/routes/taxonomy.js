@@ -346,7 +346,7 @@ router.post('/discover', requireAuth, EDIT, async function(req, res) {
     + 'DOCUMENT OR DESCRIPTION:\n' + text;
   try {
     var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
-    var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
+    var raw = require('../services/aiText').textOf(message).replace(/```json|```/g, '').trim();
     var p = JSON.parse(raw);
     if (!p.category_id || !cats.find(function(c){ return c.id === p.category_id; })) {
       p.category_id = cats.length ? cats[cats.length - 1].id : null;

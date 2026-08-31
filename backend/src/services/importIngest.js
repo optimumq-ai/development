@@ -121,7 +121,7 @@ async function enrichRecordType(typeId, fids){
   try {
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     var msg = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
-    var raw = (msg.content && msg.content[0] && msg.content[0].text) ? msg.content[0].text.trim() : '';
+    var raw = require('./aiText').textOf(msg);
     raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
     var r = JSON.parse(raw);
     await db.run("UPDATE record_types SET synonyms=?, keywords=?, disambiguators=?, intent=COALESCE(NULLIF(intent,''), ?), expected_content=COALESCE(NULLIF(expected_content,''), ?) WHERE id=?",

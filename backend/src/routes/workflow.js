@@ -90,7 +90,7 @@ router.post('/rules/draft', requireAuth, requirePermission('operations_config'),
   try {
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     var msg = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 700, messages: [{ role:'user', content: prompt }] });
-    var raw = (msg.content[0] && msg.content[0].text ? msg.content[0].text : '').trim().replace(/```json|```/g,'').trim();
+    var raw = require('../services/aiText').textOf(msg).replace(/```json|```/g,'').trim();
     var draft = JSON.parse(raw);
     res.json({ draft: draft });
   } catch(e) {

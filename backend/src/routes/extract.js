@@ -39,7 +39,7 @@ router.post('/', requireAuth, upload.single('document'), async function(req, res
       messages: [{ role: 'user', content: [contentBlock, { type: 'text', text: prompt }] }]
     });
 
-    var text = message.content[0].text.trim();
+    var text = require('../services/aiText').textOf(message);
     var clean = text.replace(/```json|```/g, '').trim();
     var result = JSON.parse(clean);
 

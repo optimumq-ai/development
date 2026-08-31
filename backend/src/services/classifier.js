@@ -61,7 +61,7 @@ async function classifyAndRoute(description) {
 
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 600, messages: [{ role: 'user', content: prompt }] });
-  var text = (message.content[0] && message.content[0].text ? message.content[0].text : '').trim();
+  var text = require('./aiText').textOf(message);
   var result = JSON.parse(text.replace(/```json|```/g, '').trim());
 
   var rtConf = typeof result.record_type_confidence === 'number' ? result.record_type_confidence : 0;

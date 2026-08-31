@@ -9910,3 +9910,18 @@ caught it). Verified: live probe of the rewritten judge on Sonnet 5 kept footage
 request_create 29/29, form_intake 11/11, search_intents 29/29, search_resolve 32/32; API restarted (200).
 Stale model comments in two harnesses + REDACTION_GROUND_TRUTH updated. Haiku question parked: revisit with a
 measured classifier eval when volume justifies it (memory: decisions-visual — bring numbers per touchpoint).
+
+## 2026-08-31 — 2026-000006: two live finds fixed — thinking-block text reads (Sonnet 5) and parent-scoped selected records
+
+Kevin's portal request landed with CLASSIFICATION_UNAVAILABLE ("Unexpected end of JSON input") and "no records
+attached". (1) Sonnet 5 runs ADAPTIVE THINKING by default, so `content[0]` can be a thinking block — 14 call
+sites read `message.content[0].text` and got '' (the classifier died on JSON.parse; the sites that join text
+blocks survived). New `services/aiText.textOf(message)` joins every text block; ALL sites converted; sweep
+must use `grep -F "content[0]"` (unescaped brackets are a character class — a bogus clean sweep cost a round).
+(2) The workspace's selected-records query was `WHERE request_id = ?` on the row addressed — the portal writes
+them on the CHILD, the workspace opens the PARENT, so every portal request showed none. Family-scoped via
+master_request_id. Verified on 2026-000006: the 7 records render under "Records the Requestor Selected".
+Harnesses: request_create 29/29, form_intake 11/11, wrap_parent 43/43, mrr_children 37/37,
+parent_child_facts 19/19; API restarted. NOTE for the §4.4 field-design pass: the parent workspace's
+"Description of Records Requested" section renders EMPTY (descriptions live on children) — same class, not
+fixed here. 2026-000006 itself stays routed to intake review (the classifier failed at submit time, by design).

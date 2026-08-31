@@ -164,7 +164,13 @@ router.get('/:id', requireAuth, async function(req, res) {
   if (!request) return res.status(404).json({ error: 'Request not found' });
   const history = await all('SELECT * FROM request_history WHERE request_id = ? ORDER BY created_at ASC', [request.id]);
   const components = (request.is_mrr && !request.master_request_id) ? await all('SELECT * FROM requests WHERE master_request_id = ? ORDER BY component_label', [request.id]) : [];
-  const selectedRecords = await all('SELECT id, record_id, title, source_system, public_availability, created_at FROM request_selected_records WHERE request_id = ? ORDER BY created_at ASC', [request.id]);
+  // FAMILY-SCOPED (2026-08-31, Kevin's 2026-000006): the portal writes selected records on the CHILD rows,
+  // but the workspace is usually opened on the parent — a parent-only query showed "no records attached"
+  // for every portal request. Read the whole family: this row, its children, and its parent's other children.
+  const selectedRecords = await all(
+    'SELECT id, record_id, title, source_system, public_availability, created_at FROM request_selected_records ' +
+    'WHERE request_id IN (SELECT id FROM requests WHERE id = ? OR master_request_id = ? OR (master_request_id IS NOT NULL AND master_request_id = (SELECT master_request_id FROM requests WHERE id = ?))) ' +
+    'ORDER BY created_at ASC', [request.id, request.id, request.id]);
   const avRow = await get("SELECT EXISTS(SELECT 1 FROM record_types rt WHERE rt.id = r.record_type_id AND (rt.formats LIKE '%video%' OR rt.formats LIKE '%audio%')) AS by_type, EXISTS(SELECT 1 FROM request_files f WHERE f.request_id = r.id AND (f.mimetype LIKE 'video/%' OR f.mimetype LIKE 'audio/%')) AS by_file, EXISTS(SELECT 1 FROM av_redaction_tasks t WHERE t.request_id = r.id) AS by_task, EXISTS(SELECT 1 FROM requests c JOIN record_types rt2 ON rt2.id = c.record_type_id WHERE c.master_request_id = r.id AND (rt2.formats LIKE '%video%' OR rt2.formats LIKE '%audio%')) AS by_comp FROM requests r WHERE r.id = ?", [request.id]);
   request.av_applicable = (avRow && (avRow.by_type || avRow.by_file || avRow.by_task || avRow.by_comp)) ? 1 : 0;
   request.exemption_model = await activeExemptionModel();

@@ -44,7 +44,7 @@ async function scanRepository(repo) {
     + 'SAMPLE DOCUMENTS:\n' + digest;
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3500, messages: [{ role: 'user', content: prompt }] });
-  var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
+  var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
   var proposals = JSON.parse(raw);
   if (!Array.isArray(proposals)) proposals = [];
   var created = [], matched = [], linked = 0;
@@ -226,7 +226,7 @@ async function discoverViaFingerprints(bucket, fileRepos) {
       + 'CLUSTERS:\n' + clusterDigest;
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
-    var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
+    var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
     var names = [];
     try { names = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again (the fingerprint index is saved, so a retry is fast)' }; }
     if (!Array.isArray(names)) names = [];
@@ -300,7 +300,7 @@ async function discoverViaSampleDigest(bucket, repos) {
     + 'SAMPLE DOCUMENTS:\n' + digest;
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
-  var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
+  var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
   var groupings = [];
   try { groupings = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again' }; }
   if (!Array.isArray(groupings)) groupings = [];
