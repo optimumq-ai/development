@@ -9886,3 +9886,15 @@ and the include chip toggles via PATCH /files/:id/status; (3) button relabelled 
 send N record(s) on →" and the flash/banner now say redaction review (it said Exemption Review — wrong stage:
 the resolve opens a redaction task). Verified by screenshot on the live task. No backend change; no suite run
 (UI-only; the next slice's run covers it).
+
+## 2026-08-31 — portal AI outage diagnosed (Anthropic account out of credits); the screen-key path VERIFIED, not rebuilt
+
+Portal chat's "I had trouble responding" = the Anthropic API refusing with "credit balance is too low" —
+reproduced outside the app with the .env key; both current model ids fail identically. Not caused by the setup
+work (census: live untouched; hub only reads AI config). My first read ("a key saved on the AI screen is never
+used") was WRONG: `services/secrets.applySecrets()` loads saved keys into process.env at boot (server.js:179)
+AND on every AI-key save (integrations.js) — saved keys override the .env baseline live, no restart. Live holds
+NO saved key rows, so the exhausted key is the .env baseline. FIX FOR KEVIN: paste a funded Anthropic key on
+AI configuration → Save; the portal answers on the next message. Added: hub J8 proves applySecrets pushes a
+saved key into env (100/100); the screen's "configured" flag now says the source ("saved on this screen" /
+"from the server environment") so which key is in use is visible. Frontend rebuilt; no backend runtime change.

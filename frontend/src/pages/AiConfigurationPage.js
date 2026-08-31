@@ -41,7 +41,7 @@ function routesTo(tp, profile) {
   }
   return tp.kind === 'embed' ? 'Voyage AI' : 'Claude (commercial API)';
 }
-function Flag(props) { return props.set ? <span style={{ color: '#03543F', fontWeight: 700 }}>&middot; configured</span> : <span style={{ color: '#9B1C1C', fontWeight: 700 }}>&middot; not set</span>; }
+function Flag(props) { return props.set ? <span style={{ color: '#03543F', fontWeight: 700 }}>&middot; configured{props.fromSaved != null ? (props.fromSaved ? ' — saved on this screen' : ' — from the server environment') : ''}</span> : <span style={{ color: '#9B1C1C', fontWeight: 700 }}>&middot; not set</span>; }
 
 export default function AiConfigurationPage() {
   var nav = useNavigate();
@@ -139,14 +139,14 @@ export default function AiConfigurationPage() {
               <div>
                 <div style={Object.assign({}, hint, { marginTop: 0, marginBottom: '16px' })}>Used for request classification, redaction assistance, semantic search and reporting. Create accounts at Anthropic and Voyage AI and paste the keys here; values are stored on this server and never shown again after saving. Email sending has its own screen: <button type="button" onClick={function () { nav('/setup/email'); }} style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: BLUE, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline dotted' }}>Email configuration</button>.</div>
                 <div style={field}>
-                  <label style={lbl}>Anthropic API key <span style={{ color: '#DC2626' }}>*</span> <Flag set={a.set} /></label>
+                  <label style={lbl}>Anthropic API key <span style={{ color: '#DC2626' }}>*</span> <Flag set={a.set} fromSaved={a.fromSaved} /></label>
                   <input type="password" value={form.anthropic_api_key} disabled={!s.can} onChange={function (e) { set('anthropic_api_key', e.target.value); }} placeholder={placeholder(a.set, a.hint)} style={Object.assign({}, inp, { marginBottom: '8px' }, (!a.set && !form.anthropic_api_key) ? { border: '2px solid #DC2626' } : {})} autoComplete="new-password" />
                   {(!a.set && !form.anthropic_api_key) ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '6px' }}>Required — enter the key and save</div> : null}
                   <TestBtn which="anthropic" disabled={!s.can} onClick={function () { runTest('anthropic', { key: form.anthropic_api_key }); }} />
                   <div style={hint}>Test uses the value typed above, or the saved key when the field is empty.</div>
                 </div>
                 <div style={field}>
-                  <label style={lbl}>Voyage AI API key <span style={{ color: '#DC2626' }}>*</span> <Flag set={v.set} /></label>
+                  <label style={lbl}>Voyage AI API key <span style={{ color: '#DC2626' }}>*</span> <Flag set={v.set} fromSaved={v.fromSaved} /></label>
                   <input type="password" value={form.voyage_api_key} disabled={!s.can} onChange={function (e) { set('voyage_api_key', e.target.value); }} placeholder={placeholder(v.set, v.hint)} style={Object.assign({}, inp, { marginBottom: '8px' }, (!v.set && !form.voyage_api_key) ? { border: '2px solid #DC2626' } : {})} autoComplete="new-password" />
                   {(!v.set && !form.voyage_api_key) ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '6px' }}>Required — enter the key and save</div> : null}
                   <TestBtn which="voyage" disabled={!s.can} onClick={function () { runTest('voyage', { key: form.voyage_api_key }); }} />

@@ -249,6 +249,16 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'DELETE', '/setup-hub/ai_config/done');
   if (aiMark) await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at, content_hash) VALUES (?,?,?,?,?)', [aiMark.item_key, aiMark.marked_by, aiMark.marked_by_name, aiMark.marked_at, aiMark.content_hash || null]);
 
+  // J8 — the screen key REACHES the running code: services/secrets.applySecrets pushes a saved key into
+  // process.env (boot + every AI-key save, integrations.js), which every Anthropic call site reads. This is
+  // the path that lets a city fix an exhausted key from the screen with no restart (Kevin, 2026-08-31).
+  var j8EnvSave = process.env.ANTHROPIC_API_KEY; var j8Row = await db.get("SELECT value FROM system_config WHERE key = 'anthropic_api_key'");
+  await db.run("INSERT INTO system_config (key, value) VALUES ('anthropic_api_key', 'sk-ant-hub-harness-proof') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value");
+  await require('../src/services/secrets').applySecrets();
+  ok('J8 a key saved on the screen overrides the environment for every AI call site (applySecrets)', process.env.ANTHROPIC_API_KEY === 'sk-ant-hub-harness-proof', 'env not updated');
+  if (j8EnvSave == null) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = j8EnvSave;
+  if (j8Row) await db.run("UPDATE system_config SET value = ? WHERE key = 'anthropic_api_key'", [j8Row.value]); else await db.run("DELETE FROM system_config WHERE key = 'anthropic_api_key'");
+
   console.log('\n=== K. EMAIL CONFIGURATION (form) — required per provider ===');
   var EM_KEYS = ['email_provider', 'smtp_host', 'smtp_port', 'smtp_from', 'smtp_user', 'smtp_pass', 'resend_api_key', 'resend_from', 'email_from_name'];
   var emSave = {}; for (var ek of EM_KEYS) { var erow = await db.get('SELECT value FROM system_config WHERE key = ?', [ek]); emSave[ek] = erow ? erow.value : null; }
