@@ -9898,3 +9898,15 @@ NO saved key rows, so the exhausted key is the .env baseline. FIX FOR KEVIN: pas
 AI configuration → Save; the portal answers on the next message. Added: hub J8 proves applySecrets pushes a
 saved key into env (100/100); the screen's "configured" flag now says the source ("saved on this screen" /
 "from the server environment") so which key is in use is visible. Frontend rebuilt; no backend runtime change.
+
+## 2026-08-31 — every AI call moved to Sonnet 5 (Kevin: 33% cheaper than 4.5, more capable); the one prefill rewritten
+
+Kevin funded the API account (the outage was an exhausted credit balance; the default-workspace console key is
+the platform's — verified by org id, key tail, and the Sonnet-4.5-shaped usage). Then: all 31 call sites in 24
+files `claude-sonnet-4-5` → `claude-sonnet-5`. Two API removals handled at `recordSearch.judgeResults`:
+`temperature: 0` dropped and the `'['` assistant PREFILL removed (Sonnet 5 rejects both; the "Output ONLY a
+JSON array" instruction + existing regex parse carry it — my pre-flight scan missed the prefill, the migration
+caught it). Verified: live probe of the rewritten judge on Sonnet 5 kept footage / dropped policy; harnesses
+request_create 29/29, form_intake 11/11, search_intents 29/29, search_resolve 32/32; API restarted (200).
+Stale model comments in two harnesses + REDACTION_GROUND_TRUTH updated. Haiku question parked: revisit with a
+measured classifier eval when volume justifies it (memory: decisions-visual — bring numbers per touchpoint).

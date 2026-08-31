@@ -69,7 +69,7 @@ async function extract(text, opts) {
   if (!clean.trim()) throw new Error('No policy text provided.');
   var currentCfg = opts.currentCfg || CP.defaults();
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var msg = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 1500, messages: [{ role: 'user', content: buildPrompt(clean, opts.jurName, currentCfg) }] });
+  var msg = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1500, messages: [{ role: 'user', content: buildPrompt(clean, opts.jurName, currentCfg) }] });
   var raw = (msg.content || []).map(function (b) { return b.text || ''; }).join('\n');
   var parsed = parseJSONObject(raw) || {};
   var cfg = (parsed.config && typeof parsed.config === 'object') ? parsed.config : {};

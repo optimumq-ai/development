@@ -33,7 +33,7 @@ function client() { return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY
 async function ask(question) {
   var q = String(question || '').slice(0, 500).trim();
   if (!q) return { error: 'Please enter a question.' };
-  var msg = await client().messages.create({ model: 'claude-sonnet-4-5', max_tokens: 400,
+  var msg = await client().messages.create({ model: 'claude-sonnet-5', max_tokens: 400,
     system: 'You translate a plain-English question about a city public-records (FOIA) program into a bounded report spec.\n\n' + SPEC_SCHEMA,
     messages: [{ role: 'user', content: q }] });
   var text = (msg.content && msg.content[0] && msg.content[0].text ? msg.content[0].text : '').trim().replace(/```json|```/g, '').trim();

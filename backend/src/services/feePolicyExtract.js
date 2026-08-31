@@ -44,7 +44,7 @@ async function extract(text, opts) {
   var clean = String(text || '').slice(0, 16000);
   if (!clean.trim()) throw new Error('No policy text provided.');
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 2500, messages: [{ role: 'user', content: buildPrompt(clean, context) }] });
+  var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 2500, messages: [{ role: 'user', content: buildPrompt(clean, context) }] });
   var raw = (message.content[0] && message.content[0].text ? message.content[0].text : '').trim().replace(/```json|```/g, '').trim();
   var parsed = JSON.parse(raw);
   if (!parsed || typeof parsed !== 'object') throw new Error('Unexpected extraction result.');

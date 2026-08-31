@@ -11,7 +11,7 @@
 
 | Capability | Status | One-line reality |
 |---|---|---|
-| AI content detection ("Find exempt content") | `[BUILT]` | Real `claude-sonnet-4-5` read of OCR text → box + rule + reason; **ephemeral, manual-trigger** |
+| AI content detection ("Find exempt content") | `[BUILT]` | Real `claude-sonnet-5` read of OCR text → box + rule + reason; **ephemeral, manual-trigger** |
 | Template / profile match | `[BUILT]` | Deterministic token-overlap vs `safety_threshold` — **not AI**; auto-suggests on canvas open, apply is manual |
 | Zone CRUD, rule picker, burn/release (`apply`) | `[BUILT]` | Full per-file redaction canvas works |
 | Side-by-side review render | `[BUILT]` | Original vs proposed columns exist (`redact/:fileId/review`) |

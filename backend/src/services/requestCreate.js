@@ -489,7 +489,7 @@ async function createRequest(fields, opts) {
   // its routing exactly as a single-record request does. That is the pre-existing behaviour, not a new decision
   // — flagged here so the hub slice knows where the gate belongs.
   // SEQUENTIALLY, in ONE background chain — not n parallel ones. Each onIntake makes an Anthropic call
-  // (classifier.js, claude-sonnet-4-5), so firing n at once means n concurrent LLM calls per submission: rate
+  // (classifier.js, claude-sonnet-5), so firing n at once means n concurrent LLM calls per submission: rate
   // limits, a cost spike, and — observed in the harness — a child that silently never gets routed because its
   // call lost. A 10-record MRR would fire ten. One child failing must not strand its siblings, so each is
   // caught and logged individually rather than aborting the chain.

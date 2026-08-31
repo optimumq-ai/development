@@ -43,7 +43,7 @@ async function discoverRules(jurisdictionId) {
     'Be accurate and specific with ' + jur.name + ' citations. Include 5 to 12 of the most operationally common exemptions not already covered. These are DRAFTS that the agency\'s legal counsel will verify before use, so prefer well-established exemptions. Return ONLY the JSON array.';
 
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] });
+  var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] });
   var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
   var arr = extractFirstArray(text);
   if (!arr) return { added: 0, skipped: 0, rules: [] };

@@ -112,7 +112,7 @@ async function kidsOf(parentId) {
     PK.forEach(function (k) { made.push(k.id); });
     ok('the portal created 2 children from 2 described records', PK.length === 2);
 
-    // DETERMINISM: `classifier.js` calls Anthropic (claude-sonnet-4-5), so whether a given description routes
+    // DETERMINISM: `classifier.js` calls Anthropic (claude-sonnet-5), so whether a given description routes
     // CONFIDENTLY — and whether a task spawns — varies run to run. Assert the thing that is true on every path:
     // intake ran SEPARATELY FOR EACH CHILD, off each child's own description. workflowEngine writes a
     // workflow_decisions row regardless of confidence, so it is the deterministic witness that per-child

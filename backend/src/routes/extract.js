@@ -34,7 +34,7 @@ router.post('/', requireAuth, upload.single('document'), async function(req, res
     }
 
     var message = await client.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-5',
       max_tokens: 1000,
       messages: [{ role: 'user', content: [contentBlock, { type: 'text', text: prompt }] }]
     });

@@ -119,7 +119,7 @@ async function aiClassifyType(query, rts) {
     'Which ONE record type best matches the kind of record the person is asking for? ' +
     'Judge by what the record actually IS, not just shared words. Reply with ONLY the item number. ' +
     'If no type clearly fits, reply 0.';
-  var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 10, messages: [{ role: 'user', content: prompt }] });
+  var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 10, messages: [{ role: 'user', content: prompt }] });
   var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
   var n = parseInt((text.match(/[0-9]+/) || ['0'])[0], 10);
   if (!n || n < 1 || n > rts.length) return null;
@@ -266,8 +266,10 @@ async function judgeResults(query, results) {
       'Decide what physical DELIVERABLE the person wants (a video/footage file, an audio recording, a photograph, a specific document such as a report/policy/contract/minutes, a dataset, etc), then keep ONLY candidates that ARE that deliverable. A candidate that merely discusses, governs, names, or relates to the same subject is NOT the deliverable - drop it, even if its title shares words with the request. Ignore all match/relevance scores.\n' +
       'Example: request "body worn camera FOOTAGE of the pursuit" -> deliverable is video footage -> KEEP the actual camera footage / incident video recordings; DROP a "Body-Worn Camera Policy", a "Contract", a "Manual", "Meeting Minutes", a "Resolution" (documents, not footage, however similar the titles). The reverse holds for a document request.\n\n' +
       'Output ONLY a JSON array of the 1-based item numbers to keep (e.g. [1,3]); use [] if none are the right deliverable. No other text.';
-    var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 120, temperature: 0, messages: [{ role: 'user', content: prompt }, { role: 'assistant', content: '[' }] });
-    var text = '[' + resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
+    // Sonnet 5 (2026-08-31): sampling params and assistant prefill are both removed from the API — the prompt's
+    // "Output ONLY a JSON array" instruction plus the regex below carry what `temperature: 0` + the '[' prefill did.
+    var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 120, messages: [{ role: 'user', content: prompt }] });
+    var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
     var mm = text.match(/\[[\d,\s]*\]/);
     if (!mm) return results;
     var keep = JSON.parse(mm[0]);

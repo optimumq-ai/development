@@ -99,7 +99,7 @@ router.post('/test/:which', requireAuth, admin, async function (req, res) {
       var key = isNewSecret(b.key) ? b.key.trim() : process.env.ANTHROPIC_API_KEY;
       if (!key) return res.json({ ok: false, message: 'No Anthropic key configured.' });
       var c = new Anthropic({ apiKey: key });
-      await c.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 5, messages: [{ role: 'user', content: 'ping' }] });
+      await c.messages.create({ model: 'claude-sonnet-5', max_tokens: 5, messages: [{ role: 'user', content: 'ping' }] });
       return res.json({ ok: true, message: 'Anthropic key works.' });
     }
     if (which === 'voyage') {

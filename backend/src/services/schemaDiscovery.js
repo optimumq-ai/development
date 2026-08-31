@@ -43,7 +43,7 @@ async function scanRepository(repo) {
     + '{"matches_existing": false, "matched_code": null, "name": "", "code": "", "category_id": "", "intent": "", "expected_content": "", "typical_request_reason": "", "synonyms": [], "disambiguators": [], "keywords": [], "identifying_facets": [], "formats": [], "public_availability": "review_required", "auto_release_eligible": 0, "confidence": 0, "example_files": [], "reasoning": ""}\n\n'
     + 'SAMPLE DOCUMENTS:\n' + digest;
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 3500, messages: [{ role: 'user', content: prompt }] });
+  var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3500, messages: [{ role: 'user', content: prompt }] });
   var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
   var proposals = JSON.parse(raw);
   if (!Array.isArray(proposals)) proposals = [];
@@ -225,7 +225,7 @@ async function discoverViaFingerprints(bucket, fileRepos) {
       + '{"cluster": 0, "name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "confidence": 0, "reasoning": ""}\n\n'
       + 'CLUSTERS:\n' + clusterDigest;
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
+    var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
     var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
     var names = [];
     try { names = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again (the fingerprint index is saved, so a retry is fast)' }; }
@@ -299,7 +299,7 @@ async function discoverViaSampleDigest(bucket, repos) {
     + '{"name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "formats": ["document"], "confidence": 0, "sample_share": 0, "layout": "varied", "mass_redaction_candidate": false, "example_files": [], "reasoning": ""}\n\n'
     + 'SAMPLE DOCUMENTS:\n' + digest;
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
+  var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
   var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
   var groupings = [];
   try { groupings = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again' }; }

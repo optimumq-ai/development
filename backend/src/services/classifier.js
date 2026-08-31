@@ -60,7 +60,7 @@ async function classifyAndRoute(description) {
     + '  "reasoning": "one sentence",\n  "flags": ["LEGAL_HOLD|SENSITIVE|ONGOING_INVESTIGATION if any"]\n}';
 
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 600, messages: [{ role: 'user', content: prompt }] });
+  var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 600, messages: [{ role: 'user', content: prompt }] });
   var text = (message.content[0] && message.content[0].text ? message.content[0].text : '').trim();
   var result = JSON.parse(text.replace(/```json|```/g, '').trim());
 

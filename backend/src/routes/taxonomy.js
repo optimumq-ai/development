@@ -345,7 +345,7 @@ router.post('/discover', requireAuth, EDIT, async function(req, res) {
     + '"public_availability": "review_required", "auto_release_eligible": 0, "confidence": 0, "reasoning": ""}\n\n'
     + 'DOCUMENT OR DESCRIPTION:\n' + text;
   try {
-    var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
+    var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
     var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
     var p = JSON.parse(raw);
     if (!p.category_id || !cats.find(function(c){ return c.id === p.category_id; })) {

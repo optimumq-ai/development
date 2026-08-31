@@ -83,7 +83,7 @@ async function extractRedactionRules(jurNm, text) {
     + 'Use ONLY these category codes: ' + REDACTION_CATS.join(', ') + '.\n\n'
     + 'Return ONLY a JSON array, each item: {"title":"short name","description":"plain-language: what to redact and when","category":"<code>","legal_sources":[{"name":"short label","citation":"formal citation","source_type":"statute|regulation|case_law","statute_text":"concise accurate summary for the reviewer"}]}.\n\n'
     + 'Base every rule on the SOURCE DOCUMENT below; include accurate citations. If the source establishes no withholding rules, return [].\n\nSOURCE DOCUMENT:\n' + String(text).slice(0, 60000);
-  var msg = await client().messages.create({ model: 'claude-sonnet-4-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
+  var msg = await client().messages.create({ model: 'claude-sonnet-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
   var txt = (msg.content || []).map(function (b) { return b.text || ''; }).join('\n');
   var arr = parseJSONArray(txt) || [];
   return arr;
@@ -94,7 +94,7 @@ async function extractTaxonomy(jurNm, text) {
   var prompt = 'You read a public-records source for ' + jurNm + ' and list the RECORD TYPES (kinds of records) it references that a city records program would track.\n\n'
     + 'Return ONLY a JSON array, each: {"name":"record type name","code":"short_snake_code","category":"a broad category label","description":"one sentence","intent":"what a requester usually wants","public_availability":"public|review_required|confidential"}.\n\n'
     + 'Only include record types clearly implied by the source. If none, return [].\n\nSOURCE DOCUMENT:\n' + String(text).slice(0, 60000);
-  var msg = await client().messages.create({ model: 'claude-sonnet-4-5', max_tokens: 2500, messages: [{ role: 'user', content: prompt }] });
+  var msg = await client().messages.create({ model: 'claude-sonnet-5', max_tokens: 2500, messages: [{ role: 'user', content: prompt }] });
   var txt = (msg.content || []).map(function (b) { return b.text || ''; }).join('\n');
   return parseJSONArray(txt) || [];
 }
@@ -107,7 +107,7 @@ async function genericExtract(domainLabel, jurName, currentCfg, sourceText) {
     + 'Propose the configuration that correctly reflects the source. Return ONLY a JSON object, no prose, no markdown fences:\n'
     + '{"config": <the full updated configuration object, same shape as CURRENT>, "summary": "<one short paragraph: what changed vs current and the citation, or \'No change indicated.\'>"}\n'
     + 'If the source does not indicate any change, return config identical to CURRENT and summary "No change indicated."';
-  var msg = await client().messages.create({ model: 'claude-sonnet-4-5', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] });
+  var msg = await client().messages.create({ model: 'claude-sonnet-5', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] });
   var txt = (msg.content || []).map(function (b) { return b.text || ''; }).join('\n');
   var parsed = parseJSONObject(txt) || {};
   return { proposed: parsed.config != null ? parsed.config : (currentCfg || {}), summary: parsed.summary || 'Proposed update from source document.' };

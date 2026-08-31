@@ -132,7 +132,7 @@ router.post('/ai-configure', requireAuth, EDIT, async function(req, res) {
   try {
     var Anthropic = require('@anthropic-ai/sdk');
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] });
+    var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] });
     var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
     var p = JSON.parse(raw);
     if (keys.indexOf(p.connector_type) < 0) p.connector_type = keys[0];

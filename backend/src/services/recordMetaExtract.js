@@ -35,7 +35,7 @@ async function extractRecordMeta(text, ctx) {
   if (!clean.trim()) return null;
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   var msg = await client.messages.create({
-    model: 'claude-sonnet-4-5', max_tokens: 700,
+    model: 'claude-sonnet-5', max_tokens: 700,
     messages: [{ role: 'user', content: buildPrompt(clean, ctx) }]
   });
   var raw = (msg.content[0] && msg.content[0].text ? msg.content[0].text : '').trim().replace(/```json|```/g, '').trim();

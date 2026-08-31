@@ -234,7 +234,7 @@ router.post('/chat', async function(req, res) {
     } catch(e) { console.error('[publicChat] failed to inject selectedRecords:', e.message); }
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     var response = await client.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-5',
       max_tokens: 1024,
       system: systemPrompt,
       messages: messages
@@ -285,7 +285,7 @@ router.post('/chat', async function(req, res) {
           eOutcome = 'The email system matched approximately ' + n + ' emails' + (emailCount && emailCount.dateRange ? ' within the given date range' : '') + '. Relay ONLY this number ("about ' + n + ' emails currently match"). CRITICAL: share only the count - never any email content, subject lines, or sender/recipient names, because these emails are unreviewed and may contain protected information. Then let them know that all email is reviewed for exempt content before release. ' + (large ? 'Because ' + n + ' is a large number, warmly invite them to narrow it - ask for specific senders or recipients (the people whose email to search) and/or a tighter date range - so their request is well targeted before it reaches staff.' : 'This is a manageable number; ask whether they would like to refine further (specific senders or a tighter date range) or proceed to submit the request for staff to pull and review these emails.') + ' Do NOT show any cards or lists.';
         }
         var eComposeSys = 'You are the warm, helpful public records assistant for ' + agencyName + '. The citizen is requesting EMAIL records. A count-only email search is COMPLETE for: "' + emailQuery + '".\n' + eOutcome + '\n\nWrite ONLY your next chat message to the citizen - brief, warm, plain text. Share ONLY the count, never email content. Do NOT emit any bracketed markers, except you MAY end with a single [[QUICK_REPLIES:...]] line if you are offering clear choices.';
-        var eCompose = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 600, system: eComposeSys, messages: messages });
+        var eCompose = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 600, system: eComposeSys, messages: messages });
         var eComposed = eCompose.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
         if (eComposed && eComposed.trim()) {
           fullText = eComposed;
@@ -318,7 +318,7 @@ router.post('/chat', async function(req, res) {
           outcome = 'The search returned NO public-ready records matching the description. Write a brief, warm reply letting the citizen know there is no public-ready record matching their request, so you will submit their request for processing and a staff member will locate and prepare it. Then continue the intake toward any remaining required info (e.g. delivery method). Do NOT ask them to choose from results (there are none) and do NOT run another search.';
         }
         var composeSys = 'You are the warm, helpful public records assistant for ' + agencyName + '. You just searched the agency records on the citizen\'s behalf for: "' + searchQuery + '". The search is COMPLETE.\n' + outcome + '\n\nWrite ONLY your next chat message to the citizen - brief, warm, plain text. Do NOT emit ANY bracketed markers (no [[SEARCH_QUERY]], [[VERIFY_EMAIL]], [[VERIFY_SKIPPED]], [[CONTACT_FORM]], [[SUBMIT_READY]], etc.)' + ((searchResults && searchResults.length) ? ', except the single [[QUICK_REPLIES:...]] line specified above' : '') + '. Do not say you are "searching" or "checking" - the search already happened and its outcome is given above.';
-        var compose = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 700, system: composeSys, messages: messages });
+        var compose = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 700, system: composeSys, messages: messages });
         var composedText = compose.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
         if (composedText && composedText.trim()) {
           fullText = composedText;

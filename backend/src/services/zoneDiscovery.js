@@ -63,7 +63,7 @@ async function discoverZones(fileId) {
     'The "text" must match the document exactly so it can be located. Split distinct items (e.g. each address line, name, number) into separate elements. Return ONLY the JSON array.';
 
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] });
+  var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] });
   var txt = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
   var arr = extractFirstArray(txt); if (!arr) return { suggestions: [], scanned_pages: pages.length };
   var items; try { items = JSON.parse(arr); } catch (e) { return { suggestions: [], scanned_pages: pages.length }; }
@@ -98,7 +98,7 @@ async function suggestRule(label) {
     'Match on the meaning of the field (e.g. a driver\'s license or license plate maps to a motor vehicle record rule; a home phone maps to a home address/telephone rule).\n\n' +
     'Rules:\n' + menu + '\n\nReturn ONLY JSON: {"rule_id": "<id from the list, or null>"}.';
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 200, messages: [{ role: 'user', content: prompt }] });
+  var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 200, messages: [{ role: 'user', content: prompt }] });
   var txt = resp.content.map(function (b) { return b.type === 'text' ? b.text : ''; }).join('');
   var m = txt.match(/\{[\s\S]*\}/); var obj = {}; try { obj = JSON.parse(m ? m[0] : '{}'); } catch (e) {}
   var hit = obj.rule_id && rules.filter(function (r) { return r.id === obj.rule_id; })[0];

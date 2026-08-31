@@ -121,7 +121,7 @@ function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
       description: 'building permit records for 100 Main St ' + TAG
     }, { actorName: 'harness' }); // kickIntake ON — routing runs on the description, which is the child's
     made.push(r2.parentId, r2.childId);
-    // NOTE ON DETERMINISM: `classifier.js` calls Anthropic (claude-sonnet-4-5), so whether a description routes
+    // NOTE ON DETERMINISM: `classifier.js` calls Anthropic (claude-sonnet-5), so whether a description routes
     // CONFIDENTLY — and therefore whether a task spawns at all — is NOT deterministic. An earlier draft asserted
     // "a task spawned" and passed 39/39, then failed on identical code the next run. Assert what is true on
     // EVERY path instead: the routing decision is always written (workflowEngine writes one regardless of
