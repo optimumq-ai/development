@@ -99,6 +99,27 @@ export default function RecordSearchTaskPage() {
   function loadAttached(rid) {
     return api.get('/files/' + rid).then(function (r) { setAttached(r.data.files || []); }).catch(function () {});
   }
+  // Preview opens the file in a new tab through the authed API (the DocSearchPanel pattern).
+  async function previewFile(f) {
+    setBusy('pv-' + f.id);
+    try { var r = await api.get('/files/download/' + f.id, { responseType: 'blob' }); window.open(URL.createObjectURL(r.data), '_blank'); }
+    catch (e) { setFlash({ tone: 'crit', text: 'The file could not be opened.' }); }
+    setBusy('');
+  }
+  var [confirmRemove, setConfirmRemove] = useState(null); // two clicks to remove — nothing destructive on one
+  async function removeFile(f) {
+    if (confirmRemove !== f.id) { setConfirmRemove(f.id); return; }
+    setBusy('rm-' + f.id); setConfirmRemove(null);
+    try { await api.delete('/files/' + f.id); setFlash({ tone: 'ok', text: 'Removed: ' + f.original_name }); await loadAttached(task.request_id); await loadTrail(task.request_id); }
+    catch (e) { setFlash({ tone: 'crit', text: (e.response && e.response.data && e.response.data.error) || 'Could not remove the file.' }); }
+    setBusy('');
+  }
+  async function toggleInclude(f) {
+    setBusy('tg-' + f.id);
+    try { await api.patch('/files/' + f.id + '/status', { responsive: !f.responsive }); await loadAttached(task.request_id); }
+    catch (e) { setFlash({ tone: 'crit', text: 'Could not change the include mark.' }); }
+    setBusy('');
+  }
   function loadIntake(rid) {
     return api.get('/requests/' + rid + '/search-intents')
       .then(function (x) { setIntake(x.data); }).catch(function () {});
@@ -110,7 +131,13 @@ export default function RecordSearchTaskPage() {
       .then(function (r) {
         if (!alive) return;
         setTask(r.data.task);
-        api.post('/tasks/' + taskId + '/begin').catch(function () {}); // begin-work: owner-gated server-side (Slice A)
+        // A finished task must LOOK finished (Kevin 2026-08-31: the rail still showed a live "Found" button on a
+        // done task after reload; clicking it earned the server's 409). Mirror routes/tasks.js isActionable.
+        if (['done', 'cancelled'].indexOf(r.data.task.status) !== -1) {
+          setResolved({ outcome: 'already', status: r.data.task.status });
+        } else {
+          api.post('/tasks/' + taskId + '/begin').catch(function () {}); // begin-work: owner-gated server-side (Slice A)
+        }
         var rid = r.data.task.request_id;
         api.get('/requests/' + rid + '/search-intents')
           .then(function (x) { if (alive) setIntake(x.data); }).catch(function () {});
@@ -221,7 +248,7 @@ export default function RecordSearchTaskPage() {
       .then(function (r) {
         setResolved(r.data);
         setFlash({ tone: 'ok', text: outcome === 'found'
-          ? ('Search complete — ' + r.data.included + ' record(s) handed to Exemption Review.')
+          ? ('Search complete — ' + r.data.included + ' record(s) handed on for redaction review.')
           : ('Closed — no responsive records. Diligence evidenced by ' + r.data.effortEntries + ' logged action(s).') });
         return loadTrail(task.request_id);
       })
@@ -657,16 +684,31 @@ export default function RecordSearchTaskPage() {
                 <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em',
                   color: C.muted, marginBottom: 8 }}>On this request ({attached.length})</div>
                 {attached.slice(0, 12).map(function (f) {
+                  var live = !resolved; // once the task is finished the list is a record, not a worklist
+                  var sBtn = { fontSize: 11.5, fontWeight: 600, fontFamily: 'inherit', borderRadius: 7, padding: '3px 9px',
+                    background: 'white', color: C.muted, border: '1px solid ' + C.hairStrong, cursor: 'pointer', whiteSpace: 'nowrap' };
                   return (
                     <div key={f.id} style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6,
                       background: C.surface, border: '1px solid ' + C.hair, borderRadius: 8, padding: '8px 11px' }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px',
-                        background: f.responsive ? C.greenTint : C.surface2, color: f.responsive ? C.green : C.faint }}>
-                        {f.responsive ? 'Include in Response' : 'Attached'}
-                      </span>
-                      <span style={{ fontSize: 13, color: C.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <button type="button" disabled={!live || !!busy} onClick={function () { toggleInclude(f); }}
+                        title={live ? (f.responsive ? 'Click to leave it attached but NOT in the response' : 'Click to include it in the response') : ''}
+                        style={{ fontSize: 11, fontWeight: 700, fontFamily: 'inherit', borderRadius: 999, padding: '2px 8px', border: 'none',
+                          cursor: live ? 'pointer' : 'default',
+                          background: f.responsive ? C.greenTint : C.surface2, color: f.responsive ? C.green : C.faint }}>
+                        {busy === 'tg-' + f.id ? '…' : (f.responsive ? 'Include in Response' : 'Attached')}
+                      </button>
+                      <span style={{ flexGrow: 1, fontSize: 13, color: C.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {f.original_name}
                       </span>
+                      <button type="button" disabled={busy === 'pv-' + f.id} onClick={function () { previewFile(f); }} style={sBtn}>
+                        {busy === 'pv-' + f.id ? 'Opening…' : 'Preview'}
+                      </button>
+                      {live && (
+                        <button type="button" disabled={!!busy} onClick={function () { removeFile(f); }}
+                          style={Object.assign({}, sBtn, confirmRemove === f.id ? { background: C.critTint, color: C.crit, border: '1px solid ' + C.crit } : {})}>
+                          {busy === 'rm-' + f.id ? 'Removing…' : (confirmRemove === f.id ? 'Remove — click again' : 'Remove')}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -713,8 +755,11 @@ export default function RecordSearchTaskPage() {
           <div style={{ padding: 14 }}>
             {resolved ? (
               <div style={{ fontSize: 13, fontWeight: 650, color: resolved.outcome === 'found' ? C.green : C.crit }}>
-                {resolved.outcome === 'found'
-                  ? '✓ Search complete — handed to Exemption Review.'
+                {resolved.outcome === 'already'
+                  ? (resolved.status === 'cancelled' ? 'This search task was cancelled — the request moved on without it.'
+                    : '✓ This search is already complete — the records were handed on for redaction review.')
+                  : resolved.outcome === 'found'
+                  ? '✓ Search complete — handed on for redaction review.'
                   : '✓ Closed — no responsive records.'}
               </div>
             ) : (
@@ -731,7 +776,7 @@ export default function RecordSearchTaskPage() {
                     color: (includedCount < 1 || openIntents.length > 0) ? C.faint : '#fff',
                     border: '1px solid ' + ((includedCount < 1 || openIntents.length > 0) ? C.hair : C.green), borderRadius: 9,
                     padding: '10px 12px', fontSize: 13.5, fontWeight: 650, marginBottom: 8 }}>
-                  {busy === 'found' ? 'Completing…' : 'Found — ' + includedCount + ' to include →'}
+                  {busy === 'found' ? 'Completing…' : 'Mark search complete — send ' + includedCount + ' record' + (includedCount === 1 ? '' : 's') + ' on →'}
                 </button>
 
                 {openIntents.length > 0 && (

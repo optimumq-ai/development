@@ -9872,3 +9872,17 @@ The templates/calibration investigation report went to Kevin (see session notes)
 redaction_rules vs record_type_estimate_profiles; the Taxonomy calibration tab is a no-op body; dead columns
 `record_types.redaction_profile_id` + `fee_estimate_low/high/note`; Mass Redaction's on-screen authoring
 instruction is stale per Kevin (UI rebuilt) — rewrite pending the template-naming decisions.
+
+## 2026-08-31 — record-search task screen: finished state on load, Preview/Remove/include-toggle on attached rows
+
+Kevin's live find on t-d59d2b75 (2026-000004). Diagnosis from live history (read-only): he HAD completed the
+search at 06:31:39 — the button was labelled "Found — 1 to include →" and did not read as the complete act,
+and after reload the rail showed a live-looking button on a done task (server 409 on click). Also the
+"On this request" rows had no preview/remove and the include chip was inert. Fixed (frontend only):
+(1) on load, task.status done/cancelled → the rail shows the finished state (mirror of routes/tasks.js
+isActionable) and begin-work is not posted; (2) attached rows get Preview (blob open — DocSearchPanel
+pattern), Remove (two-click confirm; only while the task is live; attach copies the file so delete is safe),
+and the include chip toggles via PATCH /files/:id/status; (3) button relabelled "Mark search complete —
+send N record(s) on →" and the flash/banner now say redaction review (it said Exemption Review — wrong stage:
+the resolve opens a redaction task). Verified by screenshot on the live task. No backend change; no suite run
+(UI-only; the next slice's run covers it).
