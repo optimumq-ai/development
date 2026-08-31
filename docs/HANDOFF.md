@@ -9937,3 +9937,45 @@ lists every open task incl. Kevin's intake_review t-cf74d37b. Flow = claim from 
 claims; revisit if Kevin wants). CAVEAT: two-eyes on release_review will refuse the tester if it completed the
 request's previous step — use a second login (e.g. admin) for that one review, or decide a test-mode relaxation
 with Kevin. DEACTIVATE (or delete) this account at go-live — it can do everything, everywhere.
+
+## 2026-08-31 — SESSION HANDOFF (Kevin's Fable limit reached; resume in a few hours). Pending items, in rough priority
+
+**State:** main @ e7ac1a2, tree clean, live API healthy on Sonnet 5, suite last full-run 2841/2842 (E1a the
+standing order-dependent red). Everything below is discussed-and-parked, not started.
+
+**Kevin's walkthrough (in flight):** 2026-000006 sits at intake review; the tester superuser
+(tester@optimumq.local / TestAll!2026, temp) sees every pool task — claim t-cf74d37b → intake review →
+search → redaction. Goal: reach the redaction UI and test whether the Mass Redaction screen's
+"create template from the redaction workspace" instruction still matches the rebuilt UI (Kevin believes it is
+stale). Two-eyes: release_review needs a second login (admin) or a decided test-mode relaxation.
+
+**PENDING, needing Kevin's ruling:**
+1. **NEW — AI "training documents" question (Kevin, at session end):** do we need priming/context documents
+   loaded when a user first connects to an AI model **or when the platform changes models** (e.g. the
+   4.5→Sonnet 5 move)? Frame for the discussion: the system prompts ARE the per-touchpoint training today
+   (publicChat SYSTEM_PROMPT + admin agent_rules; each extractor its own). A "model changed → re-verify
+   prompts + a golden-transcript eval per touchpoint" checklist may be the real deliverable rather than
+   runtime documents; prompt-caching also argues for stable system prompts over per-connection uploads.
+   UNDECIDED — needs a design conversation.
+2. **Workspace vs task-UI reconciliation:** the Request Workspace is the Opus-era general UI; task screens
+   (intake review BW3, search, redaction, MRR BW6, release review BW8) are the new pattern. Kevin's finds:
+   Records tab duplicates attach (search task's job); "Description of Records Requested" renders empty on the
+   parent (children carry it — §4.4 field-design pass); Kevin WANTS requestor-selected records shown on the
+   Records tab. Agreed approach: mockup first — workspace becomes read-mostly overview, actions live on task
+   screens.
+3. **Templates cleanup (investigation done, report in session notes 2026-08-31):** (a) rename pass —
+   layout_profiles/redaction-templates/layout_templates are three names for one thing; drop dead columns
+   record_types.redaction_profile_id + fee_estimate_low/high/note; (b) give Taxonomy's calibration tab a real
+   body (hub row already promises it; the working flow hides in the record-type editor; programmingHours
+   missing from EstimateProfilePanel); (c) rewrite the Mass Redaction authoring instruction after Kevin's
+   walkthrough verdict.
+4. **WORKING_setup_conversion_questions.md** (two left): nightly freshness scan mints proposals with NO
+   notification (should it notify compliance owners?); is the reminder cadence truly a required city decision?
+5. **Cosmetics:** Update Configuration's red line quotes a raw proposal title (file name + sha); Mass
+   Redaction strip squeezes its evidence text; Records-tab empty-state wording (superseded by item 2 if taken).
+6. **Standing:** MFA decision · Jurisdiction Configuration retirement (city_choices is the ONLY hub row not on
+   the approval model) · Kevin's live setup-guide walk-through · parent/child field-design pass §4.4 · MRR
+   classification roll-up §6 · Haiku-for-classifier eval (parked until volume justifies; bring numbers).
+
+**Watch out:** harness subsets must follow run_suite.js order (memory: harness-order-dependence); no
+concurrent build+suite; kill patterns anchored ^node; the tester account must be deactivated at go-live.
