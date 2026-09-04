@@ -10074,3 +10074,11 @@ restored owner dept-building from sibling evidence (audit trail had no prior rou
 probe was my error). Sources state: Public Works UNLINKED from Building permits (Kevin's intent, applied);
 links now laserfiche + sample + dev-services. NOTE the editor's non-atomic 3-call save as a finding: sources
 saved while fields 500'd, so the UI's error told Kevin the save failed when 1/3 of it had landed.
+
+## 2026-09-04 — literal "×"/"·" glyphs in the UI (JSX text does not process escapes)
+
+Kevin's find: the record-type editor showed the text "×" as its close button and "·" beside every
+field hint. Root cause: \u escapes typed in JSX TEXT position render literally (they only work inside JS
+strings). Swept the whole frontend mechanically (escape outside string quotes = broken): fixed
+RecordTypeEditor (× close button, · hint separators), SchemaDiscoveryPage, MassRedactionPage,
+FeeEstimatePanel. All in-string escapes left alone. Frontend rebuilt; no backend change. Code: b7e1f04.
