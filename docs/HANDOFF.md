@@ -9950,13 +9950,13 @@ search → redaction. Goal: reach the redaction UI and test whether the Mass Red
 stale). Two-eyes: release_review needs a second login (admin) or a decided test-mode relaxation.
 
 **PENDING, needing Kevin's ruling:**
-1. **NEW — AI "training documents" question (Kevin, at session end):** do we need priming/context documents
-   loaded when a user first connects to an AI model **or when the platform changes models** (e.g. the
-   4.5→Sonnet 5 move)? Frame for the discussion: the system prompts ARE the per-touchpoint training today
-   (publicChat SYSTEM_PROMPT + admin agent_rules; each extractor its own). A "model changed → re-verify
-   prompts + a golden-transcript eval per touchpoint" checklist may be the real deliverable rather than
-   runtime documents; prompt-caching also argues for stable system prompts over per-connection uploads.
-   UNDECIDED — needs a design conversation.
+1. **DECIDED (Kevin, 2026-08-31, discussed 2026-09-04): the MODEL-CHANGE EVAL, deferred to a future session.**
+   No runtime "training documents" — models are stateless, every call already carries its full context, and a
+   document cannot assure behavior on a new model; only testing can. BUILD (when picked up): golden transcripts
+   per AI touchpoint (real portal conversations, descriptions + correct classifications, OCR text + correct
+   redaction zones), replayed against any new model with a diff — harness-shaped, would have caught the
+   Sonnet 5 classifier failure before a live request did. The generated "city context pack" (hand-maintained
+   prompt prose rots — helpAgent went stale twice in one week) noted as a separate possible item, undecided.
 2. **Workspace vs task-UI reconciliation:** the Request Workspace is the Opus-era general UI; task screens
    (intake review BW3, search, redaction, MRR BW6, release review BW8) are the new pattern. Kevin's finds:
    Records tab duplicates attach (search task's job); "Description of Records Requested" renders empty on the
