@@ -10174,3 +10174,18 @@ Drive + Test Import Drop stay local by design — they are not department drives
 (keyed repository_id+filename+sha; paths resolve from config at scan time). Native search verified reading
 the finance share over the network (8 hits for "business license"). KEEP /opt/optimumq/demo_sources as the
 offline backup until the reset; the "unplug cityfiles" failure demo is now available for all nine drives.
+
+## 2026-09-04 — inventory function, round 2 of design (Kevin): per-source census, inventory view, "Identical Grouping"
+
+DECIDED additions to the banked inventory design: (1) census runs PER CONNECTOR/SOURCE (not per record
+type), triggered by a "Perform Census / Generate Inventory" button on the source, ONE source at a time,
+as a background job with progress — matches cost gating and protects the box/file server; (2) per-source
+"View Inventory Information": total files · readable/needs-OCR/unsupported buckets · file-type breakdown ·
+identical groupings with counts + template status · linked record types/variants · last census + incremental
+diff — this screen IS the missing holdings/liveness display from the connector findings; (3) FEATURE RENAMED
+"IDENTICAL GROUPING" (was: same-format piles / mass-redaction candidates in copy; nav "Find Same-Format
+Records") — visible relabel deferred to the inventory build so we rename once; wire names unchanged.
+TAXONOMY-VS-VECTORS (Kevin's question, answered): vector index = the FINDING layer; taxonomy = the DECIDING
+layer (release posture, legal gates, exemption categories, routing, estimate calibration, template binding,
+court-grade explainability all hang off TYPES). Semantic search removes taxonomy's search-crutch role
+(synonyms/keywords), letting it shrink to policy-bearing categories. Inventory feeds both from one read.
