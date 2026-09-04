@@ -10038,3 +10038,26 @@ INCREMENTAL RESCAN via the import-ingest name/size/mtime dedupe pattern; CAD/GIS
 text + layer names, DWG properties, shapefile .dbf attributes, GeoTIFF geo-tags) and released records already
 carry lat/long (geo screen) for geo metadata to land on. NEXT for this item: design session + inventory-screen
 mockup, then slice it.
+
+## 2026-09-04 — fingerprint census TITLE VETO: variant discovery now matches ground truth (2 mega-piles → 12 honest piles)
+
+Kevin ran variant discovery on Building permits over the new network mount: 208 docs, but only TWO piles of
+~100. Blame landed on the DETERMINISTIC clusterer, not the AI namer (the namer is already forbidden to merge):
+every city form shares the letterhead, so firstLine/topLeft agreed everywhere, no feature saw the form TITLE,
+and 8-of-10 + union-find chaining fused the two structural families (measured pairwise: short field-table
+forms scored 8–10 against each other; long permit forms likewise). FIX (docFingerprint): 11th feature
+`titleLines` = the up-to-two lines of the first ten that are ≥1.15× the document's median line height (word
+heights from pdftotext -bbox), "letterhead | title", digits normalized — and a HARD VETO in isMatch: differing
+titleLines = different templates regardless of score. The height QUALIFIER matters: a plain two-tallest
+heuristic grabbed a 12pt body line carrying the applicant NAME in verify_fingerprint_discovery's synthetic
+permit and split same-template docs — only meaningfully-taller lines qualify; zero qualifying → veto off,
+scored matching still applies (safe for the future OCR path). FEATURE_V=3; the census re-extracts
+stale-version rows (matching sha alone no longer suffices); signatures (v2) carry titleLines — old v1
+signatures have none, so the veto never fires against them and approved variants keep matching. Also: the
+cluster-naming call's max_tokens 3000→12000 (12 clusters truncated the JSON array → "AI response could not
+be read" 422).
+RESULT (live, network drives): 12 piles matching the corpus manifests exactly — IBA/IBP/RBA/RBP 25 each ·
+BIR/CO 20 each · CN/EXC/ROW each split into their two planted layouts 10+10 · 4% ungrouped (sample-drive
+singletons) · all mass-redaction candidates. Harnesses: taxonomy_variants 14/14, variant_discovery 12/12,
+fingerprint_discovery 18/18. API restarted. Code commit: 80acd5d. NEXT here: approve a variant in the UI →
+the Mass Redaction "Waiting for a template" hand-off completes Kevin's original walkthrough goal.
