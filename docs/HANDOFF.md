@@ -10208,3 +10208,14 @@ flavors; the inventory screen shows kinds-and-fields for data vs groupings-and-l
 FIELD-REDACTED renderings (embeddings.content stores text; PII lands in the index either way it's raw);
 (b) confirm the per-kind embed-tier defaults. Also standing: "Identical Grouping" rename held for the
 inventory build (rename once).
+
+## 2026-09-04 — inventory design COMPLETE: Kevin's two final calls
+
+DECIDED: (a) PRIVACY — embed FIELD-REDACTED renderings: a kind's field template applies BEFORE the render
+is embedded, so the vector index never holds withheld values (a kind with no field template yet embeds only
+its kind description — tier 1 — until one exists; row-level embedding is gated on the template, which also
+sequences the work: census → field template → then prose embedding); (b) EMBED TIERS confirmed as proposed —
+(1) always the kind description, (2) per-kind opt-in for prose fields with visible cost, (3) never pure
+id/date/number kinds. With these, the inventory function design is CLOSED — next step when Kevin schedules
+it: mockup session (per-source census button, Inventory Information screen incl. the Identical Grouping
+rename), then slices.
