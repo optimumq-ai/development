@@ -55,6 +55,7 @@ import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
 import MassRedactionPage from './pages/MassRedactionPage';
 import CashDrawerPage from './pages/CashDrawerPage';
+import RequestorLedgerPage from './pages/RequestorLedgerPage';
 import ParentFinancialPage from './pages/ParentFinancialPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
@@ -196,6 +197,7 @@ export default function App() {
           <Route path="mass-redaction" element={<MassRedactionPage />} />
           <Route path="fee-config" element={<Navigate to="/setup/fee-law" replace />} />
           <Route path="cash-drawer" element={<CashDrawerPage />} />
+          <Route path="requestor-ledger" element={<RequestorLedgerPage />} />
           <Route path="config" element={<Navigate to="/admin?tab=setup" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>

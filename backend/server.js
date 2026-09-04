@@ -86,6 +86,7 @@ app.use('/api/fee-profiles', require('./src/routes/feeProfiles'));
 app.use('/api/fee-estimates', require('./src/routes/feeEstimates'));
 app.use('/api/config-freshness', require('./src/routes/configFreshness'));
 app.use('/api/jurisdiction-profile', require('./src/routes/jurisdictionProfile'));
+app.use('/api/requestor-ledger', require('./src/routes/requestorLedger'));
 app.use('/api/clarification-policy', require('./src/routes/clarificationPolicy'));
 app.use('/api/redaction-config', require('./src/routes/redactionConfig'));
 app.use('/api/onboarding', require('./src/routes/onboarding'));

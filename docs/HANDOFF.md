@@ -10150,3 +10150,16 @@ Round 2 (Kevin): header LIGHTS (fee waiver, request outcome) · EVENTS strip = d
 COMMUNICATIONS box listing every letter/email with open-links. Open on canvas notes: skipped-stage rendering.
 When settled: build → route /requests/:id to it → delete RequestWorkspacePage (its unique actions all have
 homes: clocks/exemption/AG on the new header; attach dropped; estimate work on /estimate task screen).
+
+## 2026-09-04 — FRONT DESK nav group + the Requestor Ledger's first screen (Kevin's option 2)
+
+Nav (AppLayout): new visible group FRONT DESK after Request Queue — New Request Entry (/requests/new) ·
+Take a Payment (/cash-drawer MOVED under it, route unchanged, relabeled) · Requestor Ledger (NEW screen).
+The WS5 cross-request ledger service had NO screen anywhere — built read-only lookup:
+GET /api/requestor-ledger/search?q= (name/email → profiles + balance + request count) and /profile/:id
+(balance · allowances with used/cap bars · frequency counters · standing flags · last 15 ledger events ·
+linked requests via requestScope numberExpr). Mutations stay at the service's gates. requireAuth (matches the
+cash-drawer reconciliation endpoint's posture). Frontend RequestorLedgerPage (search → detail).
+verify_requestor_ledger 65/65 (+L1–L3); live search verified (finds Kevin's verified-email profile).
+Parked candidates for the group (Kevin to decide later): in-person identity verification · paper-archive
+index lookup.

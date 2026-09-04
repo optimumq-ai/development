@@ -24,6 +24,13 @@ export default function AppLayout() {
   const items = [
     { to: '/dashboard', label: 'Dashboard', show: true },
     { to: '/requests', label: 'Request Queue', show: true },
+    // FRONT DESK (Kevin, 2026-09-04): the counter clerk's work — a citizen standing at the window.
+    // Same visible-group pattern as the control center below. Cash Drawer MOVED here (was a
+    // top-level item); its route is unchanged.
+    { header: 'Front Desk', show: true },
+    { to: '/requests/new', label: 'New Request Entry', show: true, child: true },
+    { to: '/cash-drawer', label: 'Take a Payment', show: isElev, child: true },
+    { to: '/requestor-ledger', label: 'Requestor Ledger', show: isElev, child: true },
     { to: '/reports', label: 'Reports', show: isElev },
     { to: '/org', label: 'Organization', show: isElev },
     // PUBLIC READY CONTROL CENTER (Kevin, 2026-08-14): everything that converts internally-stored
@@ -39,7 +46,6 @@ export default function AppLayout() {
     { to: '/library-map', label: 'Public Record Geo Location', show: isElev, child: true },
     // The PUBLIC library page, linked for internal eyes — same page the citizens see.
     { to: '/portal/library', label: 'Public Records Library', show: isElev, child: true },
-    { to: '/cash-drawer', label: 'Cash Drawer', show: isElev },
     { to: '/tickler', label: 'Tickler', show: isElev },
     // BW9a: the go-live checklist. Senior Legal (ATTORNEY_REVIEWER) sees it too — they attest the
     // Legal Rules sections and cannot attest what they cannot see.
