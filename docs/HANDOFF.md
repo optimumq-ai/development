@@ -10163,3 +10163,14 @@ cash-drawer reconciliation endpoint's posture). Frontend RequestorLedgerPage (se
 verify_requestor_ledger 65/65 (+L1–L3); live search verified (finds Kevin's verified-email profile).
 Parked candidates for the group (Kevin to decide later): in-person identity verification · paper-archive
 index lookup.
+
+## 2026-09-04 — all nine department drives now served over the network (cityfiles migration complete)
+
+The remaining eight filestore sources re-pointed via the real repositories PATCH, each pre-verified
+file-count-identical between local folder and its SMB share before switching: code_enforcement 40 ·
+engineering 15 · finance 70 · fire 40 · planning 15 · police 20 · public_works 40 · utilities 50 (+ dev
+services 160 done earlier). No source config references /opt/optimumq/demo_sources any more (Sample Network
+Drive + Test Import Drop stay local by design — they are not department drives). Fingerprint index unaffected
+(keyed repository_id+filename+sha; paths resolve from config at scan time). Native search verified reading
+the finance share over the network (8 hits for "business license"). KEEP /opt/optimumq/demo_sources as the
+offline backup until the reset; the "unplug cityfiles" failure demo is now available for all nine drives.
