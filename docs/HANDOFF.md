@@ -9979,3 +9979,18 @@ stale). Two-eyes: release_review needs a second login (admin) or a decided test-
 
 **Watch out:** harness subsets must follow run_suite.js order (memory: harness-order-dependence); no
 concurrent build+suite; kill patterns anchored ^node; the tester account must be deactivated at go-live.
+
+## 2026-09-04 — demo systems + catalog documented for Kevin's connector walkthrough (pre-reset)
+
+Two reference artifacts published (Kevin's request before the config-reset/documentation pass):
+· Emulated Systems & Connectors — https://claude.ai/code/artifact/411392de-55f0-4d69-ad1a-62f075fc75b5
+· Demo Document Catalog — https://claude.ai/code/artifact/e6d68ed2-1f0d-4a93-9fbb-aa9c4cf9ae71
+Key facts: 3 HTTP emulators (Tyler :4001 / Axon :4002 / Laserfiche :4003, X-API-Key demo keys, Tyler+Axon
+regenerate on restart, Laserfiche's 32 docs are the hand-authored stable catalog); in-process demo/nena911/
+email/paper-index; 9 filestore drives = 450 PDFs, 20 form types (prefix table in the catalog doc); registry
+of 9 connector types drives the Sources screen; POST /repositories/ai-configure proposes config from prose.
+GAPS surfaced: NO test-connection anywhere (stub /health endpoints exist, unused); Tyler/Axon/Laserfiche hits
+are findable-not-fetchable (422 RETRIEVAL_REQUIRED); AI-ranked connectors go silently empty on AI errors.
+NEXT: walk one filestore + one API (Laserfiche) connection as a customer; THEN the reset (a Reset/benchmark
+feature exists — "Fresh benchmark taken AFTER the wiring so Reset preserves it", HANDOFF 2026-08-14h; use it
+rather than hand deletes; keep: users/staff, user types, teams/departments, benchmarks, demo fixtures).
