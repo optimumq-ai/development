@@ -10017,3 +10017,24 @@ build a Retire/Replace-source flow, refuse hard delete while referenced.
 **NEXT:** in-app search/discovery check over the mount · Part 2 (Laserfiche endpoint+key walkthrough) ·
 migrate remaining 8 drives · then Kevin's config-reset (via the benchmark/Reset feature) + his walkthrough
 findings list.
+
+## 2026-09-04 — THE INVENTORY FUNCTION (design decisions from Kevin's brainstorm; future build, needs a mockup session)
+
+Kevin's goal: ONE "Inventory this source" pass over a drive/file server replacing AI auto-discovery + variant
+discovery, producing three outputs from one read of each file: (a) extracted text/metadata → pgvector for
+semantic search; (b) layout fingerprint → piles → taxonomy proposals down to VARIANT level; (c) uniform piles
+→ auto-redaction (mass-template) candidates. Motivating finding (#6 of the connector batch): the AI search
+path EXCLUDES drives entirely — searchAll fans out over {demo,tyler,axon,laserfiche} only; drive documents are
+reachable today ONLY via the live-keyword browse path (pdftotext per file per query — unscalable) or after
+release. The inventory's index is what lets drives join semantic/portal search at all.
+**DECIDED (Kevin 2026-09-04): scanned/image files use OCR-THEN-CENSUS** — no OpenCV/vision stack: tesseract
+(already in docProcessing) emits word positions, so scans feed the EXISTING docFingerprint census unchanged.
+(Checked: OpenCV was never used anywhere; jimp only burns redaction boxes in redactionApply; template /match
+is text-geometry.) Other settled shape: extractor REGISTRY keyed by file type (pdf-text · pdf-ocr · docx/xlsx/
+pptx · image-ocr · eml/msg/txt/csv/rtf · dxf/shapefile/geotiff metadata · legacy doc/xls best-effort ·
+metadata-only fallback), every type counted, unreadables reported honestly, never skipped; COST GATING —
+census first, then per-pile opt-in deepening (OCR/extraction/embedding) with visible cost estimates;
+INCREMENTAL RESCAN via the import-ingest name/size/mtime dedupe pattern; CAD/GIS carry usable metadata (DXF
+text + layer names, DWG properties, shapefile .dbf attributes, GeoTIFF geo-tags) and released records already
+carry lat/long (geo screen) for geo metadata to land on. NEXT for this item: design session + inventory-screen
+mockup, then slice it.
