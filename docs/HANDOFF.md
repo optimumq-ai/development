@@ -10093,3 +10093,14 @@ source's folder, PDF-only (all a pile can hold today; the inventory function's o
 not preview). Proposals + recognized entries carry example_sources [{filename, repository_id}] alongside
 example_files (shape unchanged — approve path untouched). Harness C4–C6 (streams as PDF · traversal refused ·
 unindexed file refused even if on disk); discovery trio 14/14 · 12/12 · 21/21. Frontend rebuilt, API restarted.
+
+## 2026-09-04 — setup strip layout fixed (Kevin's Mass Redaction screenshot: one-word-per-line status column)
+
+Root cause: the strip's pill, nowrap lane label and two buttons are all unshrinkable; on rows with long
+evidence they exceeded the row width, so the ONLY flexible item (the status text) collapsed to min-content —
+one word per line — and the vertically-centered row ballooned around it. Fix in the SHARED SetupScreen strip
+(every converted setup screen benefits): flexWrap + rowGap on the container, status text flex '1 1 260px'
+minWidth 220px, lane label marginLeft auto. Verified by screenshot on Mass Redaction: compact two-line strip,
+and the "Waiting for a template (8)" cards render below with Start-a-template actions. Kevin's screenshot in
+~/exchange ("mass redaction screen isssue.png"). This closes cosmetic finding (2) of the 2026-08-31 pair;
+the Update Configuration raw-proposal-title line remains.
