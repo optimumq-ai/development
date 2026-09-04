@@ -10136,3 +10136,17 @@ reason). Request-mode flow unchanged ("Apply Redaction" there is the real act, a
 tightened — the boxes/suggestions list now takes the full column. Harnesses: mass_handoff 14/14, fingerprint
 23/23, redaction_audit 14/14, bw8_release_review 31/31 (real-path fulfilled_records writes still asserted).
 Verified by screenshot in template mode; probe artifacts cleaned up.
+
+## 2026-09-04 — Request Overview design canvas (replaces the old workspace); round 2 with Kevin's additions
+
+Canvas: https://claude.ai/code/artifact/d3c23ec1-2131-4372-afcd-ecb1ea41281f (Kevin iterating over days).
+Locked so far: clock controls stay on the header (top-right) · records READ-ONLY (attach lives on the search
+task only) · one template for single+multi item (parent header + per-item blocks; artboard 2 sketches 3 items).
+The design: STAGE SPINE (stages as nodes carrying their own task buttons; routing decisions ride the
+connectors) · SUPPORT LANES below in the column where they attached (Legal, second-eyes Reviews) · MONEY is
+NOT a lane — its own dated timeline strip (two-track status model, REQUEST_FINANCIAL_PROFILE_DESIGN §5).
+Round 2 (Kevin): header LIGHTS (fee waiver, request outcome) · EVENTS strip = descrow/defectbox vocabulary
+(SPEC_processing_ui §2.1–2) at request level, linked chips (overly broad/vague, clarification, payment hold) ·
+COMMUNICATIONS box listing every letter/email with open-links. Open on canvas notes: skipped-stage rendering.
+When settled: build → route /requests/:id to it → delete RequestWorkspacePage (its unique actions all have
+homes: clocks/exemption/AG on the new header; attach dropped; estimate work on /estimate task screen).
