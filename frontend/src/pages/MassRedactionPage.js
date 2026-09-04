@@ -70,6 +70,17 @@ export default function MassRedactionPage() {
     setLoading(false);
   }
   function startFromOpp(o) { setUploadErr(''); setPendingType(o); setNewTplOpen(true); }
+  // "Create a Template" (Kevin 2026-09-04): the pile's documents are already known — stage a real example
+  // server-side and open it in the workspace directly. The upload dialog remains only as the fallback
+  // (variant with no readable indexed documents, e.g. a structured/CSV pile).
+  var [creatingTpl, setCreatingTpl] = useState(null);
+  async function createFromOpp(o) {
+    setCreatingTpl(o.record_type_id);
+    try {
+      var r = await api.post('/redaction-templates/opportunities/' + o.record_type_id + '/stage-example');
+      navigate('/redact/' + r.data.fileId + '?for_type=' + encodeURIComponent(o.record_type_id));
+    } catch (e) { setCreatingTpl(null); startFromOpp(o); }
+  }
   async function dismissOpp(o) {
     if (!window.confirm('Remove the suggestion for "' + o.name + '"? The variant itself stays in the taxonomy.')) return;
     try { await api.post('/redaction-templates/opportunities/' + o.record_type_id + '/dismiss'); load(); }
@@ -272,7 +283,7 @@ export default function MassRedactionPage() {
                     </div>
                     {subParts.length ? <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{subParts.join(' · ')}</div> : null}
                   </div>
-                  <button onClick={function () { startFromOpp(o); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Start a template</button>
+                  <button onClick={function () { createFromOpp(o); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>{creatingTpl === o.record_type_id ? 'Opening a real example…' : 'Create a Template'}</button>
                   <button onClick={function () { dismissOpp(o); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Not needed</button>
                 </div>
               );

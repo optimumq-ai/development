@@ -10104,3 +10104,18 @@ minWidth 220px, lane label marginLeft auto. Verified by screenshot on Mass Redac
 and the "Waiting for a template (8)" cards render below with Start-a-template actions. Kevin's screenshot in
 ~/exchange ("mass redaction screen isssue.png"). This closes cosmetic finding (2) of the 2026-08-31 pair;
 the Update Configuration raw-proposal-title line remains.
+
+## 2026-09-04 — "Create a Template" stages a REAL pile document (no upload dialog); button renamed (Kevin)
+
+Kevin's find on the waiting cards: "Start a template" opened an UPLOAD dialog — senseless when the documents
+are already known. Built: POST /redaction-templates/opportunities/:rt/stage-example (requireRedactionWork) —
+picks a stamped example (document_fingerprints.matched_record_type_id, set at variant approval), copies it
+from its source drive into the standing req-template-samples request exactly as the manual upload would, and
+returns the fileId; the card's button (renamed "Create a Template") opens /redact/:fid?for_type=… directly.
+The upload dialog survives only as the automatic FALLBACK when staging 404s (no indexed examples — e.g. a
+structured/CSV pile). Path guards mirror preview-source-file. Harness E5/E6 (staged into req-template-samples
+as PDF + unknown variant refused; probe row cleaned up); fingerprint 23/23, mass_handoff 14/14; live probe
+staged RBA-2023-1000.pdf off the network drive and was cleaned up. LESSON (cost two broken runs): inserting a
+route with "first `});` after anchor" landed INSIDE the previous handler — Express then 404s the unregistered
+path with a generic body; place new routes against `module.exports = router;`, and a generic {"error":"Not
+found"} on a route you just added means REGISTRATION, not logic.

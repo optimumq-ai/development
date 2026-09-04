@@ -155,6 +155,16 @@ async function makeInspection(file, inspector) {
   var newStamped = await db.get("SELECT count(*)::int AS n FROM document_fingerprints WHERE matched_record_type_id = ? AND repository_id = ?", [variant.id, repoB]);
   ok('E4 the new location\'s documents are stamped in the index too', Number(newStamped.n) === 3);
 
+  console.log('\n=== E5-E6. STAGE A REAL EXAMPLE — Create a Template opens a pile document, no upload ===');
+  var stg = await api('POST', '/redaction-templates/opportunities/' + variant.id + '/stage-example');
+  console.log('  (stage-example status ' + stg.status + ' ' + JSON.stringify(stg.body).slice(0,120) + ')');
+  var stagedRow = stg.body && stg.body.fileId ? await db.get('SELECT request_id, original_name, mimetype FROM request_files WHERE id = ?', [stg.body.fileId]) : null;
+  ok('E5 a stamped example is staged into req-template-samples and returns the workspace fileId',
+    stg.status === 200 && stagedRow && stagedRow.request_id === 'req-template-samples' && stagedRow.mimetype === 'application/pdf' && /\.pdf$/i.test(stagedRow.original_name || ''));
+  if (stg.body && stg.body.fileId) { var sf = await db.get('SELECT filename FROM request_files WHERE id = ?', [stg.body.fileId]); await db.run('DELETE FROM request_files WHERE id = ?', [stg.body.fileId]); try { require('fs').unlinkSync(require('path').join(__dirname, '../../uploads', sf.filename)); } catch (eU) {} }
+  var stgBad = await api('POST', '/redaction-templates/opportunities/rt-does-not-exist/stage-example');
+  ok('E6 an unknown variant is refused', stgBad.status === 404);
+
   console.log('\n=== F. LEAVE THE WORLD AS FOUND ===');
   await db.run('DELETE FROM document_fingerprints WHERE repository_id IN (?,?)', [repoA, repoB]);
   await db.run('DELETE FROM record_repositories WHERE id IN (?,?)', [repoA, repoB]);

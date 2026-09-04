@@ -18,6 +18,7 @@ router.use(function (req, res, next) {
 const { requireAuth, requireRedactionWork, isElevated } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
+const UPLOAD_DIR = require('path').join(__dirname, '../../../uploads'); // same landing dir routes/files.js uses
 const docProcessing = require('../services/docProcessing');
 const redactionApply = require('../services/redactionApply');
 const structuredRedaction = require('../services/structuredRedaction');
@@ -371,6 +372,37 @@ router.post('/:id/stage', requireAuth, requireRedactionWork, async function(req,
     created.push({ id: zid, job_id: b.job_id, file_id: b.file_id, page_no: z.page_no || 1, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, note: z.label || null, zone_type: 'template' });
   }
   res.json({ success: true, template_id: t.id, zones: created });
+});
+
+// STAGE A REAL EXAMPLE (Kevin 2026-09-04): "Create a Template" on a waiting card must not ask for an
+// upload — the census already knows every document in the pile (approval stamps them
+// matched_record_type_id). Copy one stamped example from its source drive into the standing
+// req-template-samples request — the same landing spot the manual upload uses — and return the fileId
+// the redaction workspace opens. Path guards mirror /taxonomy/preview-source-file; PDF only.
+router.post('/opportunities/:recordTypeId/stage-example', requireAuth, requireRedactionWork, async function (req, res) {
+  var pathMod = require('path'), fsMod = require('fs');
+  var rt = await get('SELECT id, name FROM record_types WHERE id = ?', [req.params.recordTypeId]);
+  if (!rt) return res.status(404).json({ error: 'Record type not found' });
+  var candidates = await all('SELECT repository_id, filename FROM document_fingerprints WHERE matched_record_type_id = ? ORDER BY filename LIMIT 8', [rt.id]);
+  if (!candidates.length) return res.status(404).json({ error: 'No indexed example documents for this variant yet — upload a sample instead.' });
+  for (var i = 0; i < candidates.length; i++) {
+    var ex = candidates[i];
+    if (ex.filename !== pathMod.basename(ex.filename) || ex.filename.indexOf('..') !== -1 || !/\.pdf$/i.test(ex.filename)) continue;
+    var repo = await get('SELECT config FROM record_repositories WHERE id = ?', [ex.repository_id]);
+    if (!repo) continue;
+    var cfg = {}; try { cfg = JSON.parse(repo.config || '{}'); } catch (e) {}
+    if (!cfg.path) continue;
+    var base = pathMod.resolve(cfg.path);
+    var full = pathMod.resolve(base, ex.filename);
+    if (full.indexOf(base + pathMod.sep) !== 0 || !fsMod.existsSync(full)) continue;
+    var newName = uuidv4() + '.pdf';
+    fsMod.copyFileSync(full, pathMod.join(UPLOAD_DIR, newName));
+    var fid = uuidv4();
+    await run('INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, responsive, uploaded_by) VALUES (?,?,?,?,?,?,?,?)',
+      [fid, 'req-template-samples', newName, ex.filename, 'application/pdf', fsMod.statSync(full).size, 0, req.user.sub]);
+    return res.json({ fileId: fid, originalName: ex.filename, sourceRepository: ex.repository_id });
+  }
+  return res.status(404).json({ error: 'The example documents could not be read from their source drive — upload a sample instead.' });
 });
 
 module.exports = router;
