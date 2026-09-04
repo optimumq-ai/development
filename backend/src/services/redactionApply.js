@@ -176,6 +176,14 @@ async function applyRedaction(jobId, actor, opts) {
   var origLabel = 'Redacted - ' + (file.original_name || file.filename);
   await run('INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, status, uploaded_by, uploaded_at) VALUES (?,?,?,?,?,?,?,?,datetime(\'now\'))',
     [outId, file.request_id, outName, origLabel, 'application/pdf', bytes.length, 'redacted', actor || null]);
+  // TEST MODE (Kevin 2026-09-04): a staged template sample (the standing req-template-samples request)
+  // produces a visual-inspection copy and NOTHING else — the job stays draft (keep editing), no request
+  // history, and above all no fulfilled_records row: a template test must never place a test artifact in
+  // the public-ready index (auto_publish sits behind it). Decided server-side from the file's home,
+  // never from a client flag.
+  if (file.request_id === 'req-template-samples') {
+    return { outputFileId: outId, fileName: origLabel, zoneCount: zones.length, pageCount: pages.length, bytes: bytes.length, testOnly: true };
+  }
   await run("UPDATE redaction_jobs SET status = 'applied', output_file_id = ?, updated_at = datetime('now') WHERE id = ?", [outId, jobId]);
   if (file.request_id) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',

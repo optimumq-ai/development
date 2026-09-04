@@ -10119,3 +10119,20 @@ staged RBA-2023-1000.pdf off the network drive and was cleaned up. LESSON (cost 
 route with "first `});` after anchor" landed INSIDE the previous handler — Express then 404s the unregistered
 path with a generic body; place new routes against `module.exports = router;`, and a generic {"error":"Not
 found"} on a route you just added means REGISTRATION, not logic.
+
+## 2026-09-04 — template-mode test output (Kevin's squeeze screenshot + Apply-Redaction concern; both real)
+
+Kevin's concern was JUSTIFIED: applyRedaction on a staged template sample would have flipped the job to
+applied, written history onto req-template-samples, and INSERTED INTO fulfilled_records — with auto_publish
+behind it, a raw test artifact could reach the public-ready index. FIX (server-decided, never a client flag):
+`file.request_id === 'req-template-samples'` → apply produces the output PDF + file row and RETURNS
+(testOnly: true) — job stays draft/editable, no history, no fulfilled_records, no publish. The batch was
+always safe (it reads the drive originals; the workspace works on a staged COPY) — now the library is too.
+UI (RedactionWorkspacePage, templateMode = ?for_type or the samples request): button "Test Redaction Output
+(n)" with an honest confirm; result panel says nothing was released/published, offers Download Test Output +
+Save as Reusable Template + Keep editing (Done removed in this mode — it bounced to the workspace for no
+reason). Request-mode flow unchanged ("Apply Redaction" there is the real act, and stays). Layout (Kevin's
+"create template squeeze issue.png" in ~/exchange): workspace min-height guaranteed, sidebar header
+tightened — the boxes/suggestions list now takes the full column. Harnesses: mass_handoff 14/14, fingerprint
+23/23, redaction_audit 14/14, bw8_release_review 31/31 (real-path fulfilled_records writes still asserted).
+Verified by screenshot in template mode; probe artifacts cleaned up.

@@ -176,8 +176,14 @@ export default function RedactionWorkspacePage() {
     for (var i = 0; i < list.length; i++) { await acceptSuggestion(list[i]); }
   }
 
+  // Template mode: arrived from a Mass Redaction "waiting" card (?for_type=...) or working the staged
+  // sample request — applying is a TEST (the server enforces no-consequences for these files).
+  var templateMode = !!(new URLSearchParams(window.location.search).get('for_type')) || !!(job && job.request_id === 'req-template-samples');
   async function apply() {
-    if (!window.confirm('Apply ' + zones.length + ' redaction(s) and generate the released copy? The redacted content will be permanently removed from the output.')) return;
+    var q = templateMode
+      ? 'Generate a test output with ' + zones.length + ' redaction(s)? Nothing changes — the original document and its pile stay untouched; this copy is for visual inspection only.'
+      : 'Apply ' + zones.length + ' redaction(s) and generate the released copy? The redacted content will be permanently removed from the released version.';
+    if (!window.confirm(q)) return;
     setApplying(true); setError('');
     try { var r = await api.post('/redaction-jobs/jobs/' + job.id + '/apply'); setResult(r.data); } catch (e) { setError('Apply failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
     setApplying(false);
@@ -211,7 +217,7 @@ export default function RedactionWorkspacePage() {
   var draftBox = draft ? { left: pct(Math.min(draft.x, draft.x2)), top: pct(Math.min(draft.y, draft.y2)), width: pct(Math.abs(draft.x2 - draft.x)), height: pct(Math.abs(draft.y2 - draft.y)) } : null;
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#F3F4F6' }}>
+    <div style={{ height: '100%', minHeight: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column', background: '#F3F4F6' }}>
       {/* Top bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 20px', background: 'white', borderBottom: '1px solid #E5E7EB', flexShrink: 0 }}>
         <button onClick={function () { job && job.request_id ? nav('/requests/' + job.request_id) : nav(-1); }} style={{ border: '1px solid #E5E7EB', background: 'white', borderRadius: '8px', padding: '7px 12px', fontSize: '13px', fontWeight: '600', color: '#374151', cursor: 'pointer' }}>&larr; Back</button>
@@ -285,14 +291,14 @@ export default function RedactionWorkspacePage() {
 
         {/* Sidebar */}
         <div style={{ width: '320px', flexShrink: 0, background: 'white', borderLeft: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <div style={{ padding: '16px 18px', borderBottom: '1px solid #F3F4F6' }}>
+          <div style={{ padding: '10px 14px', borderBottom: '1px solid #F3F4F6' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '6px' }}>RULE FOR NEW BOXES</div>
             <select value={ruleId} onChange={function (e) { setRuleId(e.target.value); }} style={{ width: '100%', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', background: 'white' }}>
               <option value="">(No rule / manual)</option>
               {rules.map(function (r) { return <option key={r.id} value={r.id}>{r.title} ({r.category_label})</option>; })}
             </select>
-            <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '10px 0 0', lineHeight: 1.5 }}>Drag on the page to draw a box. Drag a box to move it, or its corners to resize. New boxes get the rule selected above.</p>
-            <button onClick={discover} disabled={discovering} style={{ width: '100%', marginTop: '12px', padding: '9px', borderRadius: '8px', border: 'none', background: discovering ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: discovering ? 'wait' : 'pointer' }}>{discovering ? 'Scanning document...' : 'Find exempt content (AI)'}</button>
+            <p style={{ fontSize: '11.5px', color: '#9CA3AF', margin: '6px 0 0', lineHeight: 1.4 }}>Drag on the page to draw a box; drag it to move, corners to resize. New boxes get the rule selected above.</p>
+            <button onClick={discover} disabled={discovering} style={{ width: '100%', marginTop: '8px', padding: '8px', borderRadius: '8px', border: 'none', background: discovering ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: discovering ? 'wait' : 'pointer' }}>{discovering ? 'Scanning document...' : 'Find exempt content (AI)'}</button>
             {rules.length === 0 ? <p style={{ fontSize: '12px', color: '#B45309', margin: '8px 0 0' }}>No approved + active rules yet. Boxes will be unlabeled until you attach a rule.</p> : null}
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
@@ -342,14 +348,21 @@ export default function RedactionWorkspacePage() {
             {result ? (
               <div>
                 <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: '#065F46', marginBottom: '10px', lineHeight: 1.5 }}>
-                  Applied {result.zoneCount} redaction(s). Released copy created with a documentation sheet.
+                  {templateMode
+                    ? <span>Test output created with {result.zoneCount} redaction(s). The original document and its pile are untouched — nothing was released or published.</span>
+                    : <span>Applied {result.zoneCount} redaction(s). Released copy created with a documentation sheet.</span>}
                 </div>
-                <button onClick={download} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginBottom: '8px' }}>Download Redacted PDF</button>
-                <button onClick={function () { job && job.request_id ? nav('/requests/' + job.request_id) : nav(-1); }} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Done</button>
+                <button onClick={download} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginBottom: '8px' }}>{templateMode ? 'Download Test Output' : 'Download Redacted PDF'}</button>
+                {templateMode
+                  ? <div>
+                      <button onClick={function () { setTplMsg(null); setTplOpen(true); }} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginBottom: '8px' }}>Save as Reusable Template</button>
+                      <button onClick={function () { setResult(null); }} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Keep editing</button>
+                    </div>
+                  : <button onClick={function () { job && job.request_id ? nav('/requests/' + job.request_id) : nav(-1); }} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Done</button>}
               </div>
             ) : (
               <div>
-                <button onClick={apply} disabled={applying || zones.length === 0} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: (applying || zones.length === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '700', cursor: (applying || zones.length === 0) ? 'default' : 'pointer' }}>{applying ? 'Applying...' : 'Apply Redaction (' + zones.length + ')'}</button>
+                <button onClick={apply} disabled={applying || zones.length === 0} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: (applying || zones.length === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '700', cursor: (applying || zones.length === 0) ? 'default' : 'pointer' }}>{applying ? (templateMode ? 'Generating…' : 'Applying...') : (templateMode ? 'Test Redaction Output (' + zones.length + ')' : 'Apply Redaction (' + zones.length + ')')}</button>
                 <button onClick={function () { setTplMsg(null); setTplOpen(true); }} disabled={zones.length === 0} style={{ width: '100%', marginTop: '8px', padding: '9px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: zones.length === 0 ? 'default' : 'pointer', opacity: zones.length === 0 ? 0.5 : 1 }}>Save as Reusable Template</button>
               </div>
             )}
