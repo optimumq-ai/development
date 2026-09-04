@@ -10219,3 +10219,31 @@ sequences the work: census → field template → then prose embedding); (b) EMB
 id/date/number kinds. With these, the inventory function design is CLOSED — next step when Kevin schedules
 it: mockup session (per-source census button, Inventory Information screen incl. the Identical Grouping
 rename), then slices.
+
+## 2026-09-04 — SESSION HANDOFF (end of day). State + the standing list
+
+**State:** main clean, live healthy, all nine department drives served from the cityfiles SMB droplet
+(10.116.0.2; this session's key is root there; fix script at /home/optimumq/fix_mounts.sh). Suite last full
+run 2841/2842 (E1a standing, order-dependent). demo_sources kept as offline backup until the reset.
+
+**Shipped this session:** emulator + demo-catalog reference docs (artifacts + ~/exchange copies) · cityfiles
+file server + credentialed SMB mounts + Part-1 connector walkthrough · title-veto census fix (12 honest
+piles) · discovery example-preview links · "Create a Template" stages a real pile document + true TEST mode
+(no fulfilled_records/publish from template samples) · setup-strip layout fix · record-type save 500 fix
+(auto_publish/mappable booleans) · JSX \u-escape glyph fixes · Front Desk nav group + the Requestor Ledger's
+first screen (65/65) · all 8 remaining drives migrated to the network · Request Overview design canvas
+(https://claude.ai/code/artifact/d3c23ec1-2131-4372-afcd-ecb1ea41281f — Kevin thinking for a few days) ·
+inventory-function design CLOSED (3 rounds; field-redacted embeddings; tiers confirmed; Identical Grouping
+rename held for the build).
+
+**PENDING, in rough order:** (1) Kevin's canvas verdict on Request Overview → build it → route /requests/:id
+→ delete RequestWorkspacePage; (2) template-workspace finale: draw boxes on the staged permit → Test
+Redaction Output → Save as Reusable Template → card clears → schedule batch → judge the STALE instruction
+box text (Kevin's original question); (3) taxonomy tidy-up: re-parent the non-permit variants (BIR/CO/CN
+under their own types), link inspection reports/COs to their drives; (4) inventory-function mockup session,
+then slices; (5) connector findings batch (test-connection · holdings/liveness · file-server labeling ·
+default-inactive · source retirement · first-50 sampling bias); (6) Kevin's config-walkthrough findings
+capture (still undocumented); (7) the RESET via the benchmark/Reset feature, keep-list agreed first (staff,
+user types, teams/departments, benchmarks, demo fixtures, tester account fate); (8) standing: MFA ·
+Jurisdiction Configuration retirement · §4.4 field pass · MRR roll-up §6 · model-change eval (decided,
+deferred) · Haiku eval at volume · deactivate tester@optimumq.local at go-live.
