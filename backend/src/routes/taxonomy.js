@@ -18,7 +18,9 @@ const { v4: uuidv4 } = require('uuid');
 const embedIndex = require('../services/embedIndex');
 
 var ARRAY_FIELDS = ['synonyms','disambiguators','keywords','identifying_facets','formats'];
-var BOOL_FIELDS = ['is_structured_data','auto_release_eligible','is_canonical','legal_redaction_required'];
+// auto_publish + mappable moved here from the PATCH fields list (2026-09-04): they are INTEGER columns,
+// and the editor sends booleans — a raw `false` bound into an integer column 500'd every record-type save.
+var BOOL_FIELDS = ['is_structured_data','auto_release_eligible','is_canonical','legal_redaction_required','auto_publish','mappable'];
 
 function nid(prefix) { return prefix + '-' + uuidv4().substring(0, 8); }
 
@@ -183,7 +185,7 @@ router.patch('/record-types/:id', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT * FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   var b = req.body;
-  var fields = ['category_id','name','code','description','intent','expected_content','typical_request_reason','public_availability','redaction_profile_id','fee_estimate_note','status','source','confidence','sort_order','fee_estimate_low','fee_estimate_high','fulfillment_method','medium','auto_publish','mappable'];
+  var fields = ['category_id','name','code','description','intent','expected_content','typical_request_reason','public_availability','redaction_profile_id','fee_estimate_note','status','source','confidence','sort_order','fee_estimate_low','fee_estimate_high','fulfillment_method','medium'];
   var sets = [], params = [];
   // #14 — parent changes are validated, never blind-set; a variant follows its parent's category.
   try {

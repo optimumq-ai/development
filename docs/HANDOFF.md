@@ -10061,3 +10061,16 @@ BIR/CO 20 each · CN/EXC/ROW each split into their two planted layouts 10+10 · 
 singletons) · all mass-redaction candidates. Harnesses: taxonomy_variants 14/14, variant_discovery 12/12,
 fingerprint_discovery 18/18. API restarted. Code commit: 80acd5d. NEXT here: approve a variant in the UI →
 the Mass Redaction "Waiting for a template" hand-off completes Kevin's original walkthrough goal.
+
+## 2026-09-04 — record-type Save 500 fixed (auto_publish/mappable were raw booleans into integer columns)
+
+Kevin's UI find: unchecking a source in the record-type editor → Save → "Internal Server Error". The editor's
+save is THREE calls (fields → routing → sources); sources and routing were fine — the FIELDS patch died on
+`invalid input syntax for type integer: "false"`: `auto_publish` and `mappable` sat in the plain fields list
+so the editor's booleans bound raw into INTEGER columns. Moved both into BOOL_FIELDS (coerces 1/0). Every
+record-type save from the editor was broken, not just Kevin's — bw2_catalog 55/55 + taxonomy_variants 14/14
+after fix; PATCH replayed 200. Side repair: my isolation probe had nulled Building permits' routing —
+restored owner dept-building from sibling evidence (audit trail had no prior routing write; the null-payload
+probe was my error). Sources state: Public Works UNLINKED from Building permits (Kevin's intent, applied);
+links now laserfiche + sample + dev-services. NOTE the editor's non-atomic 3-call save as a finding: sources
+saved while fields 500'd, so the UI's error told Kevin the save failed when 1/3 of it had landed.
