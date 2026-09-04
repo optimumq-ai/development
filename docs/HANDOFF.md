@@ -9994,3 +9994,26 @@ are findable-not-fetchable (422 RETRIEVAL_REQUIRED); AI-ranked connectors go sil
 NEXT: walk one filestore + one API (Laserfiche) connection as a customer; THEN the reset (a Reset/benchmark
 feature exists — "Fresh benchmark taken AFTER the wiring so Reset preserves it", HANDOFF 2026-08-14h; use it
 rather than hand deletes; keep: users/staff, user types, teams/departments, benchmarks, demo fixtures).
+
+## 2026-09-04 — REAL network file server built (cityfiles droplet); Part-1 connector walkthrough done; findings batch
+
+**Infrastructure (live):** DO droplet `cityfiles` (private IP 10.116.0.2, same VPC), Samba/SMB3 bound to the
+private interface, service account oqfiles (cred in /root/.smbcred-cityfiles on the app droplet), NINE shares
+mirroring the department drives; the 450 demo PDFs COPIED there (originals still in /opt/optimumq/demo_sources
+— retire after full migration). App droplet mounts all nine at /mnt/cityfiles/<dept> (fstab, ro, uid=optimumq,
+nofail; repair script kept at /home/optimumq/fix_mounts.sh — the DO web console MANGLES multi-line pastes;
+write scripts server-side and hand root a one-liner). This session's ssh key is root on cityfiles.
+**Sources state:** old "Development Services Shared Drive" re-pointed to /mnt/cityfiles/development_services
+(links intact: building permits, COs, inspection reports); Kevin's walkthrough source "Development Services
+Drive" kept INACTIVE. Other eight drives still on local paths — migrate by path edit when Kevin says.
+**CONNECTOR FINDINGS (batch for a slice):** (1) no Test Connection anywhere — stub /health endpoints unused;
+(2) sources screen shows NO holdings count and a decorative "Connected" chip for drives — needs count +
+liveness; (3) access-method label: customers with an SMB "file server" don't recognize "Network Drive /
+Folder" — relabel + help text; decide document-mount-first vs build SMB into the connector; (4) new sources
+default ACTIVE with no verification gate — should start inactive until admin sees evidence; (5) DELETE
+/repositories/:id is a bare row delete orphaning SIX tables (record_type_repositories, document_fingerprints,
+import_ingest_log ← re-ingest hazard, import_review_jobs, paper_index_items, request_files provenance) —
+build a Retire/Replace-source flow, refuse hard delete while referenced.
+**NEXT:** in-app search/discovery check over the mount · Part 2 (Laserfiche endpoint+key walkthrough) ·
+migrate remaining 8 drives · then Kevin's config-reset (via the benchmark/Reset feature) + his walkthrough
+findings list.
