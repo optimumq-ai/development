@@ -13,6 +13,7 @@
 var execFileSync = require('child_process').execFileSync;
 var docProcessing = require('./docProcessing');
 
+var FEATURE_V = 3;       // bump when extractFeatures changes shape — census re-extracts stale rows
 var Y_TOL = 0.03;        // vertical drift tolerance (print-driver drift absorbs here)
 var LINE_TOL = 2;        // line-count tolerance
 var MATCH_THRESHOLD = 8; // features (of 10) that must agree for two documents to match
@@ -53,9 +54,29 @@ function extractFeatures(pdfPath) {
   // Field labels — tokens ending with ':' — are the text a TEMPLATE owns while values vary.
   var labels = {};
   words.forEach(function (w) { if (/^[A-Za-z][A-Za-z ./()#-]{1,30}:$/.test(w.t)) labels[normText(w.t.slice(0, -1), 30)] = 1; });
+  // The TITLE VETO feature (2026-09-04, Kevin's dev-services corpus): every city form shares the
+  // letterhead, so firstLine/topLeft cannot tell a Correction Notice from an Inspection Report — the
+  // 8/10 tolerance then chained five distinct field-table forms into one 100-document cluster. The
+  // form's TITLE is template-owned text (only digits vary) printed LARGER than body text: take the two
+  // tallest lines of the top half (letterhead + title), in reading order. Two documents whose titleLines
+  // differ are DIFFERENT templates regardless of how alike their tables are — a hard veto in isMatch.
+  // Only lines MEANINGFULLY taller than the document's median line qualify — a doc whose second-tallest
+  // line is ordinary body text must not adopt it (it may carry a varying value, e.g. an applicant name,
+  // and the veto would then split a same-template pile). One qualifying line is fine; none disables the
+  // veto for this document (scored matching still applies).
+  function lineMed(l) { var hs = l.words.map(function (w) { return w.h || 0; }).sort(function (a, b) { return a - b; }); return hs.length ? hs[Math.floor(hs.length / 2)] : 0; }
+  var allMeds = lines.map(lineMed).filter(function (h) { return h > 0; }).sort(function (a, b) { return a - b; });
+  var docMed = allMeds.length ? allMeds[Math.floor(allMeds.length / 2)] : 0;
+  var scoredHead = lines.slice(0, 10).map(function (l, idx) {
+    return { idx: idx, med: +lineMed(l).toFixed(3), text: normText(l.words.map(function (w) { return w.t; }).join(' ')) };
+  }).filter(function (sh) { return sh.text && docMed > 0 && sh.med >= docMed * 1.15; });
+  var tallest = scoredHead.slice().sort(function (a, b) { return b.med - a.med || a.idx - b.idx; }).slice(0, 2)
+    .sort(function (a, b) { return a.idx - b.idx; });
+  var titleLines = tallest.length ? tallest.map(function (sh) { return sh.text; }).join(' | ') : null;
   return {
-    v: 1,
+    v: FEATURE_V,
     pageCount: pageCount,
+    titleLines: titleLines,
     topLeft: normText((first.words[0] || {}).t, 12),
     firstLine: normText(first.words.map(function (w) { return w.t; }).join(' ')),
     lastLine: normText(last.words.map(function (w) { return w.t; }).join(' ')),
@@ -92,10 +113,17 @@ function matchScore(a, b) {
   var wc = Math.max(a.wordCount, b.wordCount, 1);
   if (Math.abs(a.wordCount - b.wordCount) / wc <= 0.15) s++;
   if (jaccard(a.labels, b.labels) >= 0.6) s++;
+  if (a.titleLines && b.titleLines && a.titleLines === b.titleLines) s++; // 11th feature
   return s;
 }
 
-function isMatch(a, b) { return matchScore(a, b) >= MATCH_THRESHOLD; }
+function isMatch(a, b) {
+  // Title veto: template-owned title text disagreeing = different templates, no matter the score.
+  // Old (v1) features/signatures carry no titleLines — the veto only fires when BOTH sides have one,
+  // so previously approved variant signatures keep matching tolerantly.
+  if (a && b && a.titleLines && b.titleLines && a.titleLines !== b.titleLines) return false;
+  return matchScore(a, b) >= MATCH_THRESHOLD;
+}
 
 // Cluster feature vectors with union-find over pairwise matches. items: [{ features, ... }].
 // Returns arrays of item indexes. O(n^2) cheap comparisons — fine for per-drive corpus sizes.
@@ -131,8 +159,9 @@ function signature(featureList) {
   var consensusLabels = Object.keys(labelCounts).filter(function (l) { return labelCounts[l] >= featureList.length * 0.6; }).sort();
   function pick(field) { return mode(featureList.map(function (f) { return f[field]; })); }
   return {
-    v: 1,
+    v: 3,
     pageCount: pick('pageCount'),
+    titleLines: pick('titleLines'),
     topLeft: pick('topLeft'),
     firstLine: pick('firstLine'),
     lastLine: pick('lastLine'),
@@ -164,6 +193,7 @@ function layoutConsistency(featureList) {
 }
 
 module.exports = {
+  FEATURE_V: FEATURE_V,
   extractFeatures: extractFeatures, matchScore: matchScore, isMatch: isMatch,
   cluster: cluster, signature: signature, matchesSignature: matchesSignature,
   layoutConsistency: layoutConsistency, MATCH_THRESHOLD: MATCH_THRESHOLD

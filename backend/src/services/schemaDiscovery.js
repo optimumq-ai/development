@@ -133,6 +133,9 @@ async function fingerprintCensus(bucket, fileRepos) {
       var existing = await get('SELECT * FROM document_fingerprints WHERE repository_id = ? AND filename = ?', [repo.id, f.filename]);
       if (existing && existing.content_sha256 === sha) {
         var feat = null; try { feat = JSON.parse(existing.features); } catch (e) {}
+        // Stale feature shape (older FEATURE_V) → fall through and re-extract; the file is unchanged
+        // but the fingerprint vocabulary grew (e.g. the title-veto feature, 2026-09-04).
+        if (feat && feat.v !== docFingerprint.FEATURE_V) feat = null;
         if (feat) { rows.push({ id: existing.id, repoId: repo.id, repoName: repo.name, filename: f.filename, fullPath: f.fullPath, features: feat, matched: existing.matched_record_type_id }); continue; }
       }
       var features = docFingerprint.extractFeatures(f.fullPath);
@@ -225,7 +228,9 @@ async function discoverViaFingerprints(bucket, fileRepos) {
       + '{"cluster": 0, "name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "confidence": 0, "reasoning": ""}\n\n'
       + 'CLUSTERS:\n' + clusterDigest;
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
+    // 12000, not 3000: the title-veto census (2026-09-04) yields a cluster per FORM TYPE — a drive can
+    // easily produce 10+, and a truncated JSON array here read as 'AI response could not be read'.
+    var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] });
     var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
     var names = [];
     try { names = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again (the fingerprint index is saved, so a retry is fast)' }; }
