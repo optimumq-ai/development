@@ -253,15 +253,23 @@ async function enablePriorBalance(jid, on, patch) {
     });
   }
   var anyProfile = await db.get('SELECT id, display_name, primary_email FROM requestor_profiles ORDER BY created_at DESC LIMIT 1');
+  var lkMade = null;
+  if (!anyProfile) { // deterministic: never skip — make a specimen profile and clean it up after
+    lkMade = 'prof-lk-' + Date.now();
+    await db.run("INSERT INTO requestor_profiles (id, display_name, primary_email, identity_basis) VALUES (?, 'Lookup Specimen', 'lookup.specimen@test.local', 'staff_confirmed')", [lkMade]);
+    await db.run("INSERT INTO requestor_ledger_events (id, profile_id, type, amount, reason) VALUES (?, ?, 'invoiced', 12.5, 'lookup harness')", ['rle-' + Date.now(), lkMade]);
+    anyProfile = await db.get('SELECT id, display_name, primary_email FROM requestor_profiles WHERE id = ?', [lkMade]);
+  }
   if (anyProfile) {
     var term = (anyProfile.primary_email || anyProfile.display_name || '').slice(0, 6);
     var sr = await lk('/search?q=' + encodeURIComponent(term));
-    ok('L1 search finds the profile by name/email with a balance figure', sr.status === 200 && (sr.body.profiles || []).some(function (p) { return p.id === anyProfile.id && p.balance && typeof p.balance.balance === 'number'; }));
+    ok('L1 search finds the profile by name/email with a balance figure', sr.status === 200 && (sr.body.profiles || []).some(function (p) { return p.id === anyProfile.id && p.balance && typeof p.balance.outstanding === 'number'; }));
     var pr = await lk('/profile/' + anyProfile.id);
     ok('L2 the profile view returns balance, allowances, counters, flags, events and linked requests', pr.status === 200 && pr.body.balance && Array.isArray(pr.body.allowances) && Array.isArray(pr.body.counters) && Array.isArray(pr.body.events) && Array.isArray(pr.body.requests));
   } else { ok('L1 (skipped - no profile on this fixture run)', true); ok('L2 (skipped)', true); }
   var nf = await lk('/profile/prof-does-not-exist');
   ok('L3 an unknown profile is refused in words', nf.status === 404);
+  if (lkMade) { await db.run('DELETE FROM requestor_ledger_events WHERE profile_id = ?', [lkMade]); await db.run('DELETE FROM requestor_profiles WHERE id = ?', [lkMade]); }
 
   console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);

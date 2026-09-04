@@ -59,7 +59,7 @@ export default function RequestorLedgerPage() {
                     <div style={{ fontSize: '13.5px', fontWeight: 600 }}>{p.display_name || '(no name)'} <span style={{ color: '#8296A4', fontWeight: 400 }}>· {p.primary_email || 'no email'}</span></div>
                     <div style={{ fontSize: '11.5px', color: '#8296A4' }}>{p.request_count} request{p.request_count === 1 ? '' : 's'} · identity: {p.identity_basis || 'unknown'}</div>
                   </div>
-                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: (p.balance && p.balance.balance > 0) ? '#B02A37' : '#1B8A5A' }}>{money(p.balance && p.balance.balance)}</div>
+                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: (p.balance && p.balance.outstanding > 0) ? '#B02A37' : '#1B8A5A' }}>{money(p.balance && p.balance.outstanding)}</div>
                 </div>
               );
             })}
@@ -75,7 +75,8 @@ export default function RequestorLedgerPage() {
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: '#8296A4', textTransform: 'uppercase', letterSpacing: '.05em' }}>Prior balance</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: (d.balance && d.balance.balance > 0) ? '#B02A37' : '#1B8A5A' }}>{money(d.balance && d.balance.balance)}</div>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: (d.balance && d.balance.outstanding > 0) ? '#B02A37' : '#1B8A5A' }}>{money(d.balance && d.balance.outstanding)}</div>
+              <div style={{ fontSize: '11px', color: '#8296A4' }}>invoiced {money(d.balance && d.balance.invoiced)} · paid {money(d.balance && d.balance.paid)} · waived {money(d.balance && d.balance.waived)}</div>
             </div>
             <button onClick={function () { setDetail(null); }} style={{ border: '1px solid #BECAD3', background: 'white', borderRadius: '7px', padding: '6px 12px', fontSize: '12px', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}>Back</button>
           </div>
