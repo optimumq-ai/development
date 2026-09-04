@@ -10189,3 +10189,22 @@ TAXONOMY-VS-VECTORS (Kevin's question, answered): vector index = the FINDING lay
 layer (release posture, legal gates, exemption categories, routing, estimate calibration, template binding,
 court-grade explainability all hang off TYPES). Semantic search removes taxonomy's search-crutch role
 (synonyms/keywords), letting it shrink to policy-bearing categories. Inventory feeds both from one read.
+
+## 2026-09-04 — inventory function, round 3: DATA-RECORD sources (Kevin design talk; banked, not built)
+
+Core move: a data record is not "read", it is RENDERED — per record KIND a render recipe composes fields into
+one honest sentence ("Invoice INV-004512 — Halff Associates — $12,400 — paid 2025-03-14"); that string is what
+embeds, structured fields ride as metadata (generalizes the existing fulfilled-record embed + 911 CAD render
+patterns). CENSUS for data systems = schema/API enumeration (kinds, counts, field lists, date ranges) — no
+fingerprint clustering; the kinds ARE the grouping. Redaction analog: document grouping→ZONE template ::
+data kind→FIELD template (exempt columns marked once, covers all rows — tmpl-911-fields is the live example).
+EMBED TIERS decided per kind at census time: (1) ALWAYS embed the kind description (maps request language →
+source+kind; biggest win, least cost); (2) OPT-IN per kind: embed rows whose fields are PROSE (narratives,
+descriptions) with cost estimate shown — same gesture as OCR opt-in; (3) NEVER embed pure id/date/number
+kinds — structured filters beat vectors there. Incremental census = checkpoint pattern (the 911 puller's
+"new since last checkpoint", generalized). Unified concept: same buttons/cost-gating/refresh for both source
+flavors; the inventory screen shows kinds-and-fields for data vs groupings-and-layouts for documents.
+**OPEN — Kevin's two calls:** (a) privacy: embed RAW renderings into an internal-only vector index vs embed
+FIELD-REDACTED renderings (embeddings.content stores text; PII lands in the index either way it's raw);
+(b) confirm the per-kind embed-tier defaults. Also standing: "Identical Grouping" rename held for the
+inventory build (rename once).
