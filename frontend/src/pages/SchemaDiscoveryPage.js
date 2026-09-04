@@ -96,7 +96,7 @@ export default function SchemaDiscoveryPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
           <div>
             <div style={{ fontWeight: '700', fontSize: '15px', color: '#111' }}>{d.name}</div>
-            <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>{d.category_name} \u00b7 code: {d.code}</div>
+            <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>{d.category_name} · code: {d.code}</div>
           </div>
           <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {d.auto_release_eligible === 1 ? pill('#E1EFFE', '#1E429F', 'Auto-release') : null}

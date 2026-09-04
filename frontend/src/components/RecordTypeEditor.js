@@ -98,7 +98,7 @@ export default function RecordTypeEditor(props) {
     opts = opts || {};
     return (
       <div>
-        <label style={lab}>{lbl}{opts.hint ? <span style={{ color: '#9CA3AF', fontWeight: '400' }}> \u00b7 {opts.hint}</span> : null}</label>
+        <label style={lab}>{lbl}{opts.hint ? <span style={{ color: '#9CA3AF', fontWeight: '400' }}> · {opts.hint}</span> : null}</label>
         {opts.area
           ? <textarea value={f[key]} onChange={function(e){ set(key, e.target.value); }} style={Object.assign({}, inp, { minHeight: '60px', resize: 'vertical' })} />
           : <input value={f[key]} onChange={function(e){ set(key, e.target.value); }} disabled={opts.disabled} style={Object.assign({}, inp, opts.disabled ? { background: '#F9FAFB', color: '#9CA3AF' } : {})} />}
@@ -114,7 +114,7 @@ export default function RecordTypeEditor(props) {
       <div style={modal} onClick={function(e){ e.stopPropagation(); }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{props.mode === 'create' ? 'New record type' : 'Edit record type'}</h2>
-          <button onClick={props.onClose} style={{ border: 'none', background: 'none', fontSize: '22px', color: '#9CA3AF', cursor: 'pointer', lineHeight: 1 }}>\u00d7</button>
+          <button onClick={props.onClose} style={{ border: 'none', background: 'none', fontSize: '22px', color: '#9CA3AF', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
         <label style={lab}>Parent type <span style={{ fontWeight: 400, color: '#9CA3AF' }}>· optional — makes this a variant</span></label>
         <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>

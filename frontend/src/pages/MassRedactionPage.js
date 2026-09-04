@@ -351,7 +351,7 @@ export default function MassRedactionPage() {
           <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '560px', maxWidth: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
               <div style={{ fontWeight: '700', fontSize: '16px' }}>{viewTpl.name}</div>
-              <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '3px' }}>{viewTpl.kind === 'fields' ? 'Structured / born-redacted (drops exempt columns)' : 'Page redaction (covers zones on the page)'}{viewTpl.record_type_name ? ' \u00b7 ' + viewTpl.record_type_name : ''} \u00b7 safety threshold {viewTpl.safety_threshold != null ? viewTpl.safety_threshold : 80}%</div>
+              <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '3px' }}>{viewTpl.kind === 'fields' ? 'Structured / born-redacted (drops exempt columns)' : 'Page redaction (covers zones on the page)'}{viewTpl.record_type_name ? ' \u00b7 ' + viewTpl.record_type_name : ''} · safety threshold {viewTpl.safety_threshold != null ? viewTpl.safety_threshold : 80}%</div>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px' }}>
               {!viewDetail ? <div style={{ color: '#9CA3AF', fontSize: '13px' }}>Loading\u2026</div> : viewDetail.error ? <div style={{ color: '#9B1C1C' }}>Could not load template detail.</div> : (
@@ -376,7 +376,7 @@ export default function MassRedactionPage() {
                           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#F3F4F6', borderRadius: '8px', fontSize: '12.5px' }}>
                             <span style={{ fontWeight: '700' }}>Box {i + 1}</span>
                             <span style={{ color: '#6B7280' }}>page {z.page_no || 1}</span>
-                            {z.label ? <span style={{ color: '#6B7280' }}>\u00b7 {z.label}</span> : null}
+                            {z.label ? <span style={{ color: '#6B7280' }}>· {z.label}</span> : null}
                           </div>
                         ); })}
                       </div>

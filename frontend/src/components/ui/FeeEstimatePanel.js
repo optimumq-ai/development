@@ -238,7 +238,7 @@ export default function FeeEstimatePanel(props) {
     var change = (payMethod === 'cash' && payTendered !== '') ? Math.max(0, Math.round((Number(payTendered) - amt) * 100) / 100) : null;
     return (
       <div style={{ marginTop: '14px', padding: '12px 14px', background: 'white', border: '1px solid #E5E7EB', borderRadius: '10px', maxWidth: '660px' }}>
-        <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '8px' }}>Take a payment <span style={{ fontWeight: 400, color: '#6B7280' }}>({target} \u00b7 {money(owed)} owed)</span></div>
+        <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '8px' }}>Take a payment <span style={{ fontWeight: 400, color: '#6B7280' }}>({target} · {money(owed)} owed)</span></div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div><label style={lbl}>Method</label><select value={payMethod} onChange={function (e) { setPayMethod(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="cash">Cash</option><option value="check">Check</option><option value="card">Card</option><option value="money_order">Money order</option><option value="other">Other</option></select></div>
           <div style={{ width: '110px' }}><label style={lbl}>Amount $</label><input type="number" step="any" value={payAmount} onChange={function (e) { setPayAmount(e.target.value); }} placeholder={owed.toFixed(2)} style={inp} /></div>
@@ -271,7 +271,7 @@ export default function FeeEstimatePanel(props) {
       return box('#DEF7EC', '#BCF0DA', '#03543F', <span>Estimate <strong>accepted</strong> on {L.accepted_at}{L.deposit_paid_at ? ' \u00b7 deposit ' + money(L.deposit_paid_amount || depDue) + ' recorded' : ''} \u2014 record search underway.</span>);
     }
     return box('#EFF6FF', '#DBEAFE', '#1F4E79', <div>
-      <div style={{ marginBottom: '9px' }}><strong>Estimate sent</strong> on {L.notified_at} \u00b7 total {money(L.total)}{Number(L.deposit_due) > 0 ? ' \u00b7 deposit ' + money(L.deposit_due) : ''}. Record the requestor's response:</div>
+      <div style={{ marginBottom: '9px' }}><strong>Estimate sent</strong> on {L.notified_at} · total {money(L.total)}{Number(L.deposit_due) > 0 ? ' \u00b7 deposit ' + money(L.deposit_due) : ''}. Record the requestor's response:</div>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
         {rBtn('Mark accepted', function () { respond('estimate/accept', {}); }, true)}
         {rBtn('Mark declined', function () { respond('estimate/decline', { reason: declineReason }); }, false)}
