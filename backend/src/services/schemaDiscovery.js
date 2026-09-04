@@ -170,9 +170,9 @@ async function recognizeAgainstSignatures(bucket, rows) {
       ? sigs.find(function (s) { return s.id === row.matched; })
       : sigs.find(function (s) { return docFingerprint.matchesSignature(row.features, s.signature); });
     if (hit) {
-      if (!recognized[hit.id]) recognized[hit.id] = { record_type_id: hit.id, name: hit.name, count: 0, example_files: [] };
+      if (!recognized[hit.id]) recognized[hit.id] = { record_type_id: hit.id, name: hit.name, count: 0, example_files: [], example_sources: [] };
       recognized[hit.id].count++;
-      if (recognized[hit.id].example_files.length < 3) recognized[hit.id].example_files.push(row.filename);
+      if (recognized[hit.id].example_files.length < 3) { recognized[hit.id].example_files.push(row.filename); recognized[hit.id].example_sources.push({ filename: row.filename, repository_id: row.repoId }); }
       if (row.matched !== hit.id) await run('UPDATE document_fingerprints SET matched_record_type_id = ? WHERE id = ?', [hit.id, row.id]);
     } else {
       unrecognized.push(row);
@@ -253,6 +253,7 @@ async function discoverViaFingerprints(bucket, fileRepos) {
         layout: layout,
         mass_redaction_candidate: layout === 'uniform' || layout === 'few_layouts',
         example_files: members.slice(0, 5).map(function (m) { return m.filename; }),
+        example_sources: members.slice(0, 5).map(function (m) { return { filename: m.filename, repository_id: m.repoId }; }),
         fingerprint_ids: members.map(function (m) { return m.id; }),
         signature: docFingerprint.signature(feats)
       };

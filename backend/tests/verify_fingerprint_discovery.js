@@ -111,6 +111,20 @@ async function makeInspection(file, inspector) {
   var featsA = clusters[0].map(function (m) { return m.features; });
   ok('C3 a one-template pile measures as uniform layout', fp.layoutConsistency(featsA) === 'uniform');
 
+  console.log('\n=== C4-C6. EXAMPLE PREVIEW — a proposal opens the REAL document, and only that ===');
+  var exFile = clusters[0][0].filename;
+  async function preview(repoId, fn) {
+    var r = await fetch('http://localhost:' + PORT + '/api/taxonomy/preview-source-file?repository_id=' + encodeURIComponent(repoId) + '&filename=' + encodeURIComponent(fn), { headers: { Authorization: 'Bearer ' + TOKEN } });
+    return { status: r.status, type: r.headers.get('content-type') || '', bytes: (await r.arrayBuffer()).byteLength };
+  }
+  var pv1 = await preview(repoA, exFile);
+  ok('C4 an indexed example streams inline as a PDF', pv1.status === 200 && pv1.type.indexOf('application/pdf') === 0 && pv1.bytes > 500);
+  var pv2 = await preview(repoA, '../' + exFile);
+  var pv2b = await preview(repoA, '..%2Fetc%2Fpasswd');
+  ok('C5 traversal filenames are refused', pv2.status === 400 && (pv2b.status === 400 || pv2b.status === 404));
+  var pv3 = await preview(repoA, 'never-indexed.pdf');
+  ok('C6 a file the census never indexed is refused even if it existed on disk', pv3.status === 404);
+
   console.log('\n=== D. SIGNATURE + APPROVE — the cluster becomes a variant that FUTURE scans recognize ===');
   var sig = fp.signature(featsA);
   ok('D1 the consensus signature matches a member of its own cluster', fp.matchesSignature(featsA[0], sig));

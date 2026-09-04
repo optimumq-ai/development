@@ -207,6 +207,33 @@ router.patch('/record-types/:id', requireAuth, EDIT, async function(req, res) {
   res.json(hydrate(await get('SELECT * FROM record_types WHERE id = ?', [rt.id])));
 });
 
+// ===== EXAMPLE PREVIEW (Kevin 2026-09-04): open a REAL document behind a discovery proposal =====
+// Streams a source-drive file so the proposals panel can show what a pile actually looks like.
+// Guards, in order: taxonomy-edit gate (these are unredacted source documents — never citizen-facing);
+// only files the fingerprint census has already indexed for that source (no free-range disk reads);
+// bare basename only; the resolved path must stay inside the source's configured folder; PDF only
+// (all a census pile can contain today — the inventory function's other formats will download, not preview).
+router.get('/preview-source-file', requireAuth, EDIT, async function(req, res) {
+  var pathMod = require('path'), fsMod = require('fs');
+  var repoId = String(req.query.repository_id || ''), filename = String(req.query.filename || '');
+  if (!repoId || !filename) return res.status(400).json({ error: 'repository_id and filename are required' });
+  if (filename !== pathMod.basename(filename) || filename.indexOf('..') !== -1) return res.status(400).json({ error: 'Invalid filename' });
+  if (!/\.pdf$/i.test(filename)) return res.status(415).json({ error: 'Only PDF examples can be previewed.' });
+  var indexed = await get('SELECT id FROM document_fingerprints WHERE repository_id = ? AND filename = ?', [repoId, filename]);
+  if (!indexed) return res.status(404).json({ error: 'That file is not in the discovery index for this source.' });
+  var repo = await get('SELECT * FROM record_repositories WHERE id = ?', [repoId]);
+  if (!repo) return res.status(404).json({ error: 'Source not found' });
+  var cfg = {}; try { cfg = JSON.parse(repo.config || '{}'); } catch (e) {}
+  if (!cfg.path) return res.status(400).json({ error: 'This source has no readable folder.' });
+  var base = pathMod.resolve(cfg.path);
+  var full = pathMod.resolve(base, filename);
+  if (full !== pathMod.join(base, filename) || full.indexOf(base + pathMod.sep) !== 0) return res.status(400).json({ error: 'Invalid path' });
+  if (!fsMod.existsSync(full)) return res.status(404).json({ error: 'File not found on the source' });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline; filename="' + filename.replace(/"/g, '') + '"');
+  fsMod.createReadStream(full).pipe(res);
+});
+
 router.delete('/record-types/:id', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });

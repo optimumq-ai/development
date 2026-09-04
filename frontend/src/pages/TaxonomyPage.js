@@ -47,6 +47,12 @@ export default function TaxonomyPage() {
   // VARIANT GROUPINGS (#14 slice 2): scan a bucket's holdings, show proposals, approve as drafts.
   var [scanning, setScanning] = useState(null);        // record type id being scanned
   var [scanResult, setScanResult] = useState(null);    // { bucket, groupings, ... }
+  async function previewExample(ex) {
+    try {
+      var r = await api.get('/taxonomy/preview-source-file', { params: { repository_id: ex.repository_id, filename: ex.filename }, responseType: 'blob' });
+      window.open(URL.createObjectURL(r.data), '_blank');
+    } catch (e) { alert('The example could not be opened.'); }
+  }
   var [scanErr, setScanErr] = useState('');
   var [applied, setApplied] = useState({});            // proposal code -> 'done' | 'busy'
 
@@ -360,6 +366,16 @@ export default function TaxonomyPage() {
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{g.name}</div>
                         <div style={{ fontSize: '12.5px', color: '#5B6B7A', marginTop: '2px' }}>{g.reasoning || g.intent}</div>
+                        {(g.example_sources || []).length ? (
+                          <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '11px', color: '#8A97A5', fontWeight: 600 }}>See a real document:</span>
+                            {g.example_sources.map(function (ex) {
+                              return <button key={ex.repository_id + '/' + ex.filename} type="button" onClick={function(){ previewExample(ex); }}
+                                title="Opens the actual source document in a new tab"
+                                style={{ background: 'white', border: '1px solid #C9D6E2', borderRadius: '6px', fontSize: '11.5px', color: '#1F4E79', padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>{ex.filename}</button>;
+                            })}
+                          </div>
+                        ) : null}
                         {g.mass_redaction_candidate
                           ? <div style={{ marginTop: '7px', display: 'inline-block', fontSize: '12.5px', fontWeight: 700, color: '#B23A3A', background: '#F9E4E4', borderRadius: '8px', padding: '4px 10px' }}>⚡ Mass-redaction candidate — consistent layout</div>
                           : <div style={{ marginTop: '7px', fontSize: '12px', color: '#8A97A5' }}>Varied layouts — per-document review.</div>}

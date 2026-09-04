@@ -10082,3 +10082,14 @@ field hint. Root cause: \u escapes typed in JSX TEXT position render literally (
 strings). Swept the whole frontend mechanically (escape outside string quotes = broken): fixed
 RecordTypeEditor (× close button, · hint separators), SchemaDiscoveryPage, MassRedactionPage,
 FeeEstimatePanel. All in-string escapes left alone. Frontend rebuilt; no backend change. Code: b7e1f04.
+
+## 2026-09-04 — discovery proposals open REAL example documents (Kevin's ask, built)
+
+Each proposed pile in the Find-variants panel now shows "See a real document:" with its example filenames as
+buttons — click opens the actual source PDF in a new tab. GET /taxonomy/preview-source-file (taxonomy-edit
+gated — these are unredacted source docs, never citizen-facing) streams a drive file with layered guards:
+only files the fingerprint census has indexed for that source, bare basename, resolved path pinned inside the
+source's folder, PDF-only (all a pile can hold today; the inventory function's other formats will download,
+not preview). Proposals + recognized entries carry example_sources [{filename, repository_id}] alongside
+example_files (shape unchanged — approve path untouched). Harness C4–C6 (streams as PDF · traversal refused ·
+unindexed file refused even if on disk); discovery trio 14/14 · 12/12 · 21/21. Frontend rebuilt, API restarted.
