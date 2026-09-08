@@ -10280,3 +10280,26 @@ so those don't grow when the rail shrinks. Plan agreed in chat: one shared width
 workspaces full-width, entry forms keep a reading cap (~1100px). Do it AFTER Kevin's setup markup pass so
 his annotated screenshots don't shift. Pre-existing cosmetic: the document is 8px taller than the viewport
 (body margin), harmless.
+
+## 2026-09-08 — Fee rules: Kevin's markup document worked (14 items; SPEC_setup_hub §7 F4)
+
+Source: ~/exchange/"fee rules set up fixes and questions.docx" (3 screenshots). BUILT + verified by
+screenshot: waiver-section column crash (own grid, minWidth:0) · Minimum fee cite now opens the popup ·
+None / Actual click choices on every deferral field · delivery wording ("$ per request" + "Actual postage")
+· electronic media as CD / DVD / USB fields with per-item ceiling refusal (the old single line was not
+editable at all) · "Same day aggregation…" humanized, city column "as law", no overflow · AG rate as
+money · cost-of-collection text "Set using De-minimis in City Decisions" · citation popup shows the
+template item's own findings + research note before corpus records (the corpus resolves only TX-00xx;
+overhead/media/bands/cap/repeat cite TX-9xxx). verify_fee_law 49/49.
+ANSWERED (for Kevin): "Request-level ceiling" = a CITY cap on one request's total, not a legal figure —
+TX has no dollar request maximum, the 1000 was typed in, and the AG+25% ceilings are already per item;
+relabelled "Cap on one request's total (optional city policy)". Recommend None unless the city wants a cap.
+Graduated page bands: TX research says no bands exist (flat per-page rate) — the "bands or none" field is
+a leftover with no engine surface (F1 note stands); recommend None. Minimum fee: TX has none ($.10/page is
+rounding) — None. Repeat/aggregated popup's TX-0031 record is the § 552.275 piece of a four-finding item;
+the popup now shows all four first.
+NOT REMOVED, on purpose: the "needs requestor ledger" flag (now "not enforced yet: the Requestor Ledger
+does not read this rule"). Checked: requestorLedger.js allowances/counters are manual stubs; nothing reads
+labor.periodicFreeHours or repeat. Wiring them is its own slice (36 h/yr · 15 h/mo allowance, same-day
+aggregation counter) — Kevin to schedule.
+OPEN: populate the TX-9xxx research records (corpus task; the popup is honest meanwhile).
