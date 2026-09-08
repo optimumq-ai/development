@@ -58,4 +58,24 @@ router.post('/:id/fulfills', requireAuth, OPS, async function(req, res) {
   res.json({ success: true });
 });
 
+// REMOVAL (Kevin 2026-09-08). GET shows the process — every prerequisite as a step with where to clear it — and
+// DELETE re-runs it and refuses (409, same list) while a step is open. services/orgRemoval decides delete vs
+// retire from the footprint; the router-level finish hook above already tells the hub about the DELETE.
+const REMOVAL = require('../services/orgRemoval');
+function kindOfRow(row) { return row && row.kind === 'team' ? 'team' : 'department'; }
+router.get('/:id/removal', requireAuth, OPS, async function (req, res) {
+  try {
+    var row = await get('SELECT id, kind FROM departments WHERE id = ?', [req.params.id]);
+    if (!row) return res.status(404).json({ error: 'Not found.' });
+    res.json(await REMOVAL.check(kindOfRow(row), req.params.id, req.user));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.delete('/:id', requireAuth, OPS, async function (req, res) {
+  try {
+    var row = await get('SELECT id, kind FROM departments WHERE id = ?', [req.params.id]);
+    if (!row) return res.status(404).json({ error: 'Not found.' });
+    res.json(await REMOVAL.remove(kindOfRow(row), req.params.id, req.user));
+  } catch (e) { res.status(e.status || 500).json({ error: e.message, code: e.code || null, check: e.check || null }); }
+});
+
 module.exports = router;

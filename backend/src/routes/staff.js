@@ -28,7 +28,8 @@ async function getTaskTypes(userId) {
 }
 
 router.get('/', requireAuth, async function(req, res) {
-  var staff = await all('SELECT u.*, d.name as department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id ORDER BY u.display_name');
+  // a REMOVED account (orgRemoval retire) is off every list; it keeps its row only for the record
+  var staff = await all("SELECT u.*, d.name as department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.status <> 'removed' ORDER BY u.display_name");
   var staffOut = [];
   for (var s of staff) {
     staffOut.push(Object.assign({}, s, { userTypes: await userTypes.typesOf(s.id), taskTypes: await getTaskTypes(s.id), taskMenu: await userTypes.taskMenuFor(s.id), password_hash: undefined, mfa_secret: undefined }));
@@ -154,6 +155,18 @@ router.patch('/:id/user-types', requireAuth, MANAGE_USERS, async function(req, r
   for (var c of current) { if (!wanted.some(function (w) { return same(w, c); })) await userTypes.revoke(req.params.id, c.key, c.teamId); }
   for (var w of wanted) { if (!current.some(function (c) { return same(w, c); })) await userTypes.grant(req.params.id, w.key, w.teamId, req.user.sub); }
   res.json({ success: true, userTypes: await userTypes.typesOf(req.params.id) });
+});
+
+// REMOVAL (Kevin 2026-09-08): the process behind "delete a staff member" — see services/orgRemoval. The
+// manage_users authority, like create/deactivate. The finish hook above reports the DELETE to the hub.
+const REMOVAL = require('../services/orgRemoval');
+router.get('/:id/removal', requireAuth, MANAGE_USERS, async function (req, res) {
+  try { var c = await REMOVAL.check('staff', req.params.id, req.user); if (!c) return res.status(404).json({ error: 'Not found.' }); res.json(c); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.delete('/:id', requireAuth, MANAGE_USERS, async function (req, res) {
+  try { res.json(await REMOVAL.remove('staff', req.params.id, req.user)); }
+  catch (e) { res.status(e.status || 500).json({ error: e.message, code: e.code || null, check: e.check || null }); }
 });
 
 module.exports = router;

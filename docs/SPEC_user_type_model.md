@@ -113,7 +113,7 @@ work I don't own". They are NOT configuration rights (that is §5).
 | `financial_approval` | fee waiver, commercial rate, fee objections (today's `FINANCE`) | oro_finance, oro_director |
 | `assign_task_subsets_global` | set anyone's task subset | oro_sysadmin, oro_director |
 | `assign_task_subsets_team` | set task subsets within own team | team_manager |
-| `manage_users` | create/deactivate accounts, assign user types | oro_sysadmin, oro_director |
+| `manage_users` | create/deactivate/**delete** accounts (delete = the guided process in SPEC_setup_hub, 2026-09-08), assign user types | oro_sysadmin, oro_director |
 | `system` | technical administration acts (connectors, keys, auth policy) | oro_sysadmin |
 | `go_live` | flip enforcement from simulated to real | **oro_sysadmin, oro_director** *(Kevin 2026-08-24)* |
 

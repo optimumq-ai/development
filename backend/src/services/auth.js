@@ -26,7 +26,7 @@ async function signAccessToken(user) {
 }
 function verifyAccessToken(token) { return jwt.verify(token, JWT_SECRET); }
 async function localLogin(email, password) {
-  var user = await get('SELECT * FROM users WHERE email = ? AND status != ?', [email, 'inactive']);
+  var user = await get('SELECT * FROM users WHERE email = ? AND status = ?', [email, 'active']);   // inactive AND removed accounts are refused alike
   if (!user) return { error: 'Invalid credentials', code: 401 };
   if (!user.password_hash) return { error: 'Account uses SSO', code: 400 };
   var valid = user.password_hash === hashPwd(password);

@@ -99,6 +99,26 @@ carries health ("3 connectors · 1 not connected") — never blocks the colour, 
 green-unchanged. `verify_setup_hub` I1–I5. Same model next for Departments, Teams, Staff, Taxonomy, Workflow
 Rules.
 
+**Deleting from the organization lists — BUILT 2026-09-08** (Kevin: "I see no way to delete a city department,
+a fulfillment team, or a staff member"; nothing in the org model carries a foreign key, so deletion is a
+PROCESS, `services/orgRemoval.js`). Every row on the three Organization tabs has **Delete**; it opens a dialog
+that reads `GET /departments/:id/removal` or `GET /staff/:id/removal` — each prerequisite as a STEP with a
+count, a plain sentence, and either a link to the screen that clears it or an inline action (a person's first
+step is "Deactivate now"). `DELETE` re-runs the check and refuses **409 `REMOVAL_BLOCKED`** with the same list
+while a step is open. Steps — department: Open Records hub flag · catch-all flag · record types naming it as
+owner/fulfiller (Taxonomy → Owners) · open requests it owns · active staff calling it home. Team: hub flag ·
+departments it fulfills (edit another team to take them) · open pool tasks · open requests routed to it ·
+active members · team-scoped user types held on it. Person: not yourself · account still active · open tasks
+assigned · open requests assigned · the only active `manage_users` account. Once clear, the FOOTPRINT decides
+the outcome, never the caller: no closed requests / released records / finished tasks / history / approvals
+→ **delete** (row gone); otherwise **retire** — the row stays for the record, hidden from every list and pool
+(`departments.active = 0` with `processed_by`/catch-all cleared; `users.status = 'removed'` with user types,
+task subset, routing profile, home team and notifications stripped, tokens bumped; login accepts `active`
+only, `GET /staff` hides `removed`). The dialog says which outcome applies before the click. Permissions as
+the create paths: `operations_config` for departments/teams, `manage_users` for people. The routers' finish
+hooks report the DELETE, so an approved list drops to yellow. Harness `verify_org_removal` (A1–A7, B1–B5,
+C1–C12).
+
 ## 3f. TABBED SCREENS — sections of one item (Kevin 2026-08-31, BUILT for AI configuration first)
 A configurable tab has its own required set and its own colour: red while any of its required fields is
 empty, yellow when complete, green once the SCREEN is approved. Informational tabs carry nothing. The screen's

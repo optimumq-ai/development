@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import SetupScreen from '../components/setup/SetupScreen';
 import api from '../lib/api';
 import StaffManagementPage from './StaffManagementPage';
+import RemovalDialog from '../components/ui/RemovalDialog';
 
 // Consolidated "parent" screen for the org model (design §7): City Departments, Fulfillment Teams, and
 // Staff in one place, replacing the separate Staff Management and City Departments & Teams screens.
@@ -45,6 +46,8 @@ export default function OrgPage() {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [viewStaffTeam, setViewStaffTeam] = useState(null);
+  const [removing, setRemoving] = useState(null);   // { kind, id, name } — the deletion process dialog (2026-09-08)
+  const [removedMsg, setRemovedMsg] = useState('');
 
   useEffect(() => { load(); }, []);
   async function load() {
@@ -149,7 +152,10 @@ export default function OrgPage() {
                             </div>
                           </div>
                         </div>
-                        <button onClick={() => editDepartment(d)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
+                        <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                          <button onClick={() => editDepartment(d)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
+                          <button onClick={() => setRemoving({ kind: 'department', id: d.id, name: d.name })} title="Delete this department (a guided process)" style={{ padding: '6px 14px', background: 'white', color: '#B91C1C', border: '1px solid #FCA5A5', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
+                        </div>
                       </div>
                     );
                   })}
@@ -189,6 +195,7 @@ export default function OrgPage() {
                   <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                     <button onClick={() => setViewStaffTeam(t)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>View staff</button>
                     <button onClick={() => editTeam(t)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => setRemoving({ kind: 'team', id: t.id, name: t.name })} title="Delete this team (a guided process)" style={{ padding: '6px 14px', background: 'white', color: '#B91C1C', border: '1px solid #FCA5A5', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
                   </div>
                 </div>
               );
@@ -233,6 +240,9 @@ export default function OrgPage() {
       )}
 
       {/* ---------- EDITOR MODAL (department / team) ---------- */}
+      {removing ? <RemovalDialog kind={removing.kind} id={removing.id} name={removing.name} onClose={() => setRemoving(null)}
+        onDone={(r) => { setRemoving(null); setRemovedMsg((r.mode === 'delete' ? 'Deleted ' : 'Removed ') + r.name + (r.mode === 'retire' ? ' — kept on the record of past work.' : '.')); load(); }} /> : null}
+      {removedMsg ? <div style={{ margin: '0 0 12px', padding: '10px 14px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '8px', fontSize: '13px', color: '#065F46', display: 'flex', justifyContent: 'space-between' }}><span>{removedMsg}</span><button onClick={() => setRemovedMsg('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#065F46', fontWeight: '700' }}>Dismiss</button></div> : null}
       {editKind && (
         <div onClick={() => { if (!saving) closeEditor(); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '12px', padding: '24px', width: '560px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>

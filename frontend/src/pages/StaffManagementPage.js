@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+import RemovalDialog from '../components/ui/RemovalDialog';
 
 // v3 user-type model (SPEC_user_type_model §10.1, S3): people hold USER TYPES, fetched from /user-types. Office
 // types are held office-wide; team types are held against a fulfillment team (one chip per team — multi-team is
@@ -88,6 +89,8 @@ export default function StaffManagementPage({ embedded }) {
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
   const [specFor, setSpecFor] = useState(null);
+  const [removing, setRemoving] = useState(null);   // { id, name } — the deletion process dialog (2026-09-08)
+  const [removedMsg, setRemovedMsg] = useState('');
   const [specText, setSpecText] = useState('');
   const [specSaving, setSpecSaving] = useState(false);
   const [editFor, setEditFor] = useState(null);
@@ -215,6 +218,9 @@ export default function StaffManagementPage({ embedded }) {
 
   return (
     <div style={{maxWidth: embedded?'100%':'1100px',display:'flex',flexDirection:'column',gap:'20px'}}>
+      {removing ? <RemovalDialog kind="staff" id={removing.id} name={removing.name} onClose={function(){setRemoving(null);}}
+        onDone={function(r){ setRemoving(null); setRemovedMsg((r.mode === 'delete' ? 'Deleted ' : 'Removed ') + r.name + (r.mode === 'retire' ? ' — kept on the record of past work.' : '.')); load(); }} /> : null}
+      {removedMsg ? <div style={{margin:'0 0 12px',padding:'10px 14px',background:'#ECFDF5',border:'1px solid #A7F3D0',borderRadius:'8px',fontSize:'13px',color:'#065F46',display:'flex',justifyContent:'space-between'}}><span>{removedMsg}</span><button onClick={function(){setRemovedMsg('');}} style={{background:'none',border:'none',cursor:'pointer',color:'#065F46',fontWeight:'700'}}>Dismiss</button></div> : null}
       <div style={{display:'flex',alignItems:'center',justifyContent: embedded?'flex-end':'space-between'}}>
         {!embedded && (
         <div>
@@ -344,6 +350,11 @@ export default function StaffManagementPage({ embedded }) {
                         <button onClick={function(){toggleStatus(s.id,s.status);}}
                           style={{padding:'5px 12px',background:'white',color:isActive?'#DC2626':'#16A34A',border:'1px solid '+(isActive?'#FCA5A5':'#86EFAC'),borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
                           {isActive?'Deactivate':'Activate'}
+                        </button>
+                        <button onClick={function(){setRemoving({ id: s.id, name: s.display_name || s.email });}}
+                          title="Delete this staff member (a guided process)"
+                          style={{padding:'5px 12px',background:'white',color:'#B91C1C',border:'1px solid #FCA5A5',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          Delete
                         </button>
                       </div>
                     </td>
