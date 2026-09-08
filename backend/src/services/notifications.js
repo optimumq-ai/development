@@ -68,4 +68,19 @@ async function dismiss(id, userId) {
   return await get("SELECT * FROM notifications WHERE id = ? AND user_id = ?", [id, userId]);
 }
 
-module.exports = { emit, list, unreadCount, markRead, markAllRead, dismiss };
+// The system withdraws a heads-up it sent, for EVERY recipient: the thing it asked for has happened (a setup
+// item was approved) or the ask is void (the item went back to red). Without this the notice lingers in every
+// owner's bell until each one clicks Dismiss, and — because emit() dedupes against undismissed rows — a stale
+// notice silently swallows the next real one for the same item. Returns the number of rows resolved.
+async function resolveContext(opts) {
+  opts = opts || {};
+  if (opts.contextId == null || !(opts.kinds && opts.kinds.length)) throw new Error('notifications.resolveContext requires contextId and kinds');
+  var ph = opts.kinds.map(function () { return '?'; }).join(',');
+  var params = [nowStr()].concat(opts.kinds).concat([String(opts.contextId)]);
+  var sql = "UPDATE notifications SET dismissed_at = ? WHERE kind IN (" + ph + ") AND context_id = ? AND dismissed_at IS NULL";
+  if (opts.contextType) { sql += " AND context_type = ?"; params.push(opts.contextType); }
+  var r = await run(sql, params);
+  return r && typeof r.changes === 'number' ? r.changes : 0;
+}
+
+module.exports = { emit, list, unreadCount, markRead, markAllRead, dismiss, resolveContext };

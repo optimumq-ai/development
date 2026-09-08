@@ -170,8 +170,12 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var pA = await callAs(U.sa, 'PUT', '/agency', { agency_short_name: 'HubTest' });
   var hB = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'agency');
   ok('H3 every required field saved → YELLOW, awaiting approval', pA.status === 200 && hB.approval === 'yellow' && /awaiting approval/.test(hB.approvalWhy || ''), pA.status + ' ' + hB.approval + ': ' + hB.approvalWhy);
+  var hOpen0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agency' AND dismissed_at IS NULL")).n;
+  ok('H3b the last required save told the owners — open "Ready for approval" notices exist', hOpen0 > 0, String(hOpen0));
   var mG = await callAs(U.sa, 'POST', '/setup-hub/agency/done');
   var hC = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'agency');
+  var hOpen1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'agency' AND dismissed_at IS NULL")).n;
+  ok('H4b approval withdraws the notice from EVERY owner\'s bell, opened or not (2026-09-08: it used to linger for good)', hOpen1 === 0, hOpen0 + '→' + hOpen1);
   ok('H4 approval → GREEN by name and date', mG.status === 200 && hC.approval === 'green' && /approved by/.test(hC.approvalWhy || ''), mG.status + ' ' + hC.approval + ': ' + hC.approvalWhy);
   var nBefore = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency'")).n;
   await callAs(U.sa, 'PUT', '/agency', { contact_phone: '555-0199' });
@@ -181,6 +185,10 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   await callAs(U.sa, 'PUT', '/agency', { contact_phone: '555-0198' });
   var nAgain = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency'")).n;
   ok('H6 a second change does not pile up notifications (dedupe per item)', nAgain === nAfter, nAfter + '→' + nAgain);
+  await callAs(U.sa, 'POST', '/setup-hub/agency/done');
+  var hOpen2 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'agency' AND dismissed_at IS NULL")).n;
+  var hG2 = find((await callAs(U.dir, 'GET', '/setup-hub')).body, 'agency');
+  ok('H6b re-approving withdraws the "Re-approval needed" notices too', hG2.approval === 'green' && hOpen2 === 0, hG2.approval + ' open=' + hOpen2);
   var pg = (await callAs(U.dir, 'GET', '/setup-hub')).body;
   ok('H7 the page carries the colour counts and a go-live colour (' + pg.goLiveColour + ')', pg.colours && typeof pg.colours.red === 'number' && ['red', 'yellow', 'green'].indexOf(pg.goLiveColour) >= 0);
   await db.run("DELETE FROM notifications WHERE kind IN ('setup_ready','setup_reapproval') AND context_id = 'agency'"); await db.run("DELETE FROM setup_hub_ready WHERE item_key = 'agency'");
@@ -200,9 +208,17 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   ok('I2 "Ready for approval" is recorded by name, the bar says so, and the owners are told once', rdy.status === 200 && sB.ready && sB.approval === 'yellow' && /ready for approval/.test(sB.approvalWhy || '') && rn1 > rn0, rdy.status + ' ' + JSON.stringify(sB.ready) + ' ' + sB.approvalWhy + ' · ' + rn0 + '→' + rn1);
   var rdy2 = await callAs(U.dir, 'POST', '/setup-hub/sources/ready');
   ok('I3 a Director (not the technical lane) may not declare a technical list ready (403)', rdy2.status === 403, rdy2.status);
+  await callAs(U.sa, 'DELETE', '/setup-hub/sources/ready');
+  var iOpenW = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'sources' AND dismissed_at IS NULL")).n;
+  ok('I3b withdrawing the declaration withdraws the owners\' notices (the ask is void)', iOpenW === 0, String(iOpenW));
+  await callAs(U.sa, 'POST', '/setup-hub/sources/ready');
+  var iOpen0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'sources' AND dismissed_at IS NULL")).n;
+  ok('I3c declaring again re-notifies (the withdrawn notice no longer blocks the dedupe)', iOpen0 > 0, String(iOpen0));
   var ap1 = await callAs(U.sa, 'POST', '/setup-hub/sources/done');
   var sC = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'sources');
+  var iOpen1 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'sources' AND dismissed_at IS NULL")).n;
   ok('I4 approval → GREEN and the ready flag is cleared', ap1.status === 200 && sC.approval === 'green' && !sC.ready, ap1.status + ' ' + sC.approval);
+  ok('I4b approval withdraws every owner\'s "Ready for approval" notice', iOpen1 === 0, iOpen0 + '→' + iOpen1);
   var repo = await db.get("SELECT id, name FROM record_repositories ORDER BY id LIMIT 1");
   var cn0 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_reapproval' AND context_id = 'sources'")).n;
   var pt = await callAs(U.sa, 'PATCH', '/repositories/' + repo.id, { name: repo.name + ' (hub test)' });
@@ -284,7 +300,8 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   ok('K3c a further save while still complete and unapproved does not notify again', kn3 === kn2, kn2 + '→' + kn3);
   await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '', smtp_from: 'records@hub.test' } });
   var kR = find((await callAs(U.sa, 'GET', '/setup-hub')).body, 'email');
-  await db.run("UPDATE notifications SET dismissed_at = now() WHERE kind = 'setup_ready' AND context_id = 'email'"); // the owners read the first notice (emit() dedupes against undismissed ones)
+  var kOpenR = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email' AND dismissed_at IS NULL")).n;
+  ok('K3c\u2032 a save that empties a required field withdraws the owners\' "Ready for approval" notice (2026-09-08; the harness used to dismiss it by hand)', kOpenR === 0, String(kOpenR));
   await callAs(U.sa, 'POST', '/integrations', { email: { provider: 'smtp', smtp_host: 'mail.hub.test', smtp_port: '587', smtp_from: 'records@hub.test' } });
   var kn4 = (await db.get("SELECT count(*)::int n FROM notifications WHERE kind = 'setup_ready' AND context_id = 'email'")).n;
   ok('K3d back to red (port cleared) then complete again → the submission is re-armed and fires once more', kR.approval === 'red' && !kR.ready && kn4 === kn3 + (kn2 - kn1), kR.approval + ' ' + kn3 + '→' + kn4);

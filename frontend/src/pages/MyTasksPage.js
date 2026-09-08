@@ -543,7 +543,8 @@ export default function MyTasksPage() {
                     {n.body ? <div style={{ fontSize: '12px', color: C.muted, marginTop: '1px' }}>{n.body}</div> : null}
                     <div style={{ fontSize: '11px', color: C.faint, marginTop: '2px' }}>{(n.created_at || '').replace('T', ' ').slice(0, 16)}</div>
                   </div>
-                  <span onClick={function () { dismiss(n.id); }} title="Dismiss" style={{ color: C.faint, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 3px' }}>×</span>
+                  <button type="button" onClick={function () { dismiss(n.id); }} aria-label="Dismiss this notification" title="Remove this notification from your list"
+                    style={{ alignSelf: 'flex-start', flexShrink: 0, background: 'white', border: '1px solid #D1D5DB', borderRadius: '6px', color: '#374151', fontSize: '11.5px', fontWeight: 600, lineHeight: 1, padding: '6px 9px', cursor: 'pointer' }}>Dismiss</button>
                 </div>
               );
             })}

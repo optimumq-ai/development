@@ -68,7 +68,12 @@ one of three colours, and **the screen is the source of truth** — the Set Up G
 Mechanics (`services/setupHub.js`): a reader may report `required {missing, total}` and a `digest` of the
 screen's content; `mark()` is refused 422 `REQUIRED_MISSING` while red and stores the digest; a screen's
 write path calls `afterChange(key, actor)` after a save, which notifies the lane owners ONCE per change
-(`notifications` kind `setup_reapproval`, dedupe per item); `build()` computes `approval` /
+(`notifications` kind `setup_reapproval`, dedupe per item); **an approval withdraws the item's open
+`setup_ready` / `setup_reapproval` notices for EVERY owner** (`mark()` → `notifications.resolveContext`;
+Kevin 2026-09-08 — approving from the screen without opening the bell used to leave the notice orphaned for
+good, and because `emit()` dedupes against undismissed rows the orphan swallowed the next real notice for
+that item; withdrawing a declaration or emptying a required field withdraws the `setup_ready` notice the
+same way — the ask is void); `build()` computes `approval` /
 `approvalWhy` / `changedSinceApproval` per item and page-level `colours` + `goLiveColour`. Items whose
 reader has no `required` yet derive a colour from the counted state (ready → green; in progress / needs
 attention → yellow; else red) — each such screen is converted one at a time (list screens like Staff get a
@@ -85,7 +90,8 @@ added · **yellow, in progress** = one or more items, nobody has declared the li
 notifications while it grows) · **"Ready for approval"** = a button in the strip for anyone who may edit the
 screen — the adder's declaration that the list is complete; recorded by name (`setup_hub_ready`), the bar
 reads READY FOR APPROVAL, ONE notification to the lane owners (`setup_ready`); a signal, never an approval;
-withdrawable · **green** = the lane owner approves (clears the declaration) · **green → yellow** = any
+withdrawable (and withdrawing it withdraws the owners' notices) · **green** = the lane owner approves (clears
+the declaration and every owner's notice) · **green → yellow** = any
 add/edit/delete after approval, automatically, with the one re-approval notification (the routes report
 through `afterChange`; `routes/repositories.js` does it in a router-level finish hook). The evidence line
 carries health ("3 connectors · 1 not connected") — never blocks the colour, but the approver sees it.
@@ -169,10 +175,12 @@ submission. `afterChange(key, actor)` on an unapproved item with a `required` se
 no `setup_hub_ready` row exists, it records the saver's name there and sends the lane owners the same
 `setup_ready` notice a list screen's declaration sends ("Ready for approval: <screen> — <who> saved the last
 required item…"). Further saves while still complete send nothing; a save that empties a required field
-clears the record so the next completion notifies again; approval clears it (`mark()`). The guide's yellow
-text carries "submitted by <who> on <date>, approver notified". `notifications.emit` dedupes per
-user/kind/context while the earlier notice is undismissed, so an approver never sees two identical nudges.
-Harness: `verify_setup_hub` K2b, K3b–K3d.
+clears the record AND the owners' `setup_ready` notices so the next completion notifies again; approval
+clears both too (`mark()`). The guide's yellow text carries "submitted by <who> on <date>, approver
+notified". `notifications.emit` dedupes per user/kind/context while the earlier notice is undismissed, so an
+approver never sees two identical nudges — which is exactly why a notice the system no longer means must be
+withdrawn by the system, not left for each owner to dismiss. Harness: `verify_setup_hub` H3b/H4b/H6b,
+I3b/I3c/I4b, K2b, K3b–K3d.
 
 ## 3i. STAFF ALERTS — the `notifications` row renamed, two tabs, the alert catalogue (Kevin 2026-08-30, BUILT)
 

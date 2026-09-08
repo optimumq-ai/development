@@ -565,6 +565,14 @@ async function mark(itemKey, user) {
     'ON CONFLICT (item_key) DO UPDATE SET marked_by = EXCLUDED.marked_by, marked_by_name = EXCLUDED.marked_by_name, marked_at = EXCLUDED.marked_at, content_hash = EXCLUDED.content_hash, notified_hash = NULL',
     [itemKey, user.sub || user.id, user.name || user.email || user.sub, new Date().toISOString().slice(0, 19).replace('T', ' '), e.digest || null]);
   await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]);
+  // The approval answers every owner's "Ready for approval" / "Re-approval needed" notice — withdraw them all,
+  // whether or not the approver ever opened theirs (Kevin 2026-09-08: approving from the screen left the bell
+  // notice orphaned for good, and approve/unapprove cycles could not clear it).
+  await resolveNotices(itemKey, ['setup_ready', 'setup_reapproval']);
+}
+async function resolveNotices(itemKey, kinds) {
+  try { return await require('./notifications').resolveContext({ kinds: kinds, contextType: 'setup_item', contextId: itemKey }); }
+  catch (e) { console.error('[setupHub resolveNotices]', e && e.message); return 0; }
 }
 // LIST SCREENS: the adder says the list is complete. A signal to the lane owners (one notification), never an
 // approval. Refused while red (nothing added) and meaningless while green (already approved, unchanged).
@@ -583,7 +591,8 @@ async function declareReady(itemKey, user) {
   }
   return { ready: true, notified: sent };
 }
-async function withdrawReady(itemKey) { await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]); }
+// Withdrawing the declaration voids the ask — the owners' "Ready for approval" notices go with it.
+async function withdrawReady(itemKey) { await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]); await resolveNotices(itemKey, ['setup_ready']); }
 // Called by a screen's write path after a save: if the item was approved and its content changed, tell the
 // lane owners ONCE per change (the guide already shows yellow from the digest alone).
 // Lane owners of an item (legal items → Senior Legal); one notification each, best effort.
@@ -611,7 +620,7 @@ async function afterChange(itemKey, actorName) {
   if (!m || !m.content_hash) {
     if (!e.required) return { notified: false, reason: 'not approved' };
     var already = (await readies())[itemKey];
-    if (e.required.missing && e.required.missing.length) { if (already) await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]); return { notified: false, reason: 'required missing' }; }
+    if (e.required.missing && e.required.missing.length) { if (already) { await run('DELETE FROM setup_hub_ready WHERE item_key = ?', [itemKey]); await resolveNotices(itemKey, ['setup_ready']); } return { notified: false, reason: 'required missing' }; }
     if (already) return { notified: false, reason: 'already submitted' };
     await run('INSERT INTO setup_hub_ready (item_key, ready_by, ready_by_name, ready_at) VALUES (?, ?, ?, ?) ON CONFLICT (item_key) DO NOTHING', [itemKey, actorName || 'unknown', actorName || 'Someone', new Date().toISOString().slice(0, 19).replace('T', ' ')]);
     var sentR = await notifyOwners(it, 'setup_ready', 'Ready for approval: ' + it.name, (actorName || 'Someone') + ' saved the last required item on ' + it.name + ' — it is complete. Open it and approve.', 'afterChange:ready');

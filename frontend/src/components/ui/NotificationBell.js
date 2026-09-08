@@ -19,7 +19,10 @@ export default function NotificationBell() {
   useEffect(function () {
     load();
     const t = setInterval(load, 60000);
-    return function () { clearInterval(t); };
+    // lib/api fires this after any successful write — an approval withdraws its notice at once, a save that
+    // completes a setup screen shows the owner's notice at once.
+    window.addEventListener('oq:notifications-changed', load);
+    return function () { clearInterval(t); window.removeEventListener('oq:notifications-changed', load); };
   }, []);
   useEffect(function () {
     function onDoc(e) { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); }
@@ -66,7 +69,8 @@ export default function NotificationBell() {
                   {n.body ? <div style={{ fontSize: '11.5px', color: '#6B7280', marginTop: '2px' }}>{n.body}</div> : null}
                   <div style={{ fontSize: '10.5px', color: '#9CA3AF', marginTop: '3px' }}>{(n.created_at || '').replace('T', ' ').slice(0, 16)}</div>
                 </div>
-                <button onClick={function (e) { dismiss(e, n); }} aria-label="Dismiss" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C1C7CF', fontSize: '15px', lineHeight: 1, padding: '0 2px', height: 'fit-content' }}>×</button>
+                <button onClick={function (e) { dismiss(e, n); }} aria-label="Dismiss this notification" title="Remove this notification from your list"
+                  style={{ alignSelf: 'flex-start', flexShrink: 0, background: 'white', border: '1px solid #D1D5DB', borderRadius: '6px', color: '#374151', fontSize: '11px', fontWeight: '600', lineHeight: 1, padding: '5px 8px', cursor: 'pointer' }}>Dismiss</button>
               </div>
             );
           })}
