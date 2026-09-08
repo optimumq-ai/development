@@ -10326,3 +10326,16 @@ and the ledger meters nothing on live until Fee rules is RE-APPROVED (→ v3). T
 for anchored requestors. Free personnel time stays at the 36 h default unless he sets it or clicks None.
 Still manual by design: IL recurrent counts, PA/UT/NJ duplicates, OH delivery caps, class D/E flags.
 NEXT: back to the setup-screen markup exercise (Kevin's docs in ~/exchange).
+
+## 2026-09-08 — Organization: Delete for departments, teams and staff (a guided process)
+
+Kevin found no way to delete any of the three; there was none (staff had deactivate only). BUILT
+(`services/orgRemoval.js`, routes on departments/staff, `RemovalDialog`): every row has Delete → a dialog that
+lists each prerequisite as a step with a count and a place to clear it (or an inline "Deactivate now"), refuses
+while any is open (409 with the same list), and once clear either deletes outright or RETIRES the row when
+past work refers to it (kept for the record, hidden everywhere, a retired person can't sign in or be assigned).
+Login now accepts status 'active' only. verify_org_removal 25/25 (new harness, registered in run_suite);
+user_types 77, setup_hub 107; live untouched. Screenshots: /tmp/oq-session/o1_dept.png (City Clerk: catch-all
++ 11 record types), o2_team.png (Open Records Office: 4 steps + kept-on-record), o3_staff.png (Deactivate now).
+Spec: SPEC_setup_hub list-model section (2026-09-08 paragraph). NOTE: the "Open Records hub" flag on a
+department/team is a step, not a hard block — move the flag on Edit first.
