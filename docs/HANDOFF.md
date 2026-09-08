@@ -10261,9 +10261,7 @@ delete-the-setup-data pass). UI: × → labeled "Dismiss" button (bell + My Task
 `oq:notifications-changed` after any successful write and the bell reloads on it (the "30-second delay" was
 the 60s poll). verify_setup_hub 107/107 (+7), user_types 77/77, notifications 18/18, live untouched; bell
 verified by screenshot. Frontend rebuilt via build-next swap; API restarted.
-**OPEN — live orphans:** 110 pre-fix `setup_ready` rows across 12 approved items (5 or 15 recipients each,
-all created before the item's `marked_at`) are still undismissed on live; the one-off repair UPDATE was
-blocked by the permission classifier. The 24 `setup_reapproval` rows (fee_law · record_owners · sources)
-are genuine and stay. Options: Kevin runs the UPDATE (predicate: kind in setup_ready/setup_reapproval,
-context_type = setup_item, dismissed_at null, created_at <= signoff.marked_at), or re-approves each of the
-12 items from its screen (the real path now clears every recipient), or each user clicks Dismiss.
+**Live orphans CLEANED (Kevin's go-ahead, same day):** 110 pre-fix `setup_ready` rows across 12 approved
+items (every recipient; all created before the item's `marked_at`) dismissed by a one-off UPDATE with that
+predicate. What remains open on live is exactly the 24 genuine `setup_reapproval` notices (fee_law 5 ·
+record_owners 15 · sources 4) — those clear themselves when the item is next approved.
