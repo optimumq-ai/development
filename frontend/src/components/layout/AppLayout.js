@@ -81,7 +81,7 @@ export default function AppLayout() {
     return function () { alive = false; clearInterval(t); };
   }, [uid]);
 
-  const RAIL = 56, PANEL = 240;
+  const RAIL = 56, PANEL = 256;
   const navColor = function (active) { return active ? '#1F4E79' : '#374151'; };
   const groupActive = function (g) { return (g.routes || []).some(function (r) { return loc.pathname === r || loc.pathname.indexOf(r + '/') === 0; }); };
   const asideStyle = {
@@ -94,14 +94,12 @@ export default function AppLayout() {
     <div style={{ display: 'flex', height: '100vh', background: '#F9FAFB', overflow: 'hidden', position: 'relative' }}>
       {!pinned ? <div style={{ width: RAIL + 'px', flexShrink: 0 }} /> : null}
       <aside style={asideStyle} onMouseEnter={enter} onMouseLeave={leave} onFocus={enter} onBlur={leave} aria-label="Main navigation">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', height: '57px', boxSizing: 'border-box', borderBottom: '1px solid #F3F4F6' }}>
-          <div style={{ width: '32px', height: '32px', background: '#1F4E79', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} title="OPTIMUM Q">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          {open ? <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontWeight: '700', color: '#1F4E79', fontSize: '13px', whiteSpace: 'nowrap' }}>OPTIMUM Q</div>
-            <div style={{ fontSize: '11px', color: '#9CA3AF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agencyName}</div>
-          </div> : null}
+        {/* Kevin 2026-09-08: his logo replaces the OPTIMUM Q + agency text (the agency name already heads the
+            top bar). Collapsed: the (Q) mark cropped from the same artwork; expanded: the full wordmark. */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: open ? 'space-between' : 'center', gap: '8px', padding: open ? '10px 12px' : '10px 0', height: '57px', boxSizing: 'border-box', borderBottom: '1px solid #F3F4F6' }}>
+          {open
+            ? <img src="/brand/optimumq-wordmark.png" alt="OPTIMUM Q" style={{ height: '34px', width: 'auto', display: 'block', flexShrink: 1, minWidth: 0, maxWidth: '150px', objectFit: 'contain' }} />
+            : <img src="/brand/optimumq-mark.png" alt="OPTIMUM Q" title="OPTIMUM Q" style={{ height: '26px', width: 'auto', display: 'block' }} />}
           {open ? (
             <button onClick={togglePin} title={pinned ? 'Let the panel shrink to icons when the pointer leaves it' : 'Keep the panel open all the time'}
               style={{ display: 'flex', alignItems: 'center', gap: '5px', background: pinned ? '#EEF3F8' : 'white', border: '1px solid ' + (pinned ? '#C5D3E1' : '#E5E7EB'), borderRadius: '6px', cursor: 'pointer', color: pinned ? '#1F4E79' : '#6B7280', fontSize: '10.5px', fontWeight: '600', padding: '4px 7px', whiteSpace: 'nowrap', flexShrink: 0 }}>
