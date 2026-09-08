@@ -10247,3 +10247,23 @@ capture (still undocumented); (7) the RESET via the benchmark/Reset feature, kee
 user types, teams/departments, benchmarks, demo fixtures, tester account fate); (8) standing: MFA ·
 Jurisdiction Configuration retirement · §4.4 field pass · MRR roll-up §6 · model-change eval (decided,
 deferred) · Haiku eval at volume · deactivate tester@optimumq.local at go-live.
+
+## 2026-09-08 — setup notices: approval now withdraws them (Kevin's orphaned-notification report)
+
+Kevin approved setup screens without opening the bell notice and the notice stayed forever; approve/unapprove
+cycles could not clear it. Root cause: `mark()` never touched `notifications` — the only exit was the faint ×,
+and the "cleared as expected" case was just the click marking it READ. Worse: `emit()` dedupes against
+undismissed rows, so the orphan swallowed the next real notice for that item (K3d dismissed by hand).
+FIX (commit e73976b): `notifications.resolveContext` — the system withdraws a heads-up it sent, for every
+recipient; `mark()` withdraws setup_ready + setup_reapproval for the item, `withdrawReady()` and the
+required-missing branch of `afterChange` withdraw setup_ready (the ask is void — matters for Kevin's coming
+delete-the-setup-data pass). UI: × → labeled "Dismiss" button (bell + My Tasks); `lib/api` fires
+`oq:notifications-changed` after any successful write and the bell reloads on it (the "30-second delay" was
+the 60s poll). verify_setup_hub 107/107 (+7), user_types 77/77, notifications 18/18, live untouched; bell
+verified by screenshot. Frontend rebuilt via build-next swap; API restarted.
+**OPEN — live orphans:** 110 pre-fix `setup_ready` rows across 12 approved items (5 or 15 recipients each,
+all created before the item's `marked_at`) are still undismissed on live; the one-off repair UPDATE was
+blocked by the permission classifier. The 24 `setup_reapproval` rows (fee_law · record_owners · sources)
+are genuine and stay. Options: Kevin runs the UPDATE (predicate: kind in setup_ready/setup_reapproval,
+context_type = setup_item, dismissed_at null, created_at <= signoff.marked_at), or re-approves each of the
+12 items from its screen (the real path now clears every recipient), or each user clicks Dismiss.
