@@ -33,7 +33,10 @@ router.get('/profile/:id', requireAuth, async function (req, res) {
     var p = await get('SELECT * FROM requestor_profiles WHERE id = ?', [req.params.id]);
     if (!p) return res.status(404).json({ error: 'Requestor profile not found' });
     var balance = await RL.balance(p.id);
-    var allowances = await all('SELECT name, unit, window_spec, allowance, consumed, updated_at FROM requestor_allowances WHERE profile_id = ? ORDER BY name', [p.id]);
+    // Class B is COUNTED from the fee schedule since 2026-09-08; the manual rows remain the fallback for a city
+    // whose schedule carries no allowance.
+    var meters = await RL.allowanceMeters(null, p.id);
+    var allowances = meters ? meters.rows : await all('SELECT name, unit, window_spec, allowance, consumed, updated_at FROM requestor_allowances WHERE profile_id = ? ORDER BY name', [p.id]);
     var counters = await all('SELECT name, count, window_spec, updated_at FROM requestor_counters WHERE profile_id = ? ORDER BY name', [p.id]);
     var flags = await RL.activeFlags(p.id);
     var events = await all('SELECT type, amount, reason, request_id, created_at FROM requestor_ledger_events WHERE profile_id = ? ORDER BY created_at DESC LIMIT 15', [p.id]);
@@ -41,7 +44,7 @@ router.get('/profile/:id', requireAuth, async function (req, res) {
       'SELECT r.id, ' + scope.numberExpr('r') + ' AS request_number, r.stage, l.linked_at FROM requestor_request_links l ' +
       'JOIN requests r ON r.id = l.request_id ' + scope.numberJoin('r') +
       ' WHERE l.profile_id = ? ORDER BY l.linked_at DESC LIMIT 20', [p.id]);
-    res.json({ profile: p, balance: balance, allowances: allowances, counters: counters, flags: flags, events: events, requests: requests });
+    res.json({ profile: p, balance: balance, allowances: allowances, allowanceState: meters ? meters.state : null, counters: counters, flags: flags, events: events, requests: requests });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

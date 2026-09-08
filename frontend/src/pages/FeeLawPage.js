@@ -223,7 +223,7 @@ export default function FeeLawPage() {
     var isNone = /^\s*(none|no)\s*$/i.test(v), isActual = /^\s*actual/i.test(v);
     var missing = r.binding === 'deferral' && v === '';
     var tag = edits[r.key] !== undefined ? null : r.city && r.city.source === 'default' && r.city.value != null ? (r.binding === 'floor' ? 'MINIMUM' : 'DEFAULT') : r.city && r.city.source === 'document' ? (r.city.ref ? r.city.ref : 'from document') : null;
-    var choices = r.binding === 'deferral' ? [r.noneOk ? { v: 'none', label: 'None', on: isNone, title: 'This city sets no figure for this item — recorded as a decision' } : null, r.actualOk ? { v: 'actual', label: r.actualLabel || 'Actual', on: isActual, title: 'Left unpriced on every estimate ("actual TBD") for staff to settle at billing' } : null].filter(Boolean) : [];
+    var choices = (r.binding === 'deferral' || r.noneOk) ? [r.noneOk ? { v: 'none', label: 'None', on: isNone, title: r.binding === 'floor' ? 'This city has not adopted this optional regime — nothing is metered' : 'This city sets no figure for this item — recorded as a decision' } : null, r.actualOk ? { v: 'actual', label: r.actualLabel || 'Actual', on: isActual, title: 'Left unpriced on every estimate ("actual TBD") for staff to settle at billing' } : null].filter(Boolean) : [];
     // Kevin 2026-09-08: "none" / "actual" are choices you click, not words you have to know to type.
     return <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
       <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>

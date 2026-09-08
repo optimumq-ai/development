@@ -22,7 +22,7 @@ var CI = require('/opt/optimumq/backend/src/services/configIntegrity');
 
 var TAG = 'LEDGER-' + Date.now();
 var pass = 0, fail = 0;
-function ok(l, c) { (c ? pass++ : fail++); console.log((c ? '  PASS  ' : '  FAIL  ') + l); }
+function ok(l, c, extra) { (c ? pass++ : fail++); console.log((c ? '  PASS  ' : '  FAIL  ') + l + (c || !extra ? '' : '  -> ' + extra)); }
 function realErrors(f) { return (f || []).filter(function (x) { return x.severity === 'error' && !/A harness has leaked into production config/.test(x.issue); }); }
 async function setActive(jid) {
   await db.run("INSERT INTO system_config (key, value) VALUES ('jurisdiction_profile', ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [jid]);
@@ -203,6 +203,65 @@ async function enablePriorBalance(jid, on, patch) {
     var delAdv = await RL.evaluateDelivery('jur-tx', dupeReq.childId);
     ok('the delivery gate reports the manual counter and says it is manual',
       delAdv.advisories.some(function (a) { return a.counter === 'physical_deliveries' && /manual stub/.test(a.summary); }));
+
+    // ---- 7b. CLASS B/C WIRED (2026-09-08): personnel time counted from the fee schedule; same-day siblings
+    var authB = require('/opt/optimumq/backend/src/services/auth');
+    async function httpB(method, path, body) {
+      var u = await db.get("SELECT * FROM users WHERE id = 'u-kruss'"); var tok = await authB.signAccessToken(u);
+      var r = await fetch('http://localhost:' + (process.env.API_PORT || 3101) + '/api' + path, { method: method, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+      var j = null; try { j = await r.json(); } catch (e) {}
+      return { status: r.status, body: j };
+    }
+    // a temporary ACTIVE fee schedule that carries the two rules (a tiny cap so three small requests cross it)
+    var fpId = 'fp-ledger-' + Date.now();
+    var fpCfg = { context: 'FR', labor: { overheadPct: 20, search: { rate: 15, increment: 0.25, rounding: 'up', billable: true, billableWhen: { mode: 'all_or_nothing', trigger: 'pages', threshold: 50, paperOnly: true } }, review: { rate: 15, increment: 0.25, rounding: 'up', billable: true }, programming: { rate: 28.5, increment: 0.25, rounding: 'up', billable: true } },
+      duplication: { bw: { rate: 0.1 }, color: { rate: 0.5 }, oversized: { rate: 0.5 }, specialty: { rate: 'actual' } }, media: { cd: 1, dvd: 3, usb: 'actual' }, av: { perRecording: 10, perMinute: 1, freeMinutes: 0 },
+      delivery: { email: 0, pickup: 0, mail: 'actual', handling: 0 }, certification: { rate: 0, unit: 'per_record' },
+      requestRules: { freePageAllowance: 0, freeLaborHours: 0, deMinimis: 0, minFee: 0, maxFee: null, deposit: { threshold: null, percent: null }, estimateNotifyThreshold: 40, personnelTimeAllowance: { hoursPerYear: 2, hoursPerMonth: 1, citation: 'Tex. Gov\'t Code § 552.275' }, sameDayAggregation: true },
+      estimatePolicy: { requesterResponseDays: 10, revisionNotifyPercent: 20, estimateValidityDays: null }, payment_mode: 'internal' };
+    await db.run("INSERT INTO fee_profiles (id, jurisdiction_id, context, version, status, name, config_json, created_by, created_at, updated_at) VALUES (?, 'jur-tx', 'FR', 9999, 'active', 'ledger harness schedule', ?, 'harness-ws5', ?, ?)", [fpId, JSON.stringify(fpCfg), nowB(), nowB()]);
+    function nowB() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
+    try {
+      var cfgB = await RL.config('jur-tx');
+      ok('B1 the allowance is READ FROM THE FEE SCHEDULE: evented, 2 h/yr · 1 h/mo, response 10 days; same-day aggregation on', cfgB.allowances.mode === 'evented' && cfgB.allowances.hoursPerYear === 2 && cfgB.allowances.hoursPerMonth === 1 && cfgB.allowances.responseDays === 10 && cfgB.counters.sameDayAggregation === true);
+      var r1 = await makeRequest('metered@example.com', true, 'TX metered one', created);
+      var r2 = await makeRequest('metered@example.com', true, 'TX metered two', created);
+      var linkB = await db.get('SELECT profile_id FROM requestor_request_links WHERE request_id = ?', [r1.parentId]); profiles.push(linkB.profile_id);
+      var e1 = await httpB('POST', '/fee-estimates/request/' + r1.parentId, { components: [{ id: r1.childId, label: 'c', quantities: { searchHours: 0.75, bwPages: 5 } }], delivery: { method: 'email' } });
+      var e2 = await httpB('POST', '/fee-estimates/request/' + r2.parentId, { components: [{ id: r2.childId, label: 'c', quantities: { reviewHours: 0.5, bwPages: 5 } }], delivery: { method: 'email' } });
+      ok('B2 two estimates priced through the real route (0.75 h search, 0.5 h review)', e1.status === 200 && e2.status === 200, e1.status + ' ' + e2.status + ' ' + JSON.stringify(e1.body).slice(0, 120));
+      var st1 = await RL.personnelTimeState('jur-tx', r2.parentId);
+      ok('B3 the meter counts the OTHER request\'s hours, not the one being priced (0.75 used of 2 · 0.75 of 1 this month · not over)', st1.metered && st1.usedYear === 0.75 && st1.usedMonth === 0.75 && st1.over === false && st1.byRequest.length === 1 && st1.byRequest[0].basis === 'estimated');
+      ok('B4 …and the 2nd request\'s gate says the same in the shared shape (allowance present, no cap trigger)', !!(e2.body.ledger && e2.body.ledger.allowance) && e2.body.ledger.allowance.usedYear === 0.75 && !e2.body.ledger.triggers.some(function (t) { return t.action === 'all_time_chargeable'; }));
+      ok('B5 same-day siblings: the 2nd request\'s gate lists the 1st as a MAY-aggregate ADVISORY (never a trigger)', e2.body.ledger.advisories.some(function (a) { return a.action === 'may_aggregate' && a.requests.length === 1 && a.requests[0].requestId === r1.parentId; }) && !e2.body.ledger.triggers.some(function (t) { return t.action === 'may_aggregate'; }));
+      var r3 = await makeRequest('metered@example.com', true, 'TX metered three', created);
+      var st3 = await RL.personnelTimeState('jur-tx', r3.parentId);
+      ok('B6 third request: 1.25 h used → the MONTHLY 1 h floor is met, so the requestor is at the cap', st3.over === true && st3.usedYear === 1.25 && st3.usedMonth === 1.25);
+      // 10 paper pages by mail: under TX's 50-page bar labor would be FREE — at the cap it is charged
+      var e3 = await httpB('POST', '/fee-estimates/request/' + r3.parentId, { components: [{ id: r3.childId, label: 'c', quantities: { searchHours: 1, bwPages: 10 } }], delivery: { method: 'mail' } });
+      var R3 = e3.body && e3.body.estimate && e3.body.estimate.feeContext && e3.body.estimate.feeContext.requestLevel;
+      ok('B7 the estimate charges every hour (1 h × $15 + 20% overhead) although 10 paper pages sit under the 50-page bar', e3.status === 200 && R3 && R3.laborSubtotal === 15 && R3.laborOverhead === 3, JSON.stringify(R3 && { labor: R3.laborSubtotal, oh: R3.laborOverhead, total: R3.total }));
+      ok('B8 …the rules trace names the cap, and the gate fires the all-time-chargeable trigger with the 10-day window', R3 && R3.rulesTrace.some(function (t) { return t.rule === 'personnel_time_cap' && t.applied; }) && e3.body.ledger.triggers.some(function (t) { return t.action === 'all_time_chargeable' && t.responseDays === 10 && t.rule_id === 'TX-0031'; }));
+      var inB = JSON.parse((await db.get("SELECT input_json FROM request_fee_estimates WHERE request_id = ? ORDER BY created_at DESC LIMIT 1", [r3.parentId])).input_json);
+      ok('B9 the flag is stored in the estimate\'s input, so a reconciliation re-prices the same way', inB.personnelTimeExceeded === true);
+      var e3b = await httpB('POST', '/fee-estimates/request/' + r3.parentId, { components: [{ id: r3.childId, label: 'c', quantities: { searchHours: 1, bwPages: 10 } }], delivery: { method: 'mail' } });
+      ok('B10 same-day advisory on the 3rd lists BOTH earlier requests by number', e3b.body.ledger.advisories.some(function (a) { return a.action === 'may_aggregate' && a.requests.length === 2 && a.requests.every(function (q) { return /^\d{4}-\d{6}/.test(q.requestNumber || ''); }); }), JSON.stringify(e3b.body.ledger.advisories.map(function (a) { return a.requests; })));
+      var anonB = await makeRequest('metered@example.com', false, 'TX anonymous same address', created);
+      var stA = await RL.personnelTimeState('jur-tx', anonB.parentId);
+      var gA = await RL.evaluateEstimate('jur-tx', anonB.parentId, { estimateTotal: 10 });
+      ok('B11 ANONYMOUS: the same email string unverified is nobody — no meter, no trigger, no siblings', stA.anonymous === true && stA.over === false && gA.anonymous === true && gA.triggers.length === 0 && gA.allowance === null && gA.sameDay === null);
+      await db.run("UPDATE requests SET requestor_type = 'media' WHERE id = ?", [r3.parentId]);
+      var stM = await RL.personnelTimeState('jur-tx', r3.parentId);
+      ok('B12 an EXEMPT class (news media) is never metered — the cap does not apply even at 1.25 h', stM.exempt === true && stM.over === false && /never metered/.test(stM.exemptReason));
+      var pv = await httpB('GET', '/requestor-ledger/profile/' + linkB.profile_id);
+      ok('B13 the Front Desk profile view shows COMPUTED meters from the schedule (12-month + this-month rows, source fee_schedule)', pv.status === 200 && pv.body.allowances.length === 2 && pv.body.allowances.every(function (a) { return a.source === 'fee_schedule'; }) && pv.body.allowances[0].allowance === 2 && pv.body.allowanceState && pv.body.allowanceState.metered === true);
+      var byReq = await httpB('GET', '/jurisdiction-profile/ledger/request/' + r2.parentId);
+      ok('B14 the intake panel\'s ledger endpoint carries the allowance and the same-day list', byReq.status === 200 && byReq.body.allowance && byReq.body.allowance.hoursPerYear === 2 && byReq.body.sameDay && byReq.body.sameDay.requests.length === 2);
+    } finally {
+      await db.run('DELETE FROM fee_profiles WHERE id = ?', [fpId]);
+    }
+    var cfgAfter = await RL.config('jur-tx');
+    ok('B15 with the harness schedule gone the allowance falls back to the manual stub (nothing metered)', cfgAfter.allowances.mode === 'manual' || cfgAfter.allowances.hoursPerYear !== 2);
 
     // ---- 8. A state with no prior-balance rule has no gate at all
     var ohCfg = RL.normalizeConfig('OH', { prior_balance: { enabled: true } });

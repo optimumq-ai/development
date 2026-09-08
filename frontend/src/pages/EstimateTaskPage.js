@@ -232,14 +232,10 @@ export default function EstimateTaskPage() {
           <FeeEstimatePanel requestId={task.request_id} />
         </div>
 
-        {/* ⚠ NOT BUILT: THE TX 36-HOUR CAP TRACKER (Draft 2 §2, § 552.275).
-            The draft binds it to "ledger class B allowance — config stub, staff-entered value, `recorded`
-            badge". The class-B stub is genuinely a stub: services/requestorLedger has setAllowance() and
-            the requestor_allowances table, and NOTHING reads them back — there is no endpoint, anywhere,
-            that returns a requestor's allowance state. A tracker drawn on top of that would either invent a
-            number or render an empty box labelled with a statute, and a statutory cap displaying a figure
-            nobody entered is worse than no tracker. Omitted, per the build brief's own "else omit, note
-            it". When the class-B stub gains a reader, this is where the line goes. */}
+        {/* THE TX 36-HOUR CAP TRACKER (Draft 2 §2, § 552.275) — BUILT 2026-09-08 inside FeeEstimatePanel
+            ("Across this requestor's requests"): the ledger now COUNTS personnel time from the requestor's
+            estimate/reconciliation rows against the allowance the approved fee schedule carries, and the
+            estimate route prices all time as chargeable once the cap is met. */}
 
         {/* ── ACTIONS RAIL (spec §2.3 — "Actions", never "Work the request") ── */}
         <div style={{ flex: '0 0 236px' }}>

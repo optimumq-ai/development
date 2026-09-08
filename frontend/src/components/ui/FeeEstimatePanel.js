@@ -19,6 +19,7 @@ export default function FeeEstimatePanel(props) {
   var [actualRateDrivers, setActualRateDrivers] = useState([]);
   var [actualAmounts, setActualAmounts] = useState({});   // staff-entered $ for 'actual'-rated lines (dup_bw, media:<type>, delivery)
   var [result, setResult] = useState(null);
+  var [ledger, setLedger] = useState(null);   // WS5 requestor-ledger gate result (prior balance · personnel-time cap · same-day siblings)
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
   var [other, setOther] = useState({ amount: 0, description: '' });
@@ -103,6 +104,7 @@ export default function FeeEstimatePanel(props) {
       setQty(init);
       setPrefilled(pf);
       if (r.data.latest && r.data.latest.feeContext) setResult(r.data.latest.feeContext);
+      if (r.data.ledger) setLedger(r.data.ledger);
       if (r.data.latest && r.data.latest.input && r.data.latest.input.delivery) setDelivery(r.data.latest.input.delivery.method || 'email');
       if (r.data.request && r.data.request.purpose) setPurpose(r.data.request.purpose);
       var ard = r.data.actualRateDrivers || []; setActualRateDrivers(ard); if (ard.length) { var ro = {}; ard.forEach(function (k) { ro[k] = (r.data.laborRates || {})[k] || 0; }); setRateOverrides(ro); }
@@ -134,6 +136,7 @@ export default function FeeEstimatePanel(props) {
       var certPayload = certification.requested ? { count: num(certification.count) || 1 } : { count: 0 };
       var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, certification: certPayload, other: otherPayload, purpose: purpose, rateOverrides: rateOverrides, actualAmounts: actualAmounts });
       setResult(r.data.estimate.feeContext);
+      if (r.data.ledger) setLedger(r.data.ledger);
     } catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Calculation failed.'); }
     setCalc(false);
   }
@@ -362,6 +365,34 @@ export default function FeeEstimatePanel(props) {
   var forbidden = (ctx.chargeability && ctx.chargeability.forbidden) || [];
 
   var R = result && result.requestLevel;
+  // ACROSS THIS REQUESTOR'S REQUESTS (WS5, 2026-09-08). What the ledger found for the person behind this
+  // request: the free personnel-time meter (TX § 552.275, counted from the schedule — the tracker the estimate
+  // page used to note as NOT BUILT), the cap trigger when it bites, and same-day siblings a person may aggregate.
+  // An anonymous requestor gets the honest sentence, never an empty box.
+  function renderLedger() {
+    if (!ledger) return null;
+    var al = ledger.allowance;
+    var cap = (ledger.triggers || []).filter(function (t) { return t.action === 'all_time_chargeable'; })[0];
+    var agg = (ledger.advisories || []).filter(function (a) { return a.action === 'may_aggregate'; })[0];
+    if (ledger.anonymous && !al) return null;
+    if (!al && !cap && !agg) return null;
+    var pct = al && al.hoursPerYear ? Math.min(100, Math.round(al.usedYear / al.hoursPerYear * 100)) : 0;
+    return (
+      <div style={{ marginTop: '18px', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
+        <div style={{ fontSize: '14px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Across this requestor's requests</div>
+        <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>Counted by the requestor ledger from this person's other requests. Identity: {String(ledger.identityBasis || '').replace(/_/g, ' ') || 'anchored'}.</div>
+        {al && al.exempt ? <div style={{ fontSize: '12.5px', color: '#374151' }}>Free personnel time is not metered for this requestor — {al.exemptReason}.</div> : null}
+        {al && al.metered ? (
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#111' }}>Free personnel time <span style={{ color: '#6B7280', fontWeight: 400 }}>· {al.usedYear} of {al.hoursPerYear} hours used in the last 12 months{al.hoursPerMonth != null ? ' · ' + al.usedMonth + ' of ' + al.hoursPerMonth + ' this month' : ''} · this request not counted yet</span></div>
+            <div style={{ height: '6px', background: '#F3F4F6', borderRadius: '3px', marginTop: '5px', maxWidth: '420px' }}><div style={{ height: '6px', width: pct + '%', background: al.over ? '#B02A37' : '#1F4E79', borderRadius: '3px' }}></div></div>
+          </div>
+        ) : null}
+        {cap ? <div style={{ fontSize: '12.5px', color: '#7F1D1D', background: '#FEF2F2', border: '1px solid #FECACA', padding: '8px 10px', borderRadius: '6px', marginBottom: '8px' }}><b>All staff time is chargeable on this request.</b> {cap.summary} <span style={{ color: '#9CA3AF' }}>({cap.citation})</span></div> : null}
+        {agg ? <div style={{ fontSize: '12.5px', color: '#78350F', background: '#FFFBEB', border: '1px solid #FDE68A', padding: '8px 10px', borderRadius: '6px' }}><b>Same-day requests.</b> {agg.summary} <span style={{ color: '#9CA3AF' }}>({agg.citation})</span></div> : null}
+      </div>
+    );
+  }
   return (
     <div>
       {renderResponse()}
@@ -565,6 +596,7 @@ export default function FeeEstimatePanel(props) {
           {renderTakePayment()}
         </div>
       ) : null}
+      {renderLedger()}
       {result ? (
         <div style={{ marginTop: '18px', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
           <div style={{ fontSize: '14px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Notify requestor</div>

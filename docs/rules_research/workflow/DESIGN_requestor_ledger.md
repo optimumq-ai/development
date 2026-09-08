@@ -144,3 +144,40 @@ this: `payment.advance_payment` (14 states), `fee.personnel_time_free_allowance`
   panel → the requestor's ledger card (per-request invoiced/paid/waived/outstanding, running balance,
   allowance meters, flags, identity basis); an anonymous request shows "no ledger is kept" explicitly; and a
   staff-only **lookup by email** (exact match on the verified address, never creates a profile).
+
+## Addendum 2026-09-08 — classes B and C wired to the approved fee schedule (Kevin's order, built same day)
+
+Kevin found the Fee rules screen flagging "needs requestor ledger" on the two cross-request rows and asked
+to remove it; the check showed nothing was connected, so he scheduled the wiring instead. Built:
+
+- **Config source = the approved fee schedule**, not a ledger knob. `feeLaw.compose()` writes
+  `requestRules.personnelTimeAllowance = { hoursPerYear, hoursPerMonth, citation }` from the "Free personnel time
+  per requestor" row (the city's yearly figure, at or above the 36 h floor, with the state's 15 h/mo floor) — or
+  `null` when the city chose **None** (the regime is optional; declining it is now a click on that floor row) —
+  and `requestRules.sameDayAggregation = true` when the "Repeat / aggregated requests" prose names the same-day
+  rule. `requestorLedger.config()` reads both (`scheduleRules`); `allowances.mode` becomes `evented` with
+  `hoursPerYear/hoursPerMonth/responseDays:10/exemptRequestorTypes`, `counters.sameDayAggregation` is set.
+  The manual stubs remain the fallback for a schedule with no allowance.
+- **Counting (class B), same shape as the balance**: `personnelTime(cfg, profileId, {requestorType,
+  excludeRequestId})` scans the requestor's OWN linked parent requests received in the rolling 12 months; per
+  request it takes the latest RECONCILIATION's hours (measured labor, `laborActuals`) else the latest ESTIMATE's
+  (`estimatedHoursFromInput` — search + review/legal + programming), splits the current-calendar-month figure
+  out, and excludes the request being priced. "Equals or exceeds" either window ⇒ `over`. Exempt classes
+  (`requests.requestor_type` ∈ media/news_media/elected_official/legal_aid/academic/scholar) are never metered.
+  No running total, no staff entry; reconstructable from rows that already exist.
+- **The cap acts at the estimate gate**: `POST /fee-estimates/request/:id` asks `personnelTimeState()` BEFORE
+  pricing and sets `request.personnelTimeExceeded = true`; `feeEngine.compute` then zeroes the free hours and
+  bypasses the page/hour labor bar (never a `billable:false` driver), adds the `personnel_time_cap` trace line.
+  The flag lives in `input_json`, so reconciliation re-prices identically. `evaluateEstimate` returns the
+  `allowance` meter and, when over, the TRIGGER `{action:'all_time_chargeable', rule_id:'TX-0031', responseDays:10}`
+  — monetary, automatic, issues with the estimate notice as the design says.
+- **Same-day siblings (class C, TX § 552.261(e))** — `sameDaySiblings()` lists the requestor's other parent
+  requests received the same calendar day; both gates return it as an ADVISORY `{action:'may_aggregate'}`,
+  never a trigger: the statute says MAY, and aggregating is a person's call.
+- **Identity rule unchanged**: no anchor ⇒ `allowance:null, sameDay:null`, nothing fires (harness B11).
+- **Surfaces**: FeeEstimatePanel "Across this requestor's requests" (meter · cap notice · same-day note — the
+  tracker EstimateTaskPage had noted as NOT BUILT); the Intake Review ledger panel; the Front Desk profile view
+  shows COMPUTED meters (`allowanceMeters`, source `fee_schedule`) in place of the manual rows.
+- **Harness**: `verify_requestor_ledger` §7b B1–B15 (temporary active schedule with a 2 h/yr · 1 h/mo cap);
+  `verify_fee_law` A5/A5c/D2b.
+- **Still manual (unchanged)**: IL recurrent counts, PA/UT/NJ duplicates, OH delivery caps, class D/E flags.

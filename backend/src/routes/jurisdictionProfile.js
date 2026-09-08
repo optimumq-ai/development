@@ -195,7 +195,8 @@ router.get('/ledger/request/:requestId', requireAuth, async function (req, res) 
     var RL = require('../services/requestorLedger');
     var pid = await RL.profileForRequest(req.params.requestId);
     if (!pid) return res.json({ anonymous: true, reason: 'no affirmative identity anchor — no adverse trigger can fire', balance: null, flags: [] });
-    res.json({ anonymous: false, profileId: pid, balance: await RL.balance(pid), flags: await RL.activeFlags(pid) });
+    var gate = await RL.evaluateIntake(null, req.params.requestId);
+    res.json({ anonymous: false, profileId: pid, balance: await RL.balance(pid), flags: await RL.activeFlags(pid), allowance: gate.allowance, sameDay: gate.sameDay, advisories: gate.advisories });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

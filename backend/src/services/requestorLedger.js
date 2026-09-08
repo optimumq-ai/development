@@ -95,7 +95,7 @@ var GATES = ['intake', 'estimate', 'delivery'];
 // Config — read-time normalised, so nothing needs importing or migrating and WS1's `ledger` domain row
 // (which carries the state's concept evidence) stays exactly as it was written.
 // ---------------------------------------------------------------------------------------------------
-function normalizeConfig(code, raw) {
+function normalizeConfig(code, raw, sched) {
   raw = raw || {};
   var rule = PRIOR_BALANCE_RULES[String(code || '').toUpperCase()] || null;
   var pb = raw.prior_balance || {};
@@ -120,11 +120,37 @@ function normalizeConfig(code, raw) {
       // a city's choice, and defaulting it on would demand money no statute compels anyone to demand.
       enabled: pb.enabled === true
     } : { applies: false, enabled: false },
-    // Classes B/C/D: the knobs exist and the numbers are entered by a human until a city elects the regime.
-    allowances: { mode: 'manual', enabled: (raw.allowances || {}).enabled === true },
-    counters: { mode: 'manual', enabled: (raw.counters || {}).enabled === true },
+    // CLASS B — the personnel-time allowance (TX § 552.275). Since 2026-09-08 it is READ FROM THE APPROVED FEE
+    // SCHEDULE (Fee rules → requestRules.personnelTimeAllowance): a city that typed a yearly figure there has
+    // adopted the optional regime; "none" (or no schedule) means nothing is metered. The hours themselves are
+    // counted from the requests' own estimate/reconciliation rows (personnelTime below) — no staff entry.
+    allowances: sched && sched.personnelTimeAllowance && sched.personnelTimeAllowance.hoursPerYear != null
+      ? { mode: 'evented', enabled: true, source: 'fee_schedule',
+          hoursPerYear: Number(sched.personnelTimeAllowance.hoursPerYear),
+          hoursPerMonth: sched.personnelTimeAllowance.hoursPerMonth != null ? Number(sched.personnelTimeAllowance.hoursPerMonth) : null,
+          citation: sched.personnelTimeAllowance.citation || null,
+          responseDays: 10,                       // § 552.275(d)/(e): the estimate must be answered within 10 days
+          exemptRequestorTypes: EXEMPT_REQUESTOR_TYPES }
+      : { mode: 'manual', enabled: (raw.allowances || {}).enabled === true },
+    // CLASS C — same-calendar-day aggregation (TX § 552.261(e)), also from the schedule. The other class-C
+    // rules (IL recurrent counts, PA/UT/NJ duplicates) stay manual stubs.
+    counters: { mode: sched && sched.sameDayAggregation ? 'evented' : 'manual', enabled: (raw.counters || {}).enabled === true || !!(sched && sched.sameDayAggregation),
+      sameDayAggregation: !!(sched && sched.sameDayAggregation) },
     flags: { mode: 'manual', enabled: (raw.flags || {}).enabled !== false }
   };
+}
+// § 552.275(a-1): the regime never applies to these requestor classes. Matched on requests.requestor_type.
+var EXEMPT_REQUESTOR_TYPES = ['media', 'news_media', 'elected_official', 'legal_aid', 'academic', 'scholar'];
+
+// The cross-request rules the approved fee schedule carries (services/feeLaw.js compose()).
+async function scheduleRules(jid) {
+  if (!jid) return null;
+  var row = null;
+  try { row = await db.get("SELECT config_json FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status = 'active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jid]); } catch (e) { row = null; }
+  if (!row) return null;
+  var cfg = {}; try { cfg = JSON.parse(row.config_json || '{}'); } catch (e) { cfg = {}; }
+  var rr = cfg.requestRules || {};
+  return { personnelTimeAllowance: rr.personnelTimeAllowance || null, sameDayAggregation: rr.sameDayAggregation === true };
 }
 
 async function config(jid) {
@@ -132,7 +158,7 @@ async function config(jid) {
   var raw = null, code = null;
   try { raw = jid ? await JR.read(jid, DOMAIN) : null; } catch (e) { raw = null; }
   try { var r = jid ? await db.get('SELECT code FROM jurisdiction_profiles WHERE id = ?', [jid]) : null; code = r && r.code; } catch (e) {}
-  var out = normalizeConfig(code, raw);
+  var out = normalizeConfig(code, raw, await scheduleRules(jid));
   out.jurisdictionId = jid;
   return out;
 }
@@ -358,6 +384,101 @@ async function activeFlags(profileId) {
 }
 
 // ---------------------------------------------------------------------------------------------------
+// CLASS B — personnel time, COUNTED (2026-09-08). Same shape as the balance: a small scan over the requestor's
+// OWN linked requests, bounded by a window, never a running-total column.
+//
+// Per request the hours are the latest RECONCILIATION's (measured labor, laborActuals) when one exists, else
+// the latest ESTIMATE's — the same figures the requestor was told about, so the meter is reconstructable from
+// rows that already exist. Windows: rolling 12 months and the current calendar month, on the request's
+// received date. Requests before the schedule carried the rule still count: the statute meters time spent,
+// not time spent since a config change.
+// ---------------------------------------------------------------------------------------------------
+function hoursOfEstimateRow(row) {
+  var input = {}; try { input = JSON.parse(row.input_json || '{}'); } catch (e) { input = {}; }
+  var h = require('./laborActuals').estimatedHoursFromInput(input);
+  return Math.round(((h.searchHours || 0) + (h.reviewHours || 0) + (h.programmingHours || 0)) * 10000) / 10000;
+}
+function dateOnly(s) { return String(s || '').slice(0, 10); }
+async function personnelTime(cfg, profileId, opts) {
+  opts = opts || {};
+  var al = cfg.allowances || {};
+  var out = { applies: al.mode === 'evented', metered: false, hoursPerYear: al.hoursPerYear != null ? al.hoursPerYear : null, hoursPerMonth: al.hoursPerMonth != null ? al.hoursPerMonth : null,
+    usedYear: 0, usedMonth: 0, remainingYear: null, remainingMonth: null, over: false, exempt: false, exemptReason: null, byRequest: [], windowStart: null, monthStart: null, citation: al.citation || null };
+  if (!out.applies || !profileId) return out;
+  var now = new Date();
+  var ws = new Date(now.getTime() - 365 * 86400000); out.windowStart = ws.toISOString().slice(0, 10);
+  out.monthStart = now.toISOString().slice(0, 7) + '-01';
+  // the requestor's parent (money) rows in the window, excluding the request being priced right now
+  var reqs = await db.all('SELECT DISTINCT r.id, r.created_at, r.requestor_type, r.master_request_id FROM requestor_request_links l JOIN requests r ON r.id = l.request_id ' +
+    'WHERE l.profile_id = ? AND r.master_request_id IS NULL AND r.created_at >= ? ORDER BY r.created_at', [profileId, out.windowStart + ' 00:00:00']);
+  var exemptType = null;
+  if (opts.requestorType && (al.exemptRequestorTypes || []).indexOf(String(opts.requestorType).toLowerCase()) >= 0) exemptType = opts.requestorType;
+  if (exemptType) { out.exempt = true; out.exemptReason = 'requestor class "' + exemptType + '" is never metered (§ 552.275(a-1))'; return out; }
+  out.metered = true;
+  for (var i = 0; i < reqs.length; i++) {
+    var rq = reqs[i];
+    if (opts.excludeRequestId && (rq.id === opts.excludeRequestId)) continue;
+    var row = await db.get("SELECT kind, input_json FROM request_fee_estimates WHERE request_id = ? AND kind IN ('reconciliation','estimate') ORDER BY CASE WHEN kind = 'reconciliation' THEN 0 ELSE 1 END, created_at DESC LIMIT 1", [rq.id]);
+    if (!row) continue;
+    var hrs = hoursOfEstimateRow(row);
+    if (!hrs) continue;
+    out.usedYear = Math.round((out.usedYear + hrs) * 10000) / 10000;
+    if (dateOnly(rq.created_at) >= out.monthStart) out.usedMonth = Math.round((out.usedMonth + hrs) * 10000) / 10000;
+    out.byRequest.push({ requestId: rq.id, receivedAt: dateOnly(rq.created_at), hours: hrs, basis: row.kind === 'reconciliation' ? 'measured' : 'estimated' });
+  }
+  if (out.hoursPerYear != null) out.remainingYear = Math.max(0, Math.round((out.hoursPerYear - out.usedYear) * 10000) / 10000);
+  if (out.hoursPerMonth != null) out.remainingMonth = Math.max(0, Math.round((out.hoursPerMonth - out.usedMonth) * 10000) / 10000);
+  // "equals or exceeds" — either window at its limit puts every further hour on the bill
+  out.over = (out.hoursPerYear != null && out.usedYear >= out.hoursPerYear) || (out.hoursPerMonth != null && out.hoursPerMonth > 0 && out.usedMonth >= out.hoursPerMonth);
+  return out;
+}
+
+// CLASS C — the same-calendar-day siblings of a request from the same anchored requestor (TX § 552.261(e)).
+// Permissive ("MAY be treated as one request"), so it only ever informs; a person decides to aggregate.
+async function sameDaySiblings(cfg, profileId, requestId) {
+  if (!(cfg.counters && cfg.counters.sameDayAggregation) || !profileId || !requestId) return null;
+  var me = await db.get('SELECT id, master_request_id, created_at FROM requests WHERE id = ?', [requestId]);
+  if (!me) return null;
+  var parentId = me.master_request_id || me.id;
+  var parent = me.master_request_id ? await db.get('SELECT id, created_at FROM requests WHERE id = ?', [parentId]) : me;
+  var day = dateOnly(parent && parent.created_at);
+  if (!day) return null;
+  var scope = require('./requestScope');
+  var rows = await db.all('SELECT DISTINCT r.id, ' + scope.numberExpr('r') + ' AS request_number, r.created_at FROM requestor_request_links l JOIN requests r ON r.id = l.request_id ' + scope.numberJoin('r') +
+    ' WHERE l.profile_id = ? AND r.master_request_id IS NULL AND r.id <> ? AND substr(r.created_at, 1, 10) = ? ORDER BY r.created_at', [profileId, parentId, day]);
+  return { day: day, requests: rows.map(function (r) { return { requestId: r.id, requestNumber: r.request_number, receivedAt: r.created_at }; }) };
+}
+
+// The two class-B/C items the gates append. Shared by intake and estimate.
+async function crossRequestItems(cfg, link, requestId, opts) {
+  opts = opts || {};
+  var out = { triggers: [], advisories: [], allowance: null, sameDay: null };
+  var rq = requestId ? await db.get('SELECT id, master_request_id, requestor_type FROM requests WHERE id = ?', [requestId]) : null;
+  var parentId = rq ? (rq.master_request_id || rq.id) : null;
+  var pt = await personnelTime(cfg, link.profileId, { requestorType: rq && rq.requestor_type, excludeRequestId: parentId });
+  if (pt.applies) {
+    out.allowance = pt;
+    if (pt.metered && pt.over) {
+      var al = cfg.allowances;
+      out.triggers.push({ rule_id: 'TX-0031', citation: al.citation || 'Tex. Gov\'t Code § 552.275', action: 'all_time_chargeable',
+        responseDays: al.responseDays, usedYear: pt.usedYear, hoursPerYear: pt.hoursPerYear, usedMonth: pt.usedMonth, hoursPerMonth: pt.hoursPerMonth, identityBasis: link.basis,
+        summary: 'This requestor has used ' + pt.usedYear + ' of the city\'s ' + pt.hoursPerYear + ' free personnel hours this year' + (pt.hoursPerMonth != null ? ' (' + pt.usedMonth + ' of ' + pt.hoursPerMonth + ' this month)' : '') +
+          '. Every hour of staff time on this request is chargeable; the written estimate must be answered within ' + al.responseDays + ' days or the request is considered withdrawn.' });
+    }
+  }
+  if (opts.sameDay !== false) {
+    var sd = await sameDaySiblings(cfg, link.profileId, requestId);
+    if (sd && sd.requests.length) {
+      out.sameDay = sd;
+      out.advisories.push({ rule_id: 'TX-9028', citation: 'Tex. Gov\'t Code § 552.261(e)', action: 'may_aggregate', day: sd.day, requests: sd.requests, identityBasis: link.basis,
+        summary: sd.requests.length + ' other request' + (sd.requests.length === 1 ? '' : 's') + ' from this requestor arrived the same day (' + sd.requests.map(function (r) { return r.requestNumber; }).join(', ') +
+          '). Texas lets the city treat them as one request when it calculates charges — the 50-page labor bar and the free allowances then apply once, not per request. A person decides; nothing is aggregated automatically.' });
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------------
 // TRIGGER EVALUATION — pure over what the ledger holds. Never mutates a request.
 // ---------------------------------------------------------------------------------------------------
 
@@ -367,7 +488,7 @@ function emptyResult(gate, cfg, link) {
     gate: gate, jurisdictionId: cfg.jurisdictionId, code: cfg.code,
     profileId: link ? link.profileId : null, identityBasis: link ? link.basis : null,
     anonymous: !(link && link.profileId),
-    triggers: [], advisories: [], balance: null
+    triggers: [], advisories: [], balance: null, allowance: null, sameDay: null
   };
 }
 
@@ -429,6 +550,9 @@ async function evaluateIntake(jid, requestId) {
     out.advisories.push({ flag: f.flag, source: f.source, citation: f.citation, expires_at: f.expires_at,
       note: f.note, summary: 'Status recorded from ' + (f.source || 'an external decision') + ' — confirm before acting on it.' });
   });
+  var xr = await crossRequestItems(cfg, link, requestId, {});
+  out.allowance = xr.allowance; out.sameDay = xr.sameDay;
+  out.advisories = out.advisories.concat(xr.advisories);   // the cap is a MONEY trigger — it fires at the estimate gate
   return out;
 }
 
@@ -443,7 +567,31 @@ async function evaluateEstimate(jid, requestId, opts) {
   out.triggers = pb.triggers.filter(function (t) { return t.action !== 'advisory_deny'; });
   out.advisories = pb.advisories;
   out.balance = pb.balance;
+  var xr = await crossRequestItems(cfg, link, requestId, {});
+  out.allowance = xr.allowance; out.sameDay = xr.sameDay;
+  out.triggers = out.triggers.concat(xr.triggers);
+  out.advisories = out.advisories.concat(xr.advisories);
   return out;
+}
+
+// What the estimate route asks BEFORE pricing: is this requestor at the personnel-time cap? Pure read.
+async function personnelTimeState(jid, requestId) {
+  var cfg = await config(jid);
+  var link = await linkInfo(requestId);
+  if (!link.profileId) return { applies: cfg.allowances && cfg.allowances.mode === 'evented', anonymous: true, over: false };
+  var rq = await db.get('SELECT id, master_request_id, requestor_type FROM requests WHERE id = ?', [requestId]);
+  var pt = await personnelTime(cfg, link.profileId, { requestorType: rq && rq.requestor_type, excludeRequestId: rq ? (rq.master_request_id || rq.id) : null });
+  pt.anonymous = false; pt.identityBasis = link.basis;
+  return pt;
+}
+// The meters the Front Desk profile view shows, shaped like requestor_allowances rows but computed.
+async function allowanceMeters(jid, profileId) {
+  var cfg = await config(jid);
+  if (!(cfg.allowances && cfg.allowances.mode === 'evented')) return null;
+  var pt = await personnelTime(cfg, profileId, {});
+  var rows = [{ name: 'Free personnel time — 12 months', unit: 'hours', window_spec: 'rolling 12 months', allowance: pt.hoursPerYear, consumed: pt.usedYear, source: 'fee_schedule', updated_at: nowStr() }];
+  if (pt.hoursPerMonth != null) rows.push({ name: 'Free personnel time — this month', unit: 'hours', window_spec: 'calendar month', allowance: pt.hoursPerMonth, consumed: pt.usedMonth, source: 'fee_schedule', updated_at: nowStr() });
+  return { rows: rows, state: pt };
 }
 
 // GATE 3 — delivery / ship (Master p6). OH monthly delivery caps; decrements on actual delivery. Class C/D
@@ -469,5 +617,7 @@ module.exports = {
   anchorFor: anchorFor, resolveProfile: resolveProfile, linkRequest: linkRequest, profileForRequest: profileForRequest,
   onMoneyEvent: onMoneyEvent, onWaiverGranted: onWaiverGranted, balance: balance,
   setAllowance: setAllowance, setCounter: setCounter, setFlag: setFlag, clearFlag: clearFlag, activeFlags: activeFlags,
-  evaluateIntake: evaluateIntake, evaluateEstimate: evaluateEstimate, evaluateDelivery: evaluateDelivery
+  evaluateIntake: evaluateIntake, evaluateEstimate: evaluateEstimate, evaluateDelivery: evaluateDelivery,
+  scheduleRules: scheduleRules, personnelTime: personnelTime, personnelTimeState: personnelTimeState, sameDaySiblings: sameDaySiblings, allowanceMeters: allowanceMeters,
+  EXEMPT_REQUESTOR_TYPES: EXEMPT_REQUESTOR_TYPES
 };

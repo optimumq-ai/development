@@ -434,6 +434,19 @@ export default function IntakeReviewTaskPage() {
                       <span style={kv}>computed automatically; any demand issues with the estimate notice. Nothing for you to decide here.</span>
                     </div>
                   </div>
+                  {ledger.allowance && ledger.allowance.metered ? (
+                    <div style={{ marginTop: 8, borderLeft: '3px solid ' + G.navy, paddingLeft: 10 }}>
+                      <b>Free personnel time</b> · {ledger.allowance.usedYear} of {ledger.allowance.hoursPerYear} hours used in the last 12 months{ledger.allowance.hoursPerMonth != null ? ' · ' + ledger.allowance.usedMonth + ' of ' + ledger.allowance.hoursPerMonth + ' this month' : ''}
+                      {ledger.allowance.over ? <div style={{ color: '#B02A37', marginTop: 3 }}>At the cap — every hour on this request is chargeable; the estimate gate applies it.</div> : null}
+                    </div>
+                  ) : null}
+                  {ledger.allowance && ledger.allowance.exempt ? <div style={Object.assign({}, kv, { marginTop: 8 })}>Free personnel time is not metered — {ledger.allowance.exemptReason}.</div> : null}
+                  {ledger.sameDay && ledger.sameDay.requests.length ? (
+                    <div style={{ marginTop: 8, borderLeft: '3px solid ' + G.amberLine, paddingLeft: 10 }}>
+                      <b>Same-day requests</b> · {ledger.sameDay.requests.map(function (q) { return q.requestNumber; }).join(', ')}
+                      <div style={kv}>Texas lets the city treat requests received the same day from one requestor as one for cost calculation. A person decides; nothing is aggregated automatically.</div>
+                    </div>
+                  ) : null}
                   {(ledger.flags || []).length ? (
                     <div style={{ marginTop: 8 }}>
                       {ledger.flags.map(function (f) {

@@ -178,6 +178,9 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       var autoDraft = (recon && /auto-draft/i.test(recon.created_by || '') && !recon.notified_at) ? { id: recon.id, variancePct: recon.variance_pct, reNotifyRequired: !!recon.renotify_required, createdAt: recon.created_at } : null;
       laborOut = { hasActuals: roll.hasActuals, measured: roll.hours, estimated: estHours, counted: roll.counted, excluded: roll.excluded, autoDraft: autoDraft };
     } catch (e) { laborOut = null; }
+    // The requestor-ledger gate result for the panel on load (the POST returns the same shape after a calculation).
+    var ledgerOut = null;
+    try { ledgerOut = await require('../services/requestorLedger').evaluateEstimate(jid, req.params.requestId, { estimateTotal: latest ? latest.total : null }); } catch (e) { ledgerOut = null; }
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
       certification: { requested: certRequested, suggestedCount: certRequested ? loaded.components.length : 0, rate: certCfg.rate != null ? certCfg.rate : null, unit: certCfg.unit || 'per_record' },
@@ -186,7 +189,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       actualRateDrivers: actualRateDrivers, laborRates: laborRates,
       latest: hydrate(latest),
       paymentPlan: planCtx ? planCtx.plan : null, paymentTimingSource: planCtx ? planCtx.source : null,
-      paymentState: payState, paymentMode: paymentMode, laborActuals: laborOut,
+      paymentState: payState, paymentMode: paymentMode, laborActuals: laborOut, ledger: ledgerOut,
       // PHASE 7 / BW4 — which line kinds this state's fee config PERMITS, each with its citation. The
       // builder stops offering a box the engine will refuse to charge (Ohio: no labor, actual cost only).
       chargeability: await require('../services/chargeability').forActiveJurisdiction(jid)
@@ -223,6 +226,10 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
     // so a lost write can mean billing on the wrong basis with no trace. Unguarded on purpose — nothing has
     // been persisted yet at this point, so the outer catch's 500 loses no work and tells the caller the truth.
     if (b.purpose) await run("UPDATE requests SET purpose = ? WHERE id = ?", [b.purpose, req.params.requestId]);
+    // WS5 class B (2026-09-08): a requestor at the city's personnel-time allowance pays for every hour on this
+    // request (§ 552.275). Asked BEFORE pricing so the flag lands in input_json and reconciliation re-prices alike.
+    try { var ptState = await require('../services/requestorLedger').personnelTimeState(jid, req.params.requestId); if (ptState && ptState.metered && ptState.over) request.personnelTimeExceeded = true; }
+    catch (e) { console.error('[fee-estimate personnel-time]', e && e.message); }
     var feeContext = engine.compute(config, request);
     var R = feeContext.requestLevel;
 

@@ -242,7 +242,12 @@ function compute(profile, request) {
 
   // ---- request-level: free labor hours consumed in order, then increment-rounded + priced ----
   var billable = { search: agg.search, review: agg.review, legal: agg.legal, programming: agg.programming };
-  var remainingFree = num(rules.freeLaborHours);
+  // § 552.275(e)-style cap (WS5 class B, 2026-09-08): the requestor-ledger found this requestor AT OR PAST the
+  // city's personnel-time allowance, so ALL personnel time is chargeable on this request — no free hours and no
+  // page/hour bar. The flag rides in `request` (so it is stored in input_json and a reconciliation re-prices the
+  // same way); the ledger, not the engine, decides whether it is set.
+  var capExceeded = !!(request && request.personnelTimeExceeded);
+  var remainingFree = capExceeded ? 0 : num(rules.freeLaborHours);
   for (i = 0; i < LABOR_ORDER.length && remainingFree > 0; i++) {
     k = LABOR_ORDER[i];
     var take = Math.min(remainingFree, billable[k]);
@@ -259,7 +264,7 @@ function compute(profile, request) {
     k = LABOR_ORDER[i]; var lcfg = labor[k];
     if (!lcfg || agg[k] <= 0) continue;
     var bh = roundHours(billable[k], lcfg.increment, lcfg.rounding);
-    var gate = laborGate(lcfg, totalPages, totalLaborHours, deliveryMethod);
+    var gate = capExceeded && !(lcfg.billable === false) ? { charge: true, reason: null } : laborGate(lcfg, totalPages, totalLaborHours, deliveryMethod);
     var lrate = laborRate(k);
     var amt = gate.charge ? r2(bh * lrate) : 0;
     laborItems.push({ kind: k + '_labor', aggregateHours: r4(agg[k]), billableHours: bh, rate: lrate, amount: amt, nonBillable: !gate.charge, billabilityNote: gate.reason });
@@ -378,6 +383,7 @@ function compute(profile, request) {
   }
   var rulesTrace = [];
   (function () {
+    if (capExceeded) rulesTrace.push(te('personnel_time_cap', 'Personnel-time allowance exceeded', true, { source: 'requestor ledger' }, true, 'This requestor has used the city\'s free personnel-time allowance for the period, so every hour of staff time is chargeable on this request and the free-hours and page-bar rules do not apply.'));
     var fp = num(freePages), fh = num(rules.freeLaborHours), cfg = (fp > 0 || fh > 0);
     rulesTrace.push(te('free_allowances', 'Free allowances', cfg, { freePages: fp, freeLaborHours: fh }, cfg,
       cfg ? ('First ' + fp + ' page(s) and ' + fh + ' labor hour(s) are free, applied before charges.') : 'No free allowances configured.'));
