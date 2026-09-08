@@ -10265,3 +10265,18 @@ verified by screenshot. Frontend rebuilt via build-next swap; API restarted.
 items (every recipient; all created before the item's `marked_at`) dismissed by a one-off UPDATE with that
 predicate. What remains open on live is exactly the 24 genuine `setup_reapproval` notices (fee_law 5 ·
 record_owners 15 · sources 4) — those clear themselves when the item is next approved.
+
+## 2026-09-08 — nav panel: hover rail + pin, ✕ removed, one user block (Kevin's three asks)
+
+Kevin: the ✕ collapsed the panel with no way back (the ☰ was pushed out of the 56px rail by the logo +
+padding); wants auto-shrink with hover-expand and screens using the freed space; name shown twice.
+BUILT (AppLayout only): 56px icon rail → 240px overlay on hover (screens are laid out against the rail width
+so they keep the space); "Keep open" pin in the expanded header (remembered per browser; "Pinned" unpins) —
+replaces the ✕; nav-footer user block deleted, header name became the account menu with Sign Out (my call:
+a hover-only logout is awkward and the rail would end in an orphan circle). Icons: one per top-level item /
+group, children hidden while collapsed. Verified by screenshot ×4.
+**NOT DONE, on purpose — the page-width sweep:** ~60 pages cap their own width, ~40 with fixed px (700–1420),
+so those don't grow when the rail shrinks. Plan agreed in chat: one shared width token; lists/queues/search/
+workspaces full-width, entry forms keep a reading cap (~1100px). Do it AFTER Kevin's setup markup pass so
+his annotated screenshots don't shift. Pre-existing cosmetic: the document is 8px taller than the viewport
+(body margin), harmless.
