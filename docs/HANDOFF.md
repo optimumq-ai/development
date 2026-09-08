@@ -10309,3 +10309,20 @@ requestor for `repeat`, both fed from the approved fee schedule rather than hand
 DECIDED by Kevin (2026-09-08), recorded through PUT /fee-law/decisions under his name: Cap on one request's
 total = none · Graduated page bands = none · Minimum fee = none (city tab now 7 of 13 decided).
 OPEN: populate the TX-9xxx research records (corpus task; the popup is honest meanwhile).
+
+## 2026-09-08 — Requestor Ledger WIRED to the fee schedule (Kevin moved it ahead of the setup markup pass)
+
+BUILT (commit above; SPEC_setup_hub §7 F5, DESIGN_requestor_ledger addendum): the approved fee schedule now
+carries `requestRules.personnelTimeAllowance` (from "Free personnel time per requestor"; None = regime not
+adopted) and `requestRules.sameDayAggregation` (from "Repeat / aggregated requests"); the ledger reads both,
+COUNTS personnel time from each requestor's own estimate/reconciliation rows (12-month + calendar-month
+windows, exempt classes never metered), fires `all_time_chargeable` at the estimate gate (engine charges every
+hour, bypasses the 50-page bar, 10-day response), and lists same-day siblings as a MAY-aggregate advisory.
+Anonymous → nothing. Surfaces: estimate panel block, intake ledger panel, Front Desk profile meters. The
+"needs requestor ledger" flags are gone from Fee rules. 11 harnesses green, requestor_ledger 80/80.
+**ACTION FOR KEVIN:** live's approved schedule is v2, composed BEFORE this change, so it carries neither rule
+and the ledger meters nothing on live until Fee rules is RE-APPROVED (→ v3). The screen already shows
+"Re-approve" (the three None decisions changed the digest). One click; then the estimate panel block appears
+for anchored requestors. Free personnel time stays at the 36 h default unless he sets it or clicks None.
+Still manual by design: IL recurrent counts, PA/UT/NJ duplicates, OH delivery caps, class D/E flags.
+NEXT: back to the setup-screen markup exercise (Kevin's docs in ~/exchange).
