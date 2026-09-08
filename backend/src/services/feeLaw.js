@@ -30,6 +30,9 @@ const DECISIONS_DOMAIN = 'fee_schedule_decisions';
 //   path:   fee_profiles dotted path the city value writes to (null = no engine home / not fee_profiles)
 //   parse:  how to turn the template's prose `value` into figures (see PARSERS)
 //   unit:   what the city types
+// Kevin 2026-09-08: plain words for the two rows the engine cannot enforce yet — the Requestor Ledger's
+// allowances and counters are manual stubs (services/requestorLedger.js) and read no fee rule.
+const GAP_LEDGER = 'not enforced yet: the Requestor Ledger does not read this rule';
 const CATALOG = [
   { key: 'dup.bw.rate',                 label: 'Copy rate — B&W page',                  bucket: 'computation',      path: 'duplication.bw.rate',            parse: 'rate',     unit: '$ per page' },
   { key: 'dup.color.rate',              label: 'Copy rate — color page',                bucket: 'computation',      path: 'duplication.color.rate',         parse: 'rate',     unit: '$ per page' },
@@ -44,7 +47,7 @@ const CATALOG = [
   { key: 'labor.overheadPct',           label: 'Overhead surcharge on labor',           bucket: 'computation',      path: 'labor.overheadPct',              parse: 'pct',      unit: '%' },
   { key: 'labor.increment',             label: 'Labor time increment + rounding',       bucket: 'computation',      path: 'labor.increment',                parse: 'increment',unit: 'minutes', noneOk: true },
   { key: 'rules.freeLaborHours',        label: 'Free labor hours per request',          bucket: 'computation',      path: 'requestRules.freeLaborHours',    parse: 'num',      unit: 'hours', noneOk: true },
-  { key: 'labor.periodicFreeHours',     label: 'Free personnel time per requestor',     bucket: 'computation',      path: null,                             parse: 'hours2',   unit: 'hours', gap: 'needs requestor ledger' },
+  { key: 'labor.periodicFreeHours',     label: 'Free personnel time per requestor',     bucket: 'computation',      path: null,                             parse: 'hours2',   unit: 'hours', gap: GAP_LEDGER },
   { key: 'rules.estimateNotifyThreshold', label: 'Itemized estimate required above',   bucket: 'estimate_payment', path: 'requestRules.estimateNotifyThreshold', parse: 'usd', unit: '$' },
   { key: 'estimate.requesterResponseDays', label: 'Requestor must respond to estimate within', bucket: 'estimate_payment', path: 'estimatePolicy.requesterResponseDays', parse: 'int', unit: 'business days' },
   { key: 'estimate.revisionNotifyPercent', label: 'Revised estimate required over',     bucket: 'estimate_payment', path: 'estimatePolicy.revisionNotifyPercent', parse: 'pct', unit: '% overrun' },
@@ -55,18 +58,18 @@ const CATALOG = [
   { key: 'payment.nonpayment',          label: 'Nonpayment — request withdrawn after',  bucket: 'estimate_payment', path: null,                             parse: 'days',     unit: 'days' },
   { key: 'payment.depositClock',        label: 'Clock while a deposit is unpaid',       bucket: 'estimate_payment', path: null,                             parse: 'depositclock',     unit: 'rule' },
   { key: 'payment.reissue',             label: 'Overrun re-issue rules',                bucket: 'estimate_payment', path: null,                             parse: 'reissue',     unit: 'rule' },
-  { key: 'rules.maxFee',                label: 'Request-level ceiling',                 bucket: 'computation',      path: 'requestRules.maxFee',            parse: 'maxfee',      unit: '$', noneOk: true },
+  { key: 'rules.maxFee',                label: 'Cap on one request\'s total (optional city policy)', bucket: 'computation', path: 'requestRules.maxFee',    parse: 'maxfee',      unit: '$', noneOk: true },
   { key: 'rules.deMinimis',             label: 'De-minimis — no charge below',          bucket: 'computation',      path: 'requestRules.deMinimis',         parse: 'usd',      unit: '$', noneOk: true },
   { key: 'rules.minFee',                label: 'Minimum fee',                           bucket: 'computation',      path: 'requestRules.minFee',            parse: 'usd',      unit: '$', noneOk: true },
   { key: 'media',                       label: 'Electronic media (CD / DVD / USB)',     bucket: 'computation',      path: 'media',                          parse: 'media',    unit: '$ per item' },
-  { key: 'delivery',                    label: 'Delivery — mail / handling',            bucket: 'computation',      path: 'delivery',                       parse: 'delivery', unit: '$ or actual postage', actualOk: true },
+  { key: 'delivery',                    label: 'Delivery — mail / handling',            bucket: 'computation',      path: 'delivery',                       parse: 'delivery', unit: '$ per request', actualOk: true, actualLabel: 'Actual postage' },
   { key: 'certification',               label: 'Certified copy charge',                 bucket: 'computation',      path: 'certification.rate',             parse: 'usd',      unit: '$ per document', noneOk: true },
   { key: 'av',                          label: 'Audio / video (body-worn camera)',      bucket: 'computation',      path: 'av',                             parse: 'av',       unit: '$' },
   { key: 'commercial',                  label: 'Commercial-purpose surcharge',          bucket: 'computation',      path: 'purposeOverrides.commercial.requestRules.surchargePct', parse: 'pct', unit: '%', noneOk: true },
   // 2026-08-27 (Kevin, "Fee rules"): the conflated 'waiver' row is gone — the two § 552.267-style grounds
   // render as their own 'waiver' bucket rows, built by waiverRows() below from the same template item.
   { key: 'waiver.forfeiture',           label: 'Late response forfeits the fee',        bucket: 'estimate_payment', path: null,                             parse: 'bool',     unit: 'yes / no', noneOk: true },
-  { key: 'repeat',                      label: 'Repeat / aggregated requests',          bucket: 'computation',      path: null,                             parse: 'text',     unit: 'rule', gap: 'needs requestor ledger' },
+  { key: 'repeat',                      label: 'Repeat / aggregated requests',          bucket: 'computation',      path: null,                             parse: 'text',     unit: 'rule', gap: GAP_LEDGER },
 ];
 const BY_KEY = {}; CATALOG.forEach(function (c) { BY_KEY[c.key] = c; });
 
@@ -79,6 +82,17 @@ function firstNums(s) {
   // numbers in the first "a | b" segment only (not the prose that follows)
   var seg = String(s == null ? '' : s).split('|').slice(0, 2);
   return seg.map(function (x) { var n = nums(x); return n.length ? n[0] : null; });
+}
+// A template value is a '|'-separated list of research findings, each often prefixed 'some_key:'. For the
+// screen and the citation popup they read as sentences: 'same_day_aggregation: all requests…' →
+// 'Same day aggregation: all requests…' (Kevin 2026-09-08 — no underscores or dashes, capital first letter).
+function humanize(raw) {
+  if (raw == null || raw === '') return [];
+  return String(raw).split(/\s*\|\s*/).map(function (seg) {
+    var c = seg.indexOf(':');
+    var t = (c > 0 && c <= 45 && /_/.test(seg.slice(0, c))) ? seg.slice(0, c).replace(/_/g, ' ').trim() + ':' + seg.slice(c + 1) : seg.trim();
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }).filter(Boolean);
 }
 function parseValue(item, raw) {
   var v = raw == null ? null : String(raw);
@@ -122,7 +136,7 @@ function parseValue(item, raw) {
     case 'waiver': { var g = v.match(/grounds:\s*([a-z_ ,]+)/i); var grounds = g ? g[1].split(/[, ]+/).filter(Boolean).map(function (x) { return x.replace(/_/g, ' '); }).join(', ') : null; out.display = (grounds ? grounds.charAt(0).toUpperCase() + grounds.slice(1) : 'See statute') + (/MANDATORY/i.test(v) ? ' (mandatory once found)' : /discretion/i.test(v) ? ' (discretionary)' : ''); break; }
     case 'maxfee': { var mf = firstNums(v); if (mf[0] != null && !/not exceed the actual|actual cost/i.test(v.split('|')[0])) { out.num = mf[0]; out.display = '$' + fmt(mf[0]); } else out.display = /actual cost/i.test(v) ? 'Actual cost, never excessive' : v.slice(0, 80); break; }
     case 'bool': { out.parsed = { yes: /\byes\b|forfeit/i.test(v) && !/\bno\b/i.test(v) }; out.display = out.parsed.yes ? 'Yes' : 'No'; break; }
-    default: out.display = v.length > 90 ? v.slice(0, 87) + '…' : v;
+    default: { out.segments = humanize(v); out.display = out.segments[0] || v; break; }
   }
   return out;
 }
@@ -163,14 +177,14 @@ function waiverRows(tplItems, dec) {
   var v = String(t.value || '');
   var dm = dec && dec.items && dec.items['rules.deMinimis'];
   var dmText = dm && dm.value != null && dm.value !== 'none'
-    ? 'De-minimis $' + fmt(dm.value) + ' · set on City decisions'
-    : 'De-minimis not set yet · City decisions';
+    ? '$' + fmt(dm.value) + ' · set using De-minimis in City Decisions'
+    : 'Set using De-minimis in City Decisions';
   var out = [];
   WAIVER_GROUNDS.forEach(function (g) {
     if (!g.match.test(v)) return;
     out.push({
       key: g.key, label: g.label, bucket: 'waiver', binding: g.binding, unit: 'rule', path: null, gap: null,
-      law: { display: g.display, num: null, ag: null, actual: false, parsed: {}, authority: t.authority || '', rules: t.rule_ids || [], says: null },
+      law: { display: g.display, num: null, ag: null, actual: false, parsed: {}, authority: t.authority || '', rules: t.rule_ids || [], says: null, segments: humanize(t.value), notes: t.notes || null },
       city: { value: g.key === 'waiver.cost_of_collection' ? dmText : g.cityText, source: 'law' },
       editable: false
     });
@@ -368,7 +382,9 @@ function row(item, t, dec) {
   var binding = bindingOf(item, t);
   var r = {
     key: item.key, label: item.label, bucket: item.bucket, binding: binding, unit: item.unit, path: item.path, gap: item.gap || null,
-    law: { display: law.display, num: law.num, ag: law.ag, actual: law.actual, parsed: law.parsed, authority: t.authority || '', rules: t.rule_ids || [], says: binding === 'deferral' ? lawSays(t) : null },
+    law: { display: law.display, num: law.num, ag: law.ag, actual: law.actual, parsed: law.parsed, authority: t.authority || '', rules: t.rule_ids || [], says: binding === 'deferral' ? lawSays(t) : null,
+      // the research text behind the citation, for the popup when no corpus record resolves (Kevin 2026-09-08)
+      segments: law.segments || (law.num != null || (law.parsed && Object.keys(law.parsed).length) ? [law.display] : humanize(t.value)), notes: t.notes || null },
     city: null
   };
   var d = dec && dec.items && dec.items[item.key];
@@ -379,7 +395,8 @@ function row(item, t, dec) {
     r.city = d ? Object.assign({ source: 'hand' }, d) : { value: cap != null ? cap : (law.parsed && Object.keys(law.parsed).length ? law.parsed : null), source: 'default' };
     r.editable = true;
   } else if (binding === 'fixed') {
-    r.city = { value: law.num != null ? law.num : (Object.keys(law.parsed).length ? law.parsed : law.display), source: 'law' };
+    // a prose rule ('repeat') reads 'as law' in the city column — the text itself lives in TX allows and the popup
+    r.city = { value: law.num != null ? law.num : (Object.keys(law.parsed).length ? law.parsed : (item.parse === 'text' ? 'as law' : law.display)), source: 'law' };
     r.editable = false;
   } else if (binding === 'floor') {
     r.floor = law.num;
@@ -387,7 +404,7 @@ function row(item, t, dec) {
     r.editable = true;
   } else {
     r.city = d ? Object.assign({ source: 'hand' }, d) : { value: null, source: null };
-    r.editable = true; r.noneOk = !!item.noneOk; r.actualOk = !!item.actualOk;
+    r.editable = true; r.noneOk = !!item.noneOk; r.actualOk = !!item.actualOk; if (item.actualLabel) r.actualLabel = item.actualLabel;
   }
   return r;
 }
@@ -432,6 +449,19 @@ async function decide(jid, items, user) {
     var val = d.value;
     if (val === '' || val === undefined) val = null;
     if (typeof val === 'string' && /^\s*-?\d+(\.\d+)?\s*$/.test(val)) val = Number(val);
+    // Electronic media arrives as one field per item (Kevin 2026-09-08): each is a figure, 'actual', or empty;
+    // a figure above that item's state ceiling is refused by name.
+    if (r.key === 'media' && val && typeof val === 'object') {
+      var caps = r.law.parsed || {}, mo = {}, over = [];
+      ['cd', 'dvd', 'usb'].forEach(function (mk) {
+        var mv = val[mk]; if (mv === '' || mv === undefined) mv = null;
+        if (typeof mv === 'string') { mv = /^\s*actual/i.test(mv) ? 'actual' : (/^\s*\$?\s*-?\d+(\.\d+)?\s*$/.test(mv) ? Number(mv.replace(/[$\s]/g, '')) : null); }
+        if (typeof mv === 'number' && typeof caps[mk] === 'number' && mv > caps[mk] + 1e-9) over.push(mk.toUpperCase() + ' above ' + fmt(caps[mk]));
+        mo[mk] = mv;
+      });
+      if (over.length) { refused.push({ key: k, why: 'above the ' + s.jurisdiction.code + ' ceiling: ' + over.join(', ') }); return; }
+      val = (mo.cd == null && mo.dvd == null && mo.usb == null) ? null : mo;
+    }
     if (r.binding === 'ceiling' && r.ceiling != null && typeof val === 'number' && val > r.ceiling + 1e-9) { refused.push({ key: k, why: 'above the ' + s.jurisdiction.code + ' ceiling of ' + fmt(r.ceiling) }); return; }
     if (r.binding === 'floor' && r.floor != null && typeof val === 'number' && val < r.floor - 1e-9) { refused.push({ key: k, why: 'below the ' + s.jurisdiction.code + ' minimum of ' + fmt(r.floor) }); return; }
     if (val === null && d.source !== 'document') { delete dec.items[k]; return; }

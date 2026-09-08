@@ -26,8 +26,14 @@ export default function StatutePopup(props) {
       <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', padding: '20px 22px', width: '680px', maxWidth: '94%', maxHeight: '84vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
         <div style={{ fontSize: '15px', fontWeight: '700', color: C.ink }}>{info.title}</div>
         <div style={{ fontSize: '12px', color: C.mute, marginTop: '3px' }}>{info.authority}</div>
+        {info.text && info.text.length ? <div style={{ borderTop: '1px solid ' + C.line, marginTop: '12px', paddingTop: '10px', fontSize: '12.5px', color: C.ink }}>
+          <div style={{ fontSize: '10.5px', fontWeight: '800', letterSpacing: '.05em', textTransform: 'uppercase', color: C.mute, marginBottom: '4px' }}>What the law provides for this item</div>
+          <ul style={{ margin: '0 0 6px', paddingLeft: '18px' }}>{info.text.map(function (t, i) { return <li key={i} style={{ margin: '3px 0' }}>{t}</li>; })}</ul>
+          {info.notes ? <div style={Object.assign({}, hint, { fontSize: '12px', color: C.mute })}><b>Research note:</b> {info.notes}</div> : null}
+        </div> : null}
         {!recs ? <div style={{ fontSize: '12.5px', color: C.ph, marginTop: '12px' }}>Reading the research record…</div> : null}
-        {recs && !recs.some(function (x) { return x.rule; }) ? <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '12px' }}>No research record is attached to this item beyond its citation.</div> : null}
+        {recs && !recs.some(function (x) { return x.rule; }) && !(info.text && info.text.length) ? <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '12px' }}>No research record is attached to this item beyond its citation.</div> : null}
+        {recs && recs.some(function (x) { return x.rule; }) ? <div style={{ fontSize: '10.5px', fontWeight: '800', letterSpacing: '.05em', textTransform: 'uppercase', color: C.mute, marginTop: '14px' }}>Statute records behind the citation</div> : null}
         {recs && recs.some(function (x) { return !x.rule; }) ? <div style={Object.assign({}, hint, { marginTop: '10px' })}>Also cited: {recs.filter(function (x) { return !x.rule; }).map(function (x) { return x.id; }).join(', ')} — verified rows whose citation and figure are all the research record carries.</div> : null}
         {(recs || []).filter(function (x) { return x.rule; }).map(function (x) {
           var rec = x.rule;

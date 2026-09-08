@@ -118,6 +118,7 @@ export default function FeeLawPage() {
   function itemsFromEdits() {
     var items = {};
     Object.keys(edits).forEach(function (k) {
+      if (edits[k] && typeof edits[k] === 'object') { items[k] = { value: edits[k] }; return; }
       var s = String(edits[k]).trim();
       var v = s === '' ? null : /^(none|no)$/i.test(s) ? 'none' : /^actual/i.test(s) ? 'actual' : /^-?\d+(\.\d+)?$/.test(s.replace(/^\$/, '')) ? Number(s.replace(/^\$/, '')) : s;
       items[k] = { value: v };
@@ -204,35 +205,64 @@ export default function FeeLawPage() {
 
   function Authority(props) {
     var r = props.row;
-    var hasRules = r.law.rules && r.law.rules.length;
-    return <span style={cite}>
+    var hasRules = (r.law.rules && r.law.rules.length) || (r.law.segments && r.law.segments.length) || r.law.notes;
+    return <span style={Object.assign({}, cite, cell)}>
       {props.pre}
-      {hasRules ? <button type="button" tabIndex={-1} onClick={function () { setStatute({ title: r.label, authority: r.law.authority, ruleIds: r.law.rules }); }} title="Open the statute text behind this figure" style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline dotted' }}>{r.law.authority}</button> : r.law.authority}
+      {hasRules ? <button type="button" tabIndex={-1} onClick={function () { setStatute({ title: r.label, authority: r.law.authority, ruleIds: r.law.rules, text: r.law.segments, notes: r.law.notes, display: r.law.display }); }} title="Open the statute text behind this figure" style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline dotted' }}>{r.law.authority}</button> : r.law.authority}
       {r.gap ? <span style={{ fontSize: '10.5px', fontWeight: '700', color: C.red }}> · {r.gap}</span> : null}
     </span>;
   }
   function CityCell(props) {
     var r = props.row;
-    if (!r.editable) return <div style={inp(false, { display: 'flex', alignItems: 'center', background: C.wash, color: C.mute, fontSize: '12px' })}>{r.city && typeof r.city.value === 'string' ? r.city.value : 'as law'}</div>;
+    if (!r.editable) return <div style={inp(false, { display: 'flex', alignItems: 'center', background: C.wash, color: C.mute, fontSize: '12px', height: 'auto', minHeight: '32px', padding: '6px 10px', lineHeight: '1.35' })}>{r.city && typeof r.city.value === 'string' ? r.city.value : 'as law'}</div>;
+    if (r.key === 'media') return MediaCell({ row: r });
     if (r.city && r.city.value && typeof r.city.value === 'object' && edits[r.key] === undefined) {
       return <div style={inp(false, { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.wash, color: C.mute, fontSize: '11.5px' })}>{cityText(r.city.value)}<span style={{ fontSize: '10px', color: C.faint, fontWeight: '700' }}>AS LOADED</span></div>;
     }
     var v = valueOf(r);
+    var isNone = /^\s*(none|no)\s*$/i.test(v), isActual = /^\s*actual/i.test(v);
     var missing = r.binding === 'deferral' && v === '';
     var tag = edits[r.key] !== undefined ? null : r.city && r.city.source === 'default' && r.city.value != null ? (r.binding === 'floor' ? 'MINIMUM' : 'DEFAULT') : r.city && r.city.source === 'document' ? (r.city.ref ? r.city.ref : 'from document') : null;
-    return <div style={{ position: 'relative' }}>
-      <input value={v} disabled={!can} placeholder={r.binding === 'deferral' ? (r.actualOk ? r.unit + ', or actual' : r.noneOk ? r.unit + ' or none' : r.unit) : r.unit}
-        onChange={function (e) { setVal(r.key, e.target.value); }} style={inp(missing, tag ? { paddingRight: '78px' } : {})} />
-      {tag ? <span title={tag === 'DEFAULT' ? 'Default = the ceiling. Lower it if this city charges less.' : tag} style={{ position: 'absolute', right: '8px', top: '9px', fontSize: '9.5px', fontWeight: '700', color: r.city.source === 'document' ? C.ok : C.faint, maxWidth: '68px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tag}</span> : null}
+    var choices = r.binding === 'deferral' ? [r.noneOk ? { v: 'none', label: 'None', on: isNone, title: 'This city sets no figure for this item — recorded as a decision' } : null, r.actualOk ? { v: 'actual', label: r.actualLabel || 'Actual', on: isActual, title: 'Left unpriced on every estimate ("actual TBD") for staff to settle at billing' } : null].filter(Boolean) : [];
+    // Kevin 2026-09-08: "none" / "actual" are choices you click, not words you have to know to type.
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+      <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+        <input value={isNone || isActual ? '' : v} disabled={!can} placeholder={isNone ? 'None' : isActual ? (r.actualLabel || 'Actual') : r.unit}
+          onChange={function (e) { setVal(r.key, e.target.value); }} style={inp(missing, Object.assign({}, tag ? { paddingRight: '78px' } : {}, isNone || isActual ? { background: C.wash, fontStyle: 'italic' } : {}))} />
+        {tag ? <span title={tag === 'DEFAULT' ? 'Default = the ceiling. Lower it if this city charges less.' : tag} style={{ position: 'absolute', right: '8px', top: '9px', fontSize: '9.5px', fontWeight: '700', color: r.city.source === 'document' ? C.ok : C.faint, maxWidth: '68px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tag}</span> : null}
+      </div>
+      {choices.map(function (ch) {
+        return <button key={ch.v} type="button" disabled={!can} title={ch.title} onClick={function () { setVal(r.key, ch.on ? '' : ch.v); }}
+          style={{ height: '28px', padding: '0 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', fontFamily: 'inherit', cursor: can ? 'pointer' : 'default', whiteSpace: 'nowrap', flexShrink: 0, background: ch.on ? C.pri : 'white', color: ch.on ? 'white' : C.mute, border: '1px solid ' + (ch.on ? C.pri : C.edge) }}>{ch.label}</button>;
+      })}
     </div>;
   }
-  var grid5 = '230px 190px 78px 190px minmax(0, 1fr)', grid3 = '260px 220px minmax(0, 1fr)';
+  // Electronic media: one field per item (Kevin 2026-09-08) instead of one free-text line. Each holds a
+  // figure or "actual"; the state ceiling for each item is its placeholder and is enforced on save.
+  function MediaCell(props) {
+    var r = props.row;
+    var caps = r.law.parsed || {};
+    var cur = edits[r.key] !== undefined ? edits[r.key] : (r.city && r.city.value && typeof r.city.value === 'object' ? r.city.value : {});
+    function set(k, val) { var o = Object.assign({}, cur); o[k] = val; setVal(r.key, o); }
+    var show = function (x) { return x == null ? '' : x === 'actual' ? 'actual' : String(x); };
+    return <div style={{ display: 'flex', gap: '6px', minWidth: 0 }}>
+      {[['cd', 'CD'], ['dvd', 'DVD'], ['usb', 'USB']].map(function (pair) {
+        var k = pair[0], cap = caps[k];
+        return <label key={k} style={{ flex: 1, minWidth: 0, fontSize: '10px', fontWeight: '700', color: C.faint, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{pair[1]}
+          <input value={show(cur[k])} disabled={!can} placeholder={cap == null ? '$' : cap === 'actual' ? 'actual' : 'up to $' + fmt(cap)} title={cap == null ? '' : cap === 'actual' ? 'The law allows actual cost for this item' : 'The state ceiling is $' + fmt(cap)}
+            onChange={function (e) { set(k, e.target.value); }} style={inp(false, { marginTop: '2px', padding: '0 7px', fontSize: '12px' })} />
+        </label>;
+      })}
+    </div>;
+  }
+  var grid5 = '230px 190px 78px 190px minmax(0, 1fr)', grid3 = '260px 270px minmax(0, 1fr)', gridW = '260px 330px minmax(0, 1fr)';
+  var cell = { minWidth: 0 };  // a grid child may not overflow its track (Kevin 2026-09-08: the waiver cells crashed into the law column)
   function MandateRow(props) {
     var r = props.row;
     return <div style={{ display: 'grid', gridTemplateColumns: grid5, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
       <span>{r.label}</span>
       <span style={{ fontWeight: '600', fontVariantNumeric: 'tabular-nums' }}>{r.binding === 'ceiling' && r.ceiling != null ? 'up to ' : r.binding === 'floor' && r.floor != null ? 'at least ' : ''}{r.law.display}
-        {r.law.ag != null ? <div style={Object.assign({}, hint, { fontWeight: '500' })}>AG rate ${fmt(r.law.ag)} + 25% for cities</div> : null}</span>
+        {r.law.ag != null ? <div style={Object.assign({}, hint, { fontWeight: '500' })}>AG rate {money(r.law.ag)} + 25% for cities</div> : null}</span>
       <Chip kind={r.binding} />
       {CityCell({ row: r })}
       {Authority({ row: r })}
@@ -248,6 +278,7 @@ export default function FeeLawPage() {
   }
   var head5 = <div style={{ display: 'grid', gridTemplateColumns: grid5, gap: '10px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', color: C.faint, textTransform: 'uppercase', letterSpacing: '0.04em' }}><span>Item</span><span>{data.jurisdiction.code} allows</span><span>Binding</span><span>This city charges</span><span>Authority</span></div>;
   var head3 = <div style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', color: C.faint, textTransform: 'uppercase', letterSpacing: '0.04em' }}><span>Item</span><span>This city</span><span>What the law says</span></div>;
+  var headW = <div style={{ display: 'grid', gridTemplateColumns: gridW, gap: '10px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', color: C.faint, textTransform: 'uppercase', letterSpacing: '0.04em' }}><span>Item</span><span>This city</span><span>What the law says</span></div>;
   var mand = rows.filter(function (r) { return r.binding !== 'deferral'; }), defr = rows.filter(function (r) { return r.binding === 'deferral'; });
   var by = function (list, b) { return list.filter(function (r) { return r.bucket === b; }); };
   var docRows = rows.filter(function (r) { return r.city && r.city.source === 'document'; });
@@ -328,7 +359,7 @@ export default function FeeLawPage() {
             {head5}{by(mand, 'waiver').map(function (r) { return <React.Fragment key={r.key}>{MandateRow({ row: r })}</React.Fragment>; })}
           </React.Fragment> : null}
           <div style={{ padding: '10px 16px 14px', borderTop: '1px solid ' + C.line }}>
-            <span style={hint}><b>Ceiling</b> rows: the figure shown is this city's ceiling and its rate is pre-filled there; an entry above it is refused. <b>Fixed</b> rows apply as written.{c.gaps ? <span> Items marked <span style={{ color: C.red, fontWeight: '700' }}>needs requestor ledger</span> are law today but have no home in the engine yet — shown so the gap is visible.</span> : null}</span>
+            <span style={hint}><b>Ceiling</b> rows: the figure shown is this city's ceiling and its rate is pre-filled there; an entry above it is refused. <b>Fixed</b> rows apply as written.{c.gaps ? <span> Items marked <span style={{ color: C.red, fontWeight: '700' }}>not enforced yet</span> are law today, but the Requestor Ledger's allowances and counters are still set by hand and do not read them — shown so the gap stays visible until that is built.</span> : null}</span>
           </div>
           {Footer()}
         </div> : null}
@@ -401,19 +432,19 @@ export default function FeeLawPage() {
           </div> : null}
           {waiver.choices.length ? <React.Fragment>
             <Group title="Fee waiver" n={waiver.choices.length} />
-            {head3}
+            {headW}
             {waiver.choices.map(function (w) {
               var decided = w.value != null && wEdits[w.key === 'waiver.decider' ? 'decider' : 'denialWording'] === undefined;
-              return <div key={w.key} style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
-                <span>{w.label}</span>
+              return <div key={w.key} style={{ display: 'grid', gridTemplateColumns: gridW, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
+                <span style={cell}>{w.label}</span>
                 {w.key === 'waiver.decider' ? (
                   <select value={wEdits.decider !== undefined ? wEdits.decider : (w.value || w.current.mode)} disabled={!can}
                     onChange={function (e) { setWEdits(Object.assign({}, wEdits, { decider: e.target.value })); setMsg(''); }}
-                    style={inp(false, { color: C.ink })}>
+                    style={inp(false, { color: C.ink, maxWidth: '100%', minWidth: 0 })}>
                     {w.options.map(function (o) { return <option key={o.value} value={o.value}>{o.label}{o.value === w.current.mode && !w.value ? ' (current)' : ''}</option>; })}
                   </select>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', minWidth: 0 }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: can ? 'pointer' : 'default' }}>
                       <input type="checkbox" disabled={!can}
                         checked={wEdits.denialWording !== undefined ? wEdits.denialWording : w.value != null}
@@ -423,7 +454,7 @@ export default function FeeLawPage() {
                     <button type="button" onClick={function () { setSentences(true); }} style={btn('sec', { height: '28px', fontSize: '12px' })}>View the {waiver.sentences.length} sentences</button>
                   </div>
                 )}
-                <span style={cite}><Says text="Silent" />{w.key === 'waiver.decider'
+                <span style={Object.assign({}, cite, cell)}><Says text="Silent" />{w.key === 'waiver.decider'
                   ? 'city routing — the estimate cannot go out while a waiver request is undecided'
                   : 'the sentence a denial folds into the estimate notice; editable wording comes with the letter templates'}
                   {decided ? <span style={{ color: C.ok, fontWeight: '600' }}> · ✓ decided by {w.by}{w.at ? ', ' + String(w.at).slice(0, 10) : ''}</span> : null}</span>
@@ -436,7 +467,7 @@ export default function FeeLawPage() {
             </div>
           </React.Fragment> : null}
           <div style={{ padding: '10px 16px 14px', borderTop: '1px solid ' + C.line }}>
-            <span style={hint}>Type a figure, <b>none</b>, or <b>actual</b> where the law allows actual cost. "none" is a valid decision and is recorded as one when you approve. <b>actual</b> leaves the item unpriced on every estimate ("actual TBD") for staff to settle at billing. A green reference on a value means it came from the fee policy document.</span>
+            <span style={hint}>Type a figure, or click <b>None</b> where this city sets nothing for an item — "none" is a valid decision and is recorded as one when you approve. <b>Actual</b> (where the law allows actual cost) leaves the item unpriced on every estimate ("actual TBD") for staff to settle at billing. A green reference on a value means it came from the fee policy document.</span>
           </div>
           {Footer()}
         </div> : null}

@@ -73,6 +73,19 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   ok('A3 TX B&W copy: ceiling is the MUNICIPAL figure 0.125 (AG 0.10 + 25%), shown as the law\'s value', bw.binding === 'ceiling' && bw.ceiling === 0.125 && bw.law.ag === 0.1 && /0\.125/.test(bw.law.display), JSON.stringify(bw.law));
   ok('A4 programming labor ceiling 35.625 · overhead FIXED at 20% reads "as law" (not editable) · media parsed cd 1.25 / dvd 3.75 / usb actual', prog.ceiling === 35.625 && oh.binding === 'fixed' && oh.editable === false && oh.city.value === 20 && media.law.parsed.cd === 1.25 && media.law.parsed.dvd === 3.75 && media.law.parsed.usb === 'actual', JSON.stringify([prog.ceiling, oh.city, media.law.parsed]));
   ok('A5 the screen splits 23 mandate / 13 deferral (the two waiver ground rows included); 2 ledger gaps flagged', s0.counts.mandate === 23 && s0.counts.deferral === 13 && s0.counts.gaps === 2 && s0.rows.every(function (r) { return r.bucket === 'computation' || r.bucket === 'estimate_payment' || r.bucket === 'waiver'; }), JSON.stringify(s0.counts));
+  // Kevin's Fee-rules markup, 2026-09-08
+  var rp = rowOf(s0, 'repeat'), dl = rowOf(s0, 'delivery'), mx = rowOf(s0, 'rules.maxFee');
+  ok('A5b a prose rule reads as sentences: no underscores, capital first letter, all four findings kept for the popup, city column "as law"', /^Same day aggregation: all requests/.test(rp.law.display) && rp.law.display.indexOf('_') === -1 && rp.law.segments.length === 4 && /^Prior unpaid > \$100/.test(rp.law.segments[2]) && rp.city.value === 'as law', JSON.stringify([rp.law.display, rp.law.segments, rp.city.value]));
+  ok('A5c the two ledger rows carry the plain-words gap and the research note rides every row for the popup', /not enforced yet/.test(rp.gap) && rp.law.notes && /No carry-forward/.test(rp.law.notes) && oh.law.segments.length === 1 && oh.law.segments[0] === '20%', JSON.stringify([rp.gap, oh.law.segments]));
+  ok('A5d delivery offers "Actual postage" as its actual choice; the request cap is labelled as an optional city policy', dl.actualOk && dl.actualLabel === 'Actual postage' && dl.unit === '$ per request' && /optional city policy/.test(mx.label), JSON.stringify([dl.unit, dl.actualLabel, mx.label]));
+  var mOver = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { media: { value: { cd: '1.00', dvd: '9', usb: 'actual' } } } });
+  ok('A5e electronic media is decided per item — a DVD figure above the state ceiling is refused by name', mOver.status === 200 && mOver.body.refused.length === 1 && /DVD above 3.75/.test(mOver.body.refused[0].why), JSON.stringify(mOver.body.refused));
+  var mOk = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { media: { value: { cd: '$1.00', dvd: '3', usb: 'actual' } } } });
+  var mRow = mOk.body && rowOf(mOk.body.screen, 'media');
+  ok('A5f …and figures at or under the ceilings are stored as numbers, USB as "actual"', mOk.status === 200 && mOk.body.refused.length === 0 && mRow.city.value.cd === 1 && mRow.city.value.dvd === 3 && mRow.city.value.usb === 'actual' && mRow.city.source === 'hand', JSON.stringify(mRow && mRow.city));
+  await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { media: { value: null } } });
+  var mBack = rowOf((await callAs(U.dir, 'GET', '/fee-law')).body, 'media');
+  ok('A5g clearing every media field removes the decision (back to the loaded ceilings)', mBack.city.source === 'default' && mBack.city.value.cd === 1.25, JSON.stringify(mBack.city));
   var wpi = rowOf(s0, 'waiver.public_interest'), wcc = rowOf(s0, 'waiver.cost_of_collection');
   ok('A6 TX names both waiver grounds: public interest (fixed, must) and cost of collection (discretionary, may, de-minimis cross-reference); neither is editable',
     wpi && wpi.binding === 'fixed' && /must waive or reduce/i.test(wpi.law.display) && wpi.editable === false && /552\.267/.test(wpi.law.authority) &&
