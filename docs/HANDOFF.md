@@ -10301,5 +10301,11 @@ the popup now shows all four first.
 NOT REMOVED, on purpose: the "needs requestor ledger" flag (now "not enforced yet: the Requestor Ledger
 does not read this rule"). Checked: requestorLedger.js allowances/counters are manual stubs; nothing reads
 labor.periodicFreeHours or repeat. Wiring them is its own slice (36 h/yr · 15 h/mo allowance, same-day
-aggregation counter) — Kevin to schedule.
+aggregation counter) — **SCHEDULED by Kevin (2026-09-08): wire the Requestor Ledger to these two rules as
+the FIRST slice after the setup-screen markup exercise finishes.** Scope: allowances read
+labor.periodicFreeHours (36 h/yr · 15 h/mo floors, city may set higher), a same-day aggregation counter per
+requestor for `repeat`, both fed from the approved fee schedule rather than hand-entered; then drop the
+"not enforced yet" flag. Spec home: SPEC_setup_hub §7 F4 + the WS5 ledger spec.
+DECIDED by Kevin (2026-09-08), recorded through PUT /fee-law/decisions under his name: Cap on one request's
+total = none · Graduated page bands = none · Minimum fee = none (city tab now 7 of 13 decided).
 OPEN: populate the TX-9xxx research records (corpus task; the popup is honest meanwhile).
