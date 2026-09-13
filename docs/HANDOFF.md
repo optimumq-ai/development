@@ -10359,3 +10359,36 @@ mechanical codemod of the ~40 dominant values, then a `[data-theme]` override bl
 `localStorage` key read in AppLayout, same pattern as `oq_nav_pinned`. Waiting on Kevin's pick (light vs dark, or
 changes to the mapping) before any of that. Kevin is continuing setup-screen mark-ups meanwhile; the Fee rules
 re-approval (→ v3) is STILL pending on live (checked today: active fee_profiles row is v2).
+
+## 2026-09-13 — Display colours BUILT: three schemes in the account menu, standard default (Kevin picked all three)
+
+Kevin saw the sample mark-up (entry above) and chose **all three as options with standard as the default**. BUILT
+(commit 1d4848f; `docs/SPEC_display_theme.md`, DOMAIN_MAP §13): account menu → **Display** → Standard colours ·
+High contrast, light · High contrast, dark. Applies at once, remembered per browser (`oq_theme`, so the login screen
+wears it), saved per account (`users.ui_theme`, `PUT /auth/me/display`; sign-in applies the account's choice).
+Citizen-facing pages excluded by design.
+**How:** `frontend/scripts/theme/codemod.js` rewrote 3,757 colour literals in 81 files to `var(--oq-<fg|bg|ln|x>-<hex>)`
+(role from the CSS property / JSX attr / helper signature); `build-tokens.js` generates `src/theme/tokens.css` —
+standard block = each variable resolves to its own hex, two `[data-oq-theme]` blocks mapped from Kevin's swatches by
+hue, lightness and text-on-fill partner (mapping rules + the palette's gaps in the spec §2). `lib/theme.js` `C.*` are
+now `--oq-t-*` semantic vars with `*Bg` twins for fills. **Re-run `node scripts/theme/build-tokens.js` after adding a
+colour**; `verify_theme_tokens` (static, 13/13) fails the suite if a raw literal returns.
+**Evidence:** standard pixel-diffed on 10 routes before/after — 8 at 0 px, 2 differ only in elapsed-time counters.
+Two mid-build catches: (1) `index.css`'s body colour had never applied — **react-scripts 4 does not run Tailwind 3**,
+`@tailwind`/`@apply` ship raw and are ignored — my first rewrite made headings #111827; restored to colour-less.
+(2) dark theme headings were black-on-black (inherited colour); theme blocks now set `color` + `color-scheme`.
+Screenshots ×3 themes in chat (light: gray ground, white cards, black borders, royal buttons, solid status chips w/
+black text; dark: asphault cards on black, violet buttons, black chips w/ bright text).
+**Suite: 2900 passed, 2 failed, live untouched.** `verify_display_theme` 20/20, `verify_theme_tokens` 13/13. The two
+reds are NOT this slice: `verify_bw9_golive` E1a = the standing order-dependent red (passes alone: 35/35 in the
+subset re-run). `verify_stage_bypass` #1 "the request has an open task before the close (0)" fails 3/3 runs incl.
+alone — REPRODUCED by hand on a kept test stack: `/public/submit` with the harness's description "nonpayment close
+BYPASS-…" → the classifier now answers **"Uncertain match to Open Records"** (decided_team_id NULL, reasoning: "an
+administrative case-closure action … rather than a request"), so intake→intake is a no-op and no task spawns. The
+harness assumes a confident classification of its own tag text; that is classifier drift, not a routing regression
+(no routing code changed today). **Fix belongs to the harness** (a description the classifier will confidently route,
+or seed the task) — left for a stages session, not this slice.
+**Known sub-AA pairs, by design (spec §2):** light selected row royal-on-light-gray 3.3:1 (no pale royal in the
+palette); dark standalone red text on asphault 3.6:1. Kevin can add swatches later; the generator absorbs them.
+STILL PENDING FOR KEVIN: Fee rules re-approval → v3 (live fee_profiles active row is still v2).
+NEXT: Kevin's setup-screen mark-ups as they land in ~/exchange; page-width sweep parked behind them.
