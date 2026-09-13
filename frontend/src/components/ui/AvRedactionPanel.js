@@ -11,9 +11,9 @@ function fmtBytes(n){
 }
 
 var MODE = {
-  internal: { label:'Internal', tone:{bg:'#EFF6FF',fg:'#1F4E79',bd:'#BFDBFE'}, desc:'Media is redacted inside Optimum Q. Mark the boxes, and the system writes the redactions permanently into a new copy. The original is always kept.' },
-  external: { label:'External', tone:{bg:'#FEF3C7',fg:'#92400E',bd:'#FCD34D'}, desc:'Media is redacted in your agency\u2019s own tool (for example Axon or Veritone). The request is held while the file is out, then the redacted copy is checked back in here. The original is always kept.' },
-  not_required: { label:'Not required', tone:{bg:'#DEF7EC',fg:'#03543F',bd:'#84E1BC'}, desc:'This media type is presumed releasable. A reviewer still confirms before anything goes out \u2014 nothing is released automatically.' }
+  internal: { label:'Internal', tone:{bg:'var(--oq-bg-eff6ff)',fg:'var(--oq-fg-1f4e79)',bd:'var(--oq-ln-bfdbfe)'}, desc:'Media is redacted inside Optimum Q. Mark the boxes, and the system writes the redactions permanently into a new copy. The original is always kept.' },
+  external: { label:'External', tone:{bg:'var(--oq-bg-fef3c7)',fg:'var(--oq-fg-92400e)',bd:'var(--oq-ln-fcd34d)'}, desc:'Media is redacted in your agency\u2019s own tool (for example Axon or Veritone). The request is held while the file is out, then the redacted copy is checked back in here. The original is always kept.' },
+  not_required: { label:'Not required', tone:{bg:'var(--oq-bg-def7ec)',fg:'var(--oq-fg-03543f)',bd:'var(--oq-ln-84e1bc)'}, desc:'This media type is presumed releasable. A reviewer still confirms before anything goes out \u2014 nothing is released automatically.' }
 };
 var ORDER = ['external','internal','not_required'];
 
@@ -121,19 +121,19 @@ export default function AvRedactionPanel(props){
     setBusy(false);
   }
 
-  if(loading) return <div style={{padding:'32px',textAlign:'center',color:'#9CA3AF'}}>Loading...</div>;
-  if(err) return <div style={{padding:'16px',color:'#9B1C1C',background:'#FDE8E8',borderRadius:'8px'}}>{err}</div>;
+  if(loading) return <div style={{padding:'32px',textAlign:'center',color:'var(--oq-fg-9ca3af)'}}>Loading...</div>;
+  if(err) return <div style={{padding:'16px',color:'var(--oq-fg-9b1c1c)',background:'var(--oq-bg-fde8e8)',borderRadius:'8px'}}>{err}</div>;
 
   var m = MODE[data.mode] || MODE.internal;
   var files = data.files || [];
   var openTasks = (data.tasks||[]).filter(function(t){ return t.status==='out'; });
   var doneTasks = (data.tasks||[]).filter(function(t){ return t.status==='checked_in'; });
 
-  var lbl = {fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'};
-  var card = {background:'white',border:'1px solid #E5E7EB',borderRadius:'10px',padding:'18px',marginBottom:'16px'};
-  var inp = {width:'100%',padding:'8px 10px',border:'1px solid #D1D5DB',borderRadius:'8px',fontSize:'13px',boxSizing:'border-box'};
-  var btn = {padding:'8px 14px',borderRadius:'8px',border:'1px solid #D1D5DB',background:'white',color:'#374151',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
-  var btnPri = {padding:'9px 16px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
+  var lbl = {fontSize:'11px',fontWeight:'600',color:'var(--oq-fg-9ca3af)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'};
+  var card = {background:'var(--oq-bg-ffffff)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'10px',padding:'18px',marginBottom:'16px'};
+  var inp = {width:'100%',padding:'8px 10px',border:'1px solid var(--oq-ln-d1d5db)',borderRadius:'8px',fontSize:'13px',boxSizing:'border-box'};
+  var btn = {padding:'8px 14px',borderRadius:'8px',border:'1px solid var(--oq-ln-d1d5db)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-374151)',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
+  var btnPri = {padding:'9px 16px',borderRadius:'8px',border:'none',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
 
   function fileSelect(val, set, optional){
     return <select value={val} onChange={function(e){set(e.target.value);}} style={Object.assign({},inp,{marginBottom:'12px'})}>
@@ -145,7 +145,7 @@ export default function AvRedactionPanel(props){
   function actionBody(key){
     if(key==='external'){
       return <div>
-        <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>Marks the request on hold. Redact the file in your agency tool, then check the redacted copy back in below.</p>
+        <p style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',margin:'0 0 14px',lineHeight:'1.5'}}>Marks the request on hold. Redact the file in your agency tool, then check the redacted copy back in below.</p>
         <div style={lbl}>Original file</div>
         {fileSelect(extFile, setExtFile, true)}
         <div style={lbl}>Note (optional)</div>
@@ -155,25 +155,25 @@ export default function AvRedactionPanel(props){
     }
     if(key==='internal'){
       return <div>
-        <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>Pick the original file, then open the workbench to draw the redactions. The system burns them into a new copy and keeps the original.</p>
+        <p style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',margin:'0 0 14px',lineHeight:'1.5'}}>Pick the original file, then open the workbench to draw the redactions. The system burns them into a new copy and keeps the original.</p>
         <div style={lbl}>Original file</div>
         {fileSelect(intFile, setIntFile, false)}
         <button onClick={function(){ if(!intFile){alert('Choose the original file first.');return;} navigate('/av-redact/'+requestId+'/'+intFile); }} style={Object.assign({},btnPri,{opacity:intFile?1:0.6})}>Open drawing workbench</button>
-        <div style={{borderTop:'1px solid #F3F4F6',margin:'16px 0 12px'}}></div>
-        <div style={{fontSize:'12px',color:'#6B7280',marginBottom:'8px'}}>Or load a plan exported elsewhere:</div>
+        <div style={{borderTop:'1px solid var(--oq-ln-f3f4f6)',margin:'16px 0 12px'}}></div>
+        <div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',marginBottom:'8px'}}>Or load a plan exported elsewhere:</div>
         <input type="file" accept="application/json,.json" onChange={onZonesFile} style={{fontSize:'13px',display:'block',marginBottom:zonesName?'6px':'12px'}}/>
-        {zonesName && <div style={{fontSize:'12px',color:'#03543F',marginBottom:'12px'}}>Loaded: {zonesName}</div>}
+        {zonesName && <div style={{fontSize:'12px',color:'var(--oq-fg-03543f)',marginBottom:'12px'}}>Loaded: {zonesName}</div>}
         <button onClick={applyInternal} disabled={busy||!zonesObj} style={Object.assign({},btn,{opacity:(busy||!zonesObj)?0.6:1})}>{busy?'Applying...':'Apply loaded plan'}</button>
       </div>;
     }
     // not_required
     return <div>
-      <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>If you have reviewed the media and it can go out as-is, confirm below. This is recorded with your name and time \u2014 it is never automatic.</p>
+      <p style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',margin:'0 0 14px',lineHeight:'1.5'}}>If you have reviewed the media and it can go out as-is, confirm below. This is recorded with your name and time \u2014 it is never automatic.</p>
       <div style={lbl}>File (optional)</div>
       {fileSelect(nrFile, setNrFile, true)}
       <div style={lbl}>Note (optional)</div>
       <input value={nrNote} onChange={function(e){setNrNote(e.target.value);}} placeholder="e.g. public council meeting, no PII present" style={Object.assign({},inp,{marginBottom:'12px'})}/>
-      <label style={{display:'flex',alignItems:'flex-start',gap:'8px',fontSize:'12px',color:'#374151',marginBottom:'12px',cursor:'pointer'}}>
+      <label style={{display:'flex',alignItems:'flex-start',gap:'8px',fontSize:'12px',color:'var(--oq-fg-374151)',marginBottom:'12px',cursor:'pointer'}}>
         <input type="checkbox" checked={nrAttest} onChange={function(e){setNrAttest(e.target.checked);}} style={{marginTop:'2px'}}/>
         <span>I have reviewed this media and confirm it can be released without redaction.</span>
       </label>
@@ -187,13 +187,13 @@ export default function AvRedactionPanel(props){
   return (
     <div>
       <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
-        <div style={{fontSize:'16px',fontWeight:'700',color:'#111'}}>Audio / Video Redaction</div>
+        <div style={{fontSize:'16px',fontWeight:'700',color:'var(--oq-fg-111111)'}}>Audio / Video Redaction</div>
         <span style={{fontSize:'11px',fontWeight:'700',background:m.tone.bg,color:m.tone.fg,border:'1px solid '+m.tone.bd,borderRadius:'10px',padding:'3px 10px'}}>Agency default: {m.label}</span>
       </div>
-      <p style={{fontSize:'13px',color:'#6B7280',lineHeight:'1.6',margin:'0 0 16px'}}>{m.desc}</p>
+      <p style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',lineHeight:'1.6',margin:'0 0 16px'}}>{m.desc}</p>
 
       {data.held && (
-        <div style={{background:'#FEF3C7',border:'1px solid #FCD34D',color:'#92400E',borderRadius:'8px',padding:'12px 14px',marginBottom:'16px',fontSize:'13px',fontWeight:'600'}}>
+        <div style={{background:'var(--oq-bg-fef3c7)',border:'1px solid var(--oq-ln-fcd34d)',color:'var(--oq-fg-92400e)',borderRadius:'8px',padding:'12px 14px',marginBottom:'16px',fontSize:'13px',fontWeight:'600'}}>
           This request is on hold &mdash; media is currently out for external redaction. It resumes when the redacted copy is checked back in.
         </div>
       )}
@@ -207,14 +207,14 @@ export default function AvRedactionPanel(props){
           </label>
         </div>
         {files.length===0 ? (
-          <div style={{fontSize:'13px',color:'#9CA3AF'}}>No files uploaded to this request yet.</div>
+          <div style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)'}}>No files uploaded to this request yet.</div>
         ) : (
           <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
             {files.map(function(f){
-              return <div key={f.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'12px',border:'1px solid #F3F4F6',borderRadius:'8px',padding:'10px 12px'}}>
+              return <div key={f.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'12px',border:'1px solid var(--oq-ln-f3f4f6)',borderRadius:'8px',padding:'10px 12px'}}>
                 <div style={{minWidth:0}}>
-                  <div style={{fontSize:'13px',fontWeight:'600',color:'#111',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.original_name}{f.status==='redacted'?<span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',background:'#DEF7EC',color:'#03543F',borderRadius:'8px',padding:'2px 7px'}}>REDACTED COPY</span>:null}</div>
-                  <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'2px'}}>{(f.mimetype||'file')} &middot; {fmtBytes(f.size)}</div>
+                  <div style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-111111)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.original_name}{f.status==='redacted'?<span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',background:'var(--oq-bg-def7ec)',color:'var(--oq-fg-03543f)',borderRadius:'8px',padding:'2px 7px'}}>REDACTED COPY</span>:null}</div>
+                  <div style={{fontSize:'11px',color:'var(--oq-fg-9ca3af)',marginTop:'2px'}}>{(f.mimetype||'file')} &middot; {fmtBytes(f.size)}</div>
                 </div>
                 <button onClick={function(){download(f.id, f.original_name);}} style={btn}>Download</button>
               </div>;
@@ -232,10 +232,10 @@ export default function AvRedactionPanel(props){
       </div>
 
       <div style={{marginBottom:'16px'}}>
-        <div style={{fontSize:'12px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',margin:'0 4px 10px'}}>Other handling options</div>
+        <div style={{fontSize:'12px',fontWeight:'700',color:'var(--oq-fg-9ca3af)',textTransform:'uppercase',letterSpacing:'.05em',margin:'0 4px 10px'}}>Other handling options</div>
         {[ordered[1],ordered[2]].map(function(k){
-          return <div key={k} style={Object.assign({},card,{background:'#FAFAFA'})}>
-            <div style={{fontSize:'13px',fontWeight:'700',marginBottom:'4px',color:'#374151'}}>{titles[k]}</div>
+          return <div key={k} style={Object.assign({},card,{background:'var(--oq-bg-fafafa)'})}>
+            <div style={{fontSize:'13px',fontWeight:'700',marginBottom:'4px',color:'var(--oq-fg-374151)'}}>{titles[k]}</div>
             {actionBody(k)}
           </div>;
         })}
@@ -246,14 +246,14 @@ export default function AvRedactionPanel(props){
           <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'12px'}}>Out for redaction &mdash; check in the redacted copy</div>
           {openTasks.map(function(t){
             var c = checkin[t.id]||{};
-            return <div key={t.id} style={{border:'1px solid #FCD34D',background:'#FFFBEB',borderRadius:'8px',padding:'14px',marginBottom:'10px'}}>
-              <div style={{fontSize:'13px',color:'#92400E',marginBottom:'10px'}}>
+            return <div key={t.id} style={{border:'1px solid var(--oq-ln-fcd34d)',background:'var(--oq-bg-fffbeb)',borderRadius:'8px',padding:'14px',marginBottom:'10px'}}>
+              <div style={{fontSize:'13px',color:'var(--oq-fg-92400e)',marginBottom:'10px'}}>
                 <strong>{t.original_name||'Media (not stored here)'}</strong>{t.note?(' \u2014 '+t.note):''}<br/>
-                <span style={{fontSize:'11px',color:'#B45309'}}>Sent out {t.started_at}</span>
+                <span style={{fontSize:'11px',color:'var(--oq-fg-b45309)'}}>Sent out {t.started_at}</span>
               </div>
               <div style={lbl}>Redacted file</div>
               <input type="file" onChange={function(e){ setC(t.id,{file:e.target.files&&e.target.files[0]}); }} style={{fontSize:'13px',marginBottom:'10px',display:'block'}}/>
-              <label style={{display:'flex',alignItems:'flex-start',gap:'8px',fontSize:'12px',color:'#374151',marginBottom:'12px',cursor:'pointer'}}>
+              <label style={{display:'flex',alignItems:'flex-start',gap:'8px',fontSize:'12px',color:'var(--oq-fg-374151)',marginBottom:'12px',cursor:'pointer'}}>
                 <input type="checkbox" checked={!!c.attested} onChange={function(e){ setC(t.id,{attested:e.target.checked}); }} style={{marginTop:'2px'}}/>
                 <span>I confirm this file has been reviewed and is properly redacted for release. The original, unredacted copy is preserved.</span>
               </label>
@@ -271,11 +271,11 @@ export default function AvRedactionPanel(props){
           <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'12px'}}>Completed</div>
           {doneTasks.map(function(t){
             var isRelease = (t.mode==='not_required') || !t.redacted_file_id;
-            return <div key={t.id} style={{border:'1px solid #84E1BC',background:'#F3FBF7',borderRadius:'8px',padding:'12px 14px',marginBottom:'8px'}}>
+            return <div key={t.id} style={{border:'1px solid var(--oq-ln-84e1bc)',background:'var(--oq-bg-f3fbf7)',borderRadius:'8px',padding:'12px 14px',marginBottom:'8px'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'12px'}}>
                 <div style={{minWidth:0}}>
-                  <div style={{fontSize:'13px',fontWeight:'600',color:'#03543F'}}>{isRelease ? 'Released without redaction \u00b7 attested' : 'Redacted copy ready \u00b7 attested'} <span style={{fontSize:'10px',fontWeight:'700',color:'#6B7280'}}>({t.mode})</span></div>
-                  <div style={{fontSize:'11px',color:'#6B7280',marginTop:'2px'}}>{isRelease ? (t.note||'No note') : (t.redacted_name||'file')} &middot; {t.checked_in_at}</div>
+                  <div style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-03543f)'}}>{isRelease ? 'Released without redaction \u00b7 attested' : 'Redacted copy ready \u00b7 attested'} <span style={{fontSize:'10px',fontWeight:'700',color:'var(--oq-fg-6b7280)'}}>({t.mode})</span></div>
+                  <div style={{fontSize:'11px',color:'var(--oq-fg-6b7280)',marginTop:'2px'}}>{isRelease ? (t.note||'No note') : (t.redacted_name||'file')} &middot; {t.checked_in_at}</div>
                 </div>
                 {!isRelease && t.redacted_file_id && <button onClick={function(){download(t.redacted_file_id, t.redacted_name);}} style={btn}>Download redacted</button>}
               </div>

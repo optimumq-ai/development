@@ -37,16 +37,16 @@ export default function EstimateProfilePanel(props) {
     setSaving(false); load();
   }
 
-  if (loading) return <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '18px' }}>Loading estimate automation...</div>;
+  if (loading) return <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)', marginTop: '18px' }}>Loading estimate automation...</div>;
 
   var automated = assess && assess.decision === 'automated';
-  var bannerBg = automated ? '#DEF7EC' : '#FEF3C7', bannerFg = automated ? '#03543F' : '#92400E';
+  var bannerBg = automated ? 'var(--oq-bg-def7ec)' : 'var(--oq-bg-fef3c7)', bannerFg = automated ? 'var(--oq-x-03543f)' : 'var(--oq-x-92400e)';
   var reason = assess && assess.reasons && assess.reasons[assess.reasons.length - 1];
 
   return (
-    <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
-      <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Estimate automation</label>
-      <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '8px' }}>Typical effort for one request of this type. Seed it once and matching requests auto-estimate; leave it blank and they go to a person.</div>
+    <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid var(--oq-ln-e5e7eb)' }}>
+      <label style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)' }}>Estimate automation</label>
+      <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginBottom: '8px' }}>Typical effort for one request of this type. Seed it once and matching requests auto-estimate; leave it blank and they go to a person.</div>
 
       <div style={{ background: bannerBg, color: bannerFg, borderRadius: '8px', padding: '8px 12px', fontSize: '12px', marginBottom: '10px' }}>
         <b>{automated ? 'Auto-estimates' : 'Needs a human estimate'}</b>
@@ -58,17 +58,17 @@ export default function EstimateProfilePanel(props) {
         {FIELDS.map(function (f) {
           return (
             <div key={f[0]}>
-              <div style={{ fontSize: '11px', color: '#6B7280', marginBottom: '2px' }}>{f[1]}</div>
+              <div style={{ fontSize: '11px', color: 'var(--oq-fg-6b7280)', marginBottom: '2px' }}>{f[1]}</div>
               <input type="number" step="0.1" min="0" value={q[f[0]] == null ? '' : q[f[0]]} onChange={function (e) { var nq = Object.assign({}, q); nq[f[0]] = e.target.value; setQ(nq); }}
-                style={{ width: '100%', padding: '6px 8px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' }} />
             </div>
           );
         })}
       </div>
 
-      {prof && prof.sampleSize > 0 ? <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}>Learned from {prof.sampleSize} completed request(s){prof.source ? ' \u00b7 ' + prof.source : ''}.</div> : null}
+      {prof && prof.sampleSize > 0 ? <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginTop: '8px' }}>Learned from {prof.sampleSize} completed request(s){prof.source ? ' \u00b7 ' + prof.source : ''}.</div> : null}
 
-      <button onClick={save} disabled={saving} style={{ marginTop: '10px', padding: '7px 14px', borderRadius: '7px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12px', fontWeight: '600', cursor: saving ? 'default' : 'pointer' }}>{saving ? 'Saving...' : 'Save estimate profile'}</button>
+      <button onClick={save} disabled={saving} style={{ marginTop: '10px', padding: '7px 14px', borderRadius: '7px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '12px', fontWeight: '600', cursor: saving ? 'default' : 'pointer' }}>{saving ? 'Saving...' : 'Save estimate profile'}</button>
     </div>
   );
 }

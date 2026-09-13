@@ -28,17 +28,17 @@ export default function TimeCapturePage() {
     <SetupScreen hubKey="time_tracking" laneLabel="System Features and Options" title="Task Processing Time Capture"
       intro="Whether staff record the actual time they spend on each kind of task — the measured hours that can feed fee reconciliation. States differ on which labor is chargeable to a requestor, so this is the city's call, screen by screen. Time is always measured quietly in the background; these settings only control whether staff see the timer and are asked to confirm their time when they finish.">
       {function (s) {
-        if (!cfg) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
+        if (!cfg) return <div style={{ color: 'var(--oq-fg-9ca3af)' }}>Loading…</div>;
         return (
           <div>
             {msg ? <Msg text={msg.text} ok={msg.ok} /> : null}
             {uis.map(function (u) {
               var cur = cfg[u.key] || 'off';
               return (
-                <div key={u.key} style={{ opacity: u.available ? 1 : 0.55, borderBottom: '1px solid #EEF2F5', padding: '12px 0' }}>
+                <div key={u.key} style={{ opacity: u.available ? 1 : 0.55, borderBottom: '1px solid var(--oq-ln-eef2f5)', padding: '12px 0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>{u.label}</span>
-                    {!u.available ? <span style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', background: '#F3F4F6', borderRadius: '20px', padding: '2px 8px' }}>Not yet available</span> : null}
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--oq-fg-374151)' }}>{u.label}</span>
+                    {!u.available ? <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--oq-fg-9ca3af)', background: 'var(--oq-bg-f3f4f6)', borderRadius: '20px', padding: '2px 8px' }}>Not yet available</span> : null}
                   </div>
                   <Choice value={cur} disabled={!s.can || !u.available} onChange={function (m) { setMode(u.key, m); }} options={MODES} />
                 </div>

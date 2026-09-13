@@ -95,3 +95,6 @@ Existing docs: DOCUMENT_PROCESSING_SECURITY.md, PRE_RELEASE_HARDENING.md.
 4. **§1 Portal** + **§2 Library** — citizen-facing (recently reworked, likely closest to spec)
 5. **§9 Sources/Imports** — known-confused area, needs reconciliation before redesign
 6. **§6 Fees deep pass** · **§10 Config** · **§11 Reporting** · **§12 Security**
+
+## 13. ✅ Display colours — `SPEC_display_theme.md`
+Three colour schemes chosen in the account menu (standard · high contrast light · high contrast dark), saved per account (`users.ui_theme`, `PUT /auth/me/display`). Every staff colour is a generated CSS variable (`frontend/src/theme/tokens.css`, `scripts/theme/build-tokens.js`); `verify_theme_tokens` fails the suite if a raw colour literal returns. Citizen-facing pages are excluded by design.

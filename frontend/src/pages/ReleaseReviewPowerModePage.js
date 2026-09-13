@@ -97,7 +97,7 @@ export default function ReleaseReviewPowerModePage() {
         actions={[
           <button key="go" type="button" disabled={!note.trim() || busy} onClick={commitReturn}
             style={{ font: 'inherit', fontSize: 13, fontWeight: 700, padding: '7px 14px', borderRadius: 6,
-              background: G.navy, color: '#fff', border: '1px solid ' + G.navy,
+              background: G.navy, color: 'var(--oq-fg-ffffff)', border: '1px solid ' + G.navy,
               cursor: note.trim() && !busy ? 'pointer' : 'not-allowed', opacity: note.trim() && !busy ? 1 : 0.55 }}>
             Return with this note
           </button>,

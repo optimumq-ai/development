@@ -124,34 +124,34 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <div>
           <h3 style={{fontSize:'15px',fontWeight:'700',margin:'0 0 2px'}}>Records</h3>
-          <p style={{fontSize:'12px',color:'#9CA3AF',margin:0}}>
+          <p style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)',margin:0}}>
             {loading ? 'Loading...' : records.length===0 ? 'No records attached yet' : records.length+' record'+(records.length!==1?'s':'')+' · '+responsiveCount+' to include'}
             {stage==='record_search'&&!canAdvance&&records.length>0?' — include at least one record in the response to advance':''}
           </p>
-          {err ? <p style={{fontSize:'12px',color:'#DC2626',margin:'4px 0 0'}}>{err}</p> : null}
+          {err ? <p style={{fontSize:'12px',color:'var(--oq-fg-dc2626)',margin:'4px 0 0'}}>{err}</p> : null}
         </div>
-        <button onClick={function(){setShowAdd(!showAdd);}} style={{padding:'8px 14px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
+        <button onClick={function(){setShowAdd(!showAdd);}} style={{padding:'8px 14px',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
           + Attach Record
         </button>
       </div>
 
       {stage==='record_search'&&(
-        <div style={{display:'flex',gap:'10px',padding:'12px',background:canAdvance?'#F0FDF4':'#FFFBEB',borderRadius:'8px',border:'1px solid '+(canAdvance?'#86EFAC':'#FDE68A')}}>
+        <div style={{display:'flex',gap:'10px',padding:'12px',background:canAdvance?'var(--oq-bg-f0fdf4)':'var(--oq-bg-fffbeb)',borderRadius:'8px',border:'1px solid '+(canAdvance?'var(--oq-ln-86efac)':'var(--oq-ln-fde68a)')}}>
           <div style={{fontSize:'20px'}}>{canAdvance?'✅':'⚠️'}</div>
-          <div style={{fontSize:'13px',color:canAdvance?'#166534':'#92400E'}}>
+          <div style={{fontSize:'13px',color:canAdvance?'var(--oq-fg-166534)':'var(--oq-fg-92400e)'}}>
             {canAdvance?responsiveCount+' record'+(responsiveCount!==1?'s':'')+' to include — ready to advance':'Attach records and include at least one in the response before advancing'}
           </div>
         </div>
       )}
 
       {showAdd&&(
-        <div style={{background:'#F9FAFB',border:'1px solid #E5E7EB',borderRadius:'10px',padding:'16px'}}>
+        <div style={{background:'var(--oq-bg-f9fafb)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'10px',padding:'16px'}}>
           <h4 style={{fontSize:'14px',fontWeight:'700',margin:'0 0 12px'}}>Attach a Record</h4>
           <div style={{display:'flex',gap:'12px',marginBottom:'12px'}}>
             {[['📎 Upload File',false],['📝 Log Non-Digital',true]].map(function(item){
               var active=form.isNonDigital===item[1];
               return <button key={String(item[1])} type="button" onClick={function(){setF('isNonDigital',item[1]);}}
-                style={{flex:1,padding:'10px',borderRadius:'8px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EBF3FB':'white',color:active?'#1F4E79':'#6B7280',fontSize:'13px',fontWeight:active?'700':'500',cursor:'pointer'}}>
+                style={{flex:1,padding:'10px',borderRadius:'8px',border:'2px solid '+(active?'var(--oq-ln-1f4e79)':'var(--oq-ln-e5e7eb)'),background:active?'var(--oq-bg-ebf3fb)':'var(--oq-bg-ffffff)',color:active?'var(--oq-fg-1f4e79)':'var(--oq-fg-6b7280)',fontSize:'13px',fontWeight:active?'700':'500',cursor:'pointer'}}>
                 {item[0]}
               </button>;
             })}
@@ -160,42 +160,42 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
             <div>
               <div onDragOver={function(e){e.preventDefault();setDragOver(true);}} onDragLeave={function(){setDragOver(false);}} onDrop={handleDrop}
                 onClick={function(){fileRef.current.click();}}
-                style={{border:'2px dashed '+(dragOver?'#1F4E79':'#D1D5DB'),borderRadius:'8px',padding:'24px',textAlign:'center',cursor:'pointer',background:dragOver?'#EBF3FB':'white',transition:'all .15s'}}>
+                style={{border:'2px dashed '+(dragOver?'var(--oq-ln-1f4e79)':'var(--oq-ln-d1d5db)'),borderRadius:'8px',padding:'24px',textAlign:'center',cursor:'pointer',background:dragOver?'var(--oq-bg-ebf3fb)':'var(--oq-bg-ffffff)',transition:'all .15s'}}>
                 {uploading ? (
-                  <div style={{color:'#1F4E79',fontSize:'14px',fontWeight:'600'}}>⏳ Uploading...</div>
+                  <div style={{color:'var(--oq-fg-1f4e79)',fontSize:'14px',fontWeight:'600'}}>⏳ Uploading...</div>
                 ) : (
                   <div>
                     <div style={{fontSize:'28px',marginBottom:'8px'}}>📁</div>
-                    <div style={{fontSize:'14px',fontWeight:'600',color:'#374151',marginBottom:'4px'}}>Drop files here or click to browse</div>
-                    <div style={{fontSize:'12px',color:'#9CA3AF'}}>PDF, DOC, XLS, images, audio, video — up to 50MB</div>
+                    <div style={{fontSize:'14px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'4px'}}>Drop files here or click to browse</div>
+                    <div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>PDF, DOC, XLS, images, audio, video — up to 50MB</div>
                   </div>
                 )}
               </div>
               <input ref={fileRef} type="file" multiple onChange={handleFileSelect} style={{display:'none'}} accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.tiff,.mp3,.mp4,.mov,.txt,.csv"/>
-              <button type="button" onClick={function(){setShowAdd(false);}} style={{marginTop:'10px',padding:'8px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>Cancel</button>
+              <button type="button" onClick={function(){setShowAdd(false);}} style={{marginTop:'10px',padding:'8px 16px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-6b7280)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>Cancel</button>
             </div>
           ) : (
             <form onSubmit={handleAddNonDigital} style={{display:'flex',flexDirection:'column',gap:'10px'}}>
               <div>
-                <label style={{display:'block',fontSize:'12px',fontWeight:'600',color:'#374151',marginBottom:'4px'}}>Record Title *</label>
-                <input value={form.title} onChange={function(e){setF('title',e.target.value);}} style={{width:'100%',padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none',boxSizing:'border-box'}} placeholder="e.g., Building inspection file box #3" required/>
+                <label style={{display:'block',fontSize:'12px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'4px'}}>Record Title *</label>
+                <input value={form.title} onChange={function(e){setF('title',e.target.value);}} style={{width:'100%',padding:'8px 12px',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',outline:'none',boxSizing:'border-box'}} placeholder="e.g., Building inspection file box #3" required/>
               </div>
               <div>
-                <label style={{display:'block',fontSize:'12px',fontWeight:'600',color:'#374151',marginBottom:'4px'}}>Record Type</label>
-                <select value={form.recordType} onChange={function(e){setF('recordType',e.target.value);}} style={{width:'100%',padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none'}}>
+                <label style={{display:'block',fontSize:'12px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'4px'}}>Record Type</label>
+                <select value={form.recordType} onChange={function(e){setF('recordType',e.target.value);}} style={{width:'100%',padding:'8px 12px',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',outline:'none'}}>
                   {RECORD_TYPES.map(function(t){return <option key={t} value={t}>{t}</option>;})}
                 </select>
               </div>
               <div>
-                <label style={{display:'block',fontSize:'12px',fontWeight:'600',color:'#374151',marginBottom:'4px'}}>Description</label>
-                <textarea value={form.description} onChange={function(e){setF('description',e.target.value);}} style={{width:'100%',padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none',minHeight:'60px',resize:'vertical',fontFamily:'inherit',boxSizing:'border-box'}} placeholder="Location, custodian, contents..."/>
+                <label style={{display:'block',fontSize:'12px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'4px'}}>Description</label>
+                <textarea value={form.description} onChange={function(e){setF('description',e.target.value);}} style={{width:'100%',padding:'8px 12px',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',outline:'none',minHeight:'60px',resize:'vertical',fontFamily:'inherit',boxSizing:'border-box'}} placeholder="Location, custodian, contents..."/>
               </div>
-              <div style={{background:'#EBF3FB',borderRadius:'8px',padding:'10px',fontSize:'13px',color:'#1F4E79'}}>
+              <div style={{background:'var(--oq-bg-ebf3fb)',borderRadius:'8px',padding:'10px',fontSize:'13px',color:'var(--oq-fg-1f4e79)'}}>
                 📷 <strong>Optional:</strong> Attach a photo of this record if possible
               </div>
               <div style={{display:'flex',gap:'8px'}}>
-                <button type="button" onClick={function(){setShowAdd(false);}} style={{padding:'8px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>Cancel</button>
-                <button type="submit" disabled={uploading} style={{padding:'8px 16px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>{uploading?'Saving...':'Log Record'}</button>
+                <button type="button" onClick={function(){setShowAdd(false);}} style={{padding:'8px 16px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-6b7280)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>Cancel</button>
+                <button type="submit" disabled={uploading} style={{padding:'8px 16px',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>{uploading?'Saving...':'Log Record'}</button>
               </div>
             </form>
           )}
@@ -203,28 +203,28 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
       )}
 
       {loading ? (
-        <div style={{padding:'32px',textAlign:'center',color:'#9CA3AF',fontSize:'14px'}}>Loading records...</div>
+        <div style={{padding:'32px',textAlign:'center',color:'var(--oq-fg-9ca3af)',fontSize:'14px'}}>Loading records...</div>
       ) : records.length > 0 ? (
         <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
           {records.map(function(r){
             var isR=r.status==='responsive';
             var isNR=r.status==='non_responsive';
             return(
-              <div key={r.id} style={{background:'white',border:'1px solid '+(isR?'#86EFAC':isNR?'#FCA5A5':'#E5E7EB'),borderRadius:'10px',padding:'14px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
+              <div key={r.id} style={{background:'var(--oq-bg-ffffff)',border:'1px solid '+(isR?'var(--oq-ln-86efac)':isNR?'var(--oq-ln-fca5a5)':'var(--oq-ln-e5e7eb)'),borderRadius:'10px',padding:'14px',display:'flex',alignItems:'flex-start',gap:'12px'}}>
                 <div style={{fontSize:'28px',flexShrink:0}}>{fileIcon(r.mimetype, r.isNonDigital)}</div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:'600',fontSize:'14px',color:'#111',marginBottom:'2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.title}</div>
-                  {matches[r.id] && matches[r.id].matched ? <div style={{marginBottom:'4px'}}><span style={{fontSize:'11px',fontWeight:'700',color:'#1E40AF',background:'#EFF6FF',border:'1px solid #BFDBFE',borderRadius:'999px',padding:'2px 9px'}}>Template match: {matches[r.id].template.name} ({matches[r.id].template.score}%)</span></div> : null}
-                  <div style={{fontSize:'12px',color:'#9CA3AF'}}>
+                  <div style={{fontWeight:'600',fontSize:'14px',color:'var(--oq-fg-111111)',marginBottom:'2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.title}</div>
+                  {matches[r.id] && matches[r.id].matched ? <div style={{marginBottom:'4px'}}><span style={{fontSize:'11px',fontWeight:'700',color:'var(--oq-fg-1e40af)',background:'var(--oq-bg-eff6ff)',border:'1px solid var(--oq-ln-bfdbfe)',borderRadius:'999px',padding:'2px 9px'}}>Template match: {matches[r.id].template.name} ({matches[r.id].template.score}%)</span></div> : null}
+                  <div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>
                     {r.size ? formatSize(r.size) : 'Non-digital record'}
                     {r.uploadedAt ? ' · ' + new Date(r.uploadedAt).toLocaleDateString() : ''}
                   </div>
                 </div>
                 <div style={{display:'flex',gap:'6px',flexShrink:0,alignItems:'center'}}>
-                  <button onClick={function(){updateStatus(r.id, true);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isR?'#16A34A':'#D1D5DB'),background:isR?'#F0FDF4':'white',color:isR?'#16A34A':'#6B7280',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
+                  <button onClick={function(){updateStatus(r.id, true);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isR?'var(--oq-ln-16a34a)':'var(--oq-ln-d1d5db)'),background:isR?'var(--oq-bg-f0fdf4)':'var(--oq-bg-ffffff)',color:isR?'var(--oq-fg-16a34a)':'var(--oq-fg-6b7280)',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
                     {isR?'✓ Included in Response':'Include in Response'}
                   </button>
-                  <button onClick={function(){updateStatus(r.id, false);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isNR?'#DC2626':'#D1D5DB'),background:isNR?'#FEF2F2':'white',color:isNR?'#DC2626':'#6B7280',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
+                  <button onClick={function(){updateStatus(r.id, false);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isNR?'var(--oq-ln-dc2626)':'var(--oq-ln-d1d5db)'),background:isNR?'var(--oq-bg-fef2f2)':'var(--oq-bg-ffffff)',color:isNR?'var(--oq-fg-dc2626)':'var(--oq-fg-6b7280)',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
                     {isNR?'✗ Excluded':'Exclude from Response'}
                   </button>
                   {/* The per-record `Redact` button was RETIRED 2026-07-19 (brief §5.5). It opened the
@@ -232,8 +232,8 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
                       labour on a citizen record went unmeasured and the city under-billed for it — and no
                       task ceremony. Redaction happens on the task screen (/redaction/:taskId), reached from
                       My Tasks. The template-match badge above stays: it is information, not a way in. */}
-                  {((r.mimetype && r.mimetype.indexOf('csv') >= 0) || (r.title && /\.csv$/i.test(r.title))) ? <button onClick={function(){nav('/redact-fields/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:'white',color:'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>Redact fields</button> : null}
-                  <button onClick={function(){deleteFile(r.id);}} style={{padding:'5px 8px',borderRadius:'6px',border:'1px solid #FCA5A5',background:'white',color:'#DC2626',fontSize:'11px',cursor:'pointer'}}>✕</button>
+                  {((r.mimetype && r.mimetype.indexOf('csv') >= 0) || (r.title && /\.csv$/i.test(r.title))) ? <button onClick={function(){nav('/redact-fields/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid var(--oq-ln-1f4e79)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-1f4e79)',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>Redact fields</button> : null}
+                  <button onClick={function(){deleteFile(r.id);}} style={{padding:'5px 8px',borderRadius:'6px',border:'1px solid var(--oq-ln-fca5a5)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-dc2626)',fontSize:'11px',cursor:'pointer'}}>✕</button>
                 </div>
               </div>
             );

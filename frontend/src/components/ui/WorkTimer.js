@@ -94,8 +94,8 @@ export function WorkTimerBadge(props) {
   var t = props.timer; if (!t) return null;
   var paused = t.paused;
   var base = { display: 'inline-flex', alignItems: 'center', gap: '7px', borderRadius: '999px', padding: '5px 12px', fontSize: '13px', fontWeight: 600, fontVariantNumeric: 'tabular-nums' };
-  var style = paused ? Object.assign({}, base, { background: '#F3F4F6', color: '#6B7280', border: '1px solid #E5E7EB' }) : Object.assign({}, base, { background: '#E8F4EC', color: '#17803D' });
-  var dot = { width: '8px', height: '8px', borderRadius: '50%', background: paused ? '#9CA3AF' : '#17803D' };
+  var style = paused ? Object.assign({}, base, { background: 'var(--oq-bg-f3f4f6)', color: 'var(--oq-fg-6b7280)', border: '1px solid var(--oq-ln-e5e7eb)' }) : Object.assign({}, base, { background: 'var(--oq-bg-e8f4ec)', color: 'var(--oq-fg-17803d)' });
+  var dot = { width: '8px', height: '8px', borderRadius: '50%', background: paused ? 'var(--oq-bg-9ca3af)' : 'var(--oq-bg-17803d)' };
   return <span style={style} title="Active work time on this task">
     <span style={dot} />⏱ {fmtDur(t.seconds)}{paused ? (t.idle ? ' · paused (idle)' : ' · paused') : ''}
   </span>;
@@ -121,50 +121,50 @@ export function WorkTimerCompleteModal(props) {
   function save() { if (!reason.trim()) { setErr('A short reason is required to adjust the time.'); return; } finalize({ seconds: seconds, adjustedSeconds: (Number(h) || 0) * 3600 + (Number(m) || 0) * 60, reason: reason.trim() }); }
 
   var ov = { position: 'fixed', inset: 0, background: 'rgba(16,26,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
-  var box = { width: '420px', maxWidth: '92vw', background: 'white', borderRadius: '14px', boxShadow: '0 12px 40px rgba(16,26,42,.25)', overflow: 'hidden' };
+  var box = { width: '420px', maxWidth: '92vw', background: 'var(--oq-bg-ffffff)', borderRadius: '14px', boxShadow: '0 12px 40px rgba(16,26,42,.25)', overflow: 'hidden' };
   var btn = { flex: 1, textAlign: 'center', padding: '10px 14px', borderRadius: '9px', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer', border: '1px solid transparent' };
-  var input = { width: '56px', textAlign: 'center', fontFamily: 'monospace', fontSize: '15px', fontWeight: 700, padding: '7px', border: '1px solid #D3DAE4', borderRadius: '8px' };
+  var input = { width: '56px', textAlign: 'center', fontFamily: 'monospace', fontSize: '15px', fontWeight: 700, padding: '7px', border: '1px solid var(--oq-ln-d3dae4)', borderRadius: '8px' };
   return (
     <div style={ov} onMouseDown={function (e) { if (e.target === e.currentTarget && props.onClose) props.onClose(); }}>
       <div style={box}>
         <div style={{ padding: '18px 20px 4px' }}>
           <div style={{ fontSize: '16px', fontWeight: 800 }}>Log your time on this task</div>
-          {props.contextLabel ? <div style={{ fontSize: '12.5px', color: '#66717F', marginTop: '3px' }}>{props.contextLabel}</div> : null}
+          {props.contextLabel ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-66717f)', marginTop: '3px' }}>{props.contextLabel}</div> : null}
         </div>
         {mode === 'accept' ? (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', padding: '18px 20px' }}>
               <div style={{ fontSize: '40px', fontWeight: 800, letterSpacing: '-.02em', fontFamily: 'monospace', fontVariantNumeric: 'tabular-nums' }}>{fmtDur(seconds)}</div>
-              <div style={{ fontSize: '11.5px', fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: '#98A2B0' }}>active work time</div>
+              <div style={{ fontSize: '11.5px', fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--oq-fg-98a2b0)' }}>active work time</div>
             </div>
-            <div style={{ fontSize: '11.5px', color: '#66717F', textAlign: 'center', background: '#FAFBFC', borderTop: '1px solid #E5E7EB', borderBottom: '1px solid #E5E7EB', padding: '8px' }}>Only active time is counted — idle and time on other windows are excluded.</div>
+            <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-66717f)', textAlign: 'center', background: 'var(--oq-bg-fafbfc)', borderTop: '1px solid var(--oq-ln-e5e7eb)', borderBottom: '1px solid var(--oq-ln-e5e7eb)', padding: '8px' }}>Only active time is counted — idle and time on other windows are excluded.</div>
           </>
         ) : (
-          <div style={{ borderTop: '1px solid #E5E7EB', padding: '14px 20px', background: '#FAFBFC' }}>
-            <div style={{ fontSize: '11.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: '#66717F', marginBottom: '2px' }}>Measured</div>
-            <div style={{ fontSize: '13px', color: '#98A2B0', textDecoration: 'line-through', marginBottom: '10px', fontFamily: 'monospace' }}>{fmtDur(seconds)}</div>
-            <div style={{ fontSize: '11.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: '#66717F', marginBottom: '6px' }}>Actual time</div>
+          <div style={{ borderTop: '1px solid var(--oq-ln-e5e7eb)', padding: '14px 20px', background: 'var(--oq-bg-fafbfc)' }}>
+            <div style={{ fontSize: '11.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--oq-fg-66717f)', marginBottom: '2px' }}>Measured</div>
+            <div style={{ fontSize: '13px', color: 'var(--oq-fg-98a2b0)', textDecoration: 'line-through', marginBottom: '10px', fontFamily: 'monospace' }}>{fmtDur(seconds)}</div>
+            <div style={{ fontSize: '11.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--oq-fg-66717f)', marginBottom: '6px' }}>Actual time</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <input style={input} type="number" min="0" value={h} onChange={function (e) { setH(e.target.value); }} /><span style={{ color: '#66717F' }}>h</span>
-              <input style={input} type="number" min="0" max="59" value={m} onChange={function (e) { setM(e.target.value); }} /><span style={{ color: '#66717F' }}>m</span>
+              <input style={input} type="number" min="0" value={h} onChange={function (e) { setH(e.target.value); }} /><span style={{ color: 'var(--oq-fg-66717f)' }}>h</span>
+              <input style={input} type="number" min="0" max="59" value={m} onChange={function (e) { setM(e.target.value); }} /><span style={{ color: 'var(--oq-fg-66717f)' }}>m</span>
             </div>
-            <div style={{ fontSize: '11.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: '#66717F', marginBottom: '6px' }}>Why the change <span style={{ color: '#C22B2B' }}>· required</span></div>
-            <textarea style={{ width: '100%', minHeight: '56px', border: '1px solid #D3DAE4', borderRadius: '8px', padding: '9px', fontSize: '13px', fontFamily: 'inherit', resize: 'vertical' }} placeholder="e.g. ~30 min on a phone call about this record the timer didn't capture." value={reason} onChange={function (e) { setReason(e.target.value); }} />
-            <div style={{ fontSize: '11.5px', color: '#98A2B0', marginTop: '4px' }}>The measured time, your adjustment, and this reason are all kept on the record.</div>
+            <div style={{ fontSize: '11.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--oq-fg-66717f)', marginBottom: '6px' }}>Why the change <span style={{ color: 'var(--oq-fg-c22b2b)' }}>· required</span></div>
+            <textarea style={{ width: '100%', minHeight: '56px', border: '1px solid var(--oq-ln-d3dae4)', borderRadius: '8px', padding: '9px', fontSize: '13px', fontFamily: 'inherit', resize: 'vertical' }} placeholder="e.g. ~30 min on a phone call about this record the timer didn't capture." value={reason} onChange={function (e) { setReason(e.target.value); }} />
+            <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-98a2b0)', marginTop: '4px' }}>The measured time, your adjustment, and this reason are all kept on the record.</div>
           </div>
         )}
-        {err ? <div style={{ fontSize: '12.5px', color: '#9B1C1C', background: '#FDE8E8', padding: '8px 20px' }}>{err}</div> : null}
+        {err ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-9b1c1c)', background: 'var(--oq-bg-fde8e8)', padding: '8px 20px' }}>{err}</div> : null}
         <div style={{ display: 'flex', gap: '9px', padding: '16px 20px' }}>
           {mode === 'accept' ? (
             <>
-              <span style={Object.assign({}, btn, { background: '#1F4E79', color: '#fff', opacity: busy ? .6 : 1 })} onClick={function () { if (!busy) accept(); }}>{busy ? 'Saving…' : (props.confirmLabel || 'Accept & submit')}</span>
-              <span style={Object.assign({}, btn, { background: 'white', color: '#1F4E79', borderColor: '#E5E7EB' })} onClick={function () { setMode('adjust'); }}>Adjust time</span>
-              {props.allowSkip ? <span style={Object.assign({}, btn, { flex: '0 0 auto', background: 'white', color: '#66717F', borderColor: '#E5E7EB' })} title="Complete without logging billable time" onClick={function () { if (!busy) skipLog(); }}>Skip</span> : null}
+              <span style={Object.assign({}, btn, { background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', opacity: busy ? .6 : 1 })} onClick={function () { if (!busy) accept(); }}>{busy ? 'Saving…' : (props.confirmLabel || 'Accept & submit')}</span>
+              <span style={Object.assign({}, btn, { background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', borderColor: 'var(--oq-ln-e5e7eb)' })} onClick={function () { setMode('adjust'); }}>Adjust time</span>
+              {props.allowSkip ? <span style={Object.assign({}, btn, { flex: '0 0 auto', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-66717f)', borderColor: 'var(--oq-ln-e5e7eb)' })} title="Complete without logging billable time" onClick={function () { if (!busy) skipLog(); }}>Skip</span> : null}
             </>
           ) : (
             <>
-              <span style={Object.assign({}, btn, { background: '#1F4E79', color: '#fff', opacity: busy ? .6 : 1 })} onClick={function () { if (!busy) save(); }}>{busy ? 'Saving…' : 'Save & submit'}</span>
-              <span style={Object.assign({}, btn, { background: 'white', color: '#66717F', borderColor: '#E5E7EB' })} onClick={function () { setMode('accept'); }}>Cancel</span>
+              <span style={Object.assign({}, btn, { background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', opacity: busy ? .6 : 1 })} onClick={function () { if (!busy) save(); }}>{busy ? 'Saving…' : 'Save & submit'}</span>
+              <span style={Object.assign({}, btn, { background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-66717f)', borderColor: 'var(--oq-ln-e5e7eb)' })} onClick={function () { setMode('accept'); }}>Cancel</span>
             </>
           )}
         </div>

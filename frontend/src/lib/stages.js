@@ -28,15 +28,15 @@ export const STAGE_LABELS = STAGES.reduce(function (m, s) { m[s.key] = s.label; 
 // given colors in the existing palette's idiom — legal review in slate, AG in rose (it is the one stage that
 // hands control to an outside authority), redaction sharing the amber family with redaction_review.
 export const STAGE_COLORS = {
-  intake:           { bg: '#DBEAFE', color: '#1E40AF' },
-  awaiting_payment: { bg: '#FFEDD5', color: '#9A3412' },
-  record_search:    { bg: '#EDE9FE', color: '#6D28D9' },
-  exemption_review: { bg: '#E2E8F0', color: '#334155' },
-  ag_review:        { bg: '#FFE4E6', color: '#9F1239' },
-  redaction_review: { bg: '#FEF3C7', color: '#92400E' },
-  redaction:        { bg: '#FDE68A', color: '#78350F' },
-  delivery:         { bg: '#E0E7FF', color: '#3730A3' },
-  closed:           { bg: '#F1F5F9', color: '#475569' }
+  intake:           { bg: 'var(--oq-bg-dbeafe)', color: 'var(--oq-fg-1e40af)' },
+  awaiting_payment: { bg: 'var(--oq-bg-ffedd5)', color: 'var(--oq-fg-9a3412)' },
+  record_search:    { bg: 'var(--oq-bg-ede9fe)', color: 'var(--oq-fg-6d28d9)' },
+  exemption_review: { bg: 'var(--oq-bg-e2e8f0)', color: 'var(--oq-fg-334155)' },
+  ag_review:        { bg: 'var(--oq-bg-ffe4e6)', color: 'var(--oq-fg-9f1239)' },
+  redaction_review: { bg: 'var(--oq-bg-fef3c7)', color: 'var(--oq-fg-92400e)' },
+  redaction:        { bg: 'var(--oq-bg-fde68a)', color: 'var(--oq-fg-78350f)' },
+  delivery:         { bg: 'var(--oq-bg-e0e7ff)', color: 'var(--oq-fg-3730a3)' },
+  closed:           { bg: 'var(--oq-bg-f1f5f9)', color: 'var(--oq-fg-475569)' }
 };
 
 // ⚠️ THE SEQUENCE IS NOT THE VOCABULARY — mirrors backend/src/services/stages.js (Kevin, 2026-07-19).

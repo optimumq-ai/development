@@ -144,9 +144,9 @@ function clockLabel(t) {
 // Budget status for a row (Slice C): over / due-soon / on-track vs the step's budget.
 function budgetInfo(t) {
   var b = t.budget; if (!b) return null;
-  if (b.state === 'over') return { text: humanDur(b.overMs) + ' over budget', color: '#C22B2B', weight: 700 };
-  if (b.state === 'warn') return { text: humanDur(b.remainingMs) + ' left of ' + b.budgetDays + 'd', color: '#B45309', weight: 600 };
-  return { text: humanDur(b.remainingMs) + ' left of ' + b.budgetDays + 'd', color: '#17803D', weight: 500 };
+  if (b.state === 'over') return { text: humanDur(b.overMs) + ' over budget', color: 'var(--oq-fg-c22b2b)', weight: 700 };
+  if (b.state === 'warn') return { text: humanDur(b.remainingMs) + ' left of ' + b.budgetDays + 'd', color: 'var(--oq-fg-b45309)', weight: 600 };
+  return { text: humanDur(b.remainingMs) + ' left of ' + b.budgetDays + 'd', color: 'var(--oq-fg-17803d)', weight: 500 };
 }
 
 function dayDiff(d) { if (!d) return null; return (new Date(d) - new Date()) / (1000 * 60 * 60 * 24); }
@@ -161,13 +161,13 @@ function deadlineLabel(d) {
 }
 
 var C = {
-  card: { background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', boxShadow: '0 1px 2px rgba(16,26,42,.04),0 1px 3px rgba(16,26,42,.06)', overflow: 'hidden' },
-  accent: '#1F4E79', accentSoft: '#EAF1F8', muted: '#66717F', faint: '#98A2B0',
-  good: '#17803D', goodSoft: '#E8F4EC', warn: '#B45309', warnSoft: '#FBF1E1', crit: '#C22B2B', critSoft: '#FBEBEB'
+  card: { background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '12px', boxShadow: '0 1px 2px rgba(16,26,42,.04),0 1px 3px rgba(16,26,42,.06)', overflow: 'hidden' },
+  accent: 'var(--oq-x-1f4e79)', accentSoft: 'var(--oq-bg-eaf1f8)', muted: 'var(--oq-fg-66717f)', faint: 'var(--oq-fg-98a2b0)',
+  good: 'var(--oq-x-17803d)', goodSoft: 'var(--oq-bg-e8f4ec)', warn: 'var(--oq-x-b45309)', warnSoft: 'var(--oq-bg-fbf1e1)', crit: 'var(--oq-x-c22b2b)', critSoft: 'var(--oq-bg-fbebeb)'
 };
 function chip(text, kind) {
-  var s = { q: { bg: '#FAFBFC', fg: C.muted, bd: '1px solid #E5E7EB' }, p: { bg: C.accentSoft, fg: '#1B4067' },
-    crit: { bg: C.critSoft, fg: C.crit }, warn: { bg: C.warnSoft, fg: C.warn } }[kind] || { bg: '#F3F4F6', fg: C.muted };
+  var s = { q: { bg: 'var(--oq-bg-fafbfc)', fg: C.muted, bd: '1px solid var(--oq-ln-e5e7eb)' }, p: { bg: C.accentSoft, fg: 'var(--oq-fg-1b4067)' },
+    crit: { bg: C.critSoft, fg: C.crit }, warn: { bg: C.warnSoft, fg: C.warn } }[kind] || { bg: 'var(--oq-bg-f3f4f6)', fg: C.muted };
   return <span style={{ fontSize: '11.5px', fontWeight: 600, padding: '2px 9px', borderRadius: '999px', background: s.bg, color: s.fg, border: s.bd || 'none', whiteSpace: 'nowrap' }}>{text}</span>;
 }
 
@@ -227,32 +227,32 @@ export default function MyTasksPage() {
     // a release is blocked. Render it URGENT: red row, a banner, the reviewer's note, a red Fix action.
     if (t.return_reason) {
       return (
-        <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 16px', borderTop: '1px solid #F3F4F6', background: C.critSoft }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.crit, flexShrink: 0 }} />
+        <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 16px', borderTop: '1px solid var(--oq-ln-f3f4f6)', background: C.critSoft }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.critBg, flexShrink: 0 }} />
           <div style={{ minWidth: '128px' }}>
             <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px', fontSize: '11px', fontWeight: 800, letterSpacing: '.04em', color: C.crit }}>⚠ URGENT CORRECTIONS REQUIRED</div>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '13px', color: '#1A2230' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
+            <div style={{ fontSize: '13px', color: 'var(--oq-fg-1a2230)' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
             <div style={{ fontSize: '11.5px', color: C.crit, fontStyle: 'italic', marginTop: '2px' }}>{t.returned_by ? 'Returned by ' + t.returned_by + ' — ' : 'Returned — '}“{t.return_reason}”</div>
           </div>
           <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: deadlineState(t.deadline_date) === 'over' ? C.crit : C.muted, fontWeight: deadlineState(t.deadline_date) === 'over' ? 700 : 400 }}>{deadlineLabel(t.deadline_date)}</div>
-          <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 700, color: 'white', background: C.crit, borderRadius: '7px', padding: '5px 13px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Fix →</Link>
+          <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--oq-fg-ffffff)', background: C.critBg, borderRadius: '7px', padding: '5px 13px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Fix →</Link>
         </div>
       );
     }
     var ds = deadlineState(t.deadline_date);
     var dot = t.status === 'in_progress' ? C.accent : C.faint;
     return (
-      <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: '1px solid #F3F4F6' }}>
+      <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: '1px solid var(--oq-ln-f3f4f6)' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: dot, flexShrink: 0 }} />
         <div style={{ minWidth: '128px' }}>
           <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
           <div style={{ fontSize: '11.5px', color: C.muted, marginTop: '1px' }}>{t.requestor_name || (t.request_id ? '' : 'no request')}</div>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '13px', color: '#1A2230', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
+          <div style={{ fontSize: '13px', color: 'var(--oq-fg-1a2230)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
           <div style={{ fontSize: '11.5px', color: C.muted }}>{clockLabel(t)}{(function () { var bi = budgetInfo(t); return bi ? <span> · <span style={{ color: bi.color, fontWeight: bi.weight }}>{bi.text}</span></span> : null; })()}{t.team_name ? ' · ' + t.team_name : ''}</div>
         </div>
         {/* "PATH HERE" (BW4; Draft 2 §1) — an ESTIMATE-only column, because it is the only queue where the
@@ -261,14 +261,14 @@ export default function MyTasksPage() {
             so under only-when-needed intake (the default) most requests meet their first human here. */}
         {t.pathHere ? (
           <div style={{ minWidth: '186px', fontSize: '11.5px', lineHeight: 1.35 }}>
-            <div style={{ fontWeight: 700, color: t.pathHere.firstHumanReview ? '#92400E' : C.muted }}>
+            <div style={{ fontWeight: 700, color: t.pathHere.firstHumanReview ? 'var(--oq-fg-92400e)' : C.muted }}>
               {t.pathHere.label}
             </div>
-            {t.paused && t.paused.paused ? <div style={{ color: '#92400E', fontWeight: 700 }}>Paused — clarification sent</div> : null}
+            {t.paused && t.paused.paused ? <div style={{ color: 'var(--oq-fg-92400e)', fontWeight: 700 }}>Paused — clarification sent</div> : null}
           </div>
         ) : null}
         <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: ds === 'over' ? C.crit : ds === 'soon' ? C.warn : C.muted, fontWeight: ds ? 700 : 400 }}>{deadlineLabel(t.deadline_date)}</div>
-        <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid #E5E7EB', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>{actionLabel(t)}</Link>
+        <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>{actionLabel(t)}</Link>
       </div>
     );
   }
@@ -287,14 +287,14 @@ export default function MyTasksPage() {
     var sn = tasks.filter(function (t) { return deadlineState(t.deadline_date) === 'soon'; }).length;
     return (
       <section key={ty} style={C.card}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '11px', padding: '13px 16px', borderBottom: '1px solid #E5E7EB' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '11px', padding: '13px 16px', borderBottom: '1px solid var(--oq-ln-e5e7eb)' }}>
           <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: C.accentSoft, color: C.accent, display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>{(TYPE_LABEL[ty] || ty).slice(0, 1)}</div>
           <span style={{ fontSize: '14.5px', fontWeight: 700 }}>{TYPE_LABEL[ty] || ty}</span>
           <span style={{ fontSize: '12px', fontWeight: 700, color: C.accent, background: C.accentSoft, borderRadius: '999px', padding: '1px 9px' }}>{tasks.length}</span>
           {/* BW8 — Draft 9 Frame A: the power-mode entry lives on the group header. The count is this
               group's; the power page loads the live queue (incl. claimable pool) itself. */}
           {ty === 'release_review' ? (
-            <Link to="/release-review-power" style={{ fontSize: '12px', fontWeight: 700, color: '#fff', background: '#143D5C', borderRadius: '6px', padding: '3px 11px', textDecoration: 'none' }}>
+            <Link to="/release-review-power" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--oq-fg-ffffff)', background: 'var(--oq-bg-143d5c)', borderRadius: '6px', padding: '3px 11px', textDecoration: 'none' }}>
               Power mode ({tasks.length}) →
             </Link>
           ) : null}
@@ -308,19 +308,19 @@ export default function MyTasksPage() {
           </div>
         </div>
         {queued.length ? <div style={{ padding: '5px 0' }}><div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>Queued</div>{queued.map(taskRow)}</div> : null}
-        {inProc.length ? <div style={{ padding: '5px 0', borderTop: queued.length ? '1px solid #E5E7EB' : 'none' }}><div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>In Process</div>{inProc.map(taskRow)}</div> : null}
-        {inReview.length ? <div style={{ padding: '5px 0', borderTop: (queued.length || inProc.length) ? '1px solid #E5E7EB' : 'none' }}>
+        {inProc.length ? <div style={{ padding: '5px 0', borderTop: queued.length ? '1px solid var(--oq-ln-e5e7eb)' : 'none' }}><div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>In Process</div>{inProc.map(taskRow)}</div> : null}
+        {inReview.length ? <div style={{ padding: '5px 0', borderTop: (queued.length || inProc.length) ? '1px solid var(--oq-ln-e5e7eb)' : 'none' }}>
           <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>Submitted · in review</div>
           {inReview.map(function (t) {
             return (
-              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: '1px solid #F3F4F6', opacity: 0.72 }}>
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: '1px solid var(--oq-ln-f3f4f6)', opacity: 0.72 }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.faint, flexShrink: 0 }} />
                 <div style={{ minWidth: '128px' }}>
                   <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
                   <div style={{ fontSize: '11.5px', color: C.muted, marginTop: '1px' }}>{t.requestor_name || ''}</div>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '13px', color: '#1A2230' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--oq-fg-1a2230)' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
                   <div style={{ fontSize: '11.5px', color: C.faint }}>With the reviewer — no action needed</div>
                 </div>
                 <span style={{ fontSize: '12px', color: C.muted, fontWeight: 600 }}>{humanDur((t.timing && t.timing.inReviewMs) || (t.timing && t.timing.currentSinceMs)) || 'In review'}</span>
@@ -333,11 +333,11 @@ export default function MyTasksPage() {
   }
 
   function sectionHead(text) {
-    return <div style={{ display: 'flex', alignItems: 'center', gap: '9px', margin: '4px 2px -4px' }}><span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: C.muted }}>{text}</span><span style={{ flex: 1, height: '1px', background: '#E5E7EB' }} /></div>;
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '9px', margin: '4px 2px -4px' }}><span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: C.muted }}>{text}</span><span style={{ flex: 1, height: '1px', background: 'var(--oq-bg-e5e7eb)' }} /></div>;
   }
 
   var stat = function (k, v, kind) {
-    var col = kind === 'crit' ? C.crit : kind === 'warn' ? C.warn : kind === 'accent' ? C.accent : '#1A2230';
+    var col = kind === 'crit' ? C.crit : kind === 'warn' ? C.warn : kind === 'accent' ? C.accent : 'var(--oq-x-1a2230)';
     var rail = kind === 'crit' ? C.crit : kind === 'warn' ? C.warn : kind === 'accent' ? C.accent : C.good;
     return (
       <div style={Object.assign({}, C.card, { padding: '13px 15px', position: 'relative' })}>
@@ -361,9 +361,9 @@ export default function MyTasksPage() {
             over only this person's tasks. The subline says WHY, in plain words, so the number never
             needs decoding. */}
         {myHealth ? (() => {
-          var HC = { on_track: ['#17803D', '#E6F4EC', 'On track'],
-                     needs_attention: ['#C77A0A', '#FBEFD7', 'Needs attention'],
-                     falling_behind: ['#B23A3A', '#F9E4E4', 'Falling behind'] };
+          var HC = { on_track: ['var(--oq-x-17803d)', 'var(--oq-x-e6f4ec)', 'On track'],
+                     needs_attention: ['var(--oq-x-c77a0a)', 'var(--oq-x-fbefd7)', 'Needs attention'],
+                     falling_behind: ['var(--oq-x-b23a3a)', 'var(--oq-x-f9e4e4)', 'Falling behind'] };
           var h = HC[myHealth.status] || HC.on_track;
           var l = myHealth.late || {};
           var bits = [];
@@ -385,7 +385,7 @@ export default function MyTasksPage() {
         })() : null}
       </div>
 
-      {msg ? <div style={{ fontSize: '13px', color: '#9B1C1C', background: '#FDE8E8', border: '1px solid #FBD5D5', borderRadius: '8px', padding: '9px 12px' }}>{msg}</div> : null}
+      {msg ? <div style={{ fontSize: '13px', color: 'var(--oq-fg-9b1c1c)', background: 'var(--oq-bg-fde8e8)', border: '1px solid var(--oq-ln-fbd5d5)', borderRadius: '8px', padding: '9px 12px' }}>{msg}</div> : null}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(' + (3 + (returned ? 1 : 0) + (overBudget ? 1 : 0)) + ',1fr)', gap: '12px' }}>
         {stat('Assigned to you', assigned, 'accent')}
@@ -399,22 +399,22 @@ export default function MyTasksPage() {
 
       {/* Fee objections — real work items that aren't tasks; kept as their own boxes. */}
       {myObjs.length ? (
-        <section style={Object.assign({}, C.card, { border: '1px solid #FDE68A' })}>
-          <div style={{ fontSize: '14px', fontWeight: 700, color: '#92400E', padding: '13px 16px', borderBottom: '1px solid #F3F4F6' }}>Fee estimate objections <span style={{ color: '#B45309' }}>({myObjs.length})</span></div>
+        <section style={Object.assign({}, C.card, { border: '1px solid var(--oq-ln-fde68a)' })}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--oq-fg-92400e)', padding: '13px 16px', borderBottom: '1px solid var(--oq-ln-f3f4f6)' }}>Fee estimate objections <span style={{ color: 'var(--oq-fg-b45309)' }}>({myObjs.length})</span></div>
           {myObjs.map(function (o) { return (
-            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 16px', borderTop: '1px solid #F3F4F6' }}>
-              <div style={{ fontSize: '13px', color: '#374151' }}><strong>{o.reason}</strong> <span style={{ color: C.faint }}>· {o.requestNumber || o.requestId} · {o.status === 'tentative' ? 'pending approval' : 'open'}</span></div>
+            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 16px', borderTop: '1px solid var(--oq-ln-f3f4f6)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--oq-fg-374151)' }}><strong>{o.reason}</strong> <span style={{ color: C.faint }}>· {o.requestNumber || o.requestId} · {o.status === 'tentative' ? 'pending approval' : 'open'}</span></div>
               <Link to={'/requests/' + o.requestId} style={{ fontSize: '12.5px', color: C.accent, textDecoration: 'none', fontWeight: 700 }}>Open → Fees</Link>
             </div>
           ); })}
         </section>
       ) : null}
       {canApprove && pendingObjs.length ? (
-        <section style={Object.assign({}, C.card, { border: '1px solid #FCA5A5' })}>
-          <div style={{ fontSize: '14px', fontWeight: 700, color: '#9B1C1C', padding: '13px 16px', borderBottom: '1px solid #F3F4F6' }}>Fee resolutions awaiting your approval <span>({pendingObjs.length})</span></div>
+        <section style={Object.assign({}, C.card, { border: '1px solid var(--oq-ln-fca5a5)' })}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--oq-fg-9b1c1c)', padding: '13px 16px', borderBottom: '1px solid var(--oq-ln-f3f4f6)' }}>Fee resolutions awaiting your approval <span>({pendingObjs.length})</span></div>
           {pendingObjs.map(function (o) { return (
-            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 16px', borderTop: '1px solid #F3F4F6' }}>
-              <div style={{ fontSize: '13px', color: '#374151' }}>{o.resolutionType} of <strong>${(Number(o.resolutionAmount) || 0).toFixed(2)}</strong> <span style={{ color: C.faint }}>· {o.requestNumber || o.requestId} · proposed by {o.assigneeName}</span></div>
+            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 16px', borderTop: '1px solid var(--oq-ln-f3f4f6)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--oq-fg-374151)' }}>{o.resolutionType} of <strong>${(Number(o.resolutionAmount) || 0).toFixed(2)}</strong> <span style={{ color: C.faint }}>· {o.requestNumber || o.requestId} · proposed by {o.assigneeName}</span></div>
               <Link to={'/requests/' + o.requestId} style={{ fontSize: '12.5px', color: C.accent, textDecoration: 'none', fontWeight: 700 }}>Review → Fees</Link>
             </div>
           ); })}
@@ -427,11 +427,11 @@ export default function MyTasksPage() {
           {sectionHead('Intake Review · the exceptions')}
           <section style={C.card}>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--oq-bg-ffffff)' }}>
                 <thead>
                   <tr>
                     {['Request', 'Requestor', 'Description', 'Clock', "Why it's here", ''].map(function (h) {
-                      return <th key={h} style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted, textAlign: 'left', padding: '7px 10px', borderBottom: '2px solid #C3CFDA', fontWeight: 700 }}>{h}</th>;
+                      return <th key={h} style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted, textAlign: 'left', padding: '7px 10px', borderBottom: '2px solid var(--oq-ln-c3cfda)', fontWeight: 700 }}>{h}</th>;
                     })}
                   </tr>
                 </thead>
@@ -439,25 +439,25 @@ export default function MyTasksPage() {
                   {intake.slice().sort(queueSort).map(function (t) {
                     return (
                       <tr key={t.id}>
-                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top' }}>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--oq-ln-f2f6f9)', verticalAlign: 'top' }}>
                           <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
                           <div style={{ fontSize: '11.5px', color: C.muted }}>{'recv ' + String(t.request_created_at || '').slice(0, 10)}</div>
                         </td>
-                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', fontSize: '12.5px' }}>{t.requestor_name || 'Anonymous'}</td>
-                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', fontSize: '12.5px', color: C.muted, maxWidth: '330px' }}>{t.request_description || t.title || '—'}</td>
-                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top' }}><QueueClock clock={t.clock} /></td>
-                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', fontSize: '12.5px' }}>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--oq-ln-f2f6f9)', verticalAlign: 'top', fontSize: '12.5px' }}>{t.requestor_name || 'Anonymous'}</td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--oq-ln-f2f6f9)', verticalAlign: 'top', fontSize: '12.5px', color: C.muted, maxWidth: '330px' }}>{t.request_description || t.title || '—'}</td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--oq-ln-f2f6f9)', verticalAlign: 'top' }}><QueueClock clock={t.clock} /></td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--oq-ln-f2f6f9)', verticalAlign: 'top', fontSize: '12.5px' }}>
                           {(t.triggers || []).map(function (g) {
                             return <div key={g.key} style={{ marginBottom: '3px' }}>{g.label}</div>;
                           })}
                           {/* Three DIFFERENT facts, never collapsed into one another. */}
                           {t.alwaysMode ? <div style={{ color: C.muted }}>Every request stops here — this city set intake review to “always”.</div> : null}
                           {t.triggerUnrecorded ? <div style={{ color: C.faint, fontStyle: 'italic' }}>No trigger recorded on this task.</div> : null}
-                          {!t.mine ? <div style={{ display: 'inline-block', marginTop: '3px', fontSize: '10px', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', borderRadius: '3px', padding: '2px 7px', background: '#F2F6F9', border: '1px solid #C3CFDA', color: C.muted }}>Pool — unassigned</div> : null}
+                          {!t.mine ? <div style={{ display: 'inline-block', marginTop: '3px', fontSize: '10px', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', borderRadius: '3px', padding: '2px 7px', background: 'var(--oq-bg-f2f6f9)', border: '1px solid var(--oq-ln-c3cfda)', color: C.muted }}>Pool — unassigned</div> : null}
                         </td>
-                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', textAlign: 'right' }}>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--oq-ln-f2f6f9)', verticalAlign: 'top', textAlign: 'right' }}>
                           {t.mine
-                            ? <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid #E5E7EB', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Review →</Link>
+                            ? <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Review →</Link>
                             : <button onClick={function () { claim(t.id); }} disabled={busy === t.id} style={{ fontSize: '12.5px', fontWeight: 600, color: C.good, background: C.goodSoft, border: 'none', borderRadius: '7px', padding: '6px 13px', cursor: 'pointer', opacity: busy === t.id ? 0.6 : 1 }}>{busy === t.id ? 'Claiming…' : 'Claim'}</button>}
                         </td>
                       </tr>
@@ -466,7 +466,7 @@ export default function MyTasksPage() {
                 </tbody>
               </table>
             </div>
-            <p style={{ fontSize: '11.5px', color: C.faint, padding: '9px 12px', margin: 0, borderTop: '1px solid #F3F4F6' }}>
+            <p style={{ fontSize: '11.5px', color: C.faint, padding: '9px 12px', margin: 0, borderTop: '1px solid var(--oq-ln-f3f4f6)' }}>
               These are the exceptions, not the traffic: with intake review set to “only when needed” (the default), a
               confidently-classified, clean request routes straight to its team and never appears here. Sorted by clock,
               earliest first; a request with no clock sorts by age.
@@ -483,7 +483,7 @@ export default function MyTasksPage() {
           theirs moved the request along. */}
       {!loading && boxTypes.filter(function (ty) { return MRR_TYPES.indexOf(ty) >= 0; }).length ? (
         <div style={{ fontSize: '12px', color: C.faint, padding: '0 2px 8px' }}>
-          <b style={{ color: '#1A2230' }}>Multi-record requests.</b>{' '}
+          <b style={{ color: 'var(--oq-fg-1a2230)' }}>Multi-record requests.</b>{' '}
           MRR Management is a coordination job and stays assigned until every item is terminal.
           MRR Search / Estimate / Redaction are one item's activities — completing one updates the Request
           Manager's MRR screen and advances no stage.
@@ -497,7 +497,7 @@ export default function MyTasksPage() {
       {!loading && !boxTypes.length && !myObjs.length && !intake.length ? (
         <div style={Object.assign({}, C.card, { padding: '56px', textAlign: 'center' })}>
           <div style={{ fontSize: '40px', marginBottom: '10px' }}>✅</div>
-          <div style={{ fontSize: '17px', fontWeight: 600, color: '#4B5563' }}>No tasks assigned to you</div>
+          <div style={{ fontSize: '17px', fontWeight: 600, color: 'var(--oq-fg-4b5563)' }}>No tasks assigned to you</div>
           <div style={{ fontSize: '13px', color: C.faint, marginTop: '6px' }}>Claim work from the pool below, or it will be routed to you.</div>
         </div>
       ) : null}
@@ -510,7 +510,7 @@ export default function MyTasksPage() {
           <section style={C.card}>
             {poolOther.map(function (t, i) {
               return (
-                <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 16px', borderTop: i ? '1px solid #F3F4F6' : 'none' }}>
+                <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 16px', borderTop: i ? '1px solid var(--oq-ln-f3f4f6)' : 'none' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.good, flexShrink: 0 }} />
                   <div style={{ minWidth: '128px' }}>
                     <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
@@ -536,15 +536,15 @@ export default function MyTasksPage() {
           <section style={C.card}>
             {notes.map(function (n, i) {
               return (
-                <div key={n.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '11px', padding: '11px 16px', borderTop: i ? '1px solid #F3F4F6' : 'none', opacity: n.read_at ? 0.72 : 1 }}>
-                  <span style={{ marginTop: '5px', width: '7px', height: '7px', borderRadius: '50%', background: n.read_at ? 'transparent' : C.accent, border: n.read_at ? '1px solid #D3DAE4' : 'none', flexShrink: 0 }} />
+                <div key={n.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '11px', padding: '11px 16px', borderTop: i ? '1px solid var(--oq-ln-f3f4f6)' : 'none', opacity: n.read_at ? 0.72 : 1 }}>
+                  <span style={{ marginTop: '5px', width: '7px', height: '7px', borderRadius: '50%', background: n.read_at ? 'transparent' : C.accent, border: n.read_at ? '1px solid var(--oq-ln-d3dae4)' : 'none', flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600 }}>{n.link ? <Link to={n.link} style={{ color: '#1A2230', textDecoration: 'none' }}>{n.title}</Link> : n.title}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 600 }}>{n.link ? <Link to={n.link} style={{ color: 'var(--oq-fg-1a2230)', textDecoration: 'none' }}>{n.title}</Link> : n.title}</div>
                     {n.body ? <div style={{ fontSize: '12px', color: C.muted, marginTop: '1px' }}>{n.body}</div> : null}
                     <div style={{ fontSize: '11px', color: C.faint, marginTop: '2px' }}>{(n.created_at || '').replace('T', ' ').slice(0, 16)}</div>
                   </div>
                   <button type="button" onClick={function () { dismiss(n.id); }} aria-label="Dismiss this notification" title="Remove this notification from your list"
-                    style={{ alignSelf: 'flex-start', flexShrink: 0, background: 'white', border: '1px solid #D1D5DB', borderRadius: '6px', color: '#374151', fontSize: '11.5px', fontWeight: 600, lineHeight: 1, padding: '6px 9px', cursor: 'pointer' }}>Dismiss</button>
+                    style={{ alignSelf: 'flex-start', flexShrink: 0, background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-d1d5db)', borderRadius: '6px', color: 'var(--oq-fg-374151)', fontSize: '11.5px', fontWeight: 600, lineHeight: 1, padding: '6px 9px', cursor: 'pointer' }}>Dismiss</button>
                 </div>
               );
             })}

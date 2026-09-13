@@ -9,23 +9,23 @@ import api from '../lib/api';
 // Configuration tab's email block is retired. Data: GET/POST /api/integrations (email part) ·
 // POST /api/integrations/test/email · the hub row via /api/setup-hub.
 
-var BLUE = '#1E6091';
+var BLUE = 'var(--oq-x-1e6091)';
 var STATE = {
-  ready:           { label: 'Ready',           bg: '#E1F2E9', color: '#1B8A5A' },
-  in_progress:     { label: 'In progress',     bg: '#F6EBD6', color: '#9A6512' },
-  not_started:     { label: 'Not started',     bg: '#F3F4F6', color: '#4B5563' },
-  needs_attention: { label: 'Needs attention', bg: '#FEE2E2', color: '#991B1B' },
-  waiting:         { label: 'Waiting',         bg: '#EDE9FE', color: '#5B21B6' },
+  ready:           { label: 'Ready',           bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' },
+  in_progress:     { label: 'In progress',     bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' },
+  not_started:     { label: 'Not started',     bg: 'var(--oq-bg-f3f4f6)', color: 'var(--oq-fg-4b5563)' },
+  needs_attention: { label: 'Needs attention', bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' },
+  waiting:         { label: 'Waiting',         bg: 'var(--oq-bg-ede9fe)', color: 'var(--oq-fg-5b21b6)' },
 };
 var APPROVAL = {
-  red:    { label: 'Not started',       bg: '#FEE2E2', color: '#991B1B' },
-  yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' },
-  green:  { label: 'Approved',          bg: '#E1F2E9', color: '#1B8A5A' },
+  red:    { label: 'Not started',       bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' },
+  yellow: { label: 'Awaiting approval', bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' },
+  green:  { label: 'Approved',          bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' },
 };
-var REQ_LINE = { fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginTop: '4px' };
-var lbl = { fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' };
-var inp = { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
-var card = { background: 'white', border: '1px solid #D2DCE3', borderRadius: '10px' };
+var REQ_LINE = { fontSize: '11.5px', color: 'var(--oq-fg-dc2626)', fontWeight: 600, marginTop: '4px' };
+var lbl = { fontSize: '12.5px', fontWeight: 600, color: 'var(--oq-fg-374151)', display: 'block', marginBottom: '5px' };
+var inp = { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--oq-ln-d1d5db)', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
+var card = { background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-d2dce3)', borderRadius: '10px' };
 
 export default function EmailConfigPage() {
   var nav = useNavigate();
@@ -82,19 +82,19 @@ export default function EmailConfigPage() {
     setBusy('');
   }
 
-  if (denied) return <div style={{ color: '#5C6F7C', padding: '40px' }}>Email configuration is set up by the System Administrator — your user type can't view these settings.</div>;
-  if (!status) return <div style={{ color: '#9CA3AF', padding: '40px' }}>Loading email settings…</div>;
+  if (denied) return <div style={{ color: 'var(--oq-fg-5c6f7c)', padding: '40px' }}>Email configuration is set up by the System Administrator — your user type can't view these settings.</div>;
+  if (!status) return <div style={{ color: 'var(--oq-fg-9ca3af)', padding: '40px' }}>Loading email settings…</div>;
   // APPROVAL MODEL (2026-08-31): the pill is this screen's own three-colour indicator; required fields are marked.
   var ap = (hubRow && hubRow.approval) || null;
   var st = ap ? APPROVAL[ap] : STATE[(hubRow && hubRow.state) || 'not_started'];
   var missE = { host: form.provider === 'smtp' && !form.smtp_host, port: form.provider === 'smtp' && !form.smtp_port, sfrom: form.provider === 'smtp' && !form.smtp_from, rkey: form.provider === 'resend' && !form.resend_api_key && !(status.email && status.email.resend_key_set), rfrom: form.provider === 'resend' && !form.resend_from };
-  var RED = { border: '2px solid #DC2626' };
+  var RED = { border: '2px solid var(--oq-ln-dc2626)' };
   var reLabel = hubRow && hubRow.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
   var can = !!(hubRow && hubRow.canEdit);
   var attested = hubRow && hubRow.signoff && !(hubRow.changedSinceApproval) && ap !== 'red';
 
   return (
-    <div style={{ maxWidth: '860px', color: '#12232E' }}>
+    <div style={{ maxWidth: '860px', color: 'var(--oq-fg-12232e)' }}>
       {/* status strip — the shared pattern */}
       <div style={Object.assign({}, card, { display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 14px', marginBottom: '14px' })}>
         <button type="button" onClick={function () { nav('/admin?tab=setup'); }} title="Back to Setup and Configuration"
@@ -102,21 +102,21 @@ export default function EmailConfigPage() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           {st.label}
         </button>
-        <span style={{ flexGrow: 1, fontSize: '12px', color: '#5C6F7C', lineHeight: '1.35' }}>{hubRow ? (hubRow.approvalWhy || hubRow.evidence) : ''}</span>
-        <span style={{ fontSize: '11.5px', color: '#8296A4' }}>Technical Setup</span>
+        <span style={{ flexGrow: 1, fontSize: '12px', color: 'var(--oq-fg-5c6f7c)', lineHeight: '1.35' }}>{hubRow ? (hubRow.approvalWhy || hubRow.evidence) : ''}</span>
+        <span style={{ fontSize: '11.5px', color: 'var(--oq-fg-8296a4)' }}>Technical Setup</span>
         {attested
-          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'white', color: '#12232E', border: '1px solid #BECAD3', cursor: 'pointer' }}>{ap ? 'Approved · undo' : 'Attested · undo'}</button>
-          : <button type="button" disabled={!can || ap === 'red' || busy === 'attest'} onClick={toggleAttest} title={ap === 'red' ? 'Fill and save every required field first' : ''} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: can ? BLUE : '#F2F6F9', color: can ? 'white' : '#A9B7C2', border: '1px solid ' + (can ? BLUE : '#D2DCE3'), cursor: can ? 'pointer' : 'default' }}>{reLabel}</button>}
+          ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-12232e)', border: '1px solid var(--oq-ln-becad3)', cursor: 'pointer' }}>{ap ? 'Approved · undo' : 'Attested · undo'}</button>
+          : <button type="button" disabled={!can || ap === 'red' || busy === 'attest'} onClick={toggleAttest} title={ap === 'red' ? 'Fill and save every required field first' : ''} style={{ height: '30px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: can ? BLUE : 'var(--oq-bg-f2f6f9)', color: can ? 'var(--oq-fg-ffffff)' : 'var(--oq-fg-a9b7c2)', border: '1px solid ' + (can ? BLUE : 'var(--oq-ln-d2dce3)'), cursor: can ? 'pointer' : 'default' }}>{reLabel}</button>}
       </div>
 
       <div style={Object.assign({}, card, { padding: '20px 22px' })}>
-        {hubRow && hubRow.changedSinceApproval ? <div style={{ background: '#FFF8E8', border: '1px solid #F0D9A8', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: '#7A5210', marginBottom: '12px' }}><strong>Changed since approval.</strong> {hubRow.approvalWhy}. The System Administrator has been notified to approve again.</div> : null}
+        {hubRow && hubRow.changedSinceApproval ? <div style={{ background: 'var(--oq-bg-fff8e8)', border: '1px solid var(--oq-ln-f0d9a8)', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: 'var(--oq-fg-7a5210)', marginBottom: '12px' }}><strong>Changed since approval.</strong> {hubRow.approvalWhy}. The System Administrator has been notified to approve again.</div> : null}
         <div style={{ fontSize: '19px', fontWeight: 700, marginBottom: '3px' }}>Email configuration</div>
-        <div style={{ fontSize: '12.5px', color: '#5C6F7C', marginBottom: '18px', lineHeight: 1.5 }}>How this installation sends mail — acknowledgments, notices, and staff notifications. On-premise installs typically use their own mail server (SMTP). Credentials are stored on this server and never displayed again after saving.</div>
+        <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-5c6f7c)', marginBottom: '18px', lineHeight: 1.5 }}>How this installation sends mail — acknowledgments, notices, and staff notifications. On-premise installs typically use their own mail server (SMTP). Credentials are stored on this server and never displayed again after saving.</div>
 
         <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-          <span onClick={function () { set('provider', 'smtp'); }} style={{ fontSize: '12.5px', padding: '7px 14px', borderRadius: '999px', cursor: 'pointer', border: '1px solid ' + (form.provider === 'smtp' ? BLUE : '#D1D5DB'), background: form.provider === 'smtp' ? '#EBF3FB' : 'white', color: form.provider === 'smtp' ? BLUE : '#374151', fontWeight: 600 }}>My mail server (SMTP)</span>
-          <span onClick={function () { set('provider', 'resend'); }} style={{ fontSize: '12.5px', padding: '7px 14px', borderRadius: '999px', cursor: 'pointer', border: '1px solid ' + (form.provider === 'resend' ? BLUE : '#D1D5DB'), background: form.provider === 'resend' ? '#EBF3FB' : 'white', color: form.provider === 'resend' ? BLUE : '#374151', fontWeight: 600 }}>Resend (hosted)</span>
+          <span onClick={function () { set('provider', 'smtp'); }} style={{ fontSize: '12.5px', padding: '7px 14px', borderRadius: '999px', cursor: 'pointer', border: '1px solid ' + (form.provider === 'smtp' ? BLUE : 'var(--oq-ln-d1d5db)'), background: form.provider === 'smtp' ? 'var(--oq-bg-ebf3fb)' : 'var(--oq-bg-ffffff)', color: form.provider === 'smtp' ? BLUE : 'var(--oq-fg-374151)', fontWeight: 600 }}>My mail server (SMTP)</span>
+          <span onClick={function () { set('provider', 'resend'); }} style={{ fontSize: '12.5px', padding: '7px 14px', borderRadius: '999px', cursor: 'pointer', border: '1px solid ' + (form.provider === 'resend' ? BLUE : 'var(--oq-ln-d1d5db)'), background: form.provider === 'resend' ? 'var(--oq-bg-ebf3fb)' : 'var(--oq-bg-ffffff)', color: form.provider === 'resend' ? BLUE : 'var(--oq-fg-374151)', fontWeight: 600 }}>Resend (hosted)</span>
         </div>
 
         <div style={{ marginBottom: '14px' }}>
@@ -132,40 +132,40 @@ export default function EmailConfigPage() {
             </div>
             <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
               <div style={{ flex: 1 }}><label style={lbl}>Username</label><input value={form.smtp_user} onChange={function (e) { set('smtp_user', e.target.value); }} placeholder="records@city.gov" style={inp} autoComplete="off" /></div>
-              <div style={{ flex: 1 }}><label style={lbl}>Password {status.email.smtp_pass_set ? <span style={{ color: '#03543F' }}>&middot; set</span> : null}</label><input type="password" value={form.smtp_pass} onChange={function (e) { set('smtp_pass', e.target.value); }} placeholder={status.email.smtp_pass_set ? 'Saved — enter to replace' : ''} style={inp} autoComplete="new-password" /></div>
+              <div style={{ flex: 1 }}><label style={lbl}>Password {status.email.smtp_pass_set ? <span style={{ color: 'var(--oq-fg-03543f)' }}>&middot; set</span> : null}</label><input type="password" value={form.smtp_pass} onChange={function (e) { set('smtp_pass', e.target.value); }} placeholder={status.email.smtp_pass_set ? 'Saved — enter to replace' : ''} style={inp} autoComplete="new-password" /></div>
             </div>
             {(missE.host || missE.port) ? <div style={Object.assign({}, REQ_LINE, { marginTop: '-8px', marginBottom: '12px' })}>Required — {[missE.host ? 'SMTP host' : null, missE.port ? 'port' : null].filter(Boolean).join(' and ')}: enter and save</div> : null}
-            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address{missE.sfrom ? <span style={{ color: '#DC2626' }}> · required</span> : null}</label><input value={form.smtp_from} onChange={function (e) { set('smtp_from', e.target.value); }} placeholder="records@city.gov" style={Object.assign({}, inp, missE.sfrom ? RED : {})} /></div>
+            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address{missE.sfrom ? <span style={{ color: 'var(--oq-fg-dc2626)' }}> · required</span> : null}</label><input value={form.smtp_from} onChange={function (e) { set('smtp_from', e.target.value); }} placeholder="records@city.gov" style={Object.assign({}, inp, missE.sfrom ? RED : {})} /></div>
           </div>
         ) : (
           <div>
-            <div style={{ marginBottom: '14px' }}><label style={lbl}>Resend API key {status.email.resend_key_set ? <span style={{ color: '#03543F' }}>&middot; set</span> : null}</label><input type="password" value={form.resend_api_key} onChange={function (e) { set('resend_api_key', e.target.value); }} placeholder={status.email.resend_key_set ? 'Saved — enter to replace' : 're_…'} style={Object.assign({}, inp, missE.rkey ? RED : {})} autoComplete="new-password" /></div>
-            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address (verified domain){missE.rfrom ? <span style={{ color: '#DC2626' }}> · required</span> : null}</label><input value={form.resend_from} onChange={function (e) { set('resend_from', e.target.value); }} placeholder="records@city.gov" style={Object.assign({}, inp, missE.rfrom ? RED : {})} /></div>
+            <div style={{ marginBottom: '14px' }}><label style={lbl}>Resend API key {status.email.resend_key_set ? <span style={{ color: 'var(--oq-fg-03543f)' }}>&middot; set</span> : null}</label><input type="password" value={form.resend_api_key} onChange={function (e) { set('resend_api_key', e.target.value); }} placeholder={status.email.resend_key_set ? 'Saved — enter to replace' : 're_…'} style={Object.assign({}, inp, missE.rkey ? RED : {})} autoComplete="new-password" /></div>
+            <div style={{ marginBottom: '16px' }}><label style={lbl}>From address (verified domain){missE.rfrom ? <span style={{ color: 'var(--oq-fg-dc2626)' }}> · required</span> : null}</label><input value={form.resend_from} onChange={function (e) { set('resend_from', e.target.value); }} placeholder="records@city.gov" style={Object.assign({}, inp, missE.rfrom ? RED : {})} /></div>
           </div>
         )}
 
         <div style={{ marginBottom: '16px' }}>
           <label style={lbl}>New request alert recipient</label>
           <input type="email" value={alertEmail} onChange={function (e) { setAlertEmail(e.target.value); }} placeholder="openrecords-team@city.gov" style={inp} />
-          <div style={{ fontSize: '11.5px', color: '#9CA3AF', marginTop: '4px' }}>Gets an alert each time a new request is submitted. Blank = the public records contact email.</div>
+          <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-9ca3af)', marginTop: '4px' }}>Gets an alert each time a new request is submitted. Blank = the public records contact email.</div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
-          <button onClick={save} disabled={saving || !can} style={{ padding: '10px 22px', borderRadius: '8px', border: 'none', background: (saving || !can) ? '#9CB4CC' : BLUE, color: 'white', fontSize: '13.5px', fontWeight: 700, cursor: (saving || !can) ? 'default' : 'pointer' }}>{saving ? 'Saving…' : 'Save settings'}</button>
-          {savedMsg ? <span style={{ fontSize: '13px', fontWeight: 600, color: /not/i.test(savedMsg) ? '#9B1C1C' : '#03543F' }}>{savedMsg}</span> : null}
-          {!can ? <span style={{ fontSize: '12px', color: '#8296A4' }}>view only for you — the System Administrator owns this</span> : null}
+          <button onClick={save} disabled={saving || !can} style={{ padding: '10px 22px', borderRadius: '8px', border: 'none', background: (saving || !can) ? 'var(--oq-bg-9cb4cc)' : BLUE, color: 'var(--oq-fg-ffffff)', fontSize: '13.5px', fontWeight: 700, cursor: (saving || !can) ? 'default' : 'pointer' }}>{saving ? 'Saving…' : 'Save settings'}</button>
+          {savedMsg ? <span style={{ fontSize: '13px', fontWeight: 600, color: /not/i.test(savedMsg) ? 'var(--oq-fg-9b1c1c)' : 'var(--oq-fg-03543f)' }}>{savedMsg}</span> : null}
+          {!can ? <span style={{ fontSize: '12px', color: 'var(--oq-fg-8296a4)' }}>view only for you — the System Administrator owns this</span> : null}
         </div>
 
-        <div style={{ borderTop: '1px solid #EEF2F5', paddingTop: '14px' }}>
+        <div style={{ borderTop: '1px solid var(--oq-ln-eef2f5)', paddingTop: '14px' }}>
           <label style={lbl}>Send a test email to</label>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <input value={testEmail} onChange={function (e) { setTestEmail(e.target.value); }} placeholder="you@city.gov" style={Object.assign({}, inp, { flex: 1, minWidth: '200px', width: 'auto' })} />
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-              <button onClick={function () { runTest({ to: testEmail }); }} disabled={test.busy} style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid ' + BLUE, background: 'white', color: BLUE, fontSize: '12.5px', fontWeight: 700, cursor: test.busy ? 'default' : 'pointer' }}>{test.busy ? 'Testing…' : 'Test'}</button>
-              {test.message ? <span style={{ fontSize: '12.5px', fontWeight: 600, color: test.ok ? '#03543F' : '#9B1C1C' }}>{test.ok ? '✓ ' : '✗ '}{test.message}</span> : null}
+              <button onClick={function () { runTest({ to: testEmail }); }} disabled={test.busy} style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid ' + BLUE, background: 'var(--oq-bg-ffffff)', color: BLUE, fontSize: '12.5px', fontWeight: 700, cursor: test.busy ? 'default' : 'pointer' }}>{test.busy ? 'Testing…' : 'Test'}</button>
+              {test.message ? <span style={{ fontSize: '12.5px', fontWeight: 600, color: test.ok ? 'var(--oq-fg-03543f)' : 'var(--oq-fg-9b1c1c)' }}>{test.ok ? '✓ ' : '✗ '}{test.message}</span> : null}
             </span>
           </div>
-          <div style={{ fontSize: '11.5px', color: '#9CA3AF', marginTop: '8px' }}>Save your settings before sending the test so it uses the latest values.</div>
+          <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-9ca3af)', marginTop: '8px' }}>Save your settings before sending the test so it uses the latest values.</div>
         </div>
       </div>
     </div>

@@ -444,7 +444,7 @@ export default function RecordSearchTaskPage() {
                 Sends a clarification request. This jurisdiction’s clock rule is <code style={{ fontFamily: C.mono }}>{effect || '—'}</code>
                 {clockStops ? ' — the response clock will PAUSE.' : ' — the response clock KEEPS RUNNING.'}
                 <button type="button" disabled={!!busy} onClick={function () { markDefect('vague'); }}
-                  style={{ marginTop: 9, display: 'block', cursor: 'pointer', background: C.blue, color: '#fff',
+                  style={{ marginTop: 9, display: 'block', cursor: 'pointer', background: C.blueBg, color: 'var(--oq-fg-ffffff)',
                     border: '1px solid ' + C.blue, borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
                   {busy === 'vague' ? 'Sending…' : 'Send clarification request'}
                 </button>
@@ -481,7 +481,7 @@ export default function RecordSearchTaskPage() {
                   </>
                 )}
                 <button type="button" disabled={!!busy} onClick={function () { markDefect('overly_broad'); }}
-                  style={{ marginTop: 9, display: 'block', cursor: 'pointer', color: '#fff',
+                  style={{ marginTop: 9, display: 'block', cursor: 'pointer', color: 'var(--oq-fg-ffffff)',
                     background: conferenceOwed ? C.crit : C.blue,
                     border: '1px solid ' + (conferenceOwed ? C.crit : C.blue),
                     borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
@@ -635,7 +635,7 @@ export default function RecordSearchTaskPage() {
                 style={{ flex: 1, minWidth: 0, background: C.surface, border: '1px solid ' + C.hairStrong,
                   borderRadius: 8, padding: '9px 12px', fontSize: 14, color: C.ink }} />
               <button type="button" onClick={runSearch} disabled={searching || !q.trim()}
-                style={{ cursor: searching ? 'wait' : 'pointer', background: C.blue, color: '#fff',
+                style={{ cursor: searching ? 'wait' : 'pointer', background: C.blueBg, color: 'var(--oq-fg-ffffff)',
                   border: '1px solid ' + C.blue, borderRadius: 8, padding: '9px 18px', fontSize: 13.5, fontWeight: 650,
                   opacity: (searching || !q.trim()) ? 0.55 : 1 }}>
                 {searching ? 'Searching…' : 'Search'}
@@ -686,7 +686,7 @@ export default function RecordSearchTaskPage() {
                 {attached.slice(0, 12).map(function (f) {
                   var live = !resolved; // once the task is finished the list is a record, not a worklist
                   var sBtn = { fontSize: 11.5, fontWeight: 600, fontFamily: 'inherit', borderRadius: 7, padding: '3px 9px',
-                    background: 'white', color: C.muted, border: '1px solid ' + C.hairStrong, cursor: 'pointer', whiteSpace: 'nowrap' };
+                    background: 'var(--oq-bg-ffffff)', color: C.muted, border: '1px solid ' + C.hairStrong, cursor: 'pointer', whiteSpace: 'nowrap' };
                   return (
                     <div key={f.id} style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6,
                       background: C.surface, border: '1px solid ' + C.hair, borderRadius: 8, padding: '8px 11px' }}>
@@ -773,7 +773,7 @@ export default function RecordSearchTaskPage() {
                     : (includedCount < 1 ? 'Include at least one record in the response first.' : '')}
                   style={{ width: '100%', cursor: (busy || includedCount < 1 || openIntents.length > 0) ? 'not-allowed' : 'pointer',
                     background: (includedCount < 1 || openIntents.length > 0) ? C.surface2 : C.green,
-                    color: (includedCount < 1 || openIntents.length > 0) ? C.faint : '#fff',
+                    color: (includedCount < 1 || openIntents.length > 0) ? C.faint : 'var(--oq-fg-ffffff)',
                     border: '1px solid ' + ((includedCount < 1 || openIntents.length > 0) ? C.hair : C.green), borderRadius: 9,
                     padding: '10px 12px', fontSize: 13.5, fontWeight: 650, marginBottom: 8 }}>
                   {busy === 'found' ? 'Completing…' : 'Mark search complete — send ' + includedCount + ' record' + (includedCount === 1 ? '' : 's') + ' on →'}
@@ -877,7 +877,7 @@ export default function RecordSearchTaskPage() {
                 onClick={function () { commitClose('submit'); }}
                 style={{ cursor: (closeGate.gate && closeGate.gate.blocked) ? 'not-allowed' : 'pointer',
                   background: (closeGate.gate && closeGate.gate.blocked) ? C.surface2 : C.blue,
-                  color: (closeGate.gate && closeGate.gate.blocked) ? C.faint : '#fff',
+                  color: (closeGate.gate && closeGate.gate.blocked) ? C.faint : 'var(--oq-fg-ffffff)',
                   border: '1px solid ' + ((closeGate.gate && closeGate.gate.blocked) ? C.hair : C.blue),
                   borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
                 {busy === 'close' ? 'Closing…' : 'Submit — close & notify'}

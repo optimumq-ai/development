@@ -54,8 +54,8 @@ function ActChip(props) {
 function Tag(props) {
   var tints = {
     vague: { bg: G.amberBg, fg: G.amberInk, bd: G.amberLine },
-    denial: { bg: '#F7E9E5', fg: '#8C3A2B', bd: '#C08A7E' },
-    ext: { bg: '#EDE9F5', fg: '#4A3A75', bd: '#8E7CC3' },
+    denial: { bg: 'var(--oq-bg-f7e9e5)', fg: 'var(--oq-fg-8c3a2b)', bd: 'var(--oq-ln-c08a7e)' },
+    ext: { bg: 'var(--oq-bg-ede9f5)', fg: 'var(--oq-fg-4a3a75)', bd: 'var(--oq-ln-8e7cc3)' },
     closed: { bg: C.surface2, fg: C.muted, bd: G.line }
   };
   var t = tints[props.kind] || tints.closed;
@@ -68,7 +68,7 @@ function Tag(props) {
   );
 }
 
-var btn = { font: 'inherit', fontSize: 13, background: G.navy, color: '#fff', border: 'none',
+var btn = { font: 'inherit', fontSize: 13, background: G.navy, color: 'var(--oq-fg-ffffff)', border: 'none',
   borderRadius: 5, padding: '6px 14px', fontWeight: 600, cursor: 'pointer' };
 var btnQuiet = Object.assign({}, btn, { background: C.surface2, color: C.ink, border: '1px solid ' + G.line, fontWeight: 500 });
 var kv = { fontSize: 12.5, color: C.muted };
@@ -144,7 +144,7 @@ export default function MrrMasterPage() {
       });
   }
 
-  if (err) return <div style={{ padding: 20, color: '#8C3A2B' }}>{err}</div>;
+  if (err) return <div style={{ padding: 20, color: 'var(--oq-fg-8c3a2b)' }}>{err}</div>;
   if (!m) return <div style={{ padding: 20, color: C.muted }}>Loading…</div>;
 
   var p = m.parent;
@@ -165,12 +165,12 @@ export default function MrrMasterPage() {
               AI report "high-priority MRRs" lists every flagged request. */}
           {p.highPriority && p.highPriority.on ? (
             <span title={'Flagged by ' + (p.highPriority.setBy || 'staff') + (p.highPriority.setAt ? ' on ' + String(p.highPriority.setAt).slice(0, 10) : '')}
-              style={{ background: '#F9E4E4', color: '#B23A3A', fontWeight: 800, fontSize: 11.5, borderRadius: 12, padding: '3px 10px', letterSpacing: '.04em' }}>
+              style={{ background: 'var(--oq-bg-f9e4e4)', color: 'var(--oq-fg-b23a3a)', fontWeight: 800, fontSize: 11.5, borderRadius: 12, padding: '3px 10px', letterSpacing: '.04em' }}>
               HIGH PRIORITY</span>
           ) : null}
           {m.canManage ? (
             <button onClick={togglePriority} disabled={busy}
-              style={{ border: '1px solid ' + G.line, background: 'white', color: (p.highPriority && p.highPriority.on) ? C.muted : '#B23A3A',
+              style={{ border: '1px solid ' + G.line, background: 'var(--oq-bg-ffffff)', color: (p.highPriority && p.highPriority.on) ? C.muted : 'var(--oq-fg-b23a3a)',
                 fontSize: 11, fontWeight: 700, borderRadius: 12, padding: '3px 10px', cursor: 'pointer' }}>
               {(p.highPriority && p.highPriority.on) ? 'Clear priority' : 'Mark HIGH PRIORITY'}</button>
           ) : null}
@@ -285,7 +285,7 @@ export default function MrrMasterPage() {
           ) : null}
         </div>
 
-        {msg ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 6 }}>{msg}</div> : null}
+        {msg ? <div style={{ fontSize: 12.5, color: 'var(--oq-fg-8c3a2b)', marginTop: 6 }}>{msg}</div> : null}
       </div>
 
       {/* ── ONE BAR PER CHILD ───────────────────────────────────────────────────────────────── */}
@@ -366,7 +366,7 @@ export default function MrrMasterPage() {
             <div style={Object.assign({}, kv, { fontWeight: 700, marginBottom: 3 })}>What should legal look at? (required)</div>
             <textarea value={askNote} onChange={function (e) { setAskNote(e.target.value); }} rows={3}
               style={{ font: 'inherit', fontSize: 13, width: '100%', padding: '6px 8px', borderRadius: 5, border: '1px solid ' + G.line, boxSizing: 'border-box', resize: 'vertical' }} />
-            {askMsg ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 6 }}>{askMsg}</div> : null}
+            {askMsg ? <div style={{ fontSize: 12.5, color: 'var(--oq-fg-8c3a2b)', marginTop: 6 }}>{askMsg}</div> : null}
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button onClick={submitAsk} disabled={askBusy} style={Object.assign({}, btn, askBusy ? { opacity: 0.5, cursor: 'not-allowed' } : {})}>{askBusy ? 'Sending…' : 'Send the ask'}</button>
               <button onClick={function () { if (!askBusy) setAskOpen(false); }} style={btnQuiet}>Cancel</button>

@@ -158,7 +158,7 @@ export default function LegalEstimateTaskPage() {
           </div>
         ) : (
           <button onClick={submit} disabled={busy} style={{
-            marginTop: 14, background: busy ? C.hairStrong : C.blue, color: '#fff', border: 0,
+            marginTop: 14, background: busy ? C.hairStrong : C.blue, color: 'var(--oq-fg-ffffff)', border: 0,
             borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: busy ? 'default' : 'pointer'
           }}>{busy ? 'Recording…' : 'Record answer'}</button>
         )}

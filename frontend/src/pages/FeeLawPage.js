@@ -10,19 +10,19 @@ import StatutePopup from '../components/StatutePopup';
 // Approve = fee schedule version n. Data: GET/PUT/POST /api/fee-law · /api/fee-sandbox/preview ·
 // /api/onboarding/fees/test-result · /api/jurisdiction-profile/rules-research/:id.
 
-var C = { ink: '#12232E', mute: '#5C6F7C', faint: '#8296A4', ph: '#A9B7C2', line: '#D2DCE3', edge: '#BECAD3', wash: '#F2F6F9', pri: '#1E6091', red: '#B02A37', ok: '#1B8A5A', amber: '#9A6512', navy: '#0E3A5C' };
+var C = { ink: 'var(--oq-fg-12232e)', mute: 'var(--oq-fg-5c6f7c)', faint: 'var(--oq-fg-8296a4)', ph: 'var(--oq-fg-a9b7c2)', line: 'var(--oq-ln-d2dce3)', edge: 'var(--oq-ln-becad3)', wash: 'var(--oq-bg-f2f6f9)', pri: 'var(--oq-x-1e6091)', red: 'var(--oq-x-b02a37)', ok: 'var(--oq-x-1b8a5a)', amber: 'var(--oq-x-9a6512)', navy: 'var(--oq-x-0e3a5c)' };
 var STATE = {
-  ready:           { label: 'Ready',           bg: '#E1F2E9', color: '#1B8A5A' },
-  in_progress:     { label: 'In progress',     bg: '#F6EBD6', color: '#9A6512' },
-  not_started:     { label: 'Not started',     bg: '#F3F4F6', color: '#4B5563' },
-  needs_attention: { label: 'Needs attention', bg: '#FEE2E2', color: '#991B1B' },
-  waiting:         { label: 'Waiting',         bg: '#EDE9FE', color: '#5B21B6' },
+  ready:           { label: 'Ready',           bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' },
+  in_progress:     { label: 'In progress',     bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' },
+  not_started:     { label: 'Not started',     bg: 'var(--oq-bg-f3f4f6)', color: 'var(--oq-fg-4b5563)' },
+  needs_attention: { label: 'Needs attention', bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' },
+  waiting:         { label: 'Waiting',         bg: 'var(--oq-bg-ede9fe)', color: 'var(--oq-fg-5b21b6)' },
 };
 var BIND = {
-  fixed:    { label: 'Fixed',   bg: '#E8EEF4', color: '#0E3A5C', border: '#C5D3DF' },
-  ceiling:  { label: 'Ceiling', bg: '#FFF4E0', color: '#9A6512', border: '#F1D9A8' },
-  floor:    { label: 'Floor',   bg: '#E1F2E9', color: '#1B8A5A', border: '#B5E0C9' },
-  discretionary: { label: 'Discretionary', bg: 'white', color: '#5C6F7C', border: '#BECAD3', dashed: true },
+  fixed:    { label: 'Fixed',   bg: 'var(--oq-bg-e8eef4)', color: 'var(--oq-fg-0e3a5c)', border: 'var(--oq-ln-c5d3df)' },
+  ceiling:  { label: 'Ceiling', bg: 'var(--oq-bg-fff4e0)', color: 'var(--oq-fg-9a6512)', border: 'var(--oq-ln-f1d9a8)' },
+  floor:    { label: 'Floor',   bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)', border: 'var(--oq-ln-b5e0c9)' },
+  discretionary: { label: 'Discretionary', bg: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-5c6f7c)', border: 'var(--oq-ln-becad3)', dashed: true },
 };
 var TABS = [
   { key: 'mandate', label: 'State mandate' },
@@ -31,21 +31,21 @@ var TABS = [
   { key: 'test', label: 'Test an estimate' },
 ];
 var hint = { fontSize: '11.5px', color: C.faint, lineHeight: '1.4' };
-var card = { background: 'white', border: '1px solid ' + C.line, borderRadius: '10px' };
+var card = { background: 'var(--oq-bg-ffffff)', border: '1px solid ' + C.line, borderRadius: '10px' };
 var cite = { fontSize: '11px', color: C.faint, lineHeight: '1.35' };
 var lbl = { fontSize: '11px', fontWeight: '600', color: C.mute, display: 'block', marginBottom: '3px' };
 function btn(kind, extra) {
   var base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '36px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap' };
-  var k = kind === 'pri' ? { background: C.pri, color: 'white', border: '1px solid ' + C.pri }
+  var k = kind === 'pri' ? { background: C.pri, color: 'var(--oq-fg-ffffff)', border: '1px solid ' + C.pri }
     : kind === 'dis' ? { background: C.wash, color: C.ph, border: '1px solid ' + C.line, cursor: 'default' }
-    : { background: 'white', color: C.ink, border: '1px solid ' + C.edge };
+    : { background: 'var(--oq-bg-ffffff)', color: C.ink, border: '1px solid ' + C.edge };
   return Object.assign(base, k, extra || {});
 }
-function inp(missing, extra) { return Object.assign({ display: 'block', width: '100%', boxSizing: 'border-box', height: '32px', border: '1px solid ' + (missing ? C.red : C.edge), borderRadius: '7px', background: 'white', padding: '0 10px', fontSize: '13px', color: C.ink, fontFamily: 'inherit' }, extra || {}); }
+function inp(missing, extra) { return Object.assign({ display: 'block', width: '100%', boxSizing: 'border-box', height: '32px', border: '1px solid ' + (missing ? C.red : C.edge), borderRadius: '7px', background: 'var(--oq-bg-ffffff)', padding: '0 10px', fontSize: '13px', color: C.ink, fontFamily: 'inherit' }, extra || {}); }
 function Chip(props) { var b = BIND[props.kind]; if (!b) return null; return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', whiteSpace: 'nowrap', background: b.bg, color: b.color, border: '1px ' + (b.dashed ? 'dashed' : 'solid') + ' ' + b.border }}>{b.label}</span>; }
-function Says(props) { return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', whiteSpace: 'nowrap', background: 'white', color: C.mute, border: '1px dashed ' + C.edge, marginRight: '6px' }}>{props.text}</span>; }
+function Says(props) { return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', whiteSpace: 'nowrap', background: 'var(--oq-bg-ffffff)', color: C.mute, border: '1px dashed ' + C.edge, marginRight: '6px' }}>{props.text}</span>; }
 function Pill(props) { return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '11px', fontWeight: '700', borderRadius: '999px', padding: '2px 9px', whiteSpace: 'nowrap', background: props.bg, color: props.color }}>{props.children}</span>; }
-function Group(props) { return <div style={{ padding: '10px 12px 4px', fontSize: '12px', fontWeight: '700', color: C.ink, background: '#F8FAFC', borderTop: '1px solid ' + C.line }}>{props.title} <span style={{ fontWeight: '500', color: C.faint }}>· {props.n}</span></div>; }
+function Group(props) { return <div style={{ padding: '10px 12px 4px', fontSize: '12px', fontWeight: '700', color: C.ink, background: 'var(--oq-bg-f8fafc)', borderTop: '1px solid ' + C.line }}>{props.title} <span style={{ fontWeight: '500', color: C.faint }}>· {props.n}</span></div>; }
 function errText(e, fb) { return (e && e.response && e.response.data && e.response.data.error) || fb; }
 function fmt(n) { n = Number(n); return Number.isInteger(n) ? String(n) : (Math.round(n * 1000) / 1000).toString(); }
 function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
@@ -96,7 +96,7 @@ export default function FeeLawPage() {
   var can = !!data.canEdit;
   var hubRow = hub && hub.fee_law;
   // APPROVAL MODEL (2026-08-31): decisions are the required set; the pill is this screen's indicator.
-  var APPROVAL = { red: { label: 'Not started', bg: '#FEE2E2', color: '#991B1B' }, yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' }, green: { label: 'Approved', bg: '#E1F2E9', color: '#1B8A5A' } };
+  var APPROVAL = { red: { label: 'Not started', bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' }, yellow: { label: 'Awaiting approval', bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' }, green: { label: 'Approved', bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' } };
   var ap = (hubRow && hubRow.approval) || null;
   var st = ap ? APPROVAL[ap] : STATE[(hubRow && hubRow.state) || 'not_started'];
   var reLabel = hubRow && hubRow.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
@@ -233,7 +233,7 @@ export default function FeeLawPage() {
       </div>
       {choices.map(function (ch) {
         return <button key={ch.v} type="button" disabled={!can} title={ch.title} onClick={function () { setVal(r.key, ch.on ? '' : ch.v); }}
-          style={{ height: '28px', padding: '0 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', fontFamily: 'inherit', cursor: can ? 'pointer' : 'default', whiteSpace: 'nowrap', flexShrink: 0, background: ch.on ? C.pri : 'white', color: ch.on ? 'white' : C.mute, border: '1px solid ' + (ch.on ? C.pri : C.edge) }}>{ch.label}</button>;
+          style={{ height: '28px', padding: '0 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', fontFamily: 'inherit', cursor: can ? 'pointer' : 'default', whiteSpace: 'nowrap', flexShrink: 0, background: ch.on ? C.pri : 'var(--oq-bg-ffffff)', color: ch.on ? 'var(--oq-fg-ffffff)' : C.mute, border: '1px solid ' + (ch.on ? C.pri : C.edge) }}>{ch.label}</button>;
       })}
     </div>;
   }
@@ -259,7 +259,7 @@ export default function FeeLawPage() {
   var cell = { minWidth: 0 };  // a grid child may not overflow its track (Kevin 2026-09-08: the waiver cells crashed into the law column)
   function MandateRow(props) {
     var r = props.row;
-    return <div style={{ display: 'grid', gridTemplateColumns: grid5, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
+    return <div style={{ display: 'grid', gridTemplateColumns: grid5, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px' }}>
       <span>{r.label}</span>
       <span style={{ fontWeight: '600', fontVariantNumeric: 'tabular-nums' }}>{r.binding === 'ceiling' && r.ceiling != null ? 'up to ' : r.binding === 'floor' && r.floor != null ? 'at least ' : ''}{r.law.display}
         {r.law.ag != null ? <div style={Object.assign({}, hint, { fontWeight: '500' })}>AG rate {money(r.law.ag)} + 25% for cities</div> : null}</span>
@@ -270,7 +270,7 @@ export default function FeeLawPage() {
   }
   function DeferralRow(props) {
     var r = props.row;
-    return <div style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
+    return <div style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px' }}>
       <span>{r.label}</span>
       {CityCell({ row: r })}
       {Authority({ row: r, pre: <Says text={r.law.says} /> })}
@@ -311,8 +311,8 @@ export default function FeeLawPage() {
           : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })} title={mayAttest ? 'Record that this item is complete' : (!data.version ? 'Approve a fee schedule version first' : waiverOpen ? 'Record the fee-waiver choices first' : 'Confirm the deposit & payment clock settings first')}>{reLabel}</button>}
       </div>
 
-      {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
-      {approved ? <div style={{ background: '#E1F2E9', border: '1px solid #A7D9BF', borderRadius: '10px', padding: '12px 16px', marginBottom: '14px', fontSize: '13px' }}>
+      {err ? <div style={{ background: 'var(--oq-bg-fef2f2)', border: '1px solid var(--oq-ln-fca5a5)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
+      {approved ? <div style={{ background: 'var(--oq-bg-e1f2e9)', border: '1px solid var(--oq-ln-a7d9bf)', borderRadius: '10px', padding: '12px 16px', marginBottom: '14px', fontSize: '13px' }}>
         <b style={{ color: C.ok }}>Fee schedule v{approved.version} approved.</b> Estimates now price from it. Later changes create v{approved.version + 1}; nothing is edited in place.
         <button type="button" onClick={function () { setApproved(null); goTab('test'); }} style={btn('sec', { height: '30px', marginLeft: '12px' })}>Test an estimate against it</button>
         <button type="button" onClick={function () { nav('/admin?tab=setup'); }} style={btn('sec', { height: '30px', marginLeft: '8px' })}>See it on the hub</button>
@@ -326,7 +326,7 @@ export default function FeeLawPage() {
               <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '3px' }}>Everything about fees in one place: what {stateName} law sets, what this city decides, and when a fee is waived. Together they become the fee schedule the estimates use.</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-              {data.version ? <Pill bg="#E1F2E9" color={C.ok}>Fee schedule v{data.version.version} · active</Pill> : <Pill bg="#EDE9FE" color="#5B21B6">Fee schedule · no version yet</Pill>}
+              {data.version ? <Pill bg="var(--oq-bg-e1f2e9)" color={C.ok}>Fee schedule v{data.version.version} · active</Pill> : <Pill bg="var(--oq-bg-ede9fe)" color="var(--oq-fg-5b21b6)">Fee schedule · no version yet</Pill>}
               <span style={hint}>{data.version ? 'approved by ' + data.version.by + ', ' + String(data.version.at).slice(0, 10) + ' · approving again creates v' + nextVersion : "Approving the city's figures creates version 1"}</span>
             </div>
           </div>
@@ -336,7 +336,7 @@ export default function FeeLawPage() {
               var badge = t.key === 'mandate' ? c.mandate + ' loaded' : t.key === 'city' ? (c.decided + waiver.decided + (clock.enabled ? clock.confirmed : 0)) + ' of ' + (c.deferral + waiver.choices.length + (clock.enabled ? clock.choices.length : 0)) + ' decided' : t.key === 'document' ? (data.document ? data.document.found + ' from document' : 'none read') : (data.version ? 'v' + data.version.version : 'no version');
               return <button key={t.key} type="button" onClick={function () { goTab(t.key); }}
                 style={{ padding: '9px 16px', background: 'none', border: 'none', borderBottom: active ? '2px solid ' + C.pri : '2px solid transparent', marginBottom: '-1px', fontSize: '13.5px', fontWeight: active ? '700' : '500', color: active ? C.pri : C.mute, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                {t.key === 'city' && cityMark ? <span title={cityMark === 'red' ? 'Decisions still missing on this tab' : (cityMark === 'yellow' ? 'Complete — awaiting approval' : 'Approved')} style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: { red: '#DC2626', yellow: '#D97706', green: '#16A34A' }[cityMark] || '#C7D0D8', marginRight: '7px', verticalAlign: 'middle' }} /> : null}{t.label}<span style={{ fontSize: '10.5px', fontWeight: '700', color: active ? C.pri : C.faint, background: active ? '#E8EEF4' : C.wash, borderRadius: '999px', padding: '1px 7px' }}>{badge}</span>
+                {t.key === 'city' && cityMark ? <span title={cityMark === 'red' ? 'Decisions still missing on this tab' : (cityMark === 'yellow' ? 'Complete — awaiting approval' : 'Approved')} style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: { red: 'var(--oq-x-dc2626)', yellow: 'var(--oq-x-d97706)', green: 'var(--oq-x-16a34a)' }[cityMark] || 'var(--oq-x-c7d0d8)', marginRight: '7px', verticalAlign: 'middle' }} /> : null}{t.label}<span style={{ fontSize: '10.5px', fontWeight: '700', color: active ? C.pri : C.faint, background: active ? 'var(--oq-bg-e8eef4)' : C.wash, borderRadius: '999px', padding: '1px 7px' }}>{badge}</span>
               </button>;
             })}
           </div>
@@ -344,7 +344,7 @@ export default function FeeLawPage() {
 
         {tab === 'mandate' ? <div>
           <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E3A5C" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--oq-fg-0e3a5c)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
             <div style={{ flexGrow: 1 }}>
               <div style={{ fontSize: '14px', fontWeight: '700' }}>State mandate</div>
               <div style={hint}>Set by {stateName} law, loaded when the state was locked. The law's figure is not editable here — a change means the law changed, which goes through a proposal with a citation. Where the law sets a ceiling, the city's rate starts at the ceiling — lower it if you charge less. Click an authority to read the statute.</div>
@@ -366,12 +366,12 @@ export default function FeeLawPage() {
 
         {tab === 'city' ? <div>
           <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A6512" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--oq-fg-9a6512)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
             <div style={{ flexGrow: 1 }}>
               <div style={{ fontSize: '14px', fontWeight: '700' }}>Guidelines and deferral to local policy</div>
               <div style={hint}>{stateName} says "actual cost", "reasonable", or nothing. This city decides. Every row needs a figure or a deliberate "none" — type them here, or have them read from a fee policy document on the next tab.</div>
             </div>
-            <Pill bg={c.undecided ? '#F6EBD6' : '#E1F2E9'} color={c.undecided ? C.amber : C.ok}>{c.decided} of {c.deferral} decided</Pill>
+            <Pill bg={c.undecided ? 'var(--oq-x-f6ebd6)' : 'var(--oq-x-e1f2e9)'} color={c.undecided ? C.amber : C.ok}>{c.decided} of {c.deferral} decided</Pill>
           </div>
           <Group title="Fee computation" n={by(defr, 'computation').length} />
           {head3}{by(defr, 'computation').map(function (r) { return <React.Fragment key={r.key}>{DeferralRow({ row: r })}</React.Fragment>; })}
@@ -381,11 +381,11 @@ export default function FeeLawPage() {
           {/* Deposit & payment clock (F3): the master switch, then the six settings pre-filled with the
               state's answers. The switch arms automation that stops clocks and withdraws requests, so it
               is its own explicit act — and off is itself a valid, attestable posture. */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 12px 10px', borderTop: '1px solid #EEF2F5', background: '#FBFCFD' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 12px 10px', borderTop: '1px solid var(--oq-ln-eef2f5)', background: 'var(--oq-bg-fbfcfd)' }}>
             <button type="button" disabled={!can || busy === 'clock'} onClick={function () { setClockEnabled(!clock.enabled); }}
               title={clock.enabled ? 'Turn the deposit & payment clock automation off' : 'Turn the deposit & payment clock automation on'}
               style={{ width: '38px', height: '22px', borderRadius: '999px', border: 0, padding: 0, background: clock.enabled ? C.ok : C.edge, position: 'relative', flexShrink: 0, marginTop: '2px', cursor: can ? 'pointer' : 'default' }}>
-              <span style={{ position: 'absolute', top: '2px', left: clock.enabled ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '999px', background: 'white' }}></span>
+              <span style={{ position: 'absolute', top: '2px', left: clock.enabled ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '999px', background: 'var(--oq-bg-ffffff)' }}></span>
             </button>
             <div style={{ flexGrow: 1 }}>
               <div style={{ fontSize: '13px', fontWeight: '700' }}>Deposit &amp; payment clock — <span style={{ color: clock.enabled ? C.ok : C.faint }}>{clock.enabled ? 'on' : 'off'}</span>
@@ -399,7 +399,7 @@ export default function FeeLawPage() {
           {clock.enabled ? clock.choices.map(function (ch) {
             var decided = ch.value != null && clockEdits[ch.key] === undefined;
             var pre = ch.prefill;
-            return <div key={ch.key} style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
+            return <div key={ch.key} style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px' }}>
               <span>{ch.label}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {ch.kind === 'choice' ? (
@@ -427,7 +427,7 @@ export default function FeeLawPage() {
               </span>
             </div>;
           }) : null}
-          {clock.enabled ? <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderTop: '1px solid #EEF2F5' }}>
+          {clock.enabled ? <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)' }}>
             <span style={Object.assign({}, hint, { flexGrow: 1 })}>All six write through to the policy the engine reads, and they gate <b>Attest</b> — but not <b>Approve</b>: the fee schedule waits only on the money figures above. Automation runs only while the switch is on <b>and</b> this screen is attested.</span>
           </div> : null}
           {waiver.choices.length ? <React.Fragment>
@@ -435,7 +435,7 @@ export default function FeeLawPage() {
             {headW}
             {waiver.choices.map(function (w) {
               var decided = w.value != null && wEdits[w.key === 'waiver.decider' ? 'decider' : 'denialWording'] === undefined;
-              return <div key={w.key} style={{ display: 'grid', gridTemplateColumns: gridW, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
+              return <div key={w.key} style={{ display: 'grid', gridTemplateColumns: gridW, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px' }}>
                 <span style={cell}>{w.label}</span>
                 {w.key === 'waiver.decider' ? (
                   <select value={wEdits.decider !== undefined ? wEdits.decider : (w.value || w.current.mode)} disabled={!can}
@@ -460,7 +460,7 @@ export default function FeeLawPage() {
                   {decided ? <span style={{ color: C.ok, fontWeight: '600' }}> · ✓ decided by {w.by}{w.at ? ', ' + String(w.at).slice(0, 10) : ''}</span> : null}</span>
               </div>;
             })}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderTop: '1px solid #EEF2F5' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)' }}>
               <span style={Object.assign({}, hint, { flexGrow: 1 })}>These two are recorded like every other decision and gate <b>Attest</b> — but not <b>Approve</b>: the fee schedule waits only on the money figures above.</span>
               <button type="button" disabled={!can || busy === 'waiver' || (wEdits.decider === undefined && wEdits.denialWording === undefined)} onClick={saveWaiver}
                 style={btn(can && (wEdits.decider !== undefined || wEdits.denialWording !== undefined) ? 'pri' : 'dis', { height: '30px' })}>{busy === 'waiver' ? 'Recording…' : 'Record waiver choices'}</button>
@@ -492,7 +492,7 @@ export default function FeeLawPage() {
             {docRows.length ? <div style={{ marginTop: '18px' }}>
               <div style={{ fontSize: '12.5px', fontWeight: '700', marginBottom: '6px' }}>Figures taken from the document · {docRows.length}</div>
               <div style={Object.assign({}, card, { overflow: 'hidden' })}>
-                {docRows.map(function (r, i) { return <div key={r.key} style={{ display: 'grid', gridTemplateColumns: '260px 160px minmax(0,1fr)', gap: '10px', padding: '7px 12px', borderTop: i ? '1px solid #EEF2F5' : 0, fontSize: '12.5px', alignItems: 'center' }}><span>{r.label}</span><span style={{ fontWeight: '600' }}>{cityText(r.city.value)}</span><span style={cite}>{r.city.ref || 'no reference recorded'}</span></div>; })}
+                {docRows.map(function (r, i) { return <div key={r.key} style={{ display: 'grid', gridTemplateColumns: '260px 160px minmax(0,1fr)', gap: '10px', padding: '7px 12px', borderTop: i ? '1px solid var(--oq-ln-eef2f5)' : 0, fontSize: '12.5px', alignItems: 'center' }}><span>{r.label}</span><span style={{ fontWeight: '600' }}>{cityText(r.city.value)}</span><span style={cite}>{r.city.ref || 'no reference recorded'}</span></div>; })}
               </div>
               <div style={Object.assign({}, hint, { marginTop: '6px' })}>Change any of these on the City decisions tab; the reference stays until you overwrite the value.</div>
             </div> : null}
@@ -505,7 +505,7 @@ export default function FeeLawPage() {
       <StatutePopup info={statute} onClose={function () { setStatute(null); }} />
       {sentences ? (
         <div onClick={function () { setSentences(false); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(18,35,46,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', padding: '20px 22px', width: '620px', maxWidth: '94%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '12px', padding: '20px 22px', width: '620px', maxWidth: '94%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
             <div style={{ fontSize: '15px', fontWeight: '700' }}>The waiver-denial explanation — standard wording</div>
             <div style={Object.assign({}, hint, { marginTop: '3px' })}>The sentence staff pick when a fee-waiver request is denied; it folds into the estimate notice. Editable wording comes with the letter templates, as its own piece of work.</div>
             <ol style={{ margin: '14px 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', lineHeight: '1.5' }}>
@@ -586,8 +586,8 @@ function TestTab(props) {
         </div>
       </div>
     </div>
-    <div style={Object.assign({}, card, { background: '#F9FAFB', padding: '14px 16px', alignSelf: 'start' })}>
-      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>Estimate {out ? <span style={{ fontSize: '11px', fontWeight: '700', color: out.against === 'active' ? C.ok : C.amber, background: out.against === 'active' ? '#E1F2E9' : '#F6EBD6', borderRadius: '999px', padding: '2px 8px', marginLeft: '6px' }}>{out.against === 'active' ? 'approved ' + out.configVersion : 'unapproved draft'}</span> : null}</div>
+    <div style={Object.assign({}, card, { background: 'var(--oq-bg-f9fafb)', padding: '14px 16px', alignSelf: 'start' })}>
+      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>Estimate {out ? <span style={{ fontSize: '11px', fontWeight: '700', color: out.against === 'active' ? C.ok : C.amber, background: out.against === 'active' ? 'var(--oq-bg-e1f2e9)' : 'var(--oq-bg-f6ebd6)', borderRadius: '999px', padding: '2px 8px', marginLeft: '6px' }}>{out.against === 'active' ? 'approved ' + out.configVersion : 'unapproved draft'}</span> : null}</div>
       {err ? <div style={{ fontSize: '12.5px', color: C.red }}>{err}</div> : null}
       {!out && !err ? <div style={{ fontSize: '12px', color: C.ph }}>Calculating…</div> : null}
       {R ? <div style={{ fontSize: '12.5px' }}>
@@ -616,10 +616,10 @@ function TestTab(props) {
         </div>
         {out.requestorNotice ? <div style={{ marginTop: '12px' }}>
           <button type="button" onClick={function () { setShowNotice(!showNotice); }} style={btn('sec', { height: '30px' })}>{showNotice ? 'Hide' : 'Show'} the notice the requestor would receive</button>
-          {showNotice ? <div style={{ marginTop: '8px', background: 'white', border: '1px solid ' + C.line, borderRadius: '8px', padding: '10px 12px', fontSize: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}><b>{out.requestorNotice.subject}</b>{'\n\n'}{out.requestorNotice.text}</div> : null}
+          {showNotice ? <div style={{ marginTop: '8px', background: 'var(--oq-bg-ffffff)', border: '1px solid ' + C.line, borderRadius: '8px', padding: '10px 12px', fontSize: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}><b>{out.requestorNotice.subject}</b>{'\n\n'}{out.requestorNotice.text}</div> : null}
         </div> : null}
       </div> : null}
     </div>
   </div>;
 }
-function Line(props) { return <div style={{ display: 'flex', justifyContent: 'space-between', color: props.amber ? '#92400E' : props.muted ? '#8296A4' : '#374151' }}><span>{props.k}</span><span>{props.v}</span></div>; }
+function Line(props) { return <div style={{ display: 'flex', justifyContent: 'space-between', color: props.amber ? 'var(--oq-fg-92400e)' : props.muted ? 'var(--oq-fg-8296a4)' : 'var(--oq-fg-374151)' }}><span>{props.k}</span><span>{props.v}</span></div>; }

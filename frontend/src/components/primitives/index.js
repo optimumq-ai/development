@@ -20,9 +20,9 @@ import { C } from '../../lib/theme';
 //  - DecidedByBadge: the system is never shown as having decided a judgment call.
 
 export var G = {
-  navy: '#143D5C', line: '#C3CFDA',
-  amberInk: '#9A6700', amberLine: '#D4A72C', amberBg: '#FFF8E5',
-  ghost: '#8A97A3', statute: '#2F6B4F', statuteBg: '#EAF4EF'
+  navy: 'var(--oq-x-143d5c)', line: 'var(--oq-ln-c3cfda)',
+  amberInk: 'var(--oq-fg-9a6700)', amberLine: 'var(--oq-ln-d4a72c)', amberBg: 'var(--oq-bg-fff8e5)',
+  ghost: 'var(--oq-x-8a97a3)', statute: 'var(--oq-fg-2f6b4f)', statuteBg: 'var(--oq-bg-eaf4ef)'
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -69,11 +69,11 @@ export function ClockChip(props) {
 // flattening it into `person` would make the city look like the author of a decision it did not make.
 // Verify ≠ Approve. Same tint as MrrMasterPage's `ext` tag, so the two read as one family.
 var BY = {
-  person:  { bg: '#FFF8E5', fg: '#9A6700', bd: '#D4A72C', dash: false },
-  statute: { bg: '#EAF4EF', fg: '#2F6B4F', bd: '#2F6B4F', dash: false },
-  system:  { bg: '#F2F6F9', fg: '#143D5C', bd: '#C3CFDA', dash: false },
-  recorded:{ bg: '#FFFFFF', fg: '#8A97A3', bd: '#8A97A3', dash: true },
-  external:{ bg: '#EDE9F5', fg: '#4A3A75', bd: '#8E7CC3', dash: false }
+  person:  { bg: 'var(--oq-bg-fff8e5)', fg: 'var(--oq-fg-9a6700)', bd: 'var(--oq-ln-d4a72c)', dash: false },
+  statute: { bg: 'var(--oq-bg-eaf4ef)', fg: 'var(--oq-fg-2f6b4f)', bd: 'var(--oq-ln-2f6b4f)', dash: false },
+  system:  { bg: 'var(--oq-bg-f2f6f9)', fg: 'var(--oq-fg-143d5c)', bd: 'var(--oq-ln-c3cfda)', dash: false },
+  recorded:{ bg: 'var(--oq-bg-ffffff)', fg: 'var(--oq-fg-8a97a3)', bd: 'var(--oq-ln-8a97a3)', dash: true },
+  external:{ bg: 'var(--oq-bg-ede9f5)', fg: 'var(--oq-fg-4a3a75)', bd: 'var(--oq-ln-8e7cc3)', dash: false }
 };
 export function DecidedByBadge(props) {
   var t = BY[props.by] || BY.recorded;
@@ -142,7 +142,7 @@ var STX = {
   attested:   { bg: G.statuteBg, fg: G.statute, bd: G.statute, dash: false },
   configured: { bg: C.surface2, fg: G.navy, bd: G.line, dash: false },
   unconf:     { bg: G.amberBg, fg: G.amberInk, bd: G.amberLine, dash: false },
-  bad:        { bg: '#F7E9E5', fg: '#8C3A2B', bd: '#C08A7E', dash: false },
+  bad:        { bg: 'var(--oq-bg-f7e9e5)', fg: 'var(--oq-fg-8c3a2b)', bd: 'var(--oq-ln-c08a7e)', dash: false },
   empty:      { bg: C.surface, fg: G.ghost, bd: G.ghost, dash: true }
 };
 export function StatusChip(props) {
@@ -263,11 +263,11 @@ export function PortalResultsBar(props) {
           <button key={t.k} type="button" onClick={function () { props.onView(t.k); }}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer',
               border: '1px solid ' + C.blue, borderRadius: 8, padding: '6px 10px', fontSize: 13, fontWeight: 600,
-              background: on ? C.blue : C.blueTint, color: on ? '#fff' : C.blue }}>
+              background: on ? C.blue : C.blueTint, color: on ? 'var(--oq-fg-ffffff)' : C.blue }}>
             {t.label}
             <span style={{ display: 'inline-grid', placeItems: 'center', minWidth: 20, height: 20, padding: '0 6px',
               borderRadius: 999, fontFamily: C.mono, fontSize: 12, fontWeight: 700,
-              background: on ? '#fff' : C.blue, color: on ? C.blue : '#fff' }}>{t.n}</span>
+              background: on ? 'var(--oq-bg-ffffff)' : C.blue, color: on ? C.blue : 'var(--oq-fg-ffffff)' }}>{t.n}</span>
           </button>
         );
       })}

@@ -159,7 +159,7 @@ export default function AvWorkbenchPage(){
           var padX=b.width*0.18, padY=b.height*0.18;
           var x=Math.max(0,Math.round(b.x-padX)), y=Math.max(0,Math.round(b.y-padY));
           var w=Math.round(b.width+padX*2), h=Math.round(b.height+padY*2);
-          out.push({ id:rid(), trackId:tid, auto:true, x:x, y:y, w:w, h:h, type:'face', style:'black', label:'Face '+tid.replace('t',''), startTime:st, endTime:+Math.min(dur, st+hold).toFixed(3), detected:true });
+          out.push({ id:rid(), trackId:tid, auto:true, x:x, y:y, w:w, h:h, type:'face', style:'var(--oq-x-000000)', label:'Face '+tid.replace('t',''), startTime:st, endTime:+Math.min(dur, st+hold).toFixed(3), detected:true });
         });
         live.forEach(function(p){ if(!used[p.tid]) p.misses=(p.misses||0)+1; });
         live=live.filter(function(p){ return p.misses<=4; });
@@ -193,12 +193,12 @@ export default function AvWorkbenchPage(){
     catch(e){ alert((e.response&&e.response.data&&e.response.data.error)||'Redaction failed.'); setBusy(false); }
   }
 
-  var lbl={fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'};
-  var sel={padding:'7px 9px',border:'1px solid #D1D5DB',borderRadius:'8px',fontSize:'13px'};
-  var num={width:'72px',padding:'5px 7px',border:'1px solid #D1D5DB',borderRadius:'6px',fontSize:'12px'};
-  var btnPri={padding:'10px 18px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'14px',fontWeight:'700',cursor:'pointer'};
-  var btn={padding:'8px 14px',borderRadius:'8px',border:'1px solid #D1D5DB',background:'white',color:'#374151',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
-  var card={background:'white',border:'1px solid #E5E7EB',borderRadius:'10px',padding:'16px',marginBottom:'16px'};
+  var lbl={fontSize:'11px',fontWeight:'600',color:'var(--oq-fg-9ca3af)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'};
+  var sel={padding:'7px 9px',border:'1px solid var(--oq-ln-d1d5db)',borderRadius:'8px',fontSize:'13px'};
+  var num={width:'72px',padding:'5px 7px',border:'1px solid var(--oq-ln-d1d5db)',borderRadius:'6px',fontSize:'12px'};
+  var btnPri={padding:'10px 18px',borderRadius:'8px',border:'none',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',fontSize:'14px',fontWeight:'700',cursor:'pointer'};
+  var btn={padding:'8px 14px',borderRadius:'8px',border:'1px solid var(--oq-ln-d1d5db)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-374151)',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
+  var card={background:'var(--oq-bg-ffffff)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'10px',padding:'16px',marginBottom:'16px'};
 
   var manualReds = vReds.filter(function(z){ return !z.trackId; });
   var trackMap = {};
@@ -207,38 +207,38 @@ export default function AvWorkbenchPage(){
 
   return (
     <div style={{padding:'24px',maxWidth:'1100px',margin:'0 auto'}}>
-      <div onClick={function(){navigate('/requests/'+requestId);}} style={{fontSize:'13px',color:'#1F4E79',cursor:'pointer',marginBottom:'10px'}}>&larr; Back to request</div>
-      <div style={{fontSize:'20px',fontWeight:'800',color:'#111',marginBottom:'2px'}}>Redaction workbench</div>
-      <div style={{fontSize:'13px',color:'#6B7280',marginBottom:'18px'}}>{fileName||'Video'} {dims.w?('\u00b7 '+dims.w+'x'+dims.h):''}</div>
+      <div onClick={function(){navigate('/requests/'+requestId);}} style={{fontSize:'13px',color:'var(--oq-fg-1f4e79)',cursor:'pointer',marginBottom:'10px'}}>&larr; Back to request</div>
+      <div style={{fontSize:'20px',fontWeight:'800',color:'var(--oq-fg-111111)',marginBottom:'2px'}}>Redaction workbench</div>
+      <div style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',marginBottom:'18px'}}>{fileName||'Video'} {dims.w?('\u00b7 '+dims.w+'x'+dims.h):''}</div>
 
-      {loadErr ? <div style={{padding:'16px',color:'#9B1C1C',background:'#FDE8E8',borderRadius:'8px'}}>{loadErr}</div> : (
+      {loadErr ? <div style={{padding:'16px',color:'var(--oq-fg-9b1c1c)',background:'var(--oq-bg-fde8e8)',borderRadius:'8px'}}>{loadErr}</div> : (
       <div style={{display:'flex',gap:'20px',flexWrap:'wrap',alignItems:'flex-start'}}>
         <div style={{flex:'1 1 520px',minWidth:'320px'}}>
-          <div style={{position:'relative',width:'100%',background:'#000',borderRadius:'10px',overflow:'hidden'}}>
-            {videoUrl ? <video ref={videoRef} src={videoUrl} onLoadedMetadata={onLoaded} onTimeUpdate={onTime} onEnded={function(){setPlaying(false);}} style={{width:'100%',display:'block'}}/> : <div style={{padding:'80px',textAlign:'center',color:'#9CA3AF'}}>Loading video...</div>}
+          <div style={{position:'relative',width:'100%',background:'var(--oq-bg-000000)',borderRadius:'10px',overflow:'hidden'}}>
+            {videoUrl ? <video ref={videoRef} src={videoUrl} onLoadedMetadata={onLoaded} onTimeUpdate={onTime} onEnded={function(){setPlaying(false);}} style={{width:'100%',display:'block'}}/> : <div style={{padding:'80px',textAlign:'center',color:'var(--oq-fg-9ca3af)'}}>Loading video...</div>}
             <canvas ref={canvasRef} onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp} style={{position:'absolute',top:0,left:0,width:'100%',height:'100%',cursor: ready?'crosshair':'default'}}/>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:'10px',marginTop:'10px'}}>
             <button onClick={togglePlay} style={btn}>{playing?'Pause':'Play'}</button>
             <input type="range" min={0} max={duration||0} step={0.05} value={currentTime} onChange={function(e){seek(parseFloat(e.target.value));}} style={{flex:1}}/>
-            <span style={{fontSize:'12px',color:'#6B7280',minWidth:'92px',textAlign:'right'}}>{fmt(currentTime)} / {fmt(duration)}</span>
+            <span style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',minWidth:'92px',textAlign:'right'}}>{fmt(currentTime)} / {fmt(duration)}</span>
           </div>
 
-          <div style={{...card,marginTop:'12px',background:'#F8FAFF',borderColor:'#BFDBFE'}}>
+          <div style={{...card,marginTop:'12px',background:'var(--oq-bg-f8faff)',borderColor:'var(--oq-ln-bfdbfe)'}}>
             <div style={{display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'}}>
               <button onClick={autoDetect} disabled={detecting||!ready} style={{...btnPri,opacity:(detecting||!ready)?0.6:1}}>{detecting?'Detecting...':'Auto-detect faces'}</button>
               {vReds.some(function(z){return z.auto;}) && <button onClick={clearAuto} disabled={detecting} style={btn}>Clear auto-detections</button>}
-              {detectMsg && <span style={{fontSize:'12px',color:'#1F4E79'}}>{detectMsg}</span>}
+              {detectMsg && <span style={{fontSize:'12px',color:'var(--oq-fg-1f4e79)'}}>{detectMsg}</span>}
             </div>
-            {detecting && <div style={{height:'6px',background:'#DBEAFE',borderRadius:'3px',marginTop:'10px',overflow:'hidden'}}><div style={{height:'100%',width:progress+'%',background:'#1F4E79'}}></div></div>}
-            <div style={{fontSize:'11px',color:'#6B7280',marginTop:'10px',lineHeight:'1.5'}}>Auto-detect finds <strong>candidate</strong> faces for you to confirm. It can miss faces (turned away, blurry, distant), so always review the whole clip yourself. It does not detect license plates.</div>
+            {detecting && <div style={{height:'6px',background:'var(--oq-bg-dbeafe)',borderRadius:'3px',marginTop:'10px',overflow:'hidden'}}><div style={{height:'100%',width:progress+'%',background:'var(--oq-bg-1f4e79)'}}></div></div>}
+            <div style={{fontSize:'11px',color:'var(--oq-fg-6b7280)',marginTop:'10px',lineHeight:'1.5'}}>Auto-detect finds <strong>candidate</strong> faces for you to confirm. It can miss faces (turned away, blurry, distant), so always review the whole clip yourself. It does not detect license plates.</div>
           </div>
 
           <div style={card}>
             <div style={{display:'flex',gap:'14px',alignItems:'flex-end',flexWrap:'wrap'}}>
               <div><div style={lbl}>Type</div><select value={vType} onChange={function(e){setVType(e.target.value);}} style={sel}>{V_TYPES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select></div>
               <div><div style={lbl}>Style</div><select value={vStyle} onChange={function(e){setVStyle(e.target.value);}} style={sel}>{V_STYLES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select></div>
-              <div style={{fontSize:'12px',color:'#6B7280',paddingBottom:'8px'}}>Click and drag on the video to draw a box manually.</div>
+              <div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',paddingBottom:'8px'}}>Click and drag on the video to draw a box manually.</div>
             </div>
           </div>
         </div>
@@ -246,14 +246,14 @@ export default function AvWorkbenchPage(){
         <div style={{flex:'1 1 380px',minWidth:'300px'}}>
           <div style={card}>
             <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'10px'}}>Detected faces ({tracks.length})</div>
-            {tracks.length===0 ? <div style={{fontSize:'13px',color:'#9CA3AF'}}>None. Run auto-detect, or draw boxes manually below.</div> :
+            {tracks.length===0 ? <div style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)'}}>None. Run auto-detect, or draw boxes manually below.</div> :
               tracks.map(function(tr){ return (
-                <div key={tr.id} style={{border:'1px solid #DBEAFE',background:'#F8FAFF',borderRadius:'8px',padding:'10px',marginBottom:'8px'}}>
+                <div key={tr.id} style={{border:'1px solid var(--oq-ln-dbeafe)',background:'var(--oq-bg-f8faff)',borderRadius:'8px',padding:'10px',marginBottom:'8px'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
-                    <div style={{fontSize:'13px',fontWeight:'600',color:'#1F4E79'}}>{tr.label} <span style={{fontSize:'11px',color:'#6B7280'}}>{fmt(tr.start)}&ndash;{fmt(tr.end)} &middot; {tr.n} seg</span></div>
+                    <div style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-1f4e79)'}}>{tr.label} <span style={{fontSize:'11px',color:'var(--oq-fg-6b7280)'}}>{fmt(tr.start)}&ndash;{fmt(tr.end)} &middot; {tr.n} seg</span></div>
                     <div style={{display:'flex',gap:'6px'}}>
                       <button onClick={function(){seek(tr.start);}} style={{...btn,padding:'3px 8px',fontSize:'12px'}}>Jump</button>
-                      <button onClick={function(){delTrack(tr.id);}} style={{...btn,padding:'3px 8px',fontSize:'12px',color:'#9B1C1C',borderColor:'#FDE8E8'}}>Keep visible</button>
+                      <button onClick={function(){delTrack(tr.id);}} style={{...btn,padding:'3px 8px',fontSize:'12px',color:'var(--oq-fg-9b1c1c)',borderColor:'var(--oq-ln-fde8e8)'}}>Keep visible</button>
                     </div>
                   </div>
                   <select value={tr.style} onChange={function(e){setTrackStyle(tr.id,e.target.value);}} style={{...sel,padding:'4px 7px',fontSize:'12px'}}>{V_STYLES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select>
@@ -264,20 +264,20 @@ export default function AvWorkbenchPage(){
 
           <div style={card}>
             <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'10px'}}>Manual boxes ({manualReds.length})</div>
-            {manualReds.length===0 ? <div style={{fontSize:'13px',color:'#9CA3AF'}}>None yet. Draw a box on the video.</div> :
+            {manualReds.length===0 ? <div style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)'}}>None yet. Draw a box on the video.</div> :
               manualReds.map(function(z){ return (
-                <div key={z.id} style={{border:'1px solid #F3F4F6',borderRadius:'8px',padding:'10px',marginBottom:'8px'}}>
+                <div key={z.id} style={{border:'1px solid var(--oq-ln-f3f4f6)',borderRadius:'8px',padding:'10px',marginBottom:'8px'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
-                    <div style={{fontSize:'13px',fontWeight:'600'}}>{z.label} <span style={{fontSize:'11px',color:'#9CA3AF'}}>({z.w}x{z.h})</span></div>
-                    <button onClick={function(){delV(z.id);}} style={{...btn,padding:'3px 8px',fontSize:'12px',color:'#9B1C1C',borderColor:'#FDE8E8'}}>Remove</button>
+                    <div style={{fontSize:'13px',fontWeight:'600'}}>{z.label} <span style={{fontSize:'11px',color:'var(--oq-fg-9ca3af)'}}>({z.w}x{z.h})</span></div>
+                    <button onClick={function(){delV(z.id);}} style={{...btn,padding:'3px 8px',fontSize:'12px',color:'var(--oq-fg-9b1c1c)',borderColor:'var(--oq-ln-fde8e8)'}}>Remove</button>
                   </div>
                   <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
                     <select value={z.style} onChange={function(e){setVField(z.id,'style',e.target.value);}} style={{...sel,padding:'4px 7px',fontSize:'12px'}}>{V_STYLES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select>
-                    <span style={{fontSize:'11px',color:'#6B7280'}}>from</span>
+                    <span style={{fontSize:'11px',color:'var(--oq-fg-6b7280)'}}>from</span>
                     <input type="number" step="0.1" value={z.startTime} onChange={function(e){setVField(z.id,'startTime',clampT(e.target.value));}} style={num}/>
-                    <span style={{fontSize:'11px',color:'#6B7280'}}>to</span>
+                    <span style={{fontSize:'11px',color:'var(--oq-fg-6b7280)'}}>to</span>
                     <input type="number" step="0.1" value={z.endTime} onChange={function(e){setVField(z.id,'endTime',clampT(e.target.value));}} style={num}/>
-                    <span style={{fontSize:'11px',color:'#6B7280'}}>s</span>
+                    <span style={{fontSize:'11px',color:'var(--oq-fg-6b7280)'}}>s</span>
                   </div>
                 </div>
               );})
@@ -292,14 +292,14 @@ export default function AvWorkbenchPage(){
                 <button onClick={addAudio} style={{...btn,padding:'5px 10px',fontSize:'12px'}}>Add at {fmt(currentTime)}</button>
               </div>
             </div>
-            {aReds.length===0 ? <div style={{fontSize:'13px',color:'#9CA3AF'}}>None. Add a window at the current time.</div> :
+            {aReds.length===0 ? <div style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)'}}>None. Add a window at the current time.</div> :
               aReds.map(function(z){ return (
-                <div key={z.id} style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',border:'1px solid #F3F4F6',borderRadius:'8px',padding:'8px',marginBottom:'6px'}}>
+                <div key={z.id} style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',border:'1px solid var(--oq-ln-f3f4f6)',borderRadius:'8px',padding:'8px',marginBottom:'6px'}}>
                   <select value={z.style} onChange={function(e){setAField(z.id,'style',e.target.value);}} style={{...sel,padding:'4px 7px',fontSize:'12px'}}>{A_STYLES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select>
                   <input type="number" step="0.1" value={z.startTime} onChange={function(e){setAField(z.id,'startTime',clampT(e.target.value));}} style={num}/>
-                  <span style={{fontSize:'11px',color:'#6B7280'}}>to</span>
+                  <span style={{fontSize:'11px',color:'var(--oq-fg-6b7280)'}}>to</span>
                   <input type="number" step="0.1" value={z.endTime} onChange={function(e){setAField(z.id,'endTime',clampT(e.target.value));}} style={num}/>
-                  <button onClick={function(){delA(z.id);}} style={{...btn,padding:'3px 8px',fontSize:'12px',color:'#9B1C1C',borderColor:'#FDE8E8',marginLeft:'auto'}}>Remove</button>
+                  <button onClick={function(){delA(z.id);}} style={{...btn,padding:'3px 8px',fontSize:'12px',color:'var(--oq-fg-9b1c1c)',borderColor:'var(--oq-ln-fde8e8)',marginLeft:'auto'}}>Remove</button>
                 </div>
               );})
             }
@@ -309,7 +309,7 @@ export default function AvWorkbenchPage(){
             <button onClick={applyNow} disabled={busy} style={{...btnPri,opacity:busy?0.6:1}}>{busy?'Applying redaction...':'Apply redaction'}</button>
             <button onClick={exportPlan} style={btn}>Export plan</button>
           </div>
-          <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'10px',lineHeight:'1.5'}}>Applying creates a redacted copy on the request and keeps the original. "Keep visible" removes a detected face from redaction (e.g. an officer).</div>
+          <div style={{fontSize:'11px',color:'var(--oq-fg-9ca3af)',marginTop:'10px',lineHeight:'1.5'}}>Applying creates a redacted copy on the request and keeps the original. "Keep visible" removes a detected face from redaction (e.g. an officer).</div>
         </div>
       </div>
       )}

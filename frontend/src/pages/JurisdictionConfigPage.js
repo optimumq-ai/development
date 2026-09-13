@@ -34,7 +34,7 @@ var h1 = { fontSize: 17, fontWeight: 700, color: G.navy, margin: '0 0 2px' };
 var sub = { fontSize: 12.5, color: C.muted, margin: '0 0 14px' };
 var panel = { background: C.surface, border: '1px solid ' + G.line, borderRadius: 8, padding: '12px 14px', marginBottom: 12 };
 var railHead = { fontSize: 10.5, fontWeight: 800, letterSpacing: '.07em', textTransform: 'uppercase', color: C.muted, marginBottom: 6 };
-var btn = { font: 'inherit', fontSize: 12.5, fontWeight: 600, borderRadius: 5, padding: '5px 12px', cursor: 'pointer', background: C.blue, color: '#fff', border: '1px solid ' + C.blue };
+var btn = { font: 'inherit', fontSize: 12.5, fontWeight: 600, borderRadius: 5, padding: '5px 12px', cursor: 'pointer', background: C.blueBg, color: 'var(--oq-fg-ffffff)', border: '1px solid ' + C.blue };
 var btnSec = Object.assign({}, btn, { background: C.surface, color: C.blue });
 var btnQuiet = Object.assign({}, btn, { background: C.surface2, color: C.ink, border: '1px solid ' + G.line, fontWeight: 500 });
 var btnOff = Object.assign({}, btn, { opacity: 0.45, cursor: 'not-allowed' });
@@ -46,7 +46,7 @@ function pill(toneStyle, content, key) {
     color: C.muted }, toneStyle)}>{content}</span>;
 }
 var pillWarn = { borderColor: G.amberLine, background: G.amberBg, color: G.amberInk };
-var pillBad = { borderColor: '#C08A7E', background: '#F7E9E5', color: '#8C3A2B' };
+var pillBad = { borderColor: 'var(--oq-ln-c08a7e)', background: 'var(--oq-bg-f7e9e5)', color: 'var(--oq-fg-8c3a2b)' };
 var pillOk = { borderColor: G.statute, background: G.statuteBg, color: G.statute };
 
 // The section-row status, in the mockup's vocabulary. Only ACTIVE-on-unconfirmed and drift are
@@ -69,7 +69,7 @@ function GateSummary(props) {
   return (
     <div style={{ background: C.surface2, border: '1px solid ' + G.line, borderRadius: 6, padding: '11px 14px', marginBottom: 13 }}>
       <div style={{ display: 'flex', gap: 12, alignItems: 'baseline', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 15, fontWeight: 800, color: s.ready ? G.statute : '#8C3A2B' }}>
+        <span style={{ fontSize: 15, fontWeight: 800, color: s.ready ? G.statute : 'var(--oq-fg-8c3a2b)' }}>
           {live ? 'LIVE — ENFORCEMENT ON' : (s.ready ? 'READY FOR GO-LIVE' : 'NOT READY FOR GO-LIVE')}
         </span>
         {pill(s.unconfirmedSettings > 0 ? pillWarn : pillOk,
@@ -916,14 +916,14 @@ export default function JurisdictionConfigPage() {
               <div style={railHead}>Integrity findings</div>
               {secFindings.length === 0 ? <div style={kv}>None touching this section. The invariants (clock bands, provenance, no unknown keys) hold regardless of attestation — and the composer refuses what they refuse, before anything is written.</div>
                 : secFindings.slice(0, 4).map(function (f, i) {
-                  return <div key={i} style={{ borderLeft: '3px solid #C08A7E', paddingLeft: 10, fontSize: 12.5, marginBottom: 7 }}>
+                  return <div key={i} style={{ borderLeft: '3px solid var(--oq-ln-c08a7e)', paddingLeft: 10, fontSize: 12.5, marginBottom: 7 }}>
                     <b>{f.where}:</b> {f.issue}
                   </div>;
                 })}
             </div>
             <div style={Object.assign({}, panel, { marginTop: 10 })}>
               <div style={railHead}>Enforcement</div>
-              <div style={kv}>Dev mode: <b style={{ color: summary.devMode ? '#8C3A2B' : G.statute }}>{summary.devMode ? 'ON — gates simulated' : 'OFF — live'}</b>. Turning it off is the go-live act, on the checklist’s front page.</div>
+              <div style={kv}>Dev mode: <b style={{ color: summary.devMode ? 'var(--oq-fg-8c3a2b)' : G.statute }}>{summary.devMode ? 'ON — gates simulated' : 'OFF — live'}</b>. Turning it off is the go-live act, on the checklist’s front page.</div>
             </div>
           </div>
         </div>
@@ -1032,7 +1032,7 @@ export default function JurisdictionConfigPage() {
             ? <div style={kv}>None. The invariants (clock bands, provenance, no unknown keys, no test stamps) hold regardless of attestation.</div>
             : <div>
                 {findings.slice(0, 3).map(function (f, i) {
-                  return <div key={i} style={{ borderLeft: '3px solid #C08A7E', paddingLeft: 10, fontSize: 12.5, marginBottom: 7 }}>
+                  return <div key={i} style={{ borderLeft: '3px solid var(--oq-ln-c08a7e)', paddingLeft: 10, fontSize: 12.5, marginBottom: 7 }}>
                     <b>{f.where}:</b> {f.issue}
                   </div>;
                 })}
@@ -1044,7 +1044,7 @@ export default function JurisdictionConfigPage() {
           {summary.devMode ? (
             <div>
               <div style={Object.assign({}, kv, { marginBottom: 8 })}>
-                Dev mode is <b style={{ color: '#8C3A2B' }}>ON</b> — every gate is simulated. Turning it off is the
+                Dev mode is <b style={{ color: 'var(--oq-fg-8c3a2b)' }}>ON</b> — every gate is simulated. Turning it off is the
                 go-live act itself: a System Administrator's decision, informed by this checklist.
               </div>
               <button type="button" style={summary.ready && isSA ? btn : btnOff} disabled={!summary.ready || !isSA}

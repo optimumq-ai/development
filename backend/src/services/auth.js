@@ -52,7 +52,7 @@ async function createUser(opts) {
   return userId;
 }
 function sanitizeUser(user) {
-  return { id: user.id, email: user.email, display_name: user.display_name, title: user.title, department_id: user.department_id, status: user.status, last_login: user.last_login, temp_password: user.temp_password };
+  return { id: user.id, email: user.email, display_name: user.display_name, title: user.title, department_id: user.department_id, status: user.status, last_login: user.last_login, temp_password: user.temp_password, ui_theme: user.ui_theme || 'standard' };
 }
 async function getUserById(userId) {
   var user = await get('SELECT * FROM users WHERE id = ?', [userId]);

@@ -24,7 +24,7 @@ export default function CommercialRatePanel(props) {
     var base = { font: 'inherit', fontSize: 13, borderRadius: 5, padding: '6px 14px', cursor: busy ? 'default' : 'pointer', fontWeight: 600, opacity: busy ? 0.6 : 1 };
     if (kind === 'sec') return Object.assign({}, base, { background: C.surface, color: C.blue, border: '1px solid ' + C.blue });
     if (kind === 'quiet') return Object.assign({}, base, { background: C.surface2, color: C.ink, border: '1px solid ' + G.line, fontWeight: 500 });
-    return Object.assign({}, base, { background: C.blue, color: '#fff', border: 'none' });
+    return Object.assign({}, base, { background: C.blueBg, color: 'var(--oq-fg-ffffff)', border: 'none' });
   }
   return (
     <div style={{ background: C.surface2, border: '1px solid ' + G.line, borderRadius: 6, padding: '11px 13px', marginBottom: 11 }}>

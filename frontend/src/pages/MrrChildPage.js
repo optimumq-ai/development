@@ -47,11 +47,11 @@ function Pill(props) {
   );
 }
 
-var btn = { font: 'inherit', fontSize: 13, background: G.navy, color: '#fff', border: 'none',
+var btn = { font: 'inherit', fontSize: 13, background: G.navy, color: 'var(--oq-fg-ffffff)', border: 'none',
   borderRadius: 5, padding: '6px 14px', fontWeight: 600, cursor: 'pointer' };
 var btnQuiet = Object.assign({}, btn, { background: C.surface2, color: C.ink, border: '1px solid ' + G.line, fontWeight: 500 });
 var btnSm = Object.assign({}, btnQuiet, { fontSize: 12, padding: '4px 10px' });
-var btnDanger = Object.assign({}, btn, { background: C.surface, color: '#8C3A2B', border: '1px solid #C08A7E', fontWeight: 600 });
+var btnDanger = Object.assign({}, btn, { background: C.surface, color: 'var(--oq-fg-8c3a2b)', border: '1px solid var(--oq-ln-c08a7e)', fontWeight: 600 });
 var kv = { fontSize: 12.5, color: C.muted };
 var panelHead = { fontSize: 12, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
   color: C.muted, marginBottom: 7 };
@@ -152,7 +152,7 @@ export default function MrrChildPage() {
       .catch(function (e) { setBusy(false); setMsg((e.response && e.response.data && e.response.data.error) || e.message); });
   }
 
-  if (err) return <div style={{ padding: 20, color: '#8C3A2B' }}>{err}</div>;
+  if (err) return <div style={{ padding: 20, color: 'var(--oq-fg-8c3a2b)' }}>{err}</div>;
   if (!d) return <div style={{ padding: 20, color: C.muted }}>Loading…</div>;
 
   var it = d.item;
@@ -281,7 +281,7 @@ export default function MrrChildPage() {
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap',
                     borderTop: '1px dashed ' + G.line, paddingTop: 8 }}>
                     <span style={kv}>Secure link to <b style={{ color: C.ink }}>{a.external.email}</b> — {' '}
-                      <b style={{ color: a.external.linkState === 'expired' || a.external.linkState === 'revoked' ? '#8C3A2B' : C.ink }}>
+                      <b style={{ color: a.external.linkState === 'expired' || a.external.linkState === 'revoked' ? 'var(--oq-fg-8c3a2b)' : C.ink }}>
                         {{ sent: 'sent, not yet opened', opened: 'opened ' + (a.external.openCount || 0) + '×, last ' + (a.external.lastOpenedAt || ''),
                            completed: 'their part is COMPLETE', expired: 'EXPIRED unused — re-send it', revoked: 'revoked' }[a.external.linkState] || a.external.linkState}
                       </b>{a.external.linkState === 'sent' || a.external.linkState === 'opened' ? ' · expires ' + a.external.expiresAt : ''}</span>
@@ -357,11 +357,11 @@ export default function MrrChildPage() {
               </div>
             ) : null}
             {!rel.canRelease && rel.blockedReason ? (
-              <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 6 }}>{rel.blockedReason}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--oq-fg-8c3a2b)', marginTop: 6 }}>{rel.blockedReason}</div>
             ) : null}
           </Panel>
 
-          {msg ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginBottom: 10 }}>{msg}</div> : null}
+          {msg ? <div style={{ fontSize: 12.5, color: 'var(--oq-fg-8c3a2b)', marginBottom: 10 }}>{msg}</div> : null}
         </div>
 
         {/* ── THE RAIL ─────────────────────────────────────────────────────────────────────── */}
@@ -369,7 +369,7 @@ export default function MrrChildPage() {
           <Panel title="Child-record actions">
             {d.denial && d.denial.designated ? (
               <div>
-                <div style={{ fontSize: 12.5, color: '#8C3A2B', fontWeight: 600 }}>
+                <div style={{ fontSize: 12.5, color: 'var(--oq-fg-8c3a2b)', fontWeight: 600 }}>
                   Denial designated — with Legal Review.
                 </div>
                 <div style={Object.assign({}, kv, { marginTop: 4 })}>Grounds: {d.denial.grounds}</div>

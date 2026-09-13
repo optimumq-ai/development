@@ -90,18 +90,18 @@ export default function RecordTypeEditor(props) {
   }
 
   var overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', zIndex: 50, overflowY: 'auto' };
-  var modal = { background: 'white', borderRadius: '12px', width: '100%', maxWidth: '640px', padding: '24px', boxShadow: '0 10px 40px rgba(0,0,0,.2)' };
-  var lab = { fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px', marginTop: '14px' };
-  var inp = { width: '100%', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' };
+  var modal = { background: 'var(--oq-bg-ffffff)', borderRadius: '12px', width: '100%', maxWidth: '640px', padding: '24px', boxShadow: '0 10px 40px rgba(0,0,0,.2)' };
+  var lab = { fontSize: '12px', fontWeight: '600', color: 'var(--oq-fg-374151)', display: 'block', marginBottom: '4px', marginTop: '14px' };
+  var inp = { width: '100%', padding: '8px 10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' };
 
   function field(lbl, key, opts) {
     opts = opts || {};
     return (
       <div>
-        <label style={lab}>{lbl}{opts.hint ? <span style={{ color: '#9CA3AF', fontWeight: '400' }}> · {opts.hint}</span> : null}</label>
+        <label style={lab}>{lbl}{opts.hint ? <span style={{ color: 'var(--oq-fg-9ca3af)', fontWeight: '400' }}> · {opts.hint}</span> : null}</label>
         {opts.area
           ? <textarea value={f[key]} onChange={function(e){ set(key, e.target.value); }} style={Object.assign({}, inp, { minHeight: '60px', resize: 'vertical' })} />
-          : <input value={f[key]} onChange={function(e){ set(key, e.target.value); }} disabled={opts.disabled} style={Object.assign({}, inp, opts.disabled ? { background: '#F9FAFB', color: '#9CA3AF' } : {})} />}
+          : <input value={f[key]} onChange={function(e){ set(key, e.target.value); }} disabled={opts.disabled} style={Object.assign({}, inp, opts.disabled ? { background: 'var(--oq-bg-f9fafb)', color: 'var(--oq-fg-9ca3af)' } : {})} />}
       </div>
     );
   }
@@ -114,10 +114,10 @@ export default function RecordTypeEditor(props) {
       <div style={modal} onClick={function(e){ e.stopPropagation(); }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{props.mode === 'create' ? 'New record type' : 'Edit record type'}</h2>
-          <button onClick={props.onClose} style={{ border: 'none', background: 'none', fontSize: '22px', color: '#9CA3AF', cursor: 'pointer', lineHeight: 1 }}>×</button>
+          <button onClick={props.onClose} style={{ border: 'none', background: 'none', fontSize: '22px', color: 'var(--oq-fg-9ca3af)', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
-        <label style={lab}>Parent type <span style={{ fontWeight: 400, color: '#9CA3AF' }}>· optional — makes this a variant</span></label>
-        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>
+        <label style={lab}>Parent type <span style={{ fontWeight: 400, color: 'var(--oq-fg-9ca3af)' }}>· optional — makes this a variant</span></label>
+        <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginBottom: '4px', marginTop: '-2px' }}>
           A variant is a more specific kind of its parent (an electrical permit is a kind of building permit).
           It uses the parent's category, routing, time budgets, cost settings and redaction settings unless you set its own here.
         </div>
@@ -126,30 +126,30 @@ export default function RecordTypeEditor(props) {
           {(props.allTypes || []).filter(function(t){ return !t.parent_record_type_id && t.id !== init.id; })
             .map(function(t){ return <option key={t.id} value={t.id}>{t.name}</option>; })}
         </select>
-        <label style={lab}>Category{f.parent_record_type_id ? <span style={{ fontWeight: 400, color: '#9CA3AF' }}> · follows the parent's category</span> : null}</label>
+        <label style={lab}>Category{f.parent_record_type_id ? <span style={{ fontWeight: 400, color: 'var(--oq-fg-9ca3af)' }}> · follows the parent's category</span> : null}</label>
         <select value={f.category_id} disabled={!!f.parent_record_type_id} onChange={function(e){ set('category_id', e.target.value); }} style={inp}>
           {props.categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
         </select>
         <label style={lab}>Owning City Department</label>
-        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>The org-chart department that owns these records. The AI matches requests to this.</div>
+        <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginBottom: '4px', marginTop: '-2px' }}>The org-chart department that owns these records. The AI matches requests to this.</div>
         <select value={owningDeptId} onChange={function(e){ setOwningDeptId(e.target.value); }} style={inp}>
           <option value="">- None -</option>
           {bizDepts.map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
         </select>
         <label style={lab}>Request Fulfillment Team</label>
-        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>Leave on default unless this record type is handled by a different team than its owning department.</div>
+        <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginBottom: '4px', marginTop: '-2px' }}>Leave on default unless this record type is handled by a different team than its owning department.</div>
         <select value={teamOverrideId} onChange={function(e){ setTeamOverrideId(e.target.value); }} style={inp}>
           <option value="">Use owning City Department default{derivedTeam ? ' (' + derivedTeam.name + ')' : ''}</option>
           {teams.map(function(t){ return <option key={t.id} value={t.id}>{t.name} (override)</option>; })}
         </select>
         <label style={lab}>Found in these sources</label>
-        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '6px', marginTop: '-2px' }}>Which connected systems hold this record type. Auto-filled by AI scans for scannable sources; set API systems (Axon, Tyler) here by hand. Powers search targeting.</div>
+        <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginBottom: '6px', marginTop: '-2px' }}>Which connected systems hold this record type. Auto-filled by AI scans for scannable sources; set API systems (Axon, Tyler) here by hand. Powers search targeting.</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {sources.length === 0 ? <span style={{ fontSize: '12px', color: '#9CA3AF' }}>No sources configured yet.</span> : sources.map(function(s){
+          {sources.length === 0 ? <span style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)' }}>No sources configured yet.</span> : sources.map(function(s){
             var on = selectedSources.indexOf(s.id) >= 0;
             return (
-              <label key={s.id} style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input type="checkbox" checked={on} onChange={function(){ toggleSource(s.id); }} /> {s.name} <span style={{ color: '#9CA3AF' }}>({s.connector_type})</span>
+              <label key={s.id} style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={on} onChange={function(){ toggleSource(s.id); }} /> {s.name} <span style={{ color: 'var(--oq-fg-9ca3af)' }}>({s.connector_type})</span>
               </label>
             );
           })}
@@ -164,19 +164,19 @@ export default function RecordTypeEditor(props) {
           {AVAIL_OPTS.map(function(o){ return <option key={o} value={o}>{o}</option>; })}
         </select>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 20px', marginTop: '14px' }}>
-          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+          <label style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input type="checkbox" checked={f.auto_release_eligible} onChange={function(e){ set('auto_release_eligible', e.target.checked); }} /> Auto-release eligible
           </label>
-          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+          <label style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input type="checkbox" checked={f.is_structured_data} onChange={function(e){ set('is_structured_data', e.target.checked); }} /> Structured data
           </label>
-          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+          <label style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input type="checkbox" checked={f.auto_publish} onChange={function(e){ set('auto_publish', e.target.checked); }} /> Auto-publish to public library
           </label>
-          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+          <label style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input type="checkbox" checked={f.mappable} onChange={function(e){ set('mappable', e.target.checked); }} /> Show on public map
           </label>
-          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }} title="Every request for this record type has its redaction done by the legal team, no matter what the request says.">
+          <label style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }} title="Every request for this record type has its redaction done by the legal team, no matter what the request says.">
             <input type="checkbox" checked={f.legal_redaction_required} onChange={function(e){ set('legal_redaction_required', e.target.checked); }} /> Legal redaction required
           </label>
         </div>
@@ -205,10 +205,10 @@ export default function RecordTypeEditor(props) {
           <option value="inactive">inactive</option>
         </select>
         {props.mode !== 'create' && init.id ? <EstimateProfilePanel recordTypeId={init.id} /> : null}
-        {err ? <div style={{ color: '#DC2626', fontSize: '13px', marginTop: '14px' }}>{err}</div> : null}
+        {err ? <div style={{ color: 'var(--oq-fg-dc2626)', fontSize: '13px', marginTop: '14px' }}>{err}</div> : null}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
-          <button onClick={props.onClose} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
-          <button onClick={save} disabled={saving} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
+          <button onClick={props.onClose} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+          <button onClick={save} disabled={saving} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
         </div>
       </div>
     </div>

@@ -12,15 +12,15 @@ import api from '../lib/api';
 // THE THREE COLOURS (Kevin 2026-08-31): each bar is the item's own screen speaking — red = required data
 // missing · yellow = complete, awaiting the lane owner's approval (or changed since) · green = approved.
 var COLOUR = {
-  red:    { label: 'Not started',       bg: '#FCA5A5', bd: '#DC2626', text: '#7F1D1D' },
-  yellow: { label: 'Awaiting approval', bg: '#FCD34D', bd: '#D97706', text: '#78350F' },
-  green:  { label: 'Approved',          bg: '#86EFAC', bd: '#16A34A', text: '#14532D' },
+  red:    { label: 'Not started',       bg: 'var(--oq-bg-fca5a5)', bd: 'var(--oq-ln-dc2626)', text: 'var(--oq-fg-7f1d1d)' },
+  yellow: { label: 'Awaiting approval', bg: 'var(--oq-bg-fcd34d)', bd: 'var(--oq-ln-d97706)', text: 'var(--oq-fg-78350f)' },
+  green:  { label: 'Approved',          bg: 'var(--oq-bg-86efac)', bd: 'var(--oq-ln-16a34a)', text: 'var(--oq-fg-14532d)' },
 };
 var GO = {
-  red:    { bg: '#FEE2E2', color: '#991B1B', bd: '#DC2626', label: 'Go live — not yet' },
-  yellow: { bg: '#FCD34D', color: '#78350F', bd: '#D97706', label: 'Go live — not yet' },
-  green:  { bg: '#16A34A', color: 'white',   bd: '#16A34A', label: 'Go live' },
-  live:   { bg: '#E1F2E9', color: '#1B8A5A', bd: '#86EFAC', label: 'Live' },
+  red:    { bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)', bd: 'var(--oq-ln-dc2626)', label: 'Go live — not yet' },
+  yellow: { bg: 'var(--oq-bg-fcd34d)', color: 'var(--oq-fg-78350f)', bd: 'var(--oq-ln-d97706)', label: 'Go live — not yet' },
+  green:  { bg: 'var(--oq-bg-16a34a)', color: 'var(--oq-fg-ffffff)',   bd: 'var(--oq-ln-16a34a)', label: 'Go live' },
+  live:   { bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)', bd: 'var(--oq-ln-86efac)', label: 'Live' },
 };
 // Phases (Plan A) from the hub's lanes. The agency card is Phase 1; go-live is Phase 6 on its own.
 var PHASES = [
@@ -52,8 +52,8 @@ export default function SetupGuidePage() {
     catch (e) { setMsg((e.response && e.response.data && e.response.data.error) || 'Could not go live.'); }
     setBusy(false);
   }
-  if (err) return <div style={{ color: '#B91C1C', padding: '24px' }}>{err}</div>;
-  if (!data) return <div style={{ color: '#9CA3AF', padding: '24px' }}>Loading the setup guide…</div>;
+  if (err) return <div style={{ color: 'var(--oq-fg-b91c1c)', padding: '24px' }}>{err}</div>;
+  if (!data) return <div style={{ color: 'var(--oq-fg-9ca3af)', padding: '24px' }}>Loading the setup guide…</div>;
 
   // ---- flatten the hub payload into items with lane + phase, then compute steps from deps
   var items = [];
@@ -129,15 +129,15 @@ export default function SetupGuidePage() {
   var go = GO[goColour];
 
   return (
-    <div style={{ color: '#12232E' }}>
-      <div style={{ background: 'white', border: '1px solid #D2DCE3', borderRadius: '10px', padding: '16px 20px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+    <div style={{ color: 'var(--oq-fg-12232e)' }}>
+      <div style={{ background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-d2dce3)', borderRadius: '10px', padding: '16px 20px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ fontSize: '19px', fontWeight: 700, marginBottom: '3px' }}>Set Up Guide</div>
-          <div style={{ fontSize: '12.5px', color: '#5C6F7C', lineHeight: 1.5, marginBottom: '10px' }}>Everything this city must set up before it can answer records requests for real, in the order it has to happen. Each bar is the item's own screen speaking: <b style={{ color: COLOUR.red.text }}>red</b> — required data missing · <b style={{ color: COLOUR.yellow.text }}>yellow</b> — complete, awaiting the lane owner's approval · <b style={{ color: COLOUR.green.text }}>green</b> — approved. A saved change to approved data turns its bar yellow and notifies the approver. Arrows are the dependencies. Click a bar to open the screen.</div>
+          <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-5c6f7c)', lineHeight: 1.5, marginBottom: '10px' }}>Everything this city must set up before it can answer records requests for real, in the order it has to happen. Each bar is the item's own screen speaking: <b style={{ color: COLOUR.red.text }}>red</b> — required data missing · <b style={{ color: COLOUR.yellow.text }}>yellow</b> — complete, awaiting the lane owner's approval · <b style={{ color: COLOUR.green.text }}>green</b> — approved. A saved change to approved data turns its bar yellow and notifies the approver. Arrows are the dependencies. Click a bar to open the screen.</div>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
             {['red', 'yellow', 'green'].map(function (k) {
               var s = COLOUR[k];
-              return <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: '#5C6F7C' }}><span style={{ width: '14px', height: '10px', borderRadius: '3px', background: s.bg, border: '1.5px solid ' + s.bd }} />{s.label} · {colours[k] || 0}</span>;
+              return <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: 'var(--oq-fg-5c6f7c)' }}><span style={{ width: '14px', height: '10px', borderRadius: '3px', background: s.bg, border: '1.5px solid ' + s.bd }} />{s.label} · {colours[k] || 0}</span>;
             })}
           </div>
         </div>
@@ -145,35 +145,35 @@ export default function SetupGuidePage() {
           <button type="button" disabled={goColour !== 'green' || !mayFlip || busy} onClick={function () { setConfirm(true); }}
             title={goColour === 'live' ? 'The rules are on for real' : (goColour === 'green' ? (mayFlip ? 'Every item is approved — turn the rules on for real' : 'Every item is approved — the ORO System Administrator or ORO Director flips it') : 'Opens when every bar is green')}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '40px', padding: '0 20px', borderRadius: '8px', background: go.bg, color: go.color, fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', border: '2px solid ' + go.bd, cursor: (goColour === 'green' && mayFlip) ? 'pointer' : 'default', whiteSpace: 'nowrap' }}>{go.label}</button>
-          <div style={{ fontSize: '11.5px', color: '#5C6F7C', marginTop: '6px' }}>{goColour === 'live' ? 'the rules are on for real' : ((colours.yellow || 0) + ' awaiting approval · ' + (colours.red || 0) + ' not started')}</div>
-          {msg ? <div style={{ fontSize: '11.5px', color: '#1B8A5A', marginTop: '4px' }}>{msg}</div> : null}
+          <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-5c6f7c)', marginTop: '6px' }}>{goColour === 'live' ? 'the rules are on for real' : ((colours.yellow || 0) + ' awaiting approval · ' + (colours.red || 0) + ' not started')}</div>
+          {msg ? <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-1b8a5a)', marginTop: '4px' }}>{msg}</div> : null}
         </div>
       </div>
       {confirm ? (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(18,35,46,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={function () { if (!busy) setConfirm(false); }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ width: '520px', background: 'white', border: '1px solid #D2DCE3', borderRadius: '10px', padding: '18px 20px', boxShadow: '0 8px 24px rgba(18,35,46,0.18)' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ width: '520px', background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-d2dce3)', borderRadius: '10px', padding: '18px 20px', boxShadow: '0 8px 24px rgba(18,35,46,0.18)' }}>
             <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Ready to go live</div>
-            <div style={{ fontSize: '12.5px', color: '#5C6F7C', lineHeight: 1.5, marginBottom: '14px' }}>Every setup item is approved. Going live turns on the rules — deadlines, fees, notices and automatic decisions — for every request from now on. This is recorded by name and can be reversed by the System Administrator.</div>
+            <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-5c6f7c)', lineHeight: 1.5, marginBottom: '14px' }}>Every setup item is approved. Going live turns on the rules — deadlines, fees, notices and automatic decisions — for every request from now on. This is recorded by name and can be reversed by the System Administrator.</div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button type="button" disabled={busy} onClick={function () { setConfirm(false); }} style={{ height: '34px', padding: '0 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'white', color: '#12232E', border: '1px solid #BECAD3', cursor: 'pointer' }}>Not yet</button>
-              <button type="button" disabled={busy} onClick={goLive} style={{ height: '34px', padding: '0 18px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: '#16A34A', color: 'white', border: '1px solid #16A34A', cursor: 'pointer' }}>{busy ? 'Going live…' : 'Go live'}</button>
+              <button type="button" disabled={busy} onClick={function () { setConfirm(false); }} style={{ height: '34px', padding: '0 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-12232e)', border: '1px solid var(--oq-ln-becad3)', cursor: 'pointer' }}>Not yet</button>
+              <button type="button" disabled={busy} onClick={goLive} style={{ height: '34px', padding: '0 18px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', background: 'var(--oq-bg-16a34a)', color: 'var(--oq-fg-ffffff)', border: '1px solid var(--oq-ln-16a34a)', cursor: 'pointer' }}>{busy ? 'Going live…' : 'Go live'}</button>
             </div>
           </div>
         </div>
       ) : null}
 
-      <div style={{ background: 'white', border: '1px solid #D2DCE3', borderRadius: '10px', overflowX: 'auto' }}>
+      <div style={{ background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-d2dce3)', borderRadius: '10px', overflowX: 'auto' }}>
         <div style={{ position: 'relative', width: width + 'px', height: totalH + 'px', minWidth: '100%' }}>
           {/* column headers + grid */}
           {Array.apply(null, Array(STEPS)).map(function (_, i) {
-            return <div key={i} style={{ position: 'absolute', left: (LABEL_W + i * COL_W) + 'px', top: 0, width: COL_W + 'px', height: totalH + 'px', borderLeft: '1px solid #EEF2F5' }}>
-              <div style={{ height: HEAD_H + 'px', lineHeight: HEAD_H + 'px', textAlign: 'center', fontSize: '11px', fontWeight: 700, letterSpacing: '.06em', color: '#8296A4' }}>STEP {i + 1}</div>
+            return <div key={i} style={{ position: 'absolute', left: (LABEL_W + i * COL_W) + 'px', top: 0, width: COL_W + 'px', height: totalH + 'px', borderLeft: '1px solid var(--oq-ln-eef2f5)' }}>
+              <div style={{ height: HEAD_H + 'px', lineHeight: HEAD_H + 'px', textAlign: 'center', fontSize: '11px', fontWeight: 700, letterSpacing: '.06em', color: 'var(--oq-fg-8296a4)' }}>STEP {i + 1}</div>
             </div>;
           })}
-          <div style={{ position: 'absolute', left: 0, top: (HEAD_H - 1) + 'px', width: '100%', borderTop: '1px solid #D2DCE3' }} />
+          <div style={{ position: 'absolute', left: 0, top: (HEAD_H - 1) + 'px', width: '100%', borderTop: '1px solid var(--oq-ln-d2dce3)' }} />
           {/* rows */}
           {rows.map(function (r, i) {
-            if (r.phase) return <div key={'p' + i} style={{ position: 'absolute', left: 0, top: r.y + 'px', width: '100%', height: PHASE_H + 'px', background: '#F2F6F9', borderTop: '1px solid #E3EAF0', borderBottom: '1px solid #E3EAF0', padding: '0 14px', lineHeight: PHASE_H + 'px', fontSize: '12.5px', fontWeight: 700, color: '#1E6091' }}>{r.title}</div>;
+            if (r.phase) return <div key={'p' + i} style={{ position: 'absolute', left: 0, top: r.y + 'px', width: '100%', height: PHASE_H + 'px', background: 'var(--oq-bg-f2f6f9)', borderTop: '1px solid var(--oq-ln-e3eaf0)', borderBottom: '1px solid var(--oq-ln-e3eaf0)', padding: '0 14px', lineHeight: PHASE_H + 'px', fontSize: '12.5px', fontWeight: 700, color: 'var(--oq-fg-1e6091)' }}>{r.title}</div>;
             var it = r.item, st = stepOf[it.key];
             var col = it.goLive ? (goColour === 'live' ? 'green' : (data.goLiveColour || 'red')) : (it.approval || 'red');
             var s = COLOUR[col];
@@ -181,9 +181,9 @@ export default function SetupGuidePage() {
             var open = it.door ? function () { nav(it.door); } : null;
             return (
               <div key={it.key} onClick={open} title={it.approvalWhy || it.evidence || ''} style={{ position: 'absolute', left: 0, top: r.y + 'px', width: '100%', height: ROW_H + 'px', cursor: open ? 'pointer' : 'default' }}
-                onMouseEnter={function (e) { e.currentTarget.style.background = '#F8FAFC'; }} onMouseLeave={function (e) { e.currentTarget.style.background = 'transparent'; }}>
+                onMouseEnter={function (e) { e.currentTarget.style.background = 'var(--oq-x-f8fafc)'; }} onMouseLeave={function (e) { e.currentTarget.style.background = 'transparent'; }}>
                 <div style={{ position: 'absolute', left: '14px', top: 0, width: (LABEL_W - 20) + 'px', height: ROW_H + 'px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: it.noScreen ? '#8296A4' : '#12232E' }}>{it.name}{it.noScreen ? ' — no screen yet' : ''}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: it.noScreen ? 'var(--oq-fg-8296a4)' : 'var(--oq-fg-12232e)' }}>{it.name}{it.noScreen ? ' — no screen yet' : ''}</span>
                 </div>
                 <div style={{ position: 'absolute', left: barX(st) + 'px', top: ((ROW_H - BAR_H) / 2) + 'px', width: (COL_W - 2 * PAD) + 'px', height: BAR_H + 'px', borderRadius: '5px', background: s.bg, border: '2px solid ' + s.bd, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9.5px', fontWeight: 700, letterSpacing: '.04em', color: s.text, overflow: 'hidden', whiteSpace: 'nowrap' }}>{barText}</div>
               </div>
@@ -191,8 +191,8 @@ export default function SetupGuidePage() {
           })}
           {/* arrows */}
           <svg style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} width={width} height={totalH} viewBox={'0 0 ' + width + ' ' + totalH}>
-            <defs><marker id="sg-ah" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L6 3.5 L0 7 Z" fill="#5C6F7C" /></marker></defs>
-            {arrows.map(function (a, i) { return <path key={i} d={a.d} fill="none" stroke="#5C6F7C" strokeWidth="1.2" strokeDasharray={a.dashed ? '4 3' : undefined} markerEnd="url(#sg-ah)" />; })}
+            <defs><marker id="sg-ah" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L6 3.5 L0 7 Z" fill="var(--oq-fg-5c6f7c)" /></marker></defs>
+            {arrows.map(function (a, i) { return <path key={i} d={a.d} fill="none" stroke="var(--oq-fg-5c6f7c)" strokeWidth="1.2" strokeDasharray={a.dashed ? '4 3' : undefined} markerEnd="url(#sg-ah)" />; })}
           </svg>
         </div>
       </div>

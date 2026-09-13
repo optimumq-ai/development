@@ -9,8 +9,8 @@ import SetupScreen from '../components/setup/SetupScreen';
 // screen wears the shared setup strip — the approver's only home for this row. The body is unchanged;
 // the page's own heading and intro moved into the strip's card.
 
-function scoreColor(pass) { return pass === true ? '#03543F' : pass === false ? '#92400E' : '#6B7280'; }
-function scoreBg(pass) { return pass === true ? '#DEF7EC' : pass === false ? '#FEF3C7' : '#F3F4F6'; }
+function scoreColor(pass) { return pass === true ? 'var(--oq-x-03543f)' : pass === false ? 'var(--oq-x-92400e)' : 'var(--oq-x-6b7280)'; }
+function scoreBg(pass) { return pass === true ? 'var(--oq-bg-def7ec)' : pass === false ? 'var(--oq-bg-fef3c7)' : 'var(--oq-bg-f3f4f6)'; }
 
 export default function MassRedactionPage() {
   var [templates, setTemplates] = useState([]);
@@ -146,26 +146,26 @@ export default function MassRedactionPage() {
 
   function destinationBlock() {
     return (
-      <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '12px 14px', marginTop: '14px', marginBottom: '14px' }}>
-        <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '4px' }}>Public library section</div>
-        <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px', lineHeight: 1.5 }}>When these documents are published to the public library, citizens will find them under this department and record type. Documents that came from a request keep the request&rsquo;s own department and record type.</div>
+      <div style={{ border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '10px', padding: '12px 14px', marginTop: '14px', marginBottom: '14px' }}>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)', marginBottom: '4px' }}>Public library section</div>
+        <div style={{ fontSize: '12px', color: 'var(--oq-fg-6b7280)', marginBottom: '10px', lineHeight: 1.5 }}>When these documents are published to the public library, citizens will find them under this department and record type. Documents that came from a request keep the request&rsquo;s own department and record type.</div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: '180px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Department</label>
-            <select value={destDept} onChange={function (e) { setDestDept(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', background: 'white' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--oq-fg-6b7280)', marginBottom: '4px' }}>Department</label>
+            <select value={destDept} onChange={function (e) { setDestDept(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '13px', background: 'var(--oq-bg-ffffff)' }}>
               <option value="">— Not set —</option>
               {depts.map(function (d) { return <option key={d.id} value={d.id}>{d.name}</option>; })}
             </select>
           </div>
           <div style={{ flex: 1, minWidth: '180px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Record type</label>
-            <select value={destRt} onChange={function (e) { setDestRt(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', background: 'white' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--oq-fg-6b7280)', marginBottom: '4px' }}>Record type</label>
+            <select value={destRt} onChange={function (e) { setDestRt(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '13px', background: 'var(--oq-bg-ffffff)' }}>
               <option value="">— Not set —</option>
               {recTypes.map(function (t) { return <option key={t.id} value={t.id}>{t.name}</option>; })}
             </select>
           </div>
         </div>
-        {(!destRt || !destDept) ? <div style={{ fontSize: '12px', color: '#92400E', marginTop: '8px' }}>Without a section, these documents cannot be published to the public library until someone picks one on the Released Records page.</div> : null}
+        {(!destRt || !destDept) ? <div style={{ fontSize: '12px', color: 'var(--oq-fg-92400e)', marginTop: '8px' }}>Without a section, these documents cannot be published to the public library until someone picks one on the Released Records page.</div> : null}
       </div>
     );
   }
@@ -230,22 +230,22 @@ export default function MassRedactionPage() {
     {function () { return (
     <div>
 
-      <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#1E40AF', lineHeight: 1.5 }}>
+      <div style={{ background: 'var(--oq-bg-eff6ff)', border: '1px solid var(--oq-ln-bfdbfe)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: 'var(--oq-fg-1e40af)', lineHeight: 1.5 }}>
         To create a template: open a sample document in the redaction workspace (the <strong>Redact</strong> button on a PDF in a request's Records tab), place your boxes and attach a rule to each, then choose <strong>Save as Reusable Template</strong>. For a structured CSV record, use <strong>Redact fields</strong> on the record, mark the exempt columns, and choose <strong>Save as reusable template</strong>.
       </div>
 
-      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '10px', padding: '14px 16px', marginBottom: '22px' }}>
-        <div style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '4px' }}>911 Call Records &mdash; incremental pull demo</div>
-        <div style={{ fontSize: '12.5px', color: '#78350F', lineHeight: 1.5, marginBottom: '10px' }}>
+      <div style={{ background: 'var(--oq-bg-fffbeb)', border: '1px solid var(--oq-ln-fde68a)', borderRadius: '10px', padding: '14px 16px', marginBottom: '22px' }}>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-92400e)', marginBottom: '4px' }}>911 Call Records &mdash; incremental pull demo</div>
+        <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-78350f)', lineHeight: 1.5, marginBottom: '10px' }}>
           The <strong>911 Call Management System (demo)</strong> accumulates call records on its own side. Optimum Q pulls only what&rsquo;s <strong>new since its last checkpoint</strong>, born-redacts each (caller name, phone, and home address withheld) while the incident type, location, and disposition stay public, and publishes to the library + map. Same incremental-pull pattern a real CAD connector or nightly export uses.
         </div>
-        <div style={{ fontSize: '12.5px', color: '#374151', marginBottom: '10px' }}>
-          {status911 ? (<span>911 system holds <strong>{status911.sourceTotal}</strong> record{status911.sourceTotal !== 1 ? 's' : ''} &middot; <strong style={{ color: status911.newSinceLastPull ? '#B45309' : '#03543F' }}>{status911.newSinceLastPull}</strong> new since last pull</span>) : <span style={{ color: '#9CA3AF' }}>Loading status\u2026</span>}
+        <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-374151)', marginBottom: '10px' }}>
+          {status911 ? (<span>911 system holds <strong>{status911.sourceTotal}</strong> record{status911.sourceTotal !== 1 ? 's' : ''} &middot; <strong style={{ color: status911.newSinceLastPull ? 'var(--oq-fg-b45309)' : 'var(--oq-fg-03543f)' }}>{status911.newSinceLastPull}</strong> new since last pull</span>) : <span style={{ color: 'var(--oq-fg-9ca3af)' }}>Loading status\u2026</span>}
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button onClick={logCalls} disabled={!!busy911} style={{ padding: '9px 16px', borderRadius: '8px', border: '1px solid #B45309', background: 'white', color: '#B45309', fontSize: '13px', fontWeight: '700', cursor: busy911 ? 'default' : 'pointer', opacity: busy911 ? 0.6 : 1 }}>{busy911 === 'log' ? 'Logging\u2026' : 'Log 20 new calls (simulate dispatch)'}</button>
-          <button onClick={pullProcess} disabled={!!busy911} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#B45309', color: 'white', fontSize: '13px', fontWeight: '700', cursor: busy911 ? 'default' : 'pointer', opacity: busy911 ? 0.6 : 1 }}>{busy911 === 'pull' ? 'Pulling & processing\u2026' : ('Pull & process new records' + (status911 && status911.newSinceLastPull ? ' (' + status911.newSinceLastPull + ')' : ''))}</button>
-          {msg911 ? <span style={{ fontSize: '12.5px', color: '#03543F', fontWeight: '600' }}>{msg911}</span> : null}
+          <button onClick={logCalls} disabled={!!busy911} style={{ padding: '9px 16px', borderRadius: '8px', border: '1px solid var(--oq-ln-b45309)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-b45309)', fontSize: '13px', fontWeight: '700', cursor: busy911 ? 'default' : 'pointer', opacity: busy911 ? 0.6 : 1 }}>{busy911 === 'log' ? 'Logging\u2026' : 'Log 20 new calls (simulate dispatch)'}</button>
+          <button onClick={pullProcess} disabled={!!busy911} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-b45309)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: busy911 ? 'default' : 'pointer', opacity: busy911 ? 0.6 : 1 }}>{busy911 === 'pull' ? 'Pulling & processing\u2026' : ('Pull & process new records' + (status911 && status911.newSinceLastPull ? ' (' + status911.newSinceLastPull + ')' : ''))}</button>
+          {msg911 ? <span style={{ fontSize: '12.5px', color: 'var(--oq-fg-03543f)', fontWeight: '600' }}>{msg911}</span> : null}
         </div>
       </div>
 
@@ -253,8 +253,8 @@ export default function MassRedactionPage() {
 
       {opps.length > 0 ? (
         <div style={{ marginBottom: '22px' }}>
-          <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '6px' }}>Waiting for a template ({opps.length})</div>
-          <p style={{ fontSize: '12.5px', color: '#6B7280', lineHeight: 1.5, margin: '0 0 10px' }}>
+          <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)', marginBottom: '6px' }}>Waiting for a template ({opps.length})</div>
+          <p style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', lineHeight: 1.5, margin: '0 0 10px' }}>
             The variant scan on the Taxonomy page found piles of documents that share one layout &mdash; the kind one template can cover.
             Each suggestion below disappears on its own once a template exists for it.
           </p>
@@ -267,13 +267,13 @@ export default function MassRedactionPage() {
               if (o.example_files && o.example_files.length) subParts.push('examples: ' + o.example_files.slice(0, 3).join(', '));
               if (o.found_at) subParts.push('found ' + o.found_at);
               return (
-                <div key={o.record_type_id} style={{ background: 'white', border: '1px solid #E5E7EB', borderLeft: '4px solid #B23A3A', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+                <div key={o.record_type_id} style={{ background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-e5e7eb)', borderLeft: '4px solid var(--oq-ln-b23a3a)', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                      <span style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79' }}>{o.name}</span>
-                      <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: '#B23A3A', background: '#F9E4E4' }}>FROM THE VARIANT SCAN</span>
+                      <span style={{ fontWeight: '700', fontSize: '14.5px', color: 'var(--oq-fg-1f4e79)' }}>{o.name}</span>
+                      <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: 'var(--oq-fg-b23a3a)', background: 'var(--oq-bg-f9e4e4)' }}>FROM THE VARIANT SCAN</span>
                     </div>
-                    <div style={{ fontSize: '12.5px', color: '#374151', marginBottom: '3px', lineHeight: 1.45 }}>
+                    <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-374151)', marginBottom: '3px', lineHeight: 1.45 }}>
                       {o.estimated_count != null
                         ? <span>About <strong>{o.estimated_count.toLocaleString()} documents</strong> in <strong>{where}</strong> share {layoutPhrase}.</span>
                         : <span><strong>{Math.round((o.sample_share || 0) * 100)}% of the scanned sample</strong> in <strong>{where}</strong> shares {layoutPhrase} (the source can't report an exact total).</span>}
@@ -281,10 +281,10 @@ export default function MassRedactionPage() {
                         ? <span> A template with the safety check on will cover the matching ones and hold the rest.</span>
                         : <span> One template should fit the whole pile.</span>}
                     </div>
-                    {subParts.length ? <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{subParts.join(' · ')}</div> : null}
+                    {subParts.length ? <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)' }}>{subParts.join(' · ')}</div> : null}
                   </div>
-                  <button onClick={function () { createFromOpp(o); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>{creatingTpl === o.record_type_id ? 'Opening a real example…' : 'Create a Template'}</button>
-                  <button onClick={function () { dismissOpp(o); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Not needed</button>
+                  <button onClick={function () { createFromOpp(o); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>{creatingTpl === o.record_type_id ? 'Opening a real example…' : 'Create a Template'}</button>
+                  <button onClick={function () { dismissOpp(o); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Not needed</button>
                 </div>
               );
             })}
@@ -293,37 +293,37 @@ export default function MassRedactionPage() {
       ) : null}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-        <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Templates ({templates.length})</div>
-        <button onClick={function () { setUploadErr(''); setPendingType(null); setNewTplOpen(true); }} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>+ New template</button>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)' }}>Templates ({templates.length})</div>
+        <button onClick={function () { setUploadErr(''); setPendingType(null); setNewTplOpen(true); }} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>+ New template</button>
       </div>
       {loading ? (
-        <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF' }}>Loading templates...</div>
+        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--oq-fg-9ca3af)' }}>Loading templates...</div>
       ) : templates.length === 0 ? (
-        <div style={{ padding: '40px', textAlign: 'center', background: 'white', border: '1px dashed #E5E7EB', borderRadius: '12px', color: '#9CA3AF' }}>
+        <div style={{ padding: '40px', textAlign: 'center', background: 'var(--oq-bg-ffffff)', border: '1px dashed var(--oq-ln-e5e7eb)', borderRadius: '12px', color: 'var(--oq-fg-9ca3af)' }}>
           No templates yet. Define one from a sample document in the redaction workspace using "Save as Reusable Template."
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {templates.map(function (t) {
             return (
-              <div key={t.id} style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+              <div key={t.id} style={{ background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                    <span style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79' }}>{t.name}</span>
-                    <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: t.kind === 'fields' ? '#3730A3' : '#374151', background: t.kind === 'fields' ? '#E0E7FF' : '#F3F4F6' }}>{t.kind === 'fields' ? 'FIELDS' : 'PAGES'}</span>
+                    <span style={{ fontWeight: '700', fontSize: '14.5px', color: 'var(--oq-fg-1f4e79)' }}>{t.name}</span>
+                    <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: t.kind === 'fields' ? 'var(--oq-fg-3730a3)' : 'var(--oq-fg-374151)', background: t.kind === 'fields' ? 'var(--oq-bg-e0e7ff)' : 'var(--oq-bg-f3f4f6)' }}>{t.kind === 'fields' ? 'FIELDS' : 'PAGES'}</span>
                   </div>
-                  {t.description ? <div style={{ fontSize: '12.5px', color: '#6B7280', marginBottom: '3px' }}>{t.description}</div> : null}
-                  <div style={{ fontSize: '12px', color: '#9CA3AF' }}>
+                  {t.description ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginBottom: '3px' }}>{t.description}</div> : null}
+                  <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)' }}>
                     {t.kind === 'fields' ? (t.field_count + ' field' + (t.field_count !== 1 ? 's' : '')) : (t.zone_count + ' box' + (t.zone_count !== 1 ? 'es' : ''))}
                     {t.record_type_name ? ' \u00b7 ' + t.record_type_name : ''}
                     {t.source_filename ? ' \u00b7 from ' + t.source_filename : ''}
                     {t.created_at ? ' \u00b7 ' + (t.created_at || '').slice(0, 10) : ''}
                   </div>
                 </div>
-                <button onClick={function () { openView(t); }} title="See what this template redacts" style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>View</button>
-                <button onClick={function () { scheduleJob(t); }} title="Queue a large batch for overnight processing" style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Schedule job</button>
-                <button onClick={function () { runBatch(t); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Run batch</button>
-                <button onClick={function () { remove(t); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #FCA5A5', background: 'white', color: '#DC2626', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
+                <button onClick={function () { openView(t); }} title="See what this template redacts" style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>View</button>
+                <button onClick={function () { scheduleJob(t); }} title="Queue a large batch for overnight processing" style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Schedule job</button>
+                <button onClick={function () { runBatch(t); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Run batch</button>
+                <button onClick={function () { remove(t); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid var(--oq-ln-fca5a5)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-dc2626)', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
               </div>
             );
           })}
@@ -332,78 +332,78 @@ export default function MassRedactionPage() {
 
       {newTplOpen ? (
         <div onClick={function () { if (!uploading) { setNewTplOpen(false); setPendingType(null); } }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '520px', maxWidth: '100%', padding: '24px' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '14px', width: '520px', maxWidth: '100%', padding: '24px' }}>
             <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '6px' }}>New redaction template</div>
             {pendingType ? (
-              <div style={{ background: '#F9E4E4', border: '1px solid #F3C7C7', borderRadius: '8px', padding: '9px 12px', marginBottom: '12px', fontSize: '12.5px', color: '#7A2E2E', lineHeight: 1.45 }}>
+              <div style={{ background: 'var(--oq-bg-f9e4e4)', border: '1px solid var(--oq-ln-f3c7c7)', borderRadius: '8px', padding: '9px 12px', marginBottom: '12px', fontSize: '12.5px', color: 'var(--oq-fg-7a2e2e)', lineHeight: 1.45 }}>
                 The saved template will be linked to <strong>{pendingType.name}</strong>, so its suggestion below clears itself.
                 Upload one of that pile&rsquo;s documents as the sample{pendingType.example_files && pendingType.example_files.length ? <span> (for example {pendingType.example_files[0]})</span> : null}.
               </div>
             ) : null}
-            <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.55, marginBottom: '16px' }}>
+            <div style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', lineHeight: 1.55, marginBottom: '16px' }}>
               A template is built from one <strong>sample record</strong>. Upload a sample and we&rsquo;ll open the redaction workspace, where you mark what to redact and save it as a reusable template.
-              <ul style={{ margin: '10px 0 0', paddingLeft: '18px', color: '#6B7280' }}>
+              <ul style={{ margin: '10px 0 0', paddingLeft: '18px', color: 'var(--oq-fg-6b7280)' }}>
                 <li style={{ marginBottom: '4px' }}><strong>CSV export</strong> (structured data like 911 calls) &rarr; mark exempt <em>columns</em>; values are dropped before the record is built (born-redacted).</li>
                 <li><strong>PDF</strong> (a form) &rarr; draw <em>boxes</em> over the areas to cover, and attach a rule to each.</li>
               </ul>
             </div>
-            {uploadErr ? <div style={{ fontSize: '12.5px', color: '#9B1C1C', marginBottom: '10px' }}>{uploadErr}</div> : null}
-            <label style={{ display: 'inline-block', padding: '11px 18px', borderRadius: '8px', background: uploading ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: uploading ? 'default' : 'pointer' }}>
+            {uploadErr ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-9b1c1c)', marginBottom: '10px' }}>{uploadErr}</div> : null}
+            <label style={{ display: 'inline-block', padding: '11px 18px', borderRadius: '8px', background: uploading ? 'var(--oq-bg-9cb4cc)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: uploading ? 'default' : 'pointer' }}>
               {uploading ? 'Uploading\u2026' : 'Upload a sample (CSV or PDF)'}
               <input type="file" accept=".csv,.tsv,.pdf" disabled={uploading} onChange={handleSampleUpload} style={{ display: 'none' }} />
             </label>
-            <button onClick={function () { if (!uploading) { setNewTplOpen(false); setPendingType(null); } }} style={{ marginLeft: '10px', padding: '11px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={function () { if (!uploading) { setNewTplOpen(false); setPendingType(null); } }} style={{ marginLeft: '10px', padding: '11px 16px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
           </div>
         </div>
       ) : null}
 
       {viewTpl ? (
         <div onClick={closeView} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '560px', maxWidth: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '14px', width: '560px', maxWidth: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--oq-ln-f3f4f6)' }}>
               <div style={{ fontWeight: '700', fontSize: '16px' }}>{viewTpl.name}</div>
-              <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '3px' }}>{viewTpl.kind === 'fields' ? 'Structured / born-redacted (drops exempt columns)' : 'Page redaction (covers zones on the page)'}{viewTpl.record_type_name ? ' \u00b7 ' + viewTpl.record_type_name : ''} · safety threshold {viewTpl.safety_threshold != null ? viewTpl.safety_threshold : 80}%</div>
+              <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginTop: '3px' }}>{viewTpl.kind === 'fields' ? 'Structured / born-redacted (drops exempt columns)' : 'Page redaction (covers zones on the page)'}{viewTpl.record_type_name ? ' \u00b7 ' + viewTpl.record_type_name : ''} · safety threshold {viewTpl.safety_threshold != null ? viewTpl.safety_threshold : 80}%</div>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px' }}>
-              {!viewDetail ? <div style={{ color: '#9CA3AF', fontSize: '13px' }}>Loading\u2026</div> : viewDetail.error ? <div style={{ color: '#9B1C1C' }}>Could not load template detail.</div> : (
+              {!viewDetail ? <div style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '13px' }}>Loading\u2026</div> : viewDetail.error ? <div style={{ color: 'var(--oq-fg-9b1c1c)' }}>Could not load template detail.</div> : (
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '8px' }}>{viewTpl.kind === 'fields' ? 'Fields withheld (dropped from every record)' : 'Redaction boxes'}</div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)', marginBottom: '8px' }}>{viewTpl.kind === 'fields' ? 'Fields withheld (dropped from every record)' : 'Redaction boxes'}</div>
                   {viewTpl.kind === 'fields' ? (
                     (viewDetail.field_map || []).length ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {viewDetail.field_map.map(function (f, i) { return (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px' }}>
-                            <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: '700', color: '#991B1B' }}>{f.field}</span>
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'var(--oq-bg-fef2f2)', border: '1px solid var(--oq-ln-fecaca)', borderRadius: '8px' }}>
+                            <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-991b1b)' }}>{f.field}</span>
                             <span style={{ flex: 1 }} />
-                            <span style={{ fontSize: '11.5px', color: '#9CA3AF' }}>withheld</span>
+                            <span style={{ fontSize: '11.5px', color: 'var(--oq-fg-9ca3af)' }}>withheld</span>
                           </div>
                         ); })}
                       </div>
-                    ) : <div style={{ color: '#9CA3AF', fontSize: '13px' }}>No fields configured.</div>
+                    ) : <div style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '13px' }}>No fields configured.</div>
                   ) : (
                     (viewDetail.zones || []).length ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {viewDetail.zones.map(function (z, i) { return (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#F3F4F6', borderRadius: '8px', fontSize: '12.5px' }}>
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'var(--oq-bg-f3f4f6)', borderRadius: '8px', fontSize: '12.5px' }}>
                             <span style={{ fontWeight: '700' }}>Box {i + 1}</span>
-                            <span style={{ color: '#6B7280' }}>page {z.page_no || 1}</span>
-                            {z.label ? <span style={{ color: '#6B7280' }}>· {z.label}</span> : null}
+                            <span style={{ color: 'var(--oq-fg-6b7280)' }}>page {z.page_no || 1}</span>
+                            {z.label ? <span style={{ color: 'var(--oq-fg-6b7280)' }}>· {z.label}</span> : null}
                           </div>
                         ); })}
                       </div>
-                    ) : <div style={{ color: '#9CA3AF', fontSize: '13px' }}>No boxes configured.</div>
+                    ) : <div style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '13px' }}>No boxes configured.</div>
                   )}
-                  <div style={{ marginTop: '16px', fontSize: '12px', color: '#6B7280', lineHeight: 1.5 }}>
+                  <div style={{ marginTop: '16px', fontSize: '12px', color: 'var(--oq-fg-6b7280)', lineHeight: 1.5 }}>
                     {viewTpl.kind === 'fields' ? 'These columns are dropped before the record is rendered, so their values never appear in the released copy. Everything else stays public.' : 'These boxes are stamped over the matching areas on each document that passes the layout check.'}
                   </div>
                 </div>
               )}
             </div>
-            <div style={{ padding: '16px 22px', borderTop: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+            <div style={{ padding: '16px 22px', borderTop: '1px solid var(--oq-ln-f3f4f6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
               <div>
-                {viewSample === undefined ? null : viewSample ? <button onClick={function () { downloadSample(viewSample.output_file_id); }} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>View a sample redacted output</button> : <span style={{ fontSize: '12px', color: '#9CA3AF' }}>No processed sample yet</span>}
+                {viewSample === undefined ? null : viewSample ? <button onClick={function () { downloadSample(viewSample.output_file_id); }} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>View a sample redacted output</button> : <span style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)' }}>No processed sample yet</span>}
               </div>
-              <button onClick={closeView} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Close</button>
+              <button onClick={closeView} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Close</button>
             </div>
           </div>
         </div>
@@ -411,96 +411,96 @@ export default function MassRedactionPage() {
 
       {batchTpl ? (
         <div onClick={closeBatch} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '660px', maxWidth: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '14px', width: '660px', maxWidth: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--oq-ln-f3f4f6)' }}>
               <div style={{ fontWeight: '700', fontSize: '16px' }}>{scheduleMode ? 'Schedule nightly job' : 'Run batch'} &mdash; {batchTpl.name}</div>
-              <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '3px' }}>{batchTpl.kind === 'fields' ? (batchTpl.field_count + ' field(s)') : (batchTpl.zone_count + ' box(es)')} &middot; safety threshold {batchTpl.safety_threshold != null ? batchTpl.safety_threshold : 80}%. Each document is matched to the template's layout; only documents at or above the threshold are redacted.</div>
+              <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginTop: '3px' }}>{batchTpl.kind === 'fields' ? (batchTpl.field_count + ' field(s)') : (batchTpl.zone_count + ' box(es)')} &middot; safety threshold {batchTpl.safety_threshold != null ? batchTpl.safety_threshold : 80}%. Each document is matched to the template's layout; only documents at or above the threshold are redacted.</div>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px' }}>
-              {batchErr ? <div style={{ background: '#FEF2F2', color: '#991B1B', padding: '9px 12px', borderRadius: '8px', fontSize: '12.5px', marginBottom: '12px' }}>{batchErr}</div> : null}
+              {batchErr ? <div style={{ background: 'var(--oq-bg-fef2f2)', color: 'var(--oq-fg-991b1b)', padding: '9px 12px', borderRadius: '8px', fontSize: '12.5px', marginBottom: '12px' }}>{batchErr}</div> : null}
 
               {createdJob ? (
                 <div style={{ textAlign: 'center', padding: '14px 4px' }}>
-                  <div style={{ fontSize: '15px', fontWeight: '700', color: '#03543F', marginBottom: '8px' }}>Job scheduled</div>
-                  <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
+                  <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--oq-fg-03543f)', marginBottom: '8px' }}>Job scheduled</div>
+                  <div style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', lineHeight: 1.6 }}>
                     <strong>{createdJob.name}</strong><br />
                     {createdJob.total_items} document(s) queued, up to {createdJob.chunk_size}/night.<br />
                     {createdJob.nights_remaining > 0
                       ? ('Estimated to finish in about ' + createdJob.nights_remaining + ' night' + (createdJob.nights_remaining !== 1 ? 's' : '') + (createdJob.est_completion ? ', around ' + createdJob.est_completion : '') + '.')
                       : 'Ready to process.'}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '10px' }}>It will run automatically during the nightly window. Track its progress in "Scheduled jobs" above.</div>
+                  <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)', marginTop: '10px' }}>It will run automatically during the nightly window. Track its progress in "Scheduled jobs" above.</div>
                 </div>
               ) : batchResults ? (
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Results</div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)', marginBottom: '10px' }}>Results</div>
                   {batchResults.results.map(function (r) {
                     var ok = r.status === 'redacted';
                     return (
-                      <div key={r.file_id} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px' }}>
+                      <div key={r.file_id} style={{ border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', color: ok ? '#03543F' : r.status === 'held' ? '#92400E' : '#9B1C1C', background: ok ? '#DEF7EC' : r.status === 'held' ? '#FEF3C7' : '#FDE8E8' }}>{r.status === 'redacted' ? 'Redacted' : r.status === 'held' ? 'Held' : 'Error'}</span>
-                          <span style={{ flex: 1, minWidth: 0, fontSize: '13px', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}{r.reason ? <span style={{ color: '#92400E', fontSize: '11.5px' }}> &mdash; {r.reason}</span> : null}{r.error ? <span style={{ color: '#9B1C1C', fontSize: '11.5px' }}> &mdash; {r.error}</span> : null}</span>
-                          {ok ? <button onClick={function () { downloadOut(r.outputFileId, r.fileName); }} style={{ flexShrink: 0, padding: '5px 10px', borderRadius: '6px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '11.5px', fontWeight: '700', cursor: 'pointer' }}>Download</button> : null}
+                          <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', color: ok ? 'var(--oq-fg-03543f)' : r.status === 'held' ? 'var(--oq-fg-92400e)' : 'var(--oq-fg-9b1c1c)', background: ok ? 'var(--oq-bg-def7ec)' : r.status === 'held' ? 'var(--oq-bg-fef3c7)' : 'var(--oq-bg-fde8e8)' }}>{r.status === 'redacted' ? 'Redacted' : r.status === 'held' ? 'Held' : 'Error'}</span>
+                          <span style={{ flex: 1, minWidth: 0, fontSize: '13px', color: 'var(--oq-fg-111111)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}{r.reason ? <span style={{ color: 'var(--oq-fg-92400e)', fontSize: '11.5px' }}> &mdash; {r.reason}</span> : null}{r.error ? <span style={{ color: 'var(--oq-fg-9b1c1c)', fontSize: '11.5px' }}> &mdash; {r.error}</span> : null}</span>
+                          {ok ? <button onClick={function () { downloadOut(r.outputFileId, r.fileName); }} style={{ flexShrink: 0, padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '11.5px', fontWeight: '700', cursor: 'pointer' }}>Download</button> : null}
                         </div>
                         {(r.audit_flags && r.audit_flags.length) ? (
-                          <div style={{ marginTop: '6px', fontSize: '11.5px', color: '#92400E', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', padding: '6px 9px' }}>
+                          <div style={{ marginTop: '6px', fontSize: '11.5px', color: 'var(--oq-fg-92400e)', background: 'var(--oq-bg-fffbeb)', border: '1px solid var(--oq-ln-fde68a)', borderRadius: '6px', padding: '6px 9px' }}>
                             <strong>Content check:</strong> {r.audit_flags.map(function (f) { return f.detail; }).join(' ')}
                           </div>
                         ) : null}
                       </div>
                     );
                   })}
-                  <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '10px' }}>{batchResults.summary.redacted} redacted &amp; released, {batchResults.summary.held} held, {batchResults.summary.errors} error(s). Redacted copies are now in Released Records and searchable in the Fulfilled Request Index.</div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginTop: '10px' }}>{batchResults.summary.redacted} redacted &amp; released, {batchResults.summary.held} held, {batchResults.summary.errors} error(s). Redacted copies are now in Released Records and searchable in the Fulfilled Request Index.</div>
                 </div>
               ) : checkResults ? (
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Safety check</div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)', marginBottom: '10px' }}>Safety check</div>
                   {checkResults.results.map(function (r) {
                     return (
-                      <div key={r.file_id} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px' }}>
+                      <div key={r.file_id} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px' }}>
                         <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', color: scoreColor(r.pass), background: scoreBg(r.pass) }}>{r.pass === true ? 'Match' : r.pass === false ? 'Mismatch' : 'No fingerprint'}</span>
-                        <span style={{ flex: 1, minWidth: 0, fontSize: '13px', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+                        <span style={{ flex: 1, minWidth: 0, fontSize: '13px', color: 'var(--oq-fg-111111)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
                         <span style={{ flexShrink: 0, fontSize: '12px', fontWeight: '700', color: scoreColor(r.pass) }}>{r.score == null ? '\u2014' : r.score + '%'}</span>
                       </div>
                     );
                   })}
-                  <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '10px' }}>{checkResults.summary.passing} of {checkResults.results.length} match the template and will be redacted. Mismatches are skipped &mdash; redact those individually in the workspace.</div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginTop: '10px' }}>{checkResults.summary.passing} of {checkResults.results.length} match the template and will be redacted. Mismatches are skipped &mdash; redact those individually in the workspace.</div>
                   {destinationBlock()}
                 </div>
               ) : scheduleForm ? (
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '12px' }}>Schedule details</div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Job name</label>
-                  <input value={jobName} onChange={function (e) { setJobName(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Documents per night</label>
-                  <input type="number" min="1" value={chunkSize} onChange={function (e) { setChunkSize(e.target.value); }} style={{ width: '160px', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)', marginBottom: '12px' }}>Schedule details</div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--oq-fg-6b7280)', marginBottom: '4px' }}>Job name</label>
+                  <input value={jobName} onChange={function (e) { setJobName(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--oq-fg-6b7280)', marginBottom: '4px' }}>Documents per night</label>
+                  <input type="number" min="1" value={chunkSize} onChange={function (e) { setChunkSize(e.target.value); }} style={{ width: '160px', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
                   {destinationBlock()}
-                  <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#075985', lineHeight: 1.6 }}>
+                  <div style={{ background: 'var(--oq-bg-f0f9ff)', border: '1px solid var(--oq-ln-bae6fd)', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: 'var(--oq-fg-075985)', lineHeight: 1.6 }}>
                     <strong>{selIds.length}</strong> document(s) selected &rarr; up to <strong>{effChunk}</strong>/night &rarr; finishes in about <strong>{estNights}</strong> night{estNights !== 1 ? 's' : ''}{estDate ? (', around ' + estDate) : ''}.
-                    {cfg && parseInt(chunkSize, 10) > budget ? <div style={{ marginTop: '6px', color: '#92400E' }}>Note: the shared nightly budget is {budget}/night, so no more than {budget} will run per night across all jobs.</div> : null}
+                    {cfg && parseInt(chunkSize, 10) > budget ? <div style={{ marginTop: '6px', color: 'var(--oq-fg-92400e)' }}>Note: the shared nightly budget is {budget}/night, so no more than {budget} will run per night across all jobs.</div> : null}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '10px' }}>The job processes automatically during the nightly window and resumes where it left off each night until complete. You can pause, resume, or cancel it anytime.</div>
+                  <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)', marginTop: '10px' }}>The job processes automatically during the nightly window and resumes where it left off each night until complete. You can pause, resume, or cancel it anytime.</div>
                 </div>
               ) : (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Select documents ({selIds.length} selected)</div>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)' }}>Select documents ({selIds.length} selected)</div>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <button onClick={selectAll} style={{ border: 'none', background: 'transparent', color: '#1F4E79', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>Select all</button>
-                      <button onClick={clearSel} style={{ border: 'none', background: 'transparent', color: '#6B7280', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>Clear</button>
+                      <button onClick={selectAll} style={{ border: 'none', background: 'transparent', color: 'var(--oq-fg-1f4e79)', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>Select all</button>
+                      <button onClick={clearSel} style={{ border: 'none', background: 'transparent', color: 'var(--oq-fg-6b7280)', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>Clear</button>
                     </div>
                   </div>
-                  {candLoading ? <div style={{ color: '#9CA3AF', fontSize: '13px', padding: '20px', textAlign: 'center' }}>Loading documents...</div>
-                    : candidates.length === 0 ? <div style={{ color: '#9CA3AF', fontSize: '13px', padding: '20px', textAlign: 'center' }}>No documents available.</div>
+                  {candLoading ? <div style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '13px', padding: '20px', textAlign: 'center' }}>Loading documents...</div>
+                    : candidates.length === 0 ? <div style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '13px', padding: '20px', textAlign: 'center' }}>No documents available.</div>
                     : candidates.map(function (c) {
                       return (
-                        <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px', cursor: 'pointer' }}>
+                        <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px', cursor: 'pointer' }}>
                           <input type="checkbox" checked={!!selected[c.id]} onChange={function () { toggleSel(c.id); }} />
                           <span style={{ flex: 1, minWidth: 0 }}>
-                            <span style={{ display: 'block', fontSize: '13px', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
-                            {c.request_desc ? <span style={{ display: 'block', fontSize: '11.5px', color: '#9CA3AF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.request_desc}</span> : null}
+                            <span style={{ display: 'block', fontSize: '13px', color: 'var(--oq-fg-111111)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
+                            {c.request_desc ? <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--oq-fg-9ca3af)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.request_desc}</span> : null}
                           </span>
                         </label>
                       );
@@ -509,28 +509,28 @@ export default function MassRedactionPage() {
               )}
             </div>
 
-            <div style={{ padding: '16px 22px', borderTop: '1px solid #F3F4F6', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <div style={{ padding: '16px 22px', borderTop: '1px solid var(--oq-ln-f3f4f6)', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               {createdJob ? (
-                <button onClick={function () { setBatchTpl(null); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Done</button>
+                <button onClick={function () { setBatchTpl(null); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Done</button>
               ) : batchResults ? (
-                <button onClick={function () { setBatchTpl(null); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Done</button>
+                <button onClick={function () { setBatchTpl(null); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Done</button>
               ) : checkResults ? (
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={function () { setCheckResults(null); }} disabled={processing} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Back</button>
-                  <button onClick={runProcess} disabled={processing || checkResults.summary.passing === 0} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (processing || checkResults.summary.passing === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{processing ? 'Processing...' : 'Redact ' + checkResults.summary.passing + ' matching'}</button>
+                  <button onClick={function () { setCheckResults(null); }} disabled={processing} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Back</button>
+                  <button onClick={runProcess} disabled={processing || checkResults.summary.passing === 0} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (processing || checkResults.summary.passing === 0) ? 'var(--oq-bg-9cb4cc)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{processing ? 'Processing...' : 'Redact ' + checkResults.summary.passing + ' matching'}</button>
                 </div>
               ) : scheduleForm ? (
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={function () { setScheduleForm(false); }} disabled={creating} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Back</button>
-                  <button onClick={createJob} disabled={creating || !selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (creating || !selIds.length) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{creating ? 'Scheduling...' : 'Schedule job'}</button>
+                  <button onClick={function () { setScheduleForm(false); }} disabled={creating} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Back</button>
+                  <button onClick={createJob} disabled={creating || !selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (creating || !selIds.length) ? 'var(--oq-bg-9cb4cc)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{creating ? 'Scheduling...' : 'Schedule job'}</button>
                 </div>
               ) : (
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={closeBatch} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={closeBatch} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
                   {scheduleMode ? (
-                    <button onClick={function () { setScheduleForm(true); setBatchErr(''); }} disabled={!selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: !selIds.length ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Next: schedule ({selIds.length})</button>
+                    <button onClick={function () { setScheduleForm(true); setBatchErr(''); }} disabled={!selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: !selIds.length ? 'var(--oq-bg-9cb4cc)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Next: schedule ({selIds.length})</button>
                   ) : (
-                    <button onClick={runCheck} disabled={checking || !selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (checking || !selIds.length) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{checking ? 'Checking...' : 'Run safety check'}</button>
+                    <button onClick={runCheck} disabled={checking || !selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (checking || !selIds.length) ? 'var(--oq-bg-9cb4cc)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{checking ? 'Checking...' : 'Run safety check'}</button>
                   )}
                 </div>
               )}

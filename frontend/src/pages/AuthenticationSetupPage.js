@@ -31,14 +31,14 @@ export default function AuthenticationSetupPage() {
     <SetupScreen hubKey="auth_policy" laneLabel="Technical Setup" title="User Authentication Setup"
       intro="How staff sign in to this installation: local credentials or the city's single sign-on, whether multi-factor authentication is required, how long a session lasts, and how long a password must be.">
       {function (s) {
-        if (!form) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
+        if (!form) return <div style={{ color: 'var(--oq-fg-9ca3af)' }}>Loading…</div>;
         return (
           <div>
             {msg ? <Msg text={msg.text} ok={msg.ok} /> : null}
-            {Object.keys(saved).some(function (k) { return !saved[k]; }) ? <div style={{ fontSize: '11.5px', color: '#DC2626', fontWeight: 600, marginBottom: '12px' }}>Required — the settings outlined in red show the shipped default; choose each one and save to record the city's decision.</div> : null}
+            {Object.keys(saved).some(function (k) { return !saved[k]; }) ? <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-dc2626)', fontWeight: 600, marginBottom: '12px' }}>Required — the settings outlined in red show the shipped default; choose each one and save to record the city's decision.</div> : null}
             <div style={field}>
               <label style={lbl}>Authentication mode</label>
-              <select value={form.auth_mode} disabled={!s.can} onChange={function (e) { set('auth_mode', e.target.value); }} style={Object.assign({}, inp, saved.auth_mode ? {} : { border: '2px solid #DC2626' })}>
+              <select value={form.auth_mode} disabled={!s.can} onChange={function (e) { set('auth_mode', e.target.value); }} style={Object.assign({}, inp, saved.auth_mode ? {} : { border: '2px solid var(--oq-ln-dc2626)' })}>
                 <option value="local">Local credentials</option>
                 <option value="sso">Single sign-on (SSO)</option>
               </select>
@@ -46,7 +46,7 @@ export default function AuthenticationSetupPage() {
             </div>
             <div style={field}>
               <label style={lbl}>Multi-factor authentication</label>
-              <select value={form.mfa_mode} disabled={!s.can} onChange={function (e) { set('mfa_mode', e.target.value); }} style={Object.assign({}, inp, saved.mfa_mode ? {} : { border: '2px solid #DC2626' })}>
+              <select value={form.mfa_mode} disabled={!s.can} onChange={function (e) { set('mfa_mode', e.target.value); }} style={Object.assign({}, inp, saved.mfa_mode ? {} : { border: '2px solid var(--oq-ln-dc2626)' })}>
                 <option value="off">Off — not available</option>
                 <option value="optional">Optional — staff may enroll</option>
                 <option value="required">Required — all staff must enroll</option>
@@ -55,7 +55,7 @@ export default function AuthenticationSetupPage() {
             </div>
             <div style={field}>
               <label style={lbl}>Session timeout</label>
-              <select value={form.session_timeout} disabled={!s.can} onChange={function (e) { set('session_timeout', e.target.value); }} style={Object.assign({}, inp, saved.session_timeout ? {} : { border: '2px solid #DC2626' })}>
+              <select value={form.session_timeout} disabled={!s.can} onChange={function (e) { set('session_timeout', e.target.value); }} style={Object.assign({}, inp, saved.session_timeout ? {} : { border: '2px solid var(--oq-ln-dc2626)' })}>
                 <option value="2h">2 hours</option>
                 <option value="4h">4 hours</option>
                 <option value="8h">8 hours (recommended)</option>
@@ -65,7 +65,7 @@ export default function AuthenticationSetupPage() {
             </div>
             <div style={field}>
               <label style={lbl}>Minimum password length</label>
-              <select value={form.min_password_length} disabled={!s.can} onChange={function (e) { set('min_password_length', e.target.value); }} style={Object.assign({}, inp, saved.min_password_length ? {} : { border: '2px solid #DC2626' })}>
+              <select value={form.min_password_length} disabled={!s.can} onChange={function (e) { set('min_password_length', e.target.value); }} style={Object.assign({}, inp, saved.min_password_length ? {} : { border: '2px solid var(--oq-ln-dc2626)' })}>
                 {['8', '10', '12', '14', '16'].map(function (n) { return <option key={n} value={n}>{n} characters</option>; })}
               </select>
             </div>

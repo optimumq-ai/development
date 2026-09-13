@@ -20,10 +20,10 @@ export default function FeeWaiverDecisionPanel(props){
   if (status === 'granted' || status === 'denied'){
     var denied = status === 'denied';
     return (
-      <div style={{ border:'1px solid ' + (denied ? '#FDE68A' : '#A7F3D0'), borderRadius:'10px', padding:'16px', marginBottom:'18px', background: denied ? '#FFFBEB' : '#F0FDF4' }}>
-        <div style={{ fontSize:'14px', fontWeight:'700', color: denied ? '#92400E' : '#166534', marginBottom:'4px' }}>Fee waiver {denied ? 'denied' : 'granted'}</div>
-        {denied ? <div style={{ fontSize:'13px', color:'#374151', lineHeight:'1.5' }}><b>Reason:</b> {request.fee_waiver_reason}</div> : null}
-        <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'6px', lineHeight:'1.5' }}>{denied ? 'A denial notice was sent to the requestor. The request remains open and continues through the normal fee process.' : 'Fees are waived for this request.'}{request.fee_waiver_decided_by ? ' \u2014 by ' + request.fee_waiver_decided_by : ''}</div>
+      <div style={{ border:'1px solid ' + (denied ? 'var(--oq-ln-fde68a)' : 'var(--oq-ln-a7f3d0)'), borderRadius:'10px', padding:'16px', marginBottom:'18px', background: denied ? 'var(--oq-bg-fffbeb)' : 'var(--oq-bg-f0fdf4)' }}>
+        <div style={{ fontSize:'14px', fontWeight:'700', color: denied ? 'var(--oq-fg-92400e)' : 'var(--oq-fg-166534)', marginBottom:'4px' }}>Fee waiver {denied ? 'denied' : 'granted'}</div>
+        {denied ? <div style={{ fontSize:'13px', color:'var(--oq-fg-374151)', lineHeight:'1.5' }}><b>Reason:</b> {request.fee_waiver_reason}</div> : null}
+        <div style={{ fontSize:'12px', color:'var(--oq-fg-6b7280)', marginTop:'6px', lineHeight:'1.5' }}>{denied ? 'A denial notice was sent to the requestor. The request remains open and continues through the normal fee process.' : 'Fees are waived for this request.'}{request.fee_waiver_decided_by ? ' \u2014 by ' + request.fee_waiver_decided_by : ''}</div>
       </div>
     );
   }
@@ -44,30 +44,30 @@ export default function FeeWaiverDecisionPanel(props){
   }
 
   return (
-    <div style={{ border:'1px solid #FDE68A', borderRadius:'10px', padding:'16px', marginBottom:'18px', background:'#FFFBEB' }}>
-      <div style={{ fontSize:'14px', fontWeight:'700', color:'#92400E', marginBottom:'2px' }}>Fee waiver requested &mdash; decision needed</div>
-      <div style={{ fontSize:'12px', color:'#6B7280', marginBottom:'12px', lineHeight:'1.5' }}>Granting waives the fees. Denying sends the requestor a denial notice; the request then continues through the normal fee process (it is not closed).</div>
+    <div style={{ border:'1px solid var(--oq-ln-fde68a)', borderRadius:'10px', padding:'16px', marginBottom:'18px', background:'var(--oq-bg-fffbeb)' }}>
+      <div style={{ fontSize:'14px', fontWeight:'700', color:'var(--oq-fg-92400e)', marginBottom:'2px' }}>Fee waiver requested &mdash; decision needed</div>
+      <div style={{ fontSize:'12px', color:'var(--oq-fg-6b7280)', marginBottom:'12px', lineHeight:'1.5' }}>Granting waives the fees. Denying sends the requestor a denial notice; the request then continues through the normal fee process (it is not closed).</div>
       {mode !== 'deny' ? (
         <div style={{ display:'flex', gap:'8px' }}>
-          <button onClick={function(){ decide('grant'); }} disabled={busy} style={btn('#03543F', '#DEF7EC')}>{busy ? 'Saving...' : 'Grant waiver'}</button>
-          <button onClick={function(){ setMode('deny'); }} disabled={busy} style={btn('#9B1C1C', '#FDE8E8')}>Deny waiver</button>
+          <button onClick={function(){ decide('grant'); }} disabled={busy} style={btn('var(--oq-fg-03543f)', 'var(--oq-bg-def7ec)')}>{busy ? 'Saving...' : 'Grant waiver'}</button>
+          <button onClick={function(){ setMode('deny'); }} disabled={busy} style={btn('var(--oq-fg-9b1c1c)', 'var(--oq-bg-fde8e8)')}>Deny waiver</button>
         </div>
       ) : (
         <div>
-          <div style={{ fontSize:'12px', fontWeight:'600', color:'#374151', marginBottom:'6px' }}>Reason for denial</div>
-          <select value={reasonId} onChange={function(e){ setReasonId(e.target.value); setNewReason(''); }} disabled={!!newReason.trim()} style={{ width:'100%', padding:'8px 10px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'13px', marginBottom:'8px', boxSizing:'border-box', background: newReason.trim() ? '#F3F4F6' : 'white' }}>
+          <div style={{ fontSize:'12px', fontWeight:'600', color:'var(--oq-fg-374151)', marginBottom:'6px' }}>Reason for denial</div>
+          <select value={reasonId} onChange={function(e){ setReasonId(e.target.value); setNewReason(''); }} disabled={!!newReason.trim()} style={{ width:'100%', padding:'8px 10px', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'8px', fontSize:'13px', marginBottom:'8px', boxSizing:'border-box', background: newReason.trim() ? 'var(--oq-bg-f3f4f6)' : 'var(--oq-bg-ffffff)' }}>
             <option value="">&mdash; Select a saved reason &mdash;</option>
             {reasons.map(function(r){ return <option key={r.id} value={r.id}>{r.text}</option>; })}
           </select>
-          <div style={{ fontSize:'12px', color:'#6B7280', margin:'2px 0 4px' }}>or add a new reason (it is saved to the list for next time):</div>
-          <textarea value={newReason} onChange={function(e){ setNewReason(e.target.value); if (e.target.value.trim()) setReasonId(''); }} rows={2} placeholder="Type a new denial reason..." style={{ width:'100%', padding:'8px 10px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'13px', boxSizing:'border-box', resize:'vertical', fontFamily:'inherit' }} />
+          <div style={{ fontSize:'12px', color:'var(--oq-fg-6b7280)', margin:'2px 0 4px' }}>or add a new reason (it is saved to the list for next time):</div>
+          <textarea value={newReason} onChange={function(e){ setNewReason(e.target.value); if (e.target.value.trim()) setReasonId(''); }} rows={2} placeholder="Type a new denial reason..." style={{ width:'100%', padding:'8px 10px', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'8px', fontSize:'13px', boxSizing:'border-box', resize:'vertical', fontFamily:'inherit' }} />
           <div style={{ display:'flex', gap:'8px', marginTop:'10px' }}>
-            <button onClick={function(){ decide('deny'); }} disabled={busy} style={btn('#9B1C1C', '#FDE8E8')}>{busy ? 'Saving...' : 'Confirm denial & notify'}</button>
-            <button onClick={function(){ setMode(null); setMsg(''); }} disabled={busy} style={{ padding:'8px 14px', border:'1px solid #E5E7EB', borderRadius:'8px', background:'white', color:'#6B7280', fontSize:'13px', fontWeight:'600', cursor:'pointer' }}>Cancel</button>
+            <button onClick={function(){ decide('deny'); }} disabled={busy} style={btn('var(--oq-fg-9b1c1c)', 'var(--oq-bg-fde8e8)')}>{busy ? 'Saving...' : 'Confirm denial & notify'}</button>
+            <button onClick={function(){ setMode(null); setMsg(''); }} disabled={busy} style={{ padding:'8px 14px', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'8px', background:'var(--oq-bg-ffffff)', color:'var(--oq-fg-6b7280)', fontSize:'13px', fontWeight:'600', cursor:'pointer' }}>Cancel</button>
           </div>
         </div>
       )}
-      {msg ? <div style={{ fontSize:'12px', color:'#92400E', marginTop:'10px' }}>{msg}</div> : null}
+      {msg ? <div style={{ fontSize:'12px', color:'var(--oq-fg-92400e)', marginTop:'10px' }}>{msg}</div> : null}
     </div>
   );
 }

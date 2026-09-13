@@ -17,13 +17,13 @@ export default function ReportsHubPage() {
   const Body = active.el;
   return (
     <div>
-      <div style={{ display: 'flex', gap: '4px', borderBottom: '2px solid #E5E7EB', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '4px', borderBottom: '2px solid var(--oq-ln-e5e7eb)', marginBottom: '20px' }}>
         {TABS.map(function (t) {
           const on = t.key === active.key;
           return (
             <button key={t.key} onClick={function () { setParams({ tab: t.key }); }}
-              style={{ padding: '9px 18px', border: 'none', borderBottom: '2px solid ' + (on ? '#1F4E79' : 'transparent'),
-                marginBottom: '-2px', background: 'none', color: on ? '#1F4E79' : '#6B7280',
+              style={{ padding: '9px 18px', border: 'none', borderBottom: '2px solid ' + (on ? 'var(--oq-ln-1f4e79)' : 'transparent'),
+                marginBottom: '-2px', background: 'none', color: on ? 'var(--oq-fg-1f4e79)' : 'var(--oq-fg-6b7280)',
                 fontSize: '14px', fontWeight: on ? '700' : '500', cursor: 'pointer' }}>
               {t.label}
             </button>

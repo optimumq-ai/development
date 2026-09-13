@@ -11,20 +11,20 @@ import RemovalDialog from '../components/ui/RemovalDialog';
 //   department -> an org-chart entity that OWNS records (Police, Parks, City Clerk...).
 //   team       -> a group that PROCESSES requests. A team declares which departments it fulfills.
 
-const PALETTE = ['#2E75B6', '#1F4E79', '#C0392B', '#7030A0', '#375623', '#7F6000', '#0F766E', '#B91C1C', '#1F3864'];
+const PALETTE = ['var(--oq-x-2e75b6)', 'var(--oq-x-1f4e79)', 'var(--oq-x-c0392b)', 'var(--oq-x-7030a0)', 'var(--oq-x-375623)', 'var(--oq-x-7f6000)', 'var(--oq-x-0f766e)', 'var(--oq-x-b91c1c)', 'var(--oq-x-1f3864)'];
 
-const inp = { width: '100%', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', background: 'white' };
-const lbl = { display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '5px' };
-const btnPrimary = { padding: '10px 18px', background: '#1F4E79', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' };
-const card = { background: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '18px' };
+const inp = { width: '100%', padding: '9px 12px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', background: 'var(--oq-bg-ffffff)' };
+const lbl = { display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--oq-fg-374151)', marginBottom: '5px' };
+const btnPrimary = { padding: '10px 18px', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' };
+const card = { background: 'var(--oq-bg-ffffff)', borderRadius: '12px', border: '1px solid var(--oq-ln-e5e7eb)', padding: '18px' };
 const chip = (bg, color) => ({ background: bg, color: color, fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px', display: 'inline-block' });
 
 function Guidance({ children }) {
-  return <div style={{ background: '#F0F6FC', border: '1px solid #D6E4F0', borderRadius: '10px', padding: '14px 16px', fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>{children}</div>;
+  return <div style={{ background: 'var(--oq-bg-f0f6fc)', border: '1px solid var(--oq-ln-d6e4f0)', borderRadius: '10px', padding: '14px 16px', fontSize: '13px', color: 'var(--oq-fg-374151)', lineHeight: 1.6 }}>{children}</div>;
 }
 
 function CodeChip({ code, color }) {
-  return <span style={{ background: (color || '#2E75B6') + '22', color: color || '#2E75B6', fontSize: '11px', fontWeight: '800', padding: '3px 9px', borderRadius: '6px', letterSpacing: '.03em' }}>{code}</span>;
+  return <span style={{ background: (color || 'var(--oq-bg-2e75b6)') + '22', color: color || 'var(--oq-fg-2e75b6)', fontSize: '11px', fontWeight: '800', padding: '3px 9px', borderRadius: '6px', letterSpacing: '.03em' }}>{code}</span>;
 }
 
 export default function OrgPage() {
@@ -112,16 +112,16 @@ export default function OrgPage() {
     {function () { return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
-      <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid #E5E7EB' }}>
+      <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid var(--oq-ln-e5e7eb)' }}>
         {TABS.map(t => (
           <button key={t[0]} onClick={() => setTab(t[0])}
-            style={{ padding: '12px 20px', background: 'none', border: 'none', borderBottom: tab === t[0] ? '2px solid #1F4E79' : '2px solid transparent', marginBottom: '-1px', fontSize: '14px', fontWeight: tab === t[0] ? '700' : '500', color: tab === t[0] ? '#1F4E79' : '#6B7280', cursor: 'pointer' }}>
+            style={{ padding: '12px 20px', background: 'none', border: 'none', borderBottom: tab === t[0] ? '2px solid var(--oq-ln-1f4e79)' : '2px solid transparent', marginBottom: '-1px', fontSize: '14px', fontWeight: tab === t[0] ? '700' : '500', color: tab === t[0] ? 'var(--oq-fg-1f4e79)' : 'var(--oq-fg-6b7280)', cursor: 'pointer' }}>
             {t[1]}{t[0] === 'departments' ? ' (' + depts.length + ')' : t[0] === 'teams' ? ' (' + teams.length + ')' : ' (' + staff.length + ')'}
           </button>
         ))}
       </div>
 
-      {loading ? <div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>Loading…</div> : (
+      {loading ? <div style={{ padding: '48px', textAlign: 'center', color: 'var(--oq-fg-9ca3af)' }}>Loading…</div> : (
         <>
           {/* ---------- DEPARTMENTS ---------- */}
           {tab === 'departments' && (
@@ -132,7 +132,7 @@ export default function OrgPage() {
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button onClick={newDepartment} style={btnPrimary}>+ Add Department</button>
               </div>
-              {depts.length === 0 ? <div style={{ ...card, textAlign: 'center', color: '#9CA3AF' }}>No departments yet.</div> : (
+              {depts.length === 0 ? <div style={{ ...card, textAlign: 'center', color: 'var(--oq-fg-9ca3af)' }}>No departments yet.</div> : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {depts.map(d => {
                     const team = fulfillingTeam(d);
@@ -141,20 +141,20 @@ export default function OrgPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
                           <CodeChip code={d.code} color={d.color} />
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ fontWeight: '600', fontSize: '14px', color: '#111' }}>{d.name}
-                              {d.is_open_records ? <span style={{ marginLeft: '8px', ...chip('#DBEAFE', '#1E40AF') }}>Open Records Hub</span> : null}
-                              {d.is_catch_all ? <span style={{ marginLeft: '6px', ...chip('#FEF3C7', '#92400E') }}>Catch-All</span> : null}
+                            <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--oq-fg-111111)' }}>{d.name}
+                              {d.is_open_records ? <span style={{ marginLeft: '8px', ...chip('var(--oq-bg-dbeafe)', 'var(--oq-fg-1e40af)') }}>Open Records Hub</span> : null}
+                              {d.is_catch_all ? <span style={{ marginLeft: '6px', ...chip('var(--oq-bg-fef3c7)', 'var(--oq-fg-92400e)') }}>Catch-All</span> : null}
                             </div>
                             <div style={{ fontSize: '12px', marginTop: '3px' }}>
                               {team
-                                ? <span style={{ color: '#6B7280' }}>Fulfilled by <strong style={{ color: '#1F4E79' }}>{team.name}</strong></span>
-                                : <span style={{ color: '#B91C1C', fontWeight: 600 }}>⚠ No fulfillment team assigned</span>}
+                                ? <span style={{ color: 'var(--oq-fg-6b7280)' }}>Fulfilled by <strong style={{ color: 'var(--oq-fg-1f4e79)' }}>{team.name}</strong></span>
+                                : <span style={{ color: 'var(--oq-fg-b91c1c)', fontWeight: 600 }}>⚠ No fulfillment team assigned</span>}
                             </div>
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                          <button onClick={() => editDepartment(d)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
-                          <button onClick={() => setRemoving({ kind: 'department', id: d.id, name: d.name })} title="Delete this department (a guided process)" style={{ padding: '6px 14px', background: 'white', color: '#B91C1C', border: '1px solid #FCA5A5', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
+                          <button onClick={() => editDepartment(d)} style={{ padding: '6px 14px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', border: '1px solid var(--oq-ln-bfdbfe)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
+                          <button onClick={() => setRemoving({ kind: 'department', id: d.id, name: d.name })} title="Delete this department (a guided process)" style={{ padding: '6px 14px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-b91c1c)', border: '1px solid var(--oq-ln-fca5a5)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
                         </div>
                       </div>
                     );
@@ -179,12 +179,12 @@ export default function OrgPage() {
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', minWidth: 0 }}>
                     <CodeChip code={t.code} color={t.color} />
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: '600', fontSize: '14px', color: '#111' }}>{t.name}
-                        {t.is_open_records ? <span style={{ marginLeft: '8px', ...chip('#DBEAFE', '#1E40AF') }}>Open-Records fallback</span> : null}
-                        {staffingOnly ? <span style={{ marginLeft: '8px', ...chip('#F3E8FF', '#6D28D9') }}>Oversight (not routed)</span> : null}
-                        {t.auto_load_balancing ? <span style={{ marginLeft: '6px', ...chip('#D1FAE5', '#065F46') }}>Auto load-balance</span> : null}
+                      <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--oq-fg-111111)' }}>{t.name}
+                        {t.is_open_records ? <span style={{ marginLeft: '8px', ...chip('var(--oq-bg-dbeafe)', 'var(--oq-fg-1e40af)') }}>Open-Records fallback</span> : null}
+                        {staffingOnly ? <span style={{ marginLeft: '8px', ...chip('var(--oq-bg-f3e8ff)', 'var(--oq-fg-6d28d9)') }}>Oversight (not routed)</span> : null}
+                        {t.auto_load_balancing ? <span style={{ marginLeft: '6px', ...chip('var(--oq-bg-d1fae5)', 'var(--oq-fg-065f46)') }}>Auto load-balance</span> : null}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '3px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--oq-fg-6b7280)', marginTop: '3px' }}>
                         {members} member{members !== 1 ? 's' : ''}
                         {' · '}
                         {served.length ? <>Serves {served.map(d => d.name).join(', ')}</> : <span>Serves no departments</span>}
@@ -193,9 +193,9 @@ export default function OrgPage() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                    <button onClick={() => setViewStaffTeam(t)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>View staff</button>
-                    <button onClick={() => editTeam(t)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
-                    <button onClick={() => setRemoving({ kind: 'team', id: t.id, name: t.name })} title="Delete this team (a guided process)" style={{ padding: '6px 14px', background: 'white', color: '#B91C1C', border: '1px solid #FCA5A5', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
+                    <button onClick={() => setViewStaffTeam(t)} style={{ padding: '6px 14px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', border: '1px solid var(--oq-ln-bfdbfe)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>View staff</button>
+                    <button onClick={() => editTeam(t)} style={{ padding: '6px 14px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', border: '1px solid var(--oq-ln-bfdbfe)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => setRemoving({ kind: 'team', id: t.id, name: t.name })} title="Delete this team (a guided process)" style={{ padding: '6px 14px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-b91c1c)', border: '1px solid var(--oq-ln-fca5a5)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
                   </div>
                 </div>
               );
@@ -208,11 +208,11 @@ export default function OrgPage() {
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <button onClick={newTeam} style={btnPrimary}>+ Add Team</button>
                 </div>
-                {teams.length === 0 ? <div style={{ ...card, textAlign: 'center', color: '#9CA3AF' }}>No teams yet.</div> : (
+                {teams.length === 0 ? <div style={{ ...card, textAlign: 'center', color: 'var(--oq-fg-9ca3af)' }}>No teams yet.</div> : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {officeTeams.map(teamCard)}
                     {fulfillTeams.length > 0 && (
-                      <div style={{ fontSize: '13px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.04em', margin: '8px 0 0' }}>Fulfillment Teams</div>
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-6b7280)', textTransform: 'uppercase', letterSpacing: '.04em', margin: '8px 0 0' }}>Fulfillment Teams</div>
                     )}
                     {fulfillTeams.map(teamCard)}
                   </div>
@@ -231,7 +231,7 @@ export default function OrgPage() {
                   </Guidance>
                 </div>
                 <button onClick={() => nav('/setup/user-types')} title="The catalog of user types: what each may do, which task menus it carries, and who holds it"
-                  style={{ padding: '8px 16px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>View user types</button>
+                  style={{ padding: '8px 16px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', border: '1px solid var(--oq-ln-bfdbfe)', borderRadius: '6px', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>View user types</button>
               </div>
               <StaffManagementPage embedded />
             </div>
@@ -242,84 +242,84 @@ export default function OrgPage() {
       {/* ---------- EDITOR MODAL (department / team) ---------- */}
       {removing ? <RemovalDialog kind={removing.kind} id={removing.id} name={removing.name} onClose={() => setRemoving(null)}
         onDone={(r) => { setRemoving(null); setRemovedMsg((r.mode === 'delete' ? 'Deleted ' : 'Removed ') + r.name + (r.mode === 'retire' ? ' — kept on the record of past work.' : '.')); load(); }} /> : null}
-      {removedMsg ? <div style={{ margin: '0 0 12px', padding: '10px 14px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '8px', fontSize: '13px', color: '#065F46', display: 'flex', justifyContent: 'space-between' }}><span>{removedMsg}</span><button onClick={() => setRemovedMsg('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#065F46', fontWeight: '700' }}>Dismiss</button></div> : null}
+      {removedMsg ? <div style={{ margin: '0 0 12px', padding: '10px 14px', background: 'var(--oq-bg-ecfdf5)', border: '1px solid var(--oq-ln-a7f3d0)', borderRadius: '8px', fontSize: '13px', color: 'var(--oq-fg-065f46)', display: 'flex', justifyContent: 'space-between' }}><span>{removedMsg}</span><button onClick={() => setRemovedMsg('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--oq-fg-065f46)', fontWeight: '700' }}>Dismiss</button></div> : null}
       {editKind && (
         <div onClick={() => { if (!saving) closeEditor(); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '12px', padding: '24px', width: '560px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-            <div style={{ fontSize: '16px', fontWeight: '700', color: '#1F4E79' }}>{editRow ? 'Edit ' : 'New '}{editKind === 'team' ? 'fulfillment team' : 'city department'}</div>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '12px', padding: '24px', width: '560px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+            <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--oq-fg-1f4e79)' }}>{editRow ? 'Edit ' : 'New '}{editKind === 'team' ? 'fulfillment team' : 'city department'}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '14px', marginTop: '16px' }}>
               <div>
-                <label style={lbl}>Name <span style={{ color: '#DC2626' }}>*</span></label>
+                <label style={lbl}>Name <span style={{ color: 'var(--oq-fg-dc2626)' }}>*</span></label>
                 <input value={form.name} onChange={e => setF('name', e.target.value)} style={inp} placeholder={editKind === 'team' ? 'Police Records Team' : 'Police Department'} />
               </div>
               <div>
-                <label style={lbl}>Code <span style={{ color: '#DC2626' }}>*</span></label>
+                <label style={lbl}>Code <span style={{ color: 'var(--oq-fg-dc2626)' }}>*</span></label>
                 <input value={form.code} onChange={e => setF('code', e.target.value.toUpperCase())} maxLength={6} style={inp} placeholder="PD" />
               </div>
             </div>
             <div style={{ marginTop: '12px' }}>
               <label style={lbl}>Color</label>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {PALETTE.map(c => <button key={c} type="button" onClick={() => setF('color', c)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, border: form.color === c ? '3px solid #111' : '2px solid #E5E7EB', cursor: 'pointer' }} />)}
+                {PALETTE.map(c => <button key={c} type="button" onClick={() => setF('color', c)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, border: form.color === c ? '3px solid var(--oq-ln-111111)' : '2px solid var(--oq-ln-e5e7eb)', cursor: 'pointer' }} />)}
               </div>
             </div>
 
             {editKind === 'department' && (
               <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--oq-fg-374151)', cursor: 'pointer' }}>
                   <input type="checkbox" checked={!!form.is_open_records} onChange={e => setF('is_open_records', e.target.checked ? 1 : 0)} /> Open Records hub (badge only)
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--oq-fg-374151)', cursor: 'pointer' }}>
                   <input type="checkbox" checked={!!form.is_catch_all} onChange={e => setF('is_catch_all', e.target.checked ? 1 : 0)} /> Catch-all department
                 </label>
-                <div style={{ fontSize: '12px', color: '#9CA3AF' }}>Assign which team fulfills this department on the Teams tab (edit the team → “Departments this team fulfills”).</div>
+                <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)' }}>Assign which team fulfills this department on the Teams tab (edit the team → “Departments this team fulfills”).</div>
               </div>
             )}
 
             {editKind === 'team' && (
               <>
                 <div style={{ marginTop: '14px' }}>
-                  <label style={lbl}>Org-chart grouping <span style={{ fontWeight: 400, color: '#9CA3AF' }}>(display only — does not affect routing)</span></label>
+                  <label style={lbl}>Org-chart grouping <span style={{ fontWeight: 400, color: 'var(--oq-fg-9ca3af)' }}>(display only — does not affect routing)</span></label>
                   <select value={form.parent_id || ''} onChange={e => setF('parent_id', e.target.value)} style={inp}>
                     <option value="">— None —</option>
                     {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
                 </div>
                 <div style={{ marginTop: '14px' }}>
-                  <label style={lbl}>Routing specialization <span style={{ fontWeight: 400, color: '#9CA3AF' }}>(what this team handles, for smart routing)</span></label>
+                  <label style={lbl}>Routing specialization <span style={{ fontWeight: 400, color: 'var(--oq-fg-9ca3af)' }}>(what this team handles, for smart routing)</span></label>
                   <textarea value={form.routing_specialization} onChange={e => setF('routing_specialization', e.target.value)} rows={2} style={{ ...inp, fontFamily: 'inherit', resize: 'vertical' }} placeholder="e.g. body-worn camera footage, incident and arrest reports, 911 call audio" />
                 </div>
                 <div style={{ marginTop: '14px' }}>
                   <label style={lbl}>Departments this team fulfills</label>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF', margin: '0 0 8px' }}>Leave all unchecked for a staffing-only team (e.g. the Open Records Office) that isn't in request routing.</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '160px', overflowY: 'auto', border: '1px solid #F3F4F6', borderRadius: '8px', padding: '10px' }}>
-                    {depts.length === 0 ? <span style={{ fontSize: '12px', color: '#9CA3AF' }}>No departments yet.</span> : depts.map(d => {
+                  <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)', margin: '0 0 8px' }}>Leave all unchecked for a staffing-only team (e.g. the Open Records Office) that isn't in request routing.</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '160px', overflowY: 'auto', border: '1px solid var(--oq-ln-f3f4f6)', borderRadius: '8px', padding: '10px' }}>
+                    {depts.length === 0 ? <span style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)' }}>No departments yet.</span> : depts.map(d => {
                       const other = d.processed_by && d.processed_by !== (editRow && editRow.id);
                       return (
-                        <label key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer' }}>
+                        <label key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--oq-fg-374151)', cursor: 'pointer' }}>
                           <input type="checkbox" checked={(form.fulfills || []).includes(d.id)} onChange={() => toggleFulfills(d.id)} />
                           <CodeChip code={d.code} color={d.color} /> {d.name}
-                          {other ? <span style={{ fontSize: '11px', color: '#9CA3AF' }}>(currently: {teamById[d.processed_by] ? teamById[d.processed_by].name : 'another team'})</span> : null}
+                          {other ? <span style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)' }}>(currently: {teamById[d.processed_by] ? teamById[d.processed_by].name : 'another team'})</span> : null}
                         </label>
                       );
                     })}
                   </div>
                 </div>
                 <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--oq-fg-374151)', cursor: 'pointer' }}>
                     <input type="checkbox" checked={!!form.is_open_records} onChange={e => setF('is_open_records', e.target.checked ? 1 : 0)} /> Open-Records fallback team (catches anything unmatched)
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--oq-fg-374151)', cursor: 'pointer' }}>
                     <input type="checkbox" checked={!!form.auto_load_balancing} onChange={e => setF('auto_load_balancing', e.target.checked ? 1 : 0)} /> Auto load-balancing (assign to least-busy eligible member)
                   </label>
                 </div>
               </>
             )}
 
-            {err && <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '12px', fontSize: '14px', color: '#DC2626', marginTop: '14px' }}>{err}</div>}
+            {err && <div style={{ background: 'var(--oq-bg-fef2f2)', border: '1px solid var(--oq-ln-fca5a5)', borderRadius: '8px', padding: '12px', fontSize: '14px', color: 'var(--oq-fg-dc2626)', marginTop: '14px' }}>{err}</div>}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '18px' }}>
-              <button onClick={closeEditor} disabled={saving} style={{ padding: '9px 16px', background: 'white', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
-              <button onClick={saveEditor} disabled={saving} style={{ padding: '9px 18px', background: saving ? '#9CA3AF' : '#1F4E79', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: saving ? 'default' : 'pointer' }}>{saving ? 'Saving…' : 'Save'}</button>
+              <button onClick={closeEditor} disabled={saving} style={{ padding: '9px 16px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-6b7280)', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={saveEditor} disabled={saving} style={{ padding: '9px 18px', background: saving ? 'var(--oq-bg-9ca3af)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: saving ? 'default' : 'pointer' }}>{saving ? 'Saving…' : 'Save'}</button>
             </div>
           </div>
         </div>
@@ -328,26 +328,26 @@ export default function OrgPage() {
       {/* ---------- VIEW STAFF MODAL (read-only) ---------- */}
       {viewStaffTeam && (
         <div onClick={() => setViewStaffTeam(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '12px', padding: '24px', width: '460px', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '12px', padding: '24px', width: '460px', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <CodeChip code={viewStaffTeam.code} color={viewStaffTeam.color} />
-              <div style={{ fontSize: '16px', fontWeight: '700', color: '#1F4E79' }}>{viewStaffTeam.name} — staff</div>
+              <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--oq-fg-1f4e79)' }}>{viewStaffTeam.name} — staff</div>
             </div>
             <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {staff.filter(s => s.department_id === viewStaffTeam.id).length === 0
-                ? <div style={{ fontSize: '13px', color: '#9CA3AF', padding: '10px 0' }}>No staff on this team yet.</div>
+                ? <div style={{ fontSize: '13px', color: 'var(--oq-fg-9ca3af)', padding: '10px 0' }}>No staff on this team yet.</div>
                 : staff.filter(s => s.department_id === viewStaffTeam.id).map(s => (
-                  <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '8px 12px', border: '1px solid #F3F4F6', borderRadius: '8px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#111' }}>{s.display_name}</span>
-                    <span style={{ fontSize: '12px', color: '#6B7280' }}>{s.title || ''}</span>
+                  <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '8px 12px', border: '1px solid var(--oq-ln-f3f4f6)', borderRadius: '8px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--oq-fg-111111)' }}>{s.display_name}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--oq-fg-6b7280)' }}>{s.title || ''}</span>
                   </div>
                 ))}
             </div>
-            <div style={{ marginTop: '14px', fontSize: '12px', color: '#6B7280', background: '#F9FAFB', border: '1px solid #F3F4F6', borderRadius: '8px', padding: '10px 12px' }}>
+            <div style={{ marginTop: '14px', fontSize: '12px', color: 'var(--oq-fg-6b7280)', background: 'var(--oq-bg-f9fafb)', border: '1px solid var(--oq-ln-f3f4f6)', borderRadius: '8px', padding: '10px 12px' }}>
               Go to STAFF to modify team member list.
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
-              <button onClick={() => setViewStaffTeam(null)} style={{ padding: '9px 16px', background: 'white', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Close</button>
+              <button onClick={() => setViewStaffTeam(null)} style={{ padding: '9px 16px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-6b7280)', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Close</button>
             </div>
           </div>
         </div>

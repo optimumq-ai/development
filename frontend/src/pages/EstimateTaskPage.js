@@ -8,7 +8,7 @@ import CommercialRatePanel from '../components/ui/CommercialRatePanel';
 
 // The stacked defect buttons that live in SubmittedDescription's box (spec §2.2).
 var defectBtn = { font: 'inherit', fontSize: '13px', fontWeight: 500, borderRadius: '5px', padding: '6px 14px',
-  cursor: 'pointer', background: '#F7F9FB', color: '#101A2A', border: '1px solid #C3CFDA', whiteSpace: 'nowrap' };
+  cursor: 'pointer', background: 'var(--oq-bg-f7f9fb)', color: 'var(--oq-fg-101a2a)', border: '1px solid var(--oq-ln-c3cfda)', whiteSpace: 'nowrap' };
 
 export default function EstimateTaskPage() {
   var params = useParams();
@@ -112,8 +112,8 @@ export default function EstimateTaskPage() {
       .then(function () { setBusy(''); });
   }
 
-  if (err) return <div style={{ padding: '24px', color: '#9B1C1C', fontSize: '14px' }}>{err}</div>;
-  if (!task) return <div style={{ padding: '24px', color: '#9CA3AF', fontSize: '14px' }}>Loading...</div>;
+  if (err) return <div style={{ padding: '24px', color: 'var(--oq-fg-9b1c1c)', fontSize: '14px' }}>{err}</div>;
+  if (!task) return <div style={{ padding: '24px', color: 'var(--oq-fg-9ca3af)', fontSize: '14px' }}>Loading...</div>;
 
   var review = (task.title || '').toLowerCase().indexOf('review') >= 0;
   var done = task.status === 'done';
@@ -124,14 +124,14 @@ export default function EstimateTaskPage() {
 
   return (
     <div style={{ maxWidth: '1100px' }}>
-      <Link to="/my-tasks" style={{ fontSize: '13px', color: '#1F4E79', textDecoration: 'none' }}>&larr; My Tasks</Link>
+      <Link to="/my-tasks" style={{ fontSize: '13px', color: 'var(--oq-fg-1f4e79)', textDecoration: 'none' }}>&larr; My Tasks</Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '10px 0 4px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: '700', margin: 0 }}>Estimate</h1>
-        <span style={{ background: review ? '#FEF3C7' : '#DBEAFE', color: review ? '#92400E' : '#1E40AF', fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px' }}>{review ? 'REVIEW — auto-generated' : 'CREATE'}</span>
-        {done ? <span style={{ background: '#DEF7EC', color: '#03543F', fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px' }}>TASK COMPLETE</span> : null}
+        <span style={{ background: review ? 'var(--oq-bg-fef3c7)' : 'var(--oq-bg-dbeafe)', color: review ? 'var(--oq-fg-92400e)' : 'var(--oq-fg-1e40af)', fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px' }}>{review ? 'REVIEW — auto-generated' : 'CREATE'}</span>
+        {done ? <span style={{ background: 'var(--oq-bg-def7ec)', color: 'var(--oq-fg-03543f)', fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px' }}>TASK COMPLETE</span> : null}
         {done || tcm.mode === 'off' ? null : <WorkTimerBadge timer={timer} />}
       </div>
-      <p style={{ color: '#6B7280', fontSize: '14px', margin: '0 0 6px' }}>
+      <p style={{ color: 'var(--oq-fg-6b7280)', fontSize: '14px', margin: '0 0 6px' }}>
         {task.request_number ? task.request_number + ' · ' : ''}{task.requestor_name ? 'for ' + task.requestor_name : ''}{task.record_type_name ? ' · ' + task.record_type_name : ''}
       </p>
       {/* ── THE FIRST-LOOK BANNER (Draft 2 §1, §4.2) ──
@@ -143,15 +143,15 @@ export default function EstimateTaskPage() {
           An auto-COMPLETED intake review is NOT a human review (draft decision 4: no assignee, no
           reviewer), so it renders here too, saying which it was. */}
       {prov && prov.firstHumanReview ? (
-        <div style={{ fontSize: '13px', color: '#92400E', background: '#FFF8E5', border: '1px solid #D4A72C', borderRadius: '8px', padding: '11px 13px', margin: '0 0 14px' }}>
+        <div style={{ fontSize: '13px', color: 'var(--oq-fg-92400e)', background: 'var(--oq-bg-fff8e5)', border: '1px solid var(--oq-ln-d4a72c)', borderRadius: '8px', padding: '11px 13px', margin: '0 0 14px' }}>
           <b>First human review.</b> This request was routed automatically and no one has read it yet — you are
           the first. Check that it says what the classification claims before you price it; if it does not,
           the defect markers beside the description are how you say so.
-          {prov.detail ? <div style={{ marginTop: '4px', color: '#B45309' }}>{prov.detail}</div> : null}
-          {prov.openStop ? <div style={{ marginTop: '4px', color: '#B45309' }}>An intake review is OPEN on this request and has not been decided.</div> : null}
+          {prov.detail ? <div style={{ marginTop: '4px', color: 'var(--oq-fg-b45309)' }}>{prov.detail}</div> : null}
+          {prov.openStop ? <div style={{ marginTop: '4px', color: 'var(--oq-fg-b45309)' }}>An intake review is OPEN on this request and has not been decided.</div> : null}
         </div>
       ) : prov ? (
-        <div style={{ fontSize: '12.5px', color: '#6B7280', margin: '0 0 14px' }}>
+        <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', margin: '0 0 14px' }}>
           Path here: <b>{prov.label}</b>{prov.detail ? ' — ' + prov.detail : ''}
         </div>
       ) : null}
@@ -166,19 +166,19 @@ export default function EstimateTaskPage() {
             </>
           ) : null}>{task.request_description}</SubmittedDescription>
         : null}
-      {flash ? <div style={{ fontSize: '13px', color: '#03543F', background: '#DEF7EC', border: '1px solid #BCF0DA', borderRadius: '8px', padding: '9px 12px', marginBottom: '12px' }}>{flash}</div> : null}
+      {flash ? <div style={{ fontSize: '13px', color: 'var(--oq-fg-03543f)', background: 'var(--oq-bg-def7ec)', border: '1px solid var(--oq-ln-bcf0da)', borderRadius: '8px', padding: '9px 12px', marginBottom: '12px' }}>{flash}</div> : null}
       {/* THE PAUSE, IN THE SERVER'S WORDS. There is no manual hold anywhere (spec §2.4): the hold is a
           system state with a named cause, and the cause is printed. */}
       {paused ? (
-        <div style={{ fontSize: '13px', color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '8px', padding: '11px 13px', marginBottom: '12px' }}>
+        <div style={{ fontSize: '13px', color: 'var(--oq-fg-92400e)', background: 'var(--oq-bg-fef3c7)', border: '1px solid var(--oq-ln-fde68a)', borderRadius: '8px', padding: '11px 13px', marginBottom: '12px' }}>
           <b>Estimate paused.</b> {ctx.paused.text}
-          {ctx.paused.at ? <span style={{ color: '#B45309' }}> (since {String(ctx.paused.at).slice(0, 10)}{ctx.paused.by ? ', marked by ' + ctx.paused.by : ''})</span> : null}
+          {ctx.paused.at ? <span style={{ color: 'var(--oq-fg-b45309)' }}> (since {String(ctx.paused.at).slice(0, 10)}{ctx.paused.by ? ', marked by ' + ctx.paused.by : ''})</span> : null}
           <div style={{ marginTop: '8px' }}>
             <button type="button" disabled={!!busy} onClick={recordReply}
-              style={{ font: 'inherit', fontSize: '13px', fontWeight: 700, padding: '6px 14px', borderRadius: '6px', border: 'none', background: busy ? '#9CB4CC' : '#1F4E79', color: 'white', cursor: busy ? 'default' : 'pointer' }}>
+              style={{ font: 'inherit', fontSize: '13px', fontWeight: 700, padding: '6px 14px', borderRadius: '6px', border: 'none', background: busy ? 'var(--oq-bg-9cb4cc)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', cursor: busy ? 'default' : 'pointer' }}>
               {busy === 'resume' ? 'Recording…' : 'The requestor replied — resume'}
             </button>
-            <span style={{ color: '#B45309', marginLeft: '10px' }}>
+            <span style={{ color: 'var(--oq-fg-b45309)', marginLeft: '10px' }}>
               Recording the reply is what resumes this estimate; it also applies this jurisdiction’s reply-side
               clock rule. There is no bare un-pause — that would leave the clock tolled and the trail claiming
               a clarification is still outstanding.
@@ -195,9 +195,9 @@ export default function EstimateTaskPage() {
           (approvalModules.waiverPanelState) — a screen deciding for itself whether a mandatory category is
           armed would be a second reading of the statute list, free to disagree with the one that acts. */}
       {wp && wp.state !== 'hidden' ? (
-        <div style={{ background: '#F7F9FB', border: '1px solid ' + G.line, borderRadius: '8px', padding: '12px 14px', marginBottom: '14px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: '#6B7280', marginBottom: '7px' }}>Fee waiver</div>
-          <div style={{ fontSize: '13px', color: '#1A2230' }}>
+        <div style={{ background: 'var(--oq-bg-f7f9fb)', border: '1px solid ' + G.line, borderRadius: '8px', padding: '12px 14px', marginBottom: '14px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--oq-fg-6b7280)', marginBottom: '7px' }}>Fee waiver</div>
+          <div style={{ fontSize: '13px', color: 'var(--oq-fg-1a2230)' }}>
             {wp.text}{' '}
             {wp.state === 'by_statute' ? <DecidedByBadge by="statute">Waived by statute</DecidedByBadge> : null}
             {wp.state === 'decided' ? <DecidedByBadge by={wp.decidedBy === 'statute' ? 'statute' : 'person'}>{wp.decidedBy === 'statute' ? 'By statute' : ('Decided by ' + (wp.decidedBy || 'a person'))}</DecidedByBadge> : null}
@@ -205,12 +205,12 @@ export default function EstimateTaskPage() {
             {wp.state === 'not_offered' ? <DecidedByBadge by="recorded">Recorded — nothing to decide</DecidedByBadge> : null}
           </div>
           {wp.state === 'by_statute' ? (
-            <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '5px' }}>
+            <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginTop: '5px' }}>
               {wp.note}
               {wp.category ? <div style={{ marginTop: '3px' }}>{wp.category.label} — {wp.category.citation} (on verified {String(wp.category.evidence || '').replace(/_/g, ' ')})</div> : null}
             </div>
           ) : null}
-          {wp.state === 'decided' && wp.reason ? <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '4px' }}>Reason recorded: {wp.reason}</div> : null}
+          {wp.state === 'decided' && wp.reason ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginTop: '4px' }}>Reason recorded: {wp.reason}</div> : null}
         </div>
       ) : null}
 
@@ -218,7 +218,7 @@ export default function EstimateTaskPage() {
           send route refuses with — not a frontend re-derivation, so the greyed button and the refusal can
           never disagree. */}
       {ctx && ctx.waiverGate && ctx.waiverGate.blocked ? (
-        <div style={{ fontSize: '13px', color: '#92400E', background: '#FFF8E5', border: '1px solid #D4A72C', borderRadius: '8px', padding: '11px 13px', marginBottom: '14px' }}>
+        <div style={{ fontSize: '13px', color: 'var(--oq-fg-92400e)', background: 'var(--oq-bg-fff8e5)', border: '1px solid var(--oq-ln-d4a72c)', borderRadius: '8px', padding: '11px 13px', marginBottom: '14px' }}>
           <b>The estimate cannot be sent yet.</b> {ctx.waiverGate.reason}
         </div>
       ) : null}
@@ -227,7 +227,7 @@ export default function EstimateTaskPage() {
           evidence and removing them would look like data loss — but nothing on it can be changed or sent
           while the request's MEANING is in the post. */}
       <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-        <div style={{ flex: '1 1 auto', minWidth: 0, background: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px',
+        <div style={{ flex: '1 1 auto', minWidth: 0, background: 'var(--oq-bg-ffffff)', borderRadius: '12px', border: '1px solid var(--oq-ln-e5e7eb)', padding: '24px',
           opacity: paused ? 0.5 : 1, pointerEvents: paused ? 'none' : 'auto' }}>
           <FeeEstimatePanel requestId={task.request_id} />
         </div>
@@ -239,8 +239,8 @@ export default function EstimateTaskPage() {
 
         {/* ── ACTIONS RAIL (spec §2.3 — "Actions", never "Work the request") ── */}
         <div style={{ flex: '0 0 236px' }}>
-          <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '11px 13px' }}>
-            <div style={{ fontSize: '10.5px', fontWeight: 800, letterSpacing: '.07em', textTransform: 'uppercase', color: '#6B7280', marginBottom: '7px' }}>Actions</div>
+          <div style={{ background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', padding: '11px 13px' }}>
+            <div style={{ fontSize: '10.5px', fontWeight: 800, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--oq-fg-6b7280)', marginBottom: '7px' }}>Actions</div>
             {/* THE THRESHOLD KNOB (Kevin 7/29). The action renders only where the server says it is on
                 offer, from the SAME function the waive route refuses on — an action offered here and
                 rejected there is worse than no action. While the knob is unconfirmed the server offers it
@@ -249,10 +249,10 @@ export default function EstimateTaskPage() {
               <>
                 <button type="button" disabled={!!busy || done || paused} onClick={function () { setDmOpen(true); }}
                   style={{ font: 'inherit', width: '100%', fontSize: '13px', fontWeight: 600, padding: '6px 12px', borderRadius: '5px',
-                    background: '#F7F9FB', color: '#101A2A', border: '1px solid ' + G.line, cursor: (busy || done || paused) ? 'not-allowed' : 'pointer', opacity: (busy || done || paused) ? 0.55 : 1 }}>
+                    background: 'var(--oq-bg-f7f9fb)', color: 'var(--oq-fg-101a2a)', border: '1px solid ' + G.line, cursor: (busy || done || paused) ? 'not-allowed' : 'pointer', opacity: (busy || done || paused) ? 0.55 : 1 }}>
                   De minimis — waive &amp; advance
                 </button>
-                <div style={{ fontSize: '11.5px', color: '#6B7280', marginTop: '6px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-6b7280)', marginTop: '6px' }}>
                   Zeroes the estimate, skips the notice cycle and advances the request. Your judgment, your name
                   on it — this is not the configured de-minimis rule, which zeroes by threshold and still notifies.
                   {dm.reason === 'within_threshold' ? ' ' + dm.text : ''}
@@ -260,10 +260,10 @@ export default function EstimateTaskPage() {
                 </div>
               </>
             ) : dm ? (
-              <div style={{ fontSize: '11.5px', color: '#6B7280' }}>
+              <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-6b7280)' }}>
                 {/* NOT OFFERED, AND SAID SO. A rail that simply lost a button reads as a bug; naming the
                     threshold that closed it is the difference between a policy and a glitch. */}
-                <b style={{ color: '#101A2A' }}>De minimis — not available.</b> {dm.text}
+                <b style={{ color: 'var(--oq-fg-101a2a)' }}>De minimis — not available.</b> {dm.text}
               </div>
             ) : null}
           </div>
@@ -276,32 +276,32 @@ export default function EstimateTaskPage() {
           <>
             <button type="button" disabled={!!busy || !dmNote.trim()} onClick={deMinimisWaive}
               style={{ font: 'inherit', fontSize: '13px', fontWeight: 700, padding: '7px 16px', borderRadius: '6px', border: 'none',
-                background: (busy || !dmNote.trim()) ? '#9CB4CC' : '#1F4E79', color: 'white', cursor: (busy || !dmNote.trim()) ? 'default' : 'pointer' }}>
+                background: (busy || !dmNote.trim()) ? 'var(--oq-bg-9cb4cc)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', cursor: (busy || !dmNote.trim()) ? 'default' : 'pointer' }}>
               {busy === 'deminimis' ? 'Recording…' : 'Waive and advance'}
             </button>
             <button type="button" onClick={function () { setDmOpen(false); }}
-              style={{ font: 'inherit', fontSize: '13px', fontWeight: 600, padding: '7px 14px', borderRadius: '6px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', cursor: 'pointer' }}>Cancel</button>
+              style={{ font: 'inherit', fontSize: '13px', fontWeight: 600, padding: '7px 14px', borderRadius: '6px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', cursor: 'pointer' }}>Cancel</button>
           </>
         }>
         {/* Nothing closes on a single click, and every one-act popup states what will be WRITTEN and what
             will be SENT (spec §4). What is sent here is nothing, and that is the point worth stating. */}
-        <div style={{ fontSize: '13px', color: '#1A2230', lineHeight: 1.5 }}>
+        <div style={{ fontSize: '13px', color: 'var(--oq-fg-1a2230)', lineHeight: 1.5 }}>
           <p style={{ margin: '0 0 7px' }}>This will:</p>
           <ul style={{ margin: '0 0 9px 18px', padding: 0 }}>
             <li>record a $0.00 estimate against your name, keeping the computed one beside it as evidence of what the fees would have been;</li>
             <li>send the requestor <b>nothing</b> — no estimate notice, no acceptance gate, no payment;</li>
             <li>close this estimate task and advance the request to record search.</li>
           </ul>
-          <p style={{ margin: '0 0 7px', color: '#92400E' }}>
+          <p style={{ margin: '0 0 7px', color: 'var(--oq-fg-92400e)' }}>
             This is your judgment that the amount is not worth putting a citizen through the notice cycle for —
             not the configured de-minimis rule. A reason is required.
           </p>
           <textarea value={dmNote} onChange={function (e) { setDmNote(e.target.value); }} rows={3}
             placeholder="Why this is de minimis (required)"
-            style={{ width: '100%', font: 'inherit', fontSize: '13px', padding: '7px 9px', borderRadius: '6px', border: '1px solid #E5E7EB', boxSizing: 'border-box', resize: 'vertical' }} />
+            style={{ width: '100%', font: 'inherit', fontSize: '13px', padding: '7px 9px', borderRadius: '6px', border: '1px solid var(--oq-ln-e5e7eb)', boxSizing: 'border-box', resize: 'vertical' }} />
         </div>
       </ConfirmPopup>
-      <p style={{ color: '#9CA3AF', fontSize: '12px', marginTop: '12px' }}>Sending the estimate to the requestor marks this task complete.</p>
+      <p style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '12px', marginTop: '12px' }}>Sending the estimate to the requestor marks this task complete.</p>
     </div>
   );
 }

@@ -124,37 +124,37 @@ export default function NewRequestPage() {
     setLoading(false);
   }
 
-  var inp = { width:'100%', padding:'10px 12px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', outline:'none', boxSizing:'border-box', background:'white' };
-  var inpLow = Object.assign({}, inp, { border:'2px solid #F59E0B', background:'#FFFBEB' });
-  var lbl = { display:'block', fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'6px' };
-  var section = { background:'white', borderRadius:'12px', border:'1px solid #E5E7EB', padding:'24px', display:'flex', flexDirection:'column', gap:'16px' };
+  var inp = { width:'100%', padding:'10px 12px', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'8px', fontSize:'14px', outline:'none', boxSizing:'border-box', background:'var(--oq-bg-ffffff)' };
+  var inpLow = Object.assign({}, inp, { border:'2px solid var(--oq-ln-f59e0b)', background:'var(--oq-bg-fffbeb)' });
+  var lbl = { display:'block', fontSize:'13px', fontWeight:'600', color:'var(--oq-fg-374151)', marginBottom:'6px' };
+  var section = { background:'var(--oq-bg-ffffff)', borderRadius:'12px', border:'1px solid var(--oq-ln-e5e7eb)', padding:'24px', display:'flex', flexDirection:'column', gap:'16px' };
 
   if (!mode) {
     return (
       <div style={{maxWidth:'700px',display:'flex',flexDirection:'column',gap:'20px'}}>
         <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
-          <button onClick={function(){nav('/requests');}} style={{background:'none',border:'none',cursor:'pointer',color:'#6B7280',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>
+          <button onClick={function(){nav('/requests');}} style={{background:'none',border:'none',cursor:'pointer',color:'var(--oq-fg-6b7280)',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>
           <div>
             <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0 0 2px'}}>Log New Request</h1>
-            <p style={{color:'#9CA3AF',fontSize:'13px',margin:0}}>Choose how to enter this request</p>
+            <p style={{color:'var(--oq-fg-9ca3af)',fontSize:'13px',margin:0}}>Choose how to enter this request</p>
           </div>
         </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
-          <button onClick={function(){setMode('import');}} style={{background:'white',border:'2px solid #E5E7EB',borderRadius:'16px',padding:'32px 24px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}
-            onMouseOver={function(e){e.currentTarget.style.borderColor='#1F4E79';e.currentTarget.style.background='#EBF3FB';}}
-            onMouseOut={function(e){e.currentTarget.style.borderColor='#E5E7EB';e.currentTarget.style.background='white';}}>
+          <button onClick={function(){setMode('import');}} style={{background:'var(--oq-bg-ffffff)',border:'2px solid var(--oq-ln-e5e7eb)',borderRadius:'16px',padding:'32px 24px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}
+            onMouseOver={function(e){e.currentTarget.style.borderColor='var(--oq-ln-1f4e79)';e.currentTarget.style.background='var(--oq-bg-ebf3fb)';}}
+            onMouseOut={function(e){e.currentTarget.style.borderColor='var(--oq-ln-e5e7eb)';e.currentTarget.style.background='var(--oq-bg-ffffff)';}}>
             <div style={{fontSize:'40px',marginBottom:'16px'}}>📄</div>
-            <div style={{fontSize:'17px',fontWeight:'700',color:'#111',marginBottom:'8px'}}>Import from Document</div>
-            <div style={{fontSize:'13px',color:'#6B7280',lineHeight:'1.5'}}>Upload a PDF or photo of a letter or email. AI will read the document and fill in the form automatically.</div>
-            <div style={{marginTop:'16px',fontSize:'12px',color:'#1F4E79',fontWeight:'600'}}>Recommended for letters & emails →</div>
+            <div style={{fontSize:'17px',fontWeight:'700',color:'var(--oq-fg-111111)',marginBottom:'8px'}}>Import from Document</div>
+            <div style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',lineHeight:'1.5'}}>Upload a PDF or photo of a letter or email. AI will read the document and fill in the form automatically.</div>
+            <div style={{marginTop:'16px',fontSize:'12px',color:'var(--oq-fg-1f4e79)',fontWeight:'600'}}>Recommended for letters & emails →</div>
           </button>
-          <button onClick={function(){setMode('manual');}} style={{background:'white',border:'2px solid #E5E7EB',borderRadius:'16px',padding:'32px 24px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}
-            onMouseOver={function(e){e.currentTarget.style.borderColor='#1F4E79';e.currentTarget.style.background='#EBF3FB';}}
-            onMouseOut={function(e){e.currentTarget.style.borderColor='#E5E7EB';e.currentTarget.style.background='white';}}>
+          <button onClick={function(){setMode('manual');}} style={{background:'var(--oq-bg-ffffff)',border:'2px solid var(--oq-ln-e5e7eb)',borderRadius:'16px',padding:'32px 24px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}
+            onMouseOver={function(e){e.currentTarget.style.borderColor='var(--oq-ln-1f4e79)';e.currentTarget.style.background='var(--oq-bg-ebf3fb)';}}
+            onMouseOut={function(e){e.currentTarget.style.borderColor='var(--oq-ln-e5e7eb)';e.currentTarget.style.background='var(--oq-bg-ffffff)';}}>
             <div style={{fontSize:'40px',marginBottom:'16px'}}>✏️</div>
-            <div style={{fontSize:'17px',fontWeight:'700',color:'#111',marginBottom:'8px'}}>Enter Manually</div>
-            <div style={{fontSize:'13px',color:'#6B7280',lineHeight:'1.5'}}>Fill in the form directly. Best for phone calls, walk-ins, and requests without a written document.</div>
-            <div style={{marginTop:'16px',fontSize:'12px',color:'#6B7280',fontWeight:'600'}}>Phone, walk-in, other →</div>
+            <div style={{fontSize:'17px',fontWeight:'700',color:'var(--oq-fg-111111)',marginBottom:'8px'}}>Enter Manually</div>
+            <div style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',lineHeight:'1.5'}}>Fill in the form directly. Best for phone calls, walk-ins, and requests without a written document.</div>
+            <div style={{marginTop:'16px',fontSize:'12px',color:'var(--oq-fg-6b7280)',fontWeight:'600'}}>Phone, walk-in, other →</div>
           </button>
         </div>
       </div>
@@ -164,64 +164,64 @@ export default function NewRequestPage() {
   return (
     <div style={{maxWidth:'860px',display:'flex',flexDirection:'column',gap:'20px'}}>
       <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
-        <button onClick={function(){setMode(null);setAiExtracted(false);setAiSuggestion(null);setForm(EMPTY_FORM);setUploadedFile(null);}} style={{background:'none',border:'none',cursor:'pointer',color:'#6B7280',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>
+        <button onClick={function(){setMode(null);setAiExtracted(false);setAiSuggestion(null);setForm(EMPTY_FORM);setUploadedFile(null);}} style={{background:'none',border:'none',cursor:'pointer',color:'var(--oq-fg-6b7280)',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>
         <div>
           <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0 0 2px'}}>{mode==='import'?'Import Request Document':'Log New Request'}</h1>
-          <p style={{color:'#9CA3AF',fontSize:'13px',margin:0}}>{mode==='import'?'Upload a document — AI will extract the request details':'Enter request details manually'}</p>
+          <p style={{color:'var(--oq-fg-9ca3af)',fontSize:'13px',margin:0}}>{mode==='import'?'Upload a document — AI will extract the request details':'Enter request details manually'}</p>
         </div>
       </div>
 
       {mode==='import' && !aiExtracted && (
         <div style={section}>
-          <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid #F3F4F6',paddingBottom:'12px'}}>Upload Request Document</div>
-          <div onClick={function(){fileRef.current.click();}} style={{border:'3px dashed #D1D5DB',borderRadius:'12px',padding:'48px',textAlign:'center',cursor:'pointer',transition:'all .15s',background:extracting?'#F9FAFB':'white'}}
-            onMouseOver={function(e){if(!extracting)e.currentTarget.style.borderColor='#1F4E79';}}
-            onMouseOut={function(e){e.currentTarget.style.borderColor='#D1D5DB';}}>
+          <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid var(--oq-ln-f3f4f6)',paddingBottom:'12px'}}>Upload Request Document</div>
+          <div onClick={function(){fileRef.current.click();}} style={{border:'3px dashed var(--oq-ln-d1d5db)',borderRadius:'12px',padding:'48px',textAlign:'center',cursor:'pointer',transition:'all .15s',background:extracting?'var(--oq-bg-f9fafb)':'var(--oq-bg-ffffff)'}}
+            onMouseOver={function(e){if(!extracting)e.currentTarget.style.borderColor='var(--oq-ln-1f4e79)';}}
+            onMouseOut={function(e){e.currentTarget.style.borderColor='var(--oq-ln-d1d5db)';}}>
             {extracting ? (
               <div>
                 <div style={{fontSize:'40px',marginBottom:'16px'}}>⏳</div>
-                <div style={{fontSize:'16px',fontWeight:'600',color:'#1F4E79',marginBottom:'8px'}}>Reading document with AI...</div>
-                <div style={{fontSize:'13px',color:'#9CA3AF'}}>Extracting requestor information and records description</div>
+                <div style={{fontSize:'16px',fontWeight:'600',color:'var(--oq-fg-1f4e79)',marginBottom:'8px'}}>Reading document with AI...</div>
+                <div style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)'}}>Extracting requestor information and records description</div>
               </div>
             ) : (
               <div>
                 <div style={{fontSize:'48px',marginBottom:'16px'}}>📎</div>
-                <div style={{fontSize:'16px',fontWeight:'600',color:'#111',marginBottom:'8px'}}>Drop document here or click to upload</div>
-                <div style={{fontSize:'13px',color:'#9CA3AF',marginBottom:'16px'}}>PDF, JPG, PNG — up to 20MB</div>
-                <div style={{display:'inline-flex',padding:'10px 24px',background:'#1F4E79',color:'white',borderRadius:'8px',fontSize:'14px',fontWeight:'600'}}>Choose File</div>
+                <div style={{fontSize:'16px',fontWeight:'600',color:'var(--oq-fg-111111)',marginBottom:'8px'}}>Drop document here or click to upload</div>
+                <div style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)',marginBottom:'16px'}}>PDF, JPG, PNG — up to 20MB</div>
+                <div style={{display:'inline-flex',padding:'10px 24px',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',borderRadius:'8px',fontSize:'14px',fontWeight:'600'}}>Choose File</div>
               </div>
             )}
           </div>
           <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.tiff" onChange={handleFileSelect} style={{display:'none'}}/>
-          <div style={{fontSize:'13px',color:'#9CA3AF',textAlign:'center'}}>
+          <div style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)',textAlign:'center'}}>
             💡 For emails: open the email, print to PDF (Ctrl+P → Save as PDF), then upload the PDF here
           </div>
-          {err && <div style={{background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'#DC2626'}}>{err}</div>}
+          {err && <div style={{background:'var(--oq-bg-fef2f2)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'var(--oq-fg-dc2626)'}}>{err}</div>}
         </div>
       )}
 
       {(mode==='manual' || aiExtracted) && (
         <form onSubmit={handleSubmit} style={{display:'flex',flexDirection:'column',gap:'20px'}}>
           {aiExtracted && aiSuggestion && (
-            <div style={{background:'#EBF3FB',border:'2px solid #1F4E79',borderRadius:'12px',padding:'20px'}}>
+            <div style={{background:'var(--oq-bg-ebf3fb)',border:'2px solid var(--oq-ln-1f4e79)',borderRadius:'12px',padding:'20px'}}>
               <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
                 <span style={{fontSize:'22px'}}>✅</span>
                 <div>
-                  <div style={{fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>AI Extracted Data — Please review all fields before submitting</div>
-                  <div style={{fontSize:'13px',color:'#2E75B6'}}>Fields highlighted in amber have lower confidence and require verification</div>
+                  <div style={{fontSize:'15px',fontWeight:'700',color:'var(--oq-fg-1f4e79)'}}>AI Extracted Data — Please review all fields before submitting</div>
+                  <div style={{fontSize:'13px',color:'var(--oq-fg-2e75b6)'}}>Fields highlighted in amber have lower confidence and require verification</div>
                 </div>
               </div>
-              {aiSuggestion.reasoning && <div style={{fontSize:'13px',color:'#374151',fontStyle:'italic',borderTop:'1px solid #D6E4F0',paddingTop:'10px'}}>"{aiSuggestion.reasoning}"</div>}
+              {aiSuggestion.reasoning && <div style={{fontSize:'13px',color:'var(--oq-fg-374151)',fontStyle:'italic',borderTop:'1px solid var(--oq-ln-d6e4f0)',paddingTop:'10px'}}>"{aiSuggestion.reasoning}"</div>}
             </div>
           )}
 
           <div style={section}>
-            <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid #F3F4F6',paddingBottom:'12px'}}>Submission Channel</div>
+            <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid var(--oq-ln-f3f4f6)',paddingBottom:'12px'}}>Submission Channel</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:'10px'}}>
               {CHANNELS.map(function(c){
                 var active=form.submissionChannel===c.value;
                 return <button key={c.value} type="button" onClick={function(){setF('submissionChannel',c.value);}}
-                  style={{padding:'10px',borderRadius:'8px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EBF3FB':'white',color:active?'#1F4E79':'#6B7280',fontSize:'13px',fontWeight:active?'700':'500',cursor:'pointer'}}>
+                  style={{padding:'10px',borderRadius:'8px',border:'2px solid '+(active?'var(--oq-ln-1f4e79)':'var(--oq-ln-e5e7eb)'),background:active?'var(--oq-bg-ebf3fb)':'var(--oq-bg-ffffff)',color:active?'var(--oq-fg-1f4e79)':'var(--oq-fg-6b7280)',fontSize:'13px',fontWeight:active?'700':'500',cursor:'pointer'}}>
                   {c.label}
                 </button>;
               })}
@@ -229,18 +229,18 @@ export default function NewRequestPage() {
           </div>
 
           <div style={section}>
-            <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid #F3F4F6',paddingBottom:'12px'}}>Requestor Information</div>
+            <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid var(--oq-ln-f3f4f6)',paddingBottom:'12px'}}>Requestor Information</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
               <div>
-                <label style={lbl}>Full Name <span style={{color:'#DC2626'}}>*</span>{lowConfidenceFields.requestor_name&&<span style={{color:'#D97706',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
+                <label style={lbl}>Full Name <span style={{color:'var(--oq-fg-dc2626)'}}>*</span>{lowConfidenceFields.requestor_name&&<span style={{color:'var(--oq-fg-d97706)',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
                 <input value={form.requestorName} onChange={function(e){setF('requestorName',e.target.value);}} style={lowConfidenceFields.requestor_name?inpLow:inp} placeholder="Jane Smith" required/>
               </div>
               <div>
-                <label style={lbl}>Email Address <span style={{color:'#DC2626'}}>*</span>{lowConfidenceFields.requestor_email&&<span style={{color:'#D97706',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
+                <label style={lbl}>Email Address <span style={{color:'var(--oq-fg-dc2626)'}}>*</span>{lowConfidenceFields.requestor_email&&<span style={{color:'var(--oq-fg-d97706)',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
                 <input type="email" value={form.requestorEmail} onChange={function(e){setF('requestorEmail',e.target.value);}} style={lowConfidenceFields.requestor_email?inpLow:inp} placeholder="jane@example.com" required/>
               </div>
               <div>
-                <label style={lbl}>Phone Number{lowConfidenceFields.requestor_phone&&<span style={{color:'#D97706',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
+                <label style={lbl}>Phone Number{lowConfidenceFields.requestor_phone&&<span style={{color:'var(--oq-fg-d97706)',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
                 <input value={form.requestorPhone} onChange={function(e){setF('requestorPhone',e.target.value);}} style={lowConfidenceFields.requestor_phone?inpLow:inp} placeholder="(555) 000-0000"/>
               </div>
               <div>
@@ -253,39 +253,39 @@ export default function NewRequestPage() {
             <div>
               <label style={lbl}>Preferred Delivery Method</label>
               <div style={{display:'flex',gap:'10px'}}>
-                {DELIVERY.map(function(d){var active=form.deliveryMethod===d.value;return <button key={d.value} type="button" onClick={function(){setF('deliveryMethod',d.value);}} style={{padding:'8px 16px',borderRadius:'8px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EBF3FB':'white',color:active?'#1F4E79':'#6B7280',fontSize:'13px',fontWeight:active?'700':'500',cursor:'pointer'}}>{d.label}</button>;})}
+                {DELIVERY.map(function(d){var active=form.deliveryMethod===d.value;return <button key={d.value} type="button" onClick={function(){setF('deliveryMethod',d.value);}} style={{padding:'8px 16px',borderRadius:'8px',border:'2px solid '+(active?'var(--oq-ln-1f4e79)':'var(--oq-ln-e5e7eb)'),background:active?'var(--oq-bg-ebf3fb)':'var(--oq-bg-ffffff)',color:active?'var(--oq-fg-1f4e79)':'var(--oq-fg-6b7280)',fontSize:'13px',fontWeight:active?'700':'500',cursor:'pointer'}}>{d.label}</button>;})}
               </div>
             </div>
             {/* The walk-in identity anchor. An EXPLICIT act by the staffer logging the request — never
                 inferred from the channel ("arrived by paper" is not "somebody checked"). Recorded with
                 the staffer's name; it is what lets the requestor ledger anchor this request. */}
-            <label style={{display:'flex',alignItems:'flex-start',gap:'10px',fontSize:'13px',color:'#374151',cursor:'pointer',background:'#F9FAFB',border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px 14px'}}>
+            <label style={{display:'flex',alignItems:'flex-start',gap:'10px',fontSize:'13px',color:'var(--oq-fg-374151)',cursor:'pointer',background:'var(--oq-bg-f9fafb)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',padding:'12px 14px'}}>
               <input type="checkbox" checked={form.identityConfirmed===true} onChange={function(e){setF('identityConfirmed',e.target.checked);}} style={{marginTop:'2px'}}/>
               <span><strong>I confirmed this requestor's identity in person.</strong><br/>
-                <span style={{color:'#6B7280',fontSize:'12px'}}>Check only if you verified who this person is (e.g., at the counter). Recorded under your name.</span></span>
+                <span style={{color:'var(--oq-fg-6b7280)',fontSize:'12px'}}>Check only if you verified who this person is (e.g., at the counter). Recorded under your name.</span></span>
             </label>
           </div>
 
           <div style={section}>
-            <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid #F3F4F6',paddingBottom:'12px'}}>Request Details</div>
+            <div style={{fontSize:'15px',fontWeight:'700',borderBottom:'1px solid var(--oq-ln-f3f4f6)',paddingBottom:'12px'}}>Request Details</div>
             <div>
-              <label style={lbl}>Description of Records Requested <span style={{color:'#DC2626'}}>*</span>{lowConfidenceFields.description&&<span style={{color:'#D97706',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
+              <label style={lbl}>Description of Records Requested <span style={{color:'var(--oq-fg-dc2626)'}}>*</span>{lowConfidenceFields.description&&<span style={{color:'var(--oq-fg-d97706)',fontSize:'11px',marginLeft:'8px'}}>⚠ Verify</span>}</label>
               <div style={{display:'flex',justifyContent:'flex-end',marginBottom:'6px'}}>
                 <button type="button" onClick={analyzeWithAI} disabled={analyzing||form.description.length<20}
-                  style={{padding:'7px 14px',background:form.description.length>=20?'#1F4E79':'#E5E7EB',color:form.description.length>=20?'white':'#9CA3AF',border:'none',borderRadius:'8px',fontSize:'12px',fontWeight:'600',cursor:form.description.length>=20?'pointer':'not-allowed'}}>
+                  style={{padding:'7px 14px',background:form.description.length>=20?'var(--oq-bg-1f4e79)':'var(--oq-bg-e5e7eb)',color:form.description.length>=20?'var(--oq-fg-ffffff)':'var(--oq-fg-9ca3af)',border:'none',borderRadius:'8px',fontSize:'12px',fontWeight:'600',cursor:form.description.length>=20?'pointer':'not-allowed'}}>
                   {analyzing?'⏳ Analyzing...':'✨ Analyze with AI'}
                 </button>
               </div>
               {aiSuggestion&&!aiExtracted&&(
-                <div style={{background:aiSuggestion.confidence>=85?'#F0FDF4':'#FFFBEB',border:'1px solid '+(aiSuggestion.confidence>=85?'#86EFAC':'#FDE68A'),borderRadius:'10px',padding:'14px',marginBottom:'10px'}}>
-                  <div style={{fontWeight:'700',fontSize:'13px',color:aiSuggestion.confidence>=85?'#166534':'#92400E',marginBottom:'6px'}}>
+                <div style={{background:aiSuggestion.confidence>=85?'var(--oq-bg-f0fdf4)':'var(--oq-bg-fffbeb)',border:'1px solid '+(aiSuggestion.confidence>=85?'var(--oq-ln-86efac)':'var(--oq-ln-fde68a)'),borderRadius:'10px',padding:'14px',marginBottom:'10px'}}>
+                  <div style={{fontWeight:'700',fontSize:'13px',color:aiSuggestion.confidence>=85?'var(--oq-fg-166534)':'var(--oq-fg-92400e)',marginBottom:'6px'}}>
                     ✅ AI Suggestion — {aiSuggestion.confidence}% confidence{aiSuggestion.confidence>=85?' (auto-populated)':''}
                   </div>
                   <div style={{fontSize:'13px',display:'flex',gap:'16px',flexWrap:'wrap',marginBottom:'6px'}}>
                     <span><strong>Classification:</strong> {aiSuggestion.classification&&aiSuggestion.classification.replace(/_/g,' ')}</span>
                     <span><strong>City Department:</strong> {aiSuggestion.department_name||'—'}</span>
                   </div>
-                  <div style={{fontSize:'12px',color:'#374151',fontStyle:'italic'}}>"{aiSuggestion.reasoning}"</div>
+                  <div style={{fontSize:'12px',color:'var(--oq-fg-374151)',fontStyle:'italic'}}>"{aiSuggestion.reasoning}"</div>
                 </div>
               )}
               <textarea value={form.description} onChange={function(e){setF('description',e.target.value);}} style={Object.assign({},lowConfidenceFields.description?inpLow:inp,{minHeight:'120px',resize:'vertical',fontFamily:'inherit'})} placeholder={extraItems.length?'Record 1 — describe the first record being requested...':'Describe the records being requested...'} required/>
@@ -293,9 +293,9 @@ export default function NewRequestPage() {
                 return (
                   <div key={i} style={{marginTop:'10px'}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px'}}>
-                      <span style={{fontSize:'12px',fontWeight:'600',color:'#374151'}}>Record {i+2}</span>
+                      <span style={{fontSize:'12px',fontWeight:'600',color:'var(--oq-fg-374151)'}}>Record {i+2}</span>
                       <button type="button" onClick={function(){setExtraItems(function(p){return p.filter(function(_,j){return j!==i;});});}}
-                        style={{background:'none',border:'none',color:'#DC2626',fontSize:'12px',cursor:'pointer',fontWeight:'600'}}>Remove</button>
+                        style={{background:'none',border:'none',color:'var(--oq-fg-dc2626)',fontSize:'12px',cursor:'pointer',fontWeight:'600'}}>Remove</button>
                     </div>
                     <textarea value={txt} onChange={function(e){var v=e.target.value;setExtraItems(function(p){return p.map(function(t,j){return j===i?v:t;});});}}
                       style={Object.assign({},inp,{minHeight:'80px',resize:'vertical',fontFamily:'inherit'})}
@@ -305,10 +305,10 @@ export default function NewRequestPage() {
               })}
               {extraItems.length < 9 ? (
                 <button type="button" onClick={function(){setExtraItems(function(p){return p.concat(['']);});}}
-                  style={{marginTop:'10px',padding:'8px 14px',background:'white',color:'#1F4E79',border:'1px dashed #1F4E79',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
+                  style={{marginTop:'10px',padding:'8px 14px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-1f4e79)',border:'1px dashed var(--oq-ln-1f4e79)',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
                   + Add another record (each record is tracked and delivered individually)
                 </button>
-              ) : <div style={{marginTop:'10px',fontSize:'12px',color:'#9CA3AF'}}>A request can include at most 10 records.</div>}
+              ) : <div style={{marginTop:'10px',fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>A request can include at most 10 records.</div>}
             </div>
             <div>
               <label style={lbl}>Request Fulfillment Team</label>
@@ -320,29 +320,29 @@ export default function NewRequestPage() {
             <div>
               <label style={lbl}>Effort Classification</label>
               <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
-                {CLASSIFICATIONS.map(function(c){var active=form.classification===c.value;return <button key={c.value} type="button" onClick={function(){setF('classification',c.value);}} style={{padding:'11px 16px',borderRadius:'8px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EBF3FB':'white',textAlign:'left',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'space-between'}}><span style={{fontSize:'14px',fontWeight:'600',color:active?'#1F4E79':'#374151'}}>{c.label}</span><span style={{fontSize:'12px',color:active?'#2E75B6':'#9CA3AF'}}>{c.desc}</span></button>;})}
+                {CLASSIFICATIONS.map(function(c){var active=form.classification===c.value;return <button key={c.value} type="button" onClick={function(){setF('classification',c.value);}} style={{padding:'11px 16px',borderRadius:'8px',border:'2px solid '+(active?'var(--oq-ln-1f4e79)':'var(--oq-ln-e5e7eb)'),background:active?'var(--oq-bg-ebf3fb)':'var(--oq-bg-ffffff)',textAlign:'left',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'space-between'}}><span style={{fontSize:'14px',fontWeight:'600',color:active?'var(--oq-fg-1f4e79)':'var(--oq-fg-374151)'}}>{c.label}</span><span style={{fontSize:'12px',color:active?'var(--oq-fg-2e75b6)':'var(--oq-fg-9ca3af)'}}>{c.desc}</span></button>;})}
               </div>
             </div>
             <div style={{display:'flex',gap:'24px',flexWrap:'wrap'}}>
               <label style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}}>
                 <input type="checkbox" checked={form.feeWaiverRequested} onChange={function(e){setF('feeWaiverRequested',e.target.checked);}} style={{width:'16px',height:'16px'}}/>
-                <div><div style={{fontSize:'14px',fontWeight:'600'}}>Fee Waiver Requested</div><div style={{fontSize:'12px',color:'#9CA3AF'}}>News media, nonprofit, or researcher status</div></div>
+                <div><div style={{fontSize:'14px',fontWeight:'600'}}>Fee Waiver Requested</div><div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>News media, nonprofit, or researcher status</div></div>
               </label>
               {/* Parity with the portal wizard's certification opt-in — staff intake used to drop it
                   silently (SPEC_record_verification.md §1.5). Parent fact; feeds the fee engine. */}
               <label style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}}>
                 <input type="checkbox" checked={form.certificationRequested} onChange={function(e){setF('certificationRequested',e.target.checked);}} style={{width:'16px',height:'16px'}}/>
-                <div><div style={{fontSize:'14px',fontWeight:'600'}}>Certification Requested</div><div style={{fontSize:'12px',color:'#9CA3AF'}}>Include a page attesting the records are true and accurate. Additional fees may apply.</div></div>
+                <div><div style={{fontSize:'14px',fontWeight:'600'}}>Certification Requested</div><div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>Include a page attesting the records are true and accurate. Additional fees may apply.</div></div>
               </label>
               {/* The old Multi-Record checkbox is gone: is_mrr is DERIVED from how many records are
                   actually described (§4.1 — a fact, not a mode). Add records below instead. */}
             </div>
           </div>
 
-          {err&&<div style={{background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'14px',fontSize:'14px',color:'#DC2626'}}>{err}</div>}
+          {err&&<div style={{background:'var(--oq-bg-fef2f2)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'8px',padding:'14px',fontSize:'14px',color:'var(--oq-fg-dc2626)'}}>{err}</div>}
           <div style={{display:'flex',gap:'12px',justifyContent:'flex-end'}}>
-            <button type="button" onClick={function(){nav('/requests');}} style={{padding:'11px 24px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
-            <button type="submit" disabled={loading} style={{padding:'11px 32px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
+            <button type="button" onClick={function(){nav('/requests');}} style={{padding:'11px 24px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-6b7280)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
+            <button type="submit" disabled={loading} style={{padding:'11px 32px',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
               {loading?'Creating...':'Create Request'}
             </button>
           </div>

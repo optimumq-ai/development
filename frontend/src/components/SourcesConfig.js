@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 
-var btnPrimary = {background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',padding:'9px 14px',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
-var btnGhost = {background:'#F3F4F6',color:'#374151',border:'none',borderRadius:'8px',padding:'8px 14px',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
-var btnGhostSm = {background:'#F3F4F6',color:'#374151',border:'none',borderRadius:'6px',padding:'6px 12px',fontSize:'12px',fontWeight:'600',cursor:'pointer'};
-var inp = {width:'100%',padding:'9px 11px',borderRadius:'8px',border:'1px solid #D1D5DB',fontSize:'14px',boxSizing:'border-box'};
-var lbl = {display:'block',fontSize:'12px',fontWeight:'600',color:'#374151',marginBottom:'5px'};
+var btnPrimary = {background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',padding:'9px 14px',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
+var btnGhost = {background:'var(--oq-bg-f3f4f6)',color:'var(--oq-fg-374151)',border:'none',borderRadius:'8px',padding:'8px 14px',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
+var btnGhostSm = {background:'var(--oq-bg-f3f4f6)',color:'var(--oq-fg-374151)',border:'none',borderRadius:'6px',padding:'6px 12px',fontSize:'12px',fontWeight:'600',cursor:'pointer'};
+var inp = {width:'100%',padding:'9px 11px',borderRadius:'8px',border:'1px solid var(--oq-ln-d1d5db)',fontSize:'14px',boxSizing:'border-box'};
+var lbl = {display:'block',fontSize:'12px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'5px'};
 function badge(bg,fg){ return {background:bg,color:fg,fontSize:'11px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px'}; }
 
 export default function SourcesConfig() {
@@ -98,12 +98,12 @@ export default function SourcesConfig() {
   function renderPaperImport(){
     var p = paperImport;
     return (
-      <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
+      <div style={{ background:'var(--oq-bg-f9fafb)', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
         <div style={{ fontWeight:'700', fontSize:'15px', marginBottom:'4px' }}>Import paper records index — {p.name}</div>
-        <p style={{ color:'#6B7280', fontSize:'13px', margin:'0 0 10px' }}>Paste a CSV of the physical files in this storage location. The first row is column headers. Recognized columns: title, description, location, box, folder, date, tags (only title is required). Re-importing replaces the current index.{p.count != null ? ' Currently ' + p.count + ' record(s) indexed.' : ''}</p>
+        <p style={{ color:'var(--oq-fg-6b7280)', fontSize:'13px', margin:'0 0 10px' }}>Paste a CSV of the physical files in this storage location. The first row is column headers. Recognized columns: title, description, location, box, folder, date, tags (only title is required). Re-importing replaces the current index.{p.count != null ? ' Currently ' + p.count + ' record(s) indexed.' : ''}</p>
         <textarea style={Object.assign({},inp,{minHeight:'120px',fontFamily:'monospace',fontSize:'12px'})} value={p.csv} onChange={function(e){ setPI('csv', e.target.value); }} placeholder={"title,description,location,box,date,tags\nBuilding Permit Files 1988-1995,Paper permit applications,Aisle 4 Shelf 2,47,1988-1995,permit building"} />
-        {p.error ? <div style={{ color:'#DC2626', fontSize:'13px', marginTop:'8px' }}>{p.error}</div> : null}
-        {p.imported != null ? <div style={{ color:'#065F46', fontSize:'13px', marginTop:'8px' }}>Imported {p.imported} record(s). They are now searchable in the portal.</div> : null}
+        {p.error ? <div style={{ color:'var(--oq-fg-dc2626)', fontSize:'13px', marginTop:'8px' }}>{p.error}</div> : null}
+        {p.imported != null ? <div style={{ color:'var(--oq-fg-065f46)', fontSize:'13px', marginTop:'8px' }}>Imported {p.imported} record(s). They are now searchable in the portal.</div> : null}
         <div style={{ display:'flex', justifyContent:'flex-end', gap:'8px', marginTop:'10px' }}>
           <button onClick={function(){ setPaperImport(null); load(); }} style={btnGhost} disabled={p.busy}>Close</button>
           <button onClick={doPaperImport} style={btnPrimary} disabled={p.busy}>{p.busy?'Importing...':'Import index'}</button>
@@ -114,9 +114,9 @@ export default function SourcesConfig() {
 
   function renderAiPanel(){
     return (
-      <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
+      <div style={{ background:'var(--oq-bg-f9fafb)', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
         <div style={{ fontWeight:'700', fontSize:'15px', marginBottom:'4px' }}>Configure with AI</div>
-        <p style={{ color:'#6B7280', fontSize:'13px', margin:'0 0 12px' }}>Describe the system and where it lives. Optionally paste any documentation. The AI picks a connector type and proposes a configuration for you to review.</p>
+        <p style={{ color:'var(--oq-fg-6b7280)', fontSize:'13px', margin:'0 0 12px' }}>Describe the system and where it lives. Optionally paste any documentation. The AI picks a connector type and proposes a configuration for you to review.</p>
         <div style={{ marginBottom:'12px' }}>
           <label style={lbl}>System description / location</label>
           <textarea style={Object.assign({},inp,{minHeight:'70px',fontFamily:'inherit'})} value={ai.description} onChange={function(e){ setAiField('description', e.target.value); }} placeholder="e.g. A shared network folder of scanned permit PDFs, or our Tyler Munis ERP at https://..." />
@@ -125,7 +125,7 @@ export default function SourcesConfig() {
           <label style={lbl}>Documentation (optional)</label>
           <textarea style={Object.assign({},inp,{minHeight:'70px',fontFamily:'inherit'})} value={ai.documentation} onChange={function(e){ setAiField('documentation', e.target.value); }} placeholder="Paste any schema, data dictionary, or system docs that describe the records..." />
         </div>
-        {ai.error ? <div style={{ color:'#DC2626', fontSize:'13px', marginBottom:'10px' }}>{ai.error}</div> : null}
+        {ai.error ? <div style={{ color:'var(--oq-fg-dc2626)', fontSize:'13px', marginBottom:'10px' }}>{ai.error}</div> : null}
         <div style={{ display:'flex', justifyContent:'flex-end', gap:'8px' }}>
           <button onClick={function(){ setAi(null); }} style={btnGhost} disabled={ai.loading}>Cancel</button>
           <button onClick={proposeAi} style={btnPrimary} disabled={ai.loading}>{ai.loading?'Analyzing...':'Propose configuration'}</button>
@@ -138,27 +138,27 @@ export default function SourcesConfig() {
     var d = editor.data;
     var meta = typeMeta(d.connector_type);
     return (
-      <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
+      <div style={{ background:'var(--oq-bg-f9fafb)', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
         <div style={{ fontWeight:'700', fontSize:'15px', marginBottom:'12px' }}>{editor.mode==='create'?'Add source':'Edit source'}</div>
         {d._ai ? (
-          <div style={{ background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'8px', padding:'10px 12px', marginBottom:'12px', fontSize:'13px', color:'#1E40AF' }}>
+          <div style={{ background:'var(--oq-bg-eff6ff)', border:'1px solid var(--oq-ln-bfdbfe)', borderRadius:'8px', padding:'10px 12px', marginBottom:'12px', fontSize:'13px', color:'var(--oq-fg-1e40af)' }}>
             <strong>AI suggestion:</strong> {d._ai.reasoning}{(d._ai.missing && d._ai.missing.length) ? (' Still needed: ' + d._ai.missing.join(', ') + '.') : ''}
           </div>
         ) : null}
         <div style={{ marginBottom:'12px' }}>
           <label style={lbl}>Source name</label>
           <input style={inp} value={d.name} onChange={function(e){ setField('name', e.target.value); }} placeholder="Call it whatever your staff would - by system, content, or location" />
-          <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>A free-text label for your team (e.g. "Axon Evidence", "Payroll records", "Z Drive files"). It does not affect how records are processed - name it however makes sense.</div>
+          <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'4px' }}>A free-text label for your team (e.g. "Axon Evidence", "Payroll records", "Z Drive files"). It does not affect how records are processed - name it however makes sense.</div>
         </div>
         <div style={{ marginBottom:'12px' }}>
-          <label style={lbl}>Public description <span style={{color:'#B45309'}}>(shown to requestors)</span></label>
-          <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'10px 12px', marginBottom:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+          <label style={lbl}>Public description <span style={{color:'var(--oq-fg-b45309)'}}>(shown to requestors)</span></label>
+          <div style={{ background:'var(--oq-bg-fffbeb)', border:'1px solid var(--oq-ln-fde68a)', borderRadius:'8px', padding:'10px 12px', marginBottom:'8px', fontSize:'12px', color:'var(--oq-fg-92400e)', lineHeight:'1.5' }}>
             This text is <strong>public and citizen-facing</strong>. It appears in the self-service portal when a requestor is choosing which connected system to keyword-search. Write it for a member of the public, not staff: plainly state what kinds of records this system holds (for example, "Building permits, inspection reports, and certificates of occupancy"). Accuracy matters - a vague or wrong description sends people to the wrong system, or leads them to file requests they did not need to.
           </div>
           <textarea style={Object.assign({},inp,{minHeight:'72px',fontFamily:'inherit'})} value={d.description||''} onChange={function(e){ setField('description', e.target.value); }} placeholder="e.g. Building permits, inspection reports, and certificates of occupancy issued by the City." />
         </div>
         <div style={{ marginBottom:'12px' }}>
-          <label style={lbl}>Access method <span style={{color:'#6B7280',fontWeight:'400'}}>&mdash; how records here become available</span></label>
+          <label style={lbl}>Access method <span style={{color:'var(--oq-fg-6b7280)',fontWeight:'400'}}>&mdash; how records here become available</span></label>
           <select style={inp} value={d.connector_type} onChange={function(e){ setField('connector_type', e.target.value); }}>
             {PURPOSE_ORDER.filter(function(pu){ return catalog.some(function(c){ return (c.purpose||'demo')===pu; }); }).map(function(pu){
               return (
@@ -168,9 +168,9 @@ export default function SourcesConfig() {
               );
             })}
           </select>
-          <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>{meta.description}</div>
+          <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'4px' }}>{meta.description}</div>
           {d.connector_type==='import' ? (
-            <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+            <div style={{ background:'var(--oq-bg-fffbeb)', border:'1px solid var(--oq-ln-fde68a)', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'var(--oq-fg-92400e)', lineHeight:'1.5' }}>
               <strong>Import source.</strong> Place files in the drop folder, then use <strong>Check now</strong> on this source (in the list) to bring them in &mdash; each file is copied in, its text extracted, and indexed. Re-running picks up only new files; the source folder is never modified.
             </div>
           ) : null}
@@ -191,7 +191,7 @@ export default function SourcesConfig() {
               <option value="pull">Pull &mdash; we fetch from the other system (requires credentials; not yet available)</option>
             </select>
             {d.config.mode==='pull' ? (
-              <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+              <div style={{ background:'var(--oq-bg-fffbeb)', border:'1px solid var(--oq-ln-fde68a)', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'var(--oq-fg-92400e)', lineHeight:'1.5' }}>
                 Pull is not yet available &mdash; it requires a per-system connection with stored credentials. For now use <strong>Push</strong>: schedule an export in the source system that writes files to the folder below.
               </div>
             ) : null}
@@ -201,29 +201,29 @@ export default function SourcesConfig() {
           <div style={{ marginBottom:'12px' }}>
             <label style={lbl}>Import folder</label>
             <div style={{ display:'flex', alignItems:'stretch' }}>
-              <span style={{ fontSize:'13px', color:'#6B7280', background:'#F3F4F6', border:'1px solid #E5E7EB', borderRight:'none', borderRadius:'8px 0 0 8px', padding:'9px 10px', whiteSpace:'nowrap', display:'flex', alignItems:'center' }}>/opt/optimumq/imports/</span>
+              <span style={{ fontSize:'13px', color:'var(--oq-fg-6b7280)', background:'var(--oq-bg-f3f4f6)', border:'1px solid var(--oq-ln-e5e7eb)', borderRight:'none', borderRadius:'8px 0 0 8px', padding:'9px 10px', whiteSpace:'nowrap', display:'flex', alignItems:'center' }}>/opt/optimumq/imports/</span>
               <input style={Object.assign({},inp,{borderRadius:'0 8px 8px 0'})} value={sub} onChange={function(e){ setCfg('subdir', e.target.value); }} placeholder="payroll-daily" />
             </div>
-            <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>The folder is created for you when you save. Point the other system's export job at: <strong>/opt/optimumq/imports/{sub || '\u2026'}</strong></div>
+            <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'4px' }}>The folder is created for you when you save. Point the other system's export job at: <strong>/opt/optimumq/imports/{sub || '\u2026'}</strong></div>
           </div>
         ); })() : null}
         {d.connector_type==='import' ? (function(){ var creatingNew = (typeof d.config.new_record_type_name === 'string'); return (
           <div style={{ marginBottom:'12px' }}>
-            <label style={lbl}>Record type <span style={{color:'#6B7280',fontWeight:'400'}}>&mdash; gives imported records a record type home (required)</span></label>
+            <label style={lbl}>Record type <span style={{color:'var(--oq-fg-6b7280)',fontWeight:'400'}}>&mdash; gives imported records a record type home (required)</span></label>
             <select style={inp} value={d.config.record_type_id ? d.config.record_type_id : (creatingNew ? '__new__' : '')} onChange={function(e){ var v=e.target.value; if(v==='__new__'){ setCfg('record_type_id',''); setCfg('new_record_type_name', d.config.new_record_type_name || ''); } else { setCfg('record_type_id', v); setCfg('new_record_type_name', null); } }}>
               <option value="">Select a record type&hellip;</option>
               {recordTypes.map(function(rt){ return <option key={rt.id} value={rt.id}>{rt.name}</option>; })}
               <option value="__new__">+ Create a new record type&hellip;</option>
             </select>
             {creatingNew ? (
-              <div style={{ marginTop:'8px', paddingLeft:'10px', borderLeft:'2px solid #E5E7EB' }}>
+              <div style={{ marginTop:'8px', paddingLeft:'10px', borderLeft:'2px solid var(--oq-ln-e5e7eb)' }}>
                 <input style={inp} value={d.config.new_record_type_name||''} onChange={function(e){ setCfg('new_record_type_name', e.target.value); }} placeholder="Record type name (e.g. Payroll Records)" />
                 <textarea style={Object.assign({},inp,{marginTop:'6px', minHeight:'48px'})} value={d.config.new_record_type_description||''} onChange={function(e){ setCfg('new_record_type_description', e.target.value); }} placeholder="Plain description of what these records are" />
                 <select style={Object.assign({},inp,{marginTop:'6px'})} value={d.config.new_record_type_category||''} onChange={function(e){ setCfg('new_record_type_category', e.target.value); }}>
                   <option value="">Select a category&hellip;</option>
                   {categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
                 </select>
-                <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>You provide the name, description, and category. On the first import, AI suggests synonyms and keywords from the actual files.</div>
+                <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'4px' }}>You provide the name, description, and category. On the first import, AI suggests synonyms and keywords from the actual files.</div>
               </div>
             ) : null}
           </div>
@@ -240,7 +240,7 @@ export default function SourcesConfig() {
               <div style={{ marginTop:'8px' }}>
                 <label style={lbl}>Run at hour (0&ndash;23, server time)</label>
                 <input style={inp} type="number" min="0" max="23" value={d.config.hour!=null?d.config.hour:2} onChange={function(e){ setCfg('hour', e.target.value); }} placeholder="2" />
-                <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>Runs once daily at this hour (server local time), picking up only new files.</div>
+                <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'4px' }}>Runs once daily at this hour (server local time), picking up only new files.</div>
               </div>
             ) : null}
           </div>
@@ -253,12 +253,12 @@ export default function SourcesConfig() {
               <option value="archive">Move it to a processed/ subfolder (keeps the drop folder clean)</option>
               <option value="delete">Delete it (the system keeps the canonical copy)</option>
             </select>
-            <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>The system always keeps its own copy in secure storage. For scheduled or watch jobs, moving to processed/ keeps the drop folder tidy.</div>
+            <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'4px' }}>The system always keeps its own copy in secure storage. For scheduled or watch jobs, moving to processed/ keeps the drop folder tidy.</div>
           </div>
         ) : null}
         {d.connector_type==='import' ? (
-          <div style={{ marginBottom:'12px', background:'#F0F9FF', border:'1px solid #BAE6FD', borderRadius:'8px', padding:'12px' }}>
-            <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', fontWeight:'600', fontSize:'13px', color:'#0C4A6E' }}>
+          <div style={{ marginBottom:'12px', background:'var(--oq-bg-f0f9ff)', border:'1px solid var(--oq-ln-bae6fd)', borderRadius:'8px', padding:'12px' }}>
+            <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', fontWeight:'600', fontSize:'13px', color:'var(--oq-fg-0c4a6e)' }}>
               <input type="checkbox" checked={!!d.config.end_to_end} onChange={function(e){ var on=e.target.checked; setCfg('end_to_end', on); if(on && !d.config.review_assignee && me && me.id) setCfg('review_assignee', me.id); }} />
               Process end-to-end (import &rarr; auto-redact &rarr; review &rarr; publish)
             </label>
@@ -270,17 +270,17 @@ export default function SourcesConfig() {
                   {templates.map(function(t){ return <option key={t.id} value={t.id}>{t.name}</option>; })}
                 </select>
                 {!d.config.template_id ? (
-                  <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+                  <div style={{ background:'var(--oq-bg-fffbeb)', border:'1px solid var(--oq-ln-fde68a)', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'var(--oq-fg-92400e)', lineHeight:'1.5' }}>
                     Auto-redaction needs a redaction template, and templates are built from a real sample file. So the first time files arrive, we&rsquo;ll create a setup task for the reviewer to build the template from those files. After that, every import runs end-to-end automatically.
                   </div>
                 ) : null}
                 <div style={{ marginTop:'10px' }}>
-                  <label style={lbl}>Review assignee <span style={{color:'#6B7280',fontWeight:'400'}}>&mdash; who reviews after auto-redaction</span></label>
+                  <label style={lbl}>Review assignee <span style={{color:'var(--oq-fg-6b7280)',fontWeight:'400'}}>&mdash; who reviews after auto-redaction</span></label>
                   <select style={inp} value={d.config.review_assignee||''} onChange={function(e){ setCfg('review_assignee', e.target.value); }}>
                     <option value="">(Review pool &mdash; anyone on the team can claim)</option>
                     {staff.map(function(u){ return <option key={u.id} value={u.id}>{u.display_name}{me&&u.id===me.id?' (you)':''}</option>; })}
                   </select>
-                  <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>Defaults to you. For a scheduled ongoing import, you can assign a different reviewer.</div>
+                  <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'4px' }}>Defaults to you. For a scheduled ongoing import, you can assign a different reviewer.</div>
                 </div>
               </div>
             ) : null}
@@ -319,21 +319,21 @@ export default function SourcesConfig() {
   // status as words. Same data, same buttons \u2014 only the presentation changed.
   function dotChip(label){
     return (
-      <span style={Object.assign({}, badge('#E6F4EC','#17803D'), { display:'inline-flex', alignItems:'center', gap:'5px' })}>
-        <span style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#17803D', display:'inline-block' }} />{label}
+      <span style={Object.assign({}, badge('var(--oq-bg-e6f4ec)','var(--oq-fg-17803d)'), { display:'inline-flex', alignItems:'center', gap:'5px' })}>
+        <span style={{ width:'7px', height:'7px', borderRadius:'50%', background:'var(--oq-bg-17803d)', display:'inline-block' }} />{label}
       </span>
     );
   }
   function statusChip(s){
-    if (s.status !== 'active') return <span style={badge('#F3F4F6','#6B7280')}>Inactive</span>;
+    if (s.status !== 'active') return <span style={badge('var(--oq-bg-f3f4f6)','var(--oq-fg-6b7280)')}>Inactive</span>;
     if (s.connector_type === 'import') {
       var sch = (s.config && s.config.schedule) || 'manual';
       return dotChip(sch === 'daily' ? 'Checked nightly' : (sch === 'watch' ? 'Watching for new files' : 'Checked by hand'));
     }
     if (s.connector_type === 'paper-index') {
       return s.paper_index_count > 0
-        ? <span style={badge('#F0F2F5','#5B6B7A')}>{s.paper_index_count.toLocaleString()} entries indexed</span>
-        : <span style={badge('#FBEFD7','#C77A0A')}>No index yet</span>;
+        ? <span style={badge('var(--oq-bg-f0f2f5)','var(--oq-fg-5b6b7a)')}>{s.paper_index_count.toLocaleString()} entries indexed</span>
+        : <span style={badge('var(--oq-bg-fbefd7)','var(--oq-fg-c77a0a)')}>No index yet</span>;
     }
     return dotChip('Connected');
   }
@@ -343,9 +343,9 @@ export default function SourcesConfig() {
     var shown = names.slice(0, 3).join(', ');
     var more = names.length - 3;
     return (
-      <div style={{ fontSize:'12.5px', color:'#5B6B7A', marginTop:'6px' }}>
+      <div style={{ fontSize:'12.5px', color:'var(--oq-fg-5b6b7a)', marginTop:'6px' }}>
         {s.connector_type === 'import' ? 'Feeds: ' : 'Holds: '}
-        <span style={{ color:'#374151', fontWeight:'600' }}>{shown}</span>
+        <span style={{ color:'var(--oq-fg-374151)', fontWeight:'600' }}>{shown}</span>
         {more > 0 ? ' + ' + more + ' more record type' + (more > 1 ? 's' : '') : ''}
       </div>
     );
@@ -354,26 +354,26 @@ export default function SourcesConfig() {
     var meta = typeMeta(s.connector_type);
     var ig = ingest[s.id] || {};
     return (
-      <div key={s.id} style={{ display:'flex', alignItems:'flex-start', gap:'16px', background:'white', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'15px 18px' }}>
+      <div key={s.id} style={{ display:'flex', alignItems:'flex-start', gap:'16px', background:'var(--oq-bg-ffffff)', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'12px', padding:'15px 18px' }}>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontWeight:'700', fontSize:'15px', color:'#111' }}>{s.name}</div>
-          <div style={{ fontSize:'13px', color:'#4B5563', marginTop:'3px', lineHeight:'1.4' }}>{s.description || meta.description || meta.label}</div>
+          <div style={{ fontWeight:'700', fontSize:'15px', color:'var(--oq-fg-111111)' }}>{s.name}</div>
+          <div style={{ fontSize:'13px', color:'var(--oq-fg-4b5563)', marginTop:'3px', lineHeight:'1.4' }}>{s.description || meta.description || meta.label}</div>
           {holdsLine(s)}
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'7px', minWidth:'215px' }}>
           {statusChip(s)}
           {s.connector_type === 'import' ? (
-            ig.msg ? <span style={{ fontSize:'11.5px', color: ig.ok ? '#17803D' : '#DC2626' }}>{ig.msg}</span>
-              : (ig.status ? <span style={{ fontSize:'11.5px', color:'#8A97A5' }}>
+            ig.msg ? <span style={{ fontSize:'11.5px', color: ig.ok ? 'var(--oq-fg-17803d)' : 'var(--oq-fg-dc2626)' }}>{ig.msg}</span>
+              : (ig.status ? <span style={{ fontSize:'11.5px', color:'var(--oq-fg-8a97a5)' }}>
                   {ig.status.lastRun ? 'Last run ' + String(ig.status.lastRun).slice(0,16).replace('T',' ') + ' \u00b7 ' : ''}
                   {ig.status.ingested} file{ig.status.ingested === 1 ? '' : 's'} brought in{ig.status.errors ? ' \u00b7 ' + ig.status.errors + ' error' + (ig.status.errors > 1 ? 's' : '') : ' \u00b7 0 errors'}
                 </span> : null)
           ) : null}
           <div style={{ display:'flex', gap:'6px' }}>
-            {s.connector_type === 'import' ? <button onClick={function(){ runIngestNow(s); }} disabled={ig.busy} style={Object.assign({},btnGhostSm,{background:'#EBF3FB',color:'#1F4E79'})}>{ig.busy ? 'Checking\u2026' : 'Check now'}</button> : null}
-            {s.connector_type === 'paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={Object.assign({},btnGhostSm,{background:'#EBF3FB',color:'#1F4E79'})}>{s.paper_index_count > 0 ? 'Update index' : 'Import index'}</button> : null}
+            {s.connector_type === 'import' ? <button onClick={function(){ runIngestNow(s); }} disabled={ig.busy} style={Object.assign({},btnGhostSm,{background:'var(--oq-bg-ebf3fb)',color:'var(--oq-fg-1f4e79)'})}>{ig.busy ? 'Checking\u2026' : 'Check now'}</button> : null}
+            {s.connector_type === 'paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={Object.assign({},btnGhostSm,{background:'var(--oq-bg-ebf3fb)',color:'var(--oq-fg-1f4e79)'})}>{s.paper_index_count > 0 ? 'Update index' : 'Import index'}</button> : null}
             <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
-            <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
+            <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'var(--oq-fg-dc2626)'})}>Delete</button>
           </div>
         </div>
       </div>
@@ -384,8 +384,8 @@ export default function SourcesConfig() {
     return (
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', margin:'4px 0 10px' }}>
         <div style={{ flex:1, minWidth:0, paddingRight:'12px' }}>
-          <div style={{ fontSize:'15px', fontWeight:'700', color:'#111' }}>{title}</div>
-          <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px', lineHeight:'1.4' }}>{subtitle}</div>
+          <div style={{ fontSize:'15px', fontWeight:'700', color:'var(--oq-fg-111111)' }}>{title}</div>
+          <div style={{ fontSize:'12px', color:'var(--oq-fg-9ca3af)', marginTop:'2px', lineHeight:'1.4' }}>{subtitle}</div>
         </div>
         {canAdd ? <button onClick={addFn} style={btnPrimary}>{addLabel}</button> : null}
       </div>
@@ -395,7 +395,7 @@ export default function SourcesConfig() {
   return (
     <div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
-        <div style={{ color:'#6B7280', fontSize:'14px' }}>Repositories and systems the platform can search and scan for record types.</div>
+        <div style={{ color:'var(--oq-fg-6b7280)', fontSize:'14px' }}>Repositories and systems the platform can search and scan for record types.</div>
         {(!editor && !ai && !paperImport) ? <button onClick={openAi} style={btnGhost}>Configure with AI</button> : null}
       </div>
       <div id="source-editor">
@@ -403,7 +403,7 @@ export default function SourcesConfig() {
         {ai ? renderAiPanel() : null}
         {paperImport ? renderPaperImport() : null}
       </div>
-      {loading ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Loading sources...</div> : (function(){
+      {loading ? <div style={{ color:'var(--oq-fg-9ca3af)', fontSize:'14px' }}>Loading sources...</div> : (function(){
         var searched = sources.filter(function(s){ return ['import','paper-index','email'].indexOf(s.connector_type) < 0; });
         var watched  = sources.filter(function(s){ return s.connector_type === 'import'; });
         var counted  = sources.filter(function(s){ return s.connector_type === 'email'; });
@@ -415,7 +415,7 @@ export default function SourcesConfig() {
             <div style={{ marginBottom:'26px' }}>
               {sectionHeader(title + (list.length ? '' : ''), subtitle, addLabel, addFn, addFn ? canAdd : false)}
               <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-                {list.length === 0 ? <div style={{ color:'#9CA3AF', fontSize:'14px', padding:'6px 0' }}>{empty}</div> : list.map(renderSourceRow)}
+                {list.length === 0 ? <div style={{ color:'var(--oq-fg-9ca3af)', fontSize:'14px', padding:'6px 0' }}>{empty}</div> : list.map(renderSourceRow)}
               </div>
             </div>
           );

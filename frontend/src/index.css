@@ -1,7 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@layer base { * { box-sizing: border-box; } body { @apply bg-gray-50 text-gray-900; font-family: Inter, system-ui, sans-serif; } }
+/* NOTE (2026-09-13): react-scripts 4 does not run Tailwind 3 (PostCSS 7 vs 8), so the directives above and the
+   @apply rules below ship to the browser verbatim and are IGNORED — they have never styled anything. Kept as
+   found; the body rule below is the only live one, and it deliberately sets no colours (it never did), so the
+   display themes (docs/SPEC_display_theme.md, theme/tokens.css imported by index.tsx) change nothing here. */
+@layer base { * { box-sizing: border-box; } body { font-family: Inter, system-ui, sans-serif; } }
 @layer components {
   .btn { @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50; }
   .btn-primary { @apply btn bg-brand-700 text-white hover:bg-brand-800; }

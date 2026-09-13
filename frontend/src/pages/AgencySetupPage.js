@@ -9,26 +9,26 @@ import api from '../lib/api';
 //   · "Lock state and load its rules" is the click that imports the state's rules file and makes it the
 //     city's jurisdiction. Once. Confirmed first. Afterwards the select is read-only.
 
-var C = { ink: '#12232E', mute: '#5C6F7C', faint: '#8296A4', ph: '#A9B7C2', line: '#D2DCE3', edge: '#BECAD3', wash: '#F2F6F9', pri: '#1E6091', red: '#B02A37' };
+var C = { ink: 'var(--oq-fg-12232e)', mute: 'var(--oq-fg-5c6f7c)', faint: 'var(--oq-fg-8296a4)', ph: 'var(--oq-fg-a9b7c2)', line: 'var(--oq-ln-d2dce3)', edge: 'var(--oq-ln-becad3)', wash: 'var(--oq-bg-f2f6f9)', pri: 'var(--oq-x-1e6091)', red: 'var(--oq-x-b02a37)' };
 var STATE = {
-  ready:           { label: 'Ready',           bg: '#E1F2E9', color: '#1B8A5A' },
-  in_progress:     { label: 'In progress',     bg: '#F6EBD6', color: '#9A6512' },
-  not_started:     { label: 'Not started',     bg: '#F3F4F6', color: '#4B5563' },
-  needs_attention: { label: 'Needs attention', bg: '#FEE2E2', color: '#991B1B' },
-  waiting:         { label: 'Waiting',         bg: '#EDE9FE', color: '#5B21B6' },
+  ready:           { label: 'Ready',           bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' },
+  in_progress:     { label: 'In progress',     bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' },
+  not_started:     { label: 'Not started',     bg: 'var(--oq-bg-f3f4f6)', color: 'var(--oq-fg-4b5563)' },
+  needs_attention: { label: 'Needs attention', bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' },
+  waiting:         { label: 'Waiting',         bg: 'var(--oq-bg-ede9fe)', color: 'var(--oq-fg-5b21b6)' },
 };
 var lbl = { fontSize: '12.5px', fontWeight: '600', color: C.ink, marginBottom: '5px' };
 var hint = { fontSize: '11.5px', color: C.faint, marginTop: '4px', lineHeight: '1.4' };
 var sect = { fontSize: '11.5px', fontWeight: '700', color: C.mute, textTransform: 'uppercase', letterSpacing: '0.05em' };
-var card = { background: 'white', border: '1px solid ' + C.line, borderRadius: '10px' };
+var card = { background: 'var(--oq-bg-ffffff)', border: '1px solid ' + C.line, borderRadius: '10px' };
 function inp(missing, extra) {
-  return Object.assign({ display: 'block', width: '100%', boxSizing: 'border-box', height: '36px', border: '1px solid ' + (missing ? C.red : C.edge), borderRadius: '7px', background: 'white', padding: '0 11px', fontSize: '13.5px', color: C.ink, fontFamily: 'inherit' }, extra || {});
+  return Object.assign({ display: 'block', width: '100%', boxSizing: 'border-box', height: '36px', border: '1px solid ' + (missing ? C.red : C.edge), borderRadius: '7px', background: 'var(--oq-bg-ffffff)', padding: '0 11px', fontSize: '13.5px', color: C.ink, fontFamily: 'inherit' }, extra || {});
 }
 function btn(kind, extra) {
   var base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '36px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap' };
-  var k = kind === 'pri' ? { background: C.pri, color: 'white', border: '1px solid ' + C.pri }
+  var k = kind === 'pri' ? { background: C.pri, color: 'var(--oq-fg-ffffff)', border: '1px solid ' + C.pri }
     : kind === 'dis' ? { background: C.wash, color: C.ph, border: '1px solid ' + C.line, cursor: 'default' }
-    : { background: 'white', color: C.ink, border: '1px solid ' + C.edge };
+    : { background: 'var(--oq-bg-ffffff)', color: C.ink, border: '1px solid ' + C.edge };
   return Object.assign(base, k, extra || {});
 }
 var Req = function () { return <span style={{ color: C.red, fontWeight: '700' }}> *</span>; };
@@ -39,9 +39,9 @@ function errText(e, fallback) { return (e && e.response && e.response.data && e.
 function fmtDate(s) { if (!s) return ''; var d = new Date(String(s).replace(' ', 'T') + (String(s).length <= 19 ? 'Z' : '')); return isNaN(d) ? String(s).slice(0, 10) : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); }
 
 var APPROVAL = {
-  red:    { label: 'Not started',       bg: '#FEE2E2', color: '#991B1B' },
-  yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' },
-  green:  { label: 'Approved',          bg: '#E1F2E9', color: '#1B8A5A' },
+  red:    { label: 'Not started',       bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' },
+  yellow: { label: 'Awaiting approval', bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' },
+  green:  { label: 'Approved',          bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' },
 };
 
 export default function AgencySetupPage() {
@@ -154,12 +154,12 @@ export default function AgencySetupPage() {
               title={mayAttest ? 'Approve: record that this item is complete' : 'Fill every required field and lock the state first'}>{reLabel}</button>}
       </div>
 
-      {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
-      {hub && hub.changedSinceApproval ? <div style={{ background: '#FFF8E8', border: '1px solid #F0D9A8', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: '#7A5210', marginBottom: '12px' }}><strong>Changed since approval.</strong> {hub.approvalWhy}. The lane owner has been notified to approve again.</div> : null}
+      {err ? <div style={{ background: 'var(--oq-bg-fef2f2)', border: '1px solid var(--oq-ln-fca5a5)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
+      {hub && hub.changedSinceApproval ? <div style={{ background: 'var(--oq-bg-fff8e8)', border: '1px solid var(--oq-ln-f0d9a8)', borderRadius: '8px', padding: '10px 12px', fontSize: '12.5px', color: 'var(--oq-fg-7a5210)', marginBottom: '12px' }}><strong>Changed since approval.</strong> {hub.approvalWhy}. The lane owner has been notified to approve again.</div> : null}
 
       {loaded ? (
-        <div style={{ background: '#E1F2E9', border: '1px solid #A7D9BF', borderRadius: '10px', padding: '14px 16px', marginBottom: '14px', fontSize: '13px', lineHeight: '1.55' }}>
-          <div style={{ fontWeight: '700', color: '#1B8A5A' }}>{lock ? lock.name : pickName} rules loaded</div>
+        <div style={{ background: 'var(--oq-bg-e1f2e9)', border: '1px solid var(--oq-ln-a7d9bf)', borderRadius: '10px', padding: '14px 16px', marginBottom: '14px', fontSize: '13px', lineHeight: '1.55' }}>
+          <div style={{ fontWeight: '700', color: 'var(--oq-fg-1b8a5a)' }}>{lock ? lock.name : pickName} rules loaded</div>
           <div style={{ color: C.ink, marginTop: '4px' }}>
             Written into the review items on the Setup hub: <b>{loaded.written.length}</b> sections
             ({loaded.written.join(', ')}){loaded.proposed.length ? <span> · {loaded.proposed.length} staged as proposals because this city already had values ({loaded.proposed.join(', ')})</span> : null}.
@@ -244,7 +244,7 @@ export default function AgencySetupPage() {
                     </select>}
               </div>
               {lock
-                ? <span style={{ display: 'inline-flex', alignItems: 'center', height: '36px', padding: '0 12px', borderRadius: '999px', background: '#E1F2E9', color: '#1B8A5A', fontSize: '11px', fontWeight: '700', whiteSpace: 'nowrap' }}>Locked · by {lock.by} · {fmtDate(lock.at)}</span>
+                ? <span style={{ display: 'inline-flex', alignItems: 'center', height: '36px', padding: '0 12px', borderRadius: '999px', background: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)', fontSize: '11px', fontWeight: '700', whiteSpace: 'nowrap' }}>Locked · by {lock.by} · {fmtDate(lock.at)}</span>
                 : <button type="button" disabled={!can || !pickState || !pickHasRules || busy === 'lock'} onClick={function () { setConfirm(true); }} style={btn(can && pickState && pickHasRules ? 'pri' : 'dis')}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
                     {busy === 'lock' ? 'Loading rules…' : 'Lock state and load its rules'}
@@ -260,7 +260,7 @@ export default function AgencySetupPage() {
 
         <div style={{ padding: '12px 20px', borderTop: '1px solid ' + C.line, background: C.wash, borderRadius: '0 0 10px 10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={Object.assign({}, hint, { flexGrow: 1, marginTop: 0 })}>
-            {msg ? <span style={{ color: '#1B8A5A', fontWeight: '600' }}>{msg} </span> : null}
+            {msg ? <span style={{ color: 'var(--oq-fg-1b8a5a)', fontWeight: '600' }}>{msg} </span> : null}
             {lock ? 'Fields stay editable after attesting. Changing the address or contact does not reload rules.'
               : <span><span style={{ color: C.red, fontWeight: '700' }}>*</span> Required to attest. Attest becomes available when every required field is filled and the state is locked.</span>}
             {!can ? ' · view only for you' : ''}
@@ -272,9 +272,9 @@ export default function AgencySetupPage() {
 
       {confirm ? (
         <div onClick={function () { setConfirm(false); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(18,35,46,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', padding: '22px', width: '520px', maxWidth: '92%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '12px', padding: '22px', width: '520px', maxWidth: '92%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
             <div style={{ fontSize: '16px', fontWeight: '700' }}>Lock the state to {pickName}?</div>
-            <div style={{ fontSize: '13px', color: '#374151', marginTop: '10px', lineHeight: '1.6' }}>
+            <div style={{ fontSize: '13px', color: 'var(--oq-fg-374151)', marginTop: '10px', lineHeight: '1.6' }}>
               {pickName}'s public records rules will be loaded into the Setup hub's review items — response deadlines, what may be charged, deposits, fee waivers, exemptions and appeals — and {pickName} becomes the law this city follows.
               This happens once. It cannot be undone from this screen; later changes in the law come in as proposals for review.
             </div>

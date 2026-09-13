@@ -102,7 +102,7 @@ export default function ReleaseReviewTaskPage() {
       <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
         <button type="button" disabled={busy || blocked} onClick={approve}
           style={{ font: 'inherit', fontSize: 13, fontWeight: 700, padding: '9px 16px', borderRadius: 6,
-            background: G.navy, color: '#fff', border: '1px solid ' + G.navy,
+            background: G.navy, color: 'var(--oq-fg-ffffff)', border: '1px solid ' + G.navy,
             cursor: busy || blocked ? 'not-allowed' : 'pointer', opacity: busy || blocked ? 0.55 : 1 }}>
           Approve & send
         </button>
@@ -123,7 +123,7 @@ export default function ReleaseReviewTaskPage() {
         actions={[
           <button key="go" type="button" disabled={!note.trim() || busy} onClick={commitReturn}
             style={{ font: 'inherit', fontSize: 13, fontWeight: 700, padding: '7px 14px', borderRadius: 6,
-              background: G.navy, color: '#fff', border: '1px solid ' + G.navy,
+              background: G.navy, color: 'var(--oq-fg-ffffff)', border: '1px solid ' + G.navy,
               cursor: note.trim() && !busy ? 'pointer' : 'not-allowed', opacity: note.trim() && !busy ? 1 : 0.55 }}>
             Return with this note
           </button>,

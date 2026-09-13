@@ -6,7 +6,7 @@ import RemovalDialog from '../components/ui/RemovalDialog';
 // v3 user-type model (SPEC_user_type_model §10.1, S3): people hold USER TYPES, fetched from /user-types. Office
 // types are held office-wide; team types are held against a fulfillment team (one chip per team — multi-team is
 // allowed, and office + team together). The legacy function-role chips are gone.
-const TYPE_COLORS = { oro_sysadmin:{bg:'#FEF2F2',color:'#991B1B'}, oro_director:{bg:'#EDE9FE',color:'#6D28D9'}, oro_supervisor:{bg:'#DBEAFE',color:'#1E40AF'}, oro_senior_legal:{bg:'#FCE7F3',color:'#9D174D'}, oro_legal_associate:{bg:'#FCE7F3',color:'#9D174D'}, oro_associate:{bg:'#FEF3C7',color:'#92400E'}, oro_finance:{bg:'#ECFDF5',color:'#047857'}, city_management:{bg:'#F3F4F6',color:'#374151'}, team_manager:{bg:'#D1FAE5',color:'#065F46'}, team_supervisor:{bg:'#D1FAE5',color:'#065F46'}, team_staff:{bg:'#F0FDF4',color:'#166534'} };
+const TYPE_COLORS = { oro_sysadmin:{bg:'var(--oq-bg-fef2f2)',color:'var(--oq-fg-991b1b)'}, oro_director:{bg:'var(--oq-bg-ede9fe)',color:'var(--oq-fg-6d28d9)'}, oro_supervisor:{bg:'var(--oq-bg-dbeafe)',color:'var(--oq-fg-1e40af)'}, oro_senior_legal:{bg:'var(--oq-bg-fce7f3)',color:'var(--oq-fg-9d174d)'}, oro_legal_associate:{bg:'var(--oq-bg-fce7f3)',color:'var(--oq-fg-9d174d)'}, oro_associate:{bg:'var(--oq-bg-fef3c7)',color:'var(--oq-fg-92400e)'}, oro_finance:{bg:'var(--oq-bg-ecfdf5)',color:'var(--oq-fg-047857)'}, city_management:{bg:'var(--oq-bg-f3f4f6)',color:'var(--oq-fg-374151)'}, team_manager:{bg:'var(--oq-bg-d1fae5)',color:'var(--oq-fg-065f46)'}, team_supervisor:{bg:'var(--oq-bg-d1fae5)',color:'var(--oq-fg-065f46)'}, team_staff:{bg:'var(--oq-bg-f0fdf4)',color:'var(--oq-fg-166534)'} };
 function sameType(a,b){ return a.key===b.key && (a.teamId||null)===(b.teamId||null); }
 
 // The USER-TYPE PICKER (§10.1) — module-scope so its own state survives the parent's re-renders: office types as chips; team types as chips per team (defaults to the
@@ -19,31 +19,31 @@ function TypePicker(props) {
   if (homeTeam && pickedTeams.indexOf(homeTeam)===-1) pickedTeams.unshift(homeTeam);
   var [extraTeam, setExtraTeam] = useState('');
   var office = catalog.filter(function(c){ return c.scope==='office'; }), teamTypes = catalog.filter(function(c){ return c.scope==='team'; });
-  var chipStyle = function(active, col){ return { padding:'5px 12px', borderRadius:'20px', border:'2px solid '+(active?col.color:'#E5E7EB'), background:active?col.bg:'white', color:active?col.color:'#6B7280', fontSize:'12px', fontWeight:'600', cursor:'pointer' }; };
+  var chipStyle = function(active, col){ return { padding:'5px 12px', borderRadius:'20px', border:'2px solid '+(active?col.color:'var(--oq-ln-e5e7eb)'), background:active?col.bg:'var(--oq-bg-ffffff)', color:active?col.color:'var(--oq-fg-6b7280)', fontSize:'12px', fontWeight:'600', cursor:'pointer' }; };
   return (
     <div>
-      <div style={{fontSize:'11px',fontWeight:'700',color:'#6B7280',textTransform:'uppercase',letterSpacing:'0.04em',margin:'0 0 6px'}}>Open Records Office</div>
+      <div style={{fontSize:'11px',fontWeight:'700',color:'var(--oq-fg-6b7280)',textTransform:'uppercase',letterSpacing:'0.04em',margin:'0 0 6px'}}>Open Records Office</div>
       <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
-        {office.map(function(c){ var active = ut.some(function(x){ return x.key===c.key; }); var col = TYPE_COLORS[c.key]||{bg:'#F3F4F6',color:'#374151'};
+        {office.map(function(c){ var active = ut.some(function(x){ return x.key===c.key; }); var col = TYPE_COLORS[c.key]||{bg:'var(--oq-bg-f3f4f6)',color:'var(--oq-fg-374151)'};
           return <button key={c.key} type="button" onClick={function(){ onToggle(c.key, null); }} style={chipStyle(active,col)}>{c.displayName}</button>; })}
       </div>
       {pickedTeams.map(function(teamId){
         return <div key={teamId} style={{marginTop:'10px'}}>
-          <div style={{fontSize:'11px',fontWeight:'700',color:'#6B7280',textTransform:'uppercase',letterSpacing:'0.04em',margin:'0 0 6px'}}>{teamName(teamId)}{teamId===homeTeam?' · home team':''}</div>
+          <div style={{fontSize:'11px',fontWeight:'700',color:'var(--oq-fg-6b7280)',textTransform:'uppercase',letterSpacing:'0.04em',margin:'0 0 6px'}}>{teamName(teamId)}{teamId===homeTeam?' · home team':''}</div>
           <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
-            {teamTypes.map(function(c){ var active = ut.some(function(x){ return x.key===c.key && x.teamId===teamId; }); var col = TYPE_COLORS[c.key]||{bg:'#F3F4F6',color:'#374151'};
+            {teamTypes.map(function(c){ var active = ut.some(function(x){ return x.key===c.key && x.teamId===teamId; }); var col = TYPE_COLORS[c.key]||{bg:'var(--oq-bg-f3f4f6)',color:'var(--oq-fg-374151)'};
               return <button key={c.key} type="button" onClick={function(){ onToggle(c.key, teamId); }} style={chipStyle(active,col)}>{c.displayName.replace('[Team] ','')}</button>; })}
           </div>
         </div>; })}
       <div style={{display:'flex',gap:'8px',alignItems:'center',marginTop:'10px'}}>
-        <select value={extraTeam} onChange={function(e){ setExtraTeam(e.target.value); }} style={{padding:'6px 8px',border:'1px solid #E5E7EB',borderRadius:'6px',fontSize:'12px'}}>
+        <select value={extraTeam} onChange={function(e){ setExtraTeam(e.target.value); }} style={{padding:'6px 8px',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'6px',fontSize:'12px'}}>
           <option value="">Add another team…</option>
           {teams.filter(function(d){ return pickedTeams.indexOf(d.id)===-1; }).map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
         </select>
         <button type="button" disabled={!extraTeam} onClick={function(){ if (extraTeam) { onToggle('team_staff', extraTeam); setExtraTeam(''); } }}
-          style={{padding:'6px 10px',background:extraTeam?'#1F4E79':'#E5E7EB',color:'white',border:'none',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:extraTeam?'pointer':'default'}}>Add as staff</button>
+          style={{padding:'6px 10px',background:extraTeam?'var(--oq-bg-1f4e79)':'var(--oq-bg-e5e7eb)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:extraTeam?'pointer':'default'}}>Add as staff</button>
       </div>
-      <div style={{fontSize:'12px',color:'#9CA3AF',marginTop:'6px'}}>A person may hold several types, on several teams, and be in the Open Records Office at the same time.</div>
+      <div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)',marginTop:'6px'}}>A person may hold several types, on several teams, and be in the Open Records Office at the same time.</div>
     </div>
   );
 }
@@ -213,39 +213,39 @@ export default function StaffManagementPage({ embedded }) {
     } catch(e) { console.error(e); }
   }
 
-  var inp = { width:'100%', padding:'9px 12px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', outline:'none', boxSizing:'border-box', background:'white' };
-  var lbl = { display:'block', fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'5px' };
+  var inp = { width:'100%', padding:'9px 12px', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'8px', fontSize:'14px', outline:'none', boxSizing:'border-box', background:'var(--oq-bg-ffffff)' };
+  var lbl = { display:'block', fontSize:'13px', fontWeight:'600', color:'var(--oq-fg-374151)', marginBottom:'5px' };
 
   return (
     <div style={{maxWidth: embedded?'100%':'1100px',display:'flex',flexDirection:'column',gap:'20px'}}>
       {removing ? <RemovalDialog kind="staff" id={removing.id} name={removing.name} onClose={function(){setRemoving(null);}}
         onDone={function(r){ setRemoving(null); setRemovedMsg((r.mode === 'delete' ? 'Deleted ' : 'Removed ') + r.name + (r.mode === 'retire' ? ' — kept on the record of past work.' : '.')); load(); }} /> : null}
-      {removedMsg ? <div style={{margin:'0 0 12px',padding:'10px 14px',background:'#ECFDF5',border:'1px solid #A7F3D0',borderRadius:'8px',fontSize:'13px',color:'#065F46',display:'flex',justifyContent:'space-between'}}><span>{removedMsg}</span><button onClick={function(){setRemovedMsg('');}} style={{background:'none',border:'none',cursor:'pointer',color:'#065F46',fontWeight:'700'}}>Dismiss</button></div> : null}
+      {removedMsg ? <div style={{margin:'0 0 12px',padding:'10px 14px',background:'var(--oq-bg-ecfdf5)',border:'1px solid var(--oq-ln-a7f3d0)',borderRadius:'8px',fontSize:'13px',color:'var(--oq-fg-065f46)',display:'flex',justifyContent:'space-between'}}><span>{removedMsg}</span><button onClick={function(){setRemovedMsg('');}} style={{background:'none',border:'none',cursor:'pointer',color:'var(--oq-fg-065f46)',fontWeight:'700'}}>Dismiss</button></div> : null}
       <div style={{display:'flex',alignItems:'center',justifyContent: embedded?'flex-end':'space-between'}}>
         {!embedded && (
         <div>
           <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0 0 4px'}}>Staff Management</h1>
-          <p style={{color:'#9CA3AF',fontSize:'14px',margin:0}}>{staff.length} staff member{staff.length!==1?'s':''} in the system</p>
+          <p style={{color:'var(--oq-fg-9ca3af)',fontSize:'14px',margin:0}}>{staff.length} staff member{staff.length!==1?'s':''} in the system</p>
         </div>
         )}
-        <button onClick={function(){setShowAdd(!showAdd);setErr('');setSuccess('');}} style={{padding:'10px 18px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
+        <button onClick={function(){setShowAdd(!showAdd);setErr('');setSuccess('');}} style={{padding:'10px 18px',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
           + Add Staff Member
         </button>
       </div>
 
-      {success && <div style={{background:'#F0FDF4',border:'1px solid #86EFAC',borderRadius:'8px',padding:'14px',fontSize:'14px',color:'#166534'}}>{success}</div>}
+      {success && <div style={{background:'var(--oq-bg-f0fdf4)',border:'1px solid var(--oq-ln-86efac)',borderRadius:'8px',padding:'14px',fontSize:'14px',color:'var(--oq-fg-166534)'}}>{success}</div>}
 
       {showAdd && (
-        <div style={{background:'white',borderRadius:'12px',border:'2px solid #1F4E79',padding:'24px'}}>
-          <h2 style={{fontSize:'16px',fontWeight:'700',margin:'0 0 20px',color:'#1F4E79'}}>Add New Staff Member</h2>
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'2px solid var(--oq-ln-1f4e79)',padding:'24px'}}>
+          <h2 style={{fontSize:'16px',fontWeight:'700',margin:'0 0 20px',color:'var(--oq-fg-1f4e79)'}}>Add New Staff Member</h2>
           <form onSubmit={handleAdd} style={{display:'flex',flexDirection:'column',gap:'16px'}}>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
               <div>
-                <label style={lbl}>Full Name <span style={{color:'#DC2626'}}>*</span></label>
+                <label style={lbl}>Full Name <span style={{color:'var(--oq-fg-dc2626)'}}>*</span></label>
                 <input value={form.displayName} onChange={function(e){setF('displayName',e.target.value);}} style={inp} placeholder="Jane Smith" required/>
               </div>
               <div>
-                <label style={lbl}>Email Address <span style={{color:'#DC2626'}}>*</span></label>
+                <label style={lbl}>Email Address <span style={{color:'var(--oq-fg-dc2626)'}}>*</span></label>
                 <input type="email" value={form.email} onChange={function(e){setF('email',e.target.value);}} style={inp} placeholder="jsmith@city.gov" required/>
               </div>
               <div>
@@ -258,22 +258,22 @@ export default function StaffManagementPage({ embedded }) {
                   <option value="">— No team assigned —</option>
                   {departments.filter(function(d){ return d.kind==='team'; }).map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
                 </select>
-                <button type="button" onClick={createTeam} style={{marginTop:'6px',background:'none',border:'none',color:'#1F4E79',fontSize:'12px',fontWeight:'600',cursor:'pointer',padding:0}}>+ New team</button>
+                <button type="button" onClick={createTeam} style={{marginTop:'6px',background:'none',border:'none',color:'var(--oq-fg-1f4e79)',fontSize:'12px',fontWeight:'600',cursor:'pointer',padding:0}}>+ New team</button>
               </div>
               <div>
-                <label style={lbl}>Temporary Password <span style={{color:'#DC2626'}}>*</span></label>
+                <label style={lbl}>Temporary Password <span style={{color:'var(--oq-fg-dc2626)'}}>*</span></label>
                 <input type="password" value={form.tempPassword} onChange={function(e){setF('tempPassword',e.target.value);}} style={inp} placeholder="Min 8 characters"/>
-                <div style={{fontSize:'12px',color:'#9CA3AF',marginTop:'4px'}}>Staff will be required to change this on first login</div>
+                <div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)',marginTop:'4px'}}>Staff will be required to change this on first login</div>
               </div>
             </div>
             <div>
-              <label style={lbl}>User types <span style={{color:'#DC2626'}}>*</span></label>
+              <label style={lbl}>User types <span style={{color:'var(--oq-fg-dc2626)'}}>*</span></label>
               <div style={{marginTop:'6px'}}><TypePicker userTypes={form.userTypes} homeTeam={form.departmentId||null} catalog={catalog} departments={departments} onToggle={function(k,t){ toggleType(setForm,k,t); }}/></div>
             </div>
-            {err && <div style={{background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'#DC2626'}}>{err}</div>}
+            {err && <div style={{background:'var(--oq-bg-fef2f2)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'var(--oq-fg-dc2626)'}}>{err}</div>}
             <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
-              <button type="button" onClick={function(){setShowAdd(false);setErr('');}} style={{padding:'10px 20px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',cursor:'pointer'}}>Cancel</button>
-              <button type="submit" disabled={saving} style={{padding:'10px 24px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
+              <button type="button" onClick={function(){setShowAdd(false);setErr('');}} style={{padding:'10px 20px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-6b7280)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'14px',cursor:'pointer'}}>Cancel</button>
+              <button type="submit" disabled={saving} style={{padding:'10px 24px',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
                 {saving?'Creating...':'Create Staff Member'}
               </button>
             </div>
@@ -281,21 +281,21 @@ export default function StaffManagementPage({ embedded }) {
         </div>
       )}
 
-      <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden'}}>
+      <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',overflow:'hidden'}}>
         {loading ? (
-          <div style={{padding:'48px',textAlign:'center',color:'#9CA3AF'}}>Loading staff...</div>
+          <div style={{padding:'48px',textAlign:'center',color:'var(--oq-fg-9ca3af)'}}>Loading staff...</div>
         ) : staff.length === 0 ? (
-          <div style={{padding:'48px',textAlign:'center',color:'#9CA3AF'}}>
+          <div style={{padding:'48px',textAlign:'center',color:'var(--oq-fg-9ca3af)'}}>
             <div style={{fontSize:'40px',marginBottom:'12px'}}>👥</div>
-            <div style={{fontSize:'16px',fontWeight:'600',color:'#4B5563',marginBottom:'8px'}}>No staff members yet</div>
+            <div style={{fontSize:'16px',fontWeight:'600',color:'var(--oq-fg-4b5563)',marginBottom:'8px'}}>No staff members yet</div>
             <div style={{fontSize:'14px'}}>Add your first staff member using the button above</div>
           </div>
         ) : (
           <table style={{width:'100%',borderCollapse:'collapse'}}>
             <thead>
-              <tr style={{background:'#F9FAFB'}}>
+              <tr style={{background:'var(--oq-bg-f9fafb)'}}>
                 {['Name','Email','Home dept','User types','Status','Last Login',''].map(function(h){
-                  return <th key={h} style={{textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#6B7280',textTransform:'uppercase',letterSpacing:'.05em',padding:'10px 16px'}}>{h}</th>;
+                  return <th key={h} style={{textAlign:'left',fontSize:'11px',fontWeight:'600',color:'var(--oq-fg-6b7280)',textTransform:'uppercase',letterSpacing:'.05em',padding:'10px 16px'}}>{h}</th>;
                 })}
               </tr>
             </thead>
@@ -303,57 +303,57 @@ export default function StaffManagementPage({ embedded }) {
               {staff.map(function(s,i){
                 var isActive = s.status === 'active';
                 return (
-                  <tr key={s.id} style={{borderTop:'1px solid #F3F4F6'}}>
+                  <tr key={s.id} style={{borderTop:'1px solid var(--oq-ln-f3f4f6)'}}>
                     <td style={{padding:'14px 16px'}}>
                       <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-                        <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'#1F4E79',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
+                        <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'var(--oq-bg-1f4e79)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--oq-fg-ffffff)',fontSize:'14px',fontWeight:'700',flexShrink:0}}>
                           {s.display_name?s.display_name[0].toUpperCase():'?'}
                         </div>
                         <div>
-                          <div style={{fontWeight:'600',fontSize:'14px',color:'#111'}}>{s.display_name}</div>
-                          {s.title&&<div style={{fontSize:'12px',color:'#9CA3AF'}}>{s.title}</div>}
+                          <div style={{fontWeight:'600',fontSize:'14px',color:'var(--oq-fg-111111)'}}>{s.display_name}</div>
+                          {s.title&&<div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>{s.title}</div>}
                         </div>
                       </div>
                     </td>
-                    <td style={{padding:'14px 16px',fontSize:'13px',color:'#374151'}}>{s.email}</td>
-                    <td style={{padding:'14px 16px',fontSize:'13px',color:'#374151'}}>{s.department_name||<span style={{color:'#D1D5DB',fontStyle:'italic'}}>None</span>}</td>
+                    <td style={{padding:'14px 16px',fontSize:'13px',color:'var(--oq-fg-374151)'}}>{s.email}</td>
+                    <td style={{padding:'14px 16px',fontSize:'13px',color:'var(--oq-fg-374151)'}}>{s.department_name||<span style={{color:'var(--oq-fg-d1d5db)',fontStyle:'italic'}}>None</span>}</td>
                     <td style={{padding:'14px 16px'}}>
                       <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
                         {(s.userTypes||[]).map(function(t){
-                          var rc = TYPE_COLORS[t.key]||{bg:'#F3F4F6',color:'#374151'};
+                          var rc = TYPE_COLORS[t.key]||{bg:'var(--oq-bg-f3f4f6)',color:'var(--oq-fg-374151)'};
                           var label = t.teamId ? (t.displayName||typeLabel(t.key)).replace('[Team] ','') + ' · ' + teamName(t.teamId) : (t.displayName||typeLabel(t.key));
                           return <span key={t.key+':'+(t.teamId||'')} style={{background:rc.bg,color:rc.color,fontSize:'10px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px'}}>{label}</span>;
                         })}
-                        {!(s.userTypes||[]).length && <span style={{color:'#D1D5DB',fontStyle:'italic',fontSize:'11px'}}>No user type — sees nothing gated</span>}
+                        {!(s.userTypes||[]).length && <span style={{color:'var(--oq-fg-d1d5db)',fontStyle:'italic',fontSize:'11px'}}>No user type — sees nothing gated</span>}
                       </div>
                     </td>
                     <td style={{padding:'14px 16px'}}>
-                      <span style={{background:isActive?'#F0FDF4':'#F9FAFB',color:isActive?'#16A34A':'#9CA3AF',fontSize:'12px',fontWeight:'600',padding:'3px 10px',borderRadius:'20px'}}>
+                      <span style={{background:isActive?'var(--oq-bg-f0fdf4)':'var(--oq-bg-f9fafb)',color:isActive?'var(--oq-fg-16a34a)':'var(--oq-fg-9ca3af)',fontSize:'12px',fontWeight:'600',padding:'3px 10px',borderRadius:'20px'}}>
                         {isActive?'Active':'Inactive'}
                       </span>
                     </td>
-                    <td style={{padding:'14px 16px',fontSize:'12px',color:'#9CA3AF'}}>
+                    <td style={{padding:'14px 16px',fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>
                       {s.last_login ? new Date(s.last_login).toLocaleDateString() : 'Never'}
                     </td>
                     <td style={{padding:'14px 16px'}}>
                       <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
                         <button onClick={function(){openEdit(s);}}
                           title="Edit profile, team, and task types"
-                          style={{padding:'5px 12px',background:'white',color:'#1F4E79',border:'1px solid #BFDBFE',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          style={{padding:'5px 12px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-1f4e79)',border:'1px solid var(--oq-ln-bfdbfe)',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
                           Edit
                         </button>
                         <button onClick={function(){setSpecFor(s);setSpecText(s.routing_specialization||'');}}
                           title="Routing specialization"
-                          style={{padding:'5px 12px',background:s.routing_specialization?'#DBEAFE':'white',color:'#1F4E79',border:'1px solid #BFDBFE',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          style={{padding:'5px 12px',background:s.routing_specialization?'var(--oq-bg-dbeafe)':'var(--oq-bg-ffffff)',color:'var(--oq-fg-1f4e79)',border:'1px solid var(--oq-ln-bfdbfe)',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
                           Routing
                         </button>
                         <button onClick={function(){toggleStatus(s.id,s.status);}}
-                          style={{padding:'5px 12px',background:'white',color:isActive?'#DC2626':'#16A34A',border:'1px solid '+(isActive?'#FCA5A5':'#86EFAC'),borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          style={{padding:'5px 12px',background:'var(--oq-bg-ffffff)',color:isActive?'var(--oq-fg-dc2626)':'var(--oq-fg-16a34a)',border:'1px solid '+(isActive?'var(--oq-ln-fca5a5)':'var(--oq-ln-86efac)'),borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
                           {isActive?'Deactivate':'Activate'}
                         </button>
                         <button onClick={function(){setRemoving({ id: s.id, name: s.display_name || s.email });}}
                           title="Delete this staff member (a guided process)"
-                          style={{padding:'5px 12px',background:'white',color:'#B91C1C',border:'1px solid #FCA5A5',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          style={{padding:'5px 12px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-b91c1c)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
                           Delete
                         </button>
                       </div>
@@ -368,12 +368,12 @@ export default function StaffManagementPage({ embedded }) {
 
       {editFor && (
         <div onClick={function(){if(!editSaving)setEditFor(null);}} style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(17,24,39,0.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'20px'}}>
-          <div onClick={function(e){e.stopPropagation();}} style={{background:'white',borderRadius:'12px',padding:'24px',width:'560px',maxWidth:'100%',maxHeight:'90vh',overflowY:'auto',boxShadow:'0 10px 40px rgba(0,0,0,0.2)'}}>
-            <div style={{fontSize:'16px',fontWeight:'700',color:'#1F4E79'}}>Edit staff member</div>
-            <div style={{fontSize:'13px',color:'#374151',marginTop:'2px',marginBottom:'16px'}}>{editFor.email}</div>
+          <div onClick={function(e){e.stopPropagation();}} style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',padding:'24px',width:'560px',maxWidth:'100%',maxHeight:'90vh',overflowY:'auto',boxShadow:'0 10px 40px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:'16px',fontWeight:'700',color:'var(--oq-fg-1f4e79)'}}>Edit staff member</div>
+            <div style={{fontSize:'13px',color:'var(--oq-fg-374151)',marginTop:'2px',marginBottom:'16px'}}>{editFor.email}</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px'}}>
               <div>
-                <label style={lbl}>Full Name <span style={{color:'#DC2626'}}>*</span></label>
+                <label style={lbl}>Full Name <span style={{color:'var(--oq-fg-dc2626)'}}>*</span></label>
                 <input value={editForm.displayName} onChange={function(e){setEF('displayName',e.target.value);}} style={inp}/>
               </div>
               <div>
@@ -394,11 +394,11 @@ export default function StaffManagementPage({ embedded }) {
                 <div style={{marginTop:'6px'}}><TypePicker userTypes={editForm.userTypes} homeTeam={editForm.departmentId||null} catalog={catalog} departments={departments} onToggle={function(k,t){ toggleType(setEditForm,k,t); }}/></div>
               </div>
             ) : (
-              <div style={{marginTop:'16px',fontSize:'12px',color:'#9CA3AF'}}>User types: {editForm.userTypes.length ? editForm.userTypes.map(function(t){ return typeLabel(t.key) + (t.teamId ? ' · ' + teamName(t.teamId) : ''); }).join(', ') : 'none'} — assigning user types needs the Manage Users authority.</div>
+              <div style={{marginTop:'16px',fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>User types: {editForm.userTypes.length ? editForm.userTypes.map(function(t){ return typeLabel(t.key) + (t.teamId ? ' · ' + teamName(t.teamId) : ''); }).join(', ') : 'none'} — assigning user types needs the Manage Users authority.</div>
             )}
             <div style={{marginTop:'16px'}}>
               <label style={lbl}>Task types</label>
-              <div style={{fontSize:'12px',color:'#9CA3AF',margin:'0 0 8px'}}>The request work this person can be assigned within their team. Task routing offers a task only to eligible people who hold its type.</div>
+              <div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)',margin:'0 0 8px'}}>The request work this person can be assigned within their team. Task routing offers a task only to eligible people who hold its type.</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
                 {TASK_TYPES.map(function(t){
                   var active = editForm.taskTypes.includes(t.key);
@@ -406,18 +406,18 @@ export default function StaffManagementPage({ embedded }) {
                   var covered = menu === null || menu.indexOf(t.key) !== -1;
                   if (!covered && !active) return null;   // §6: the picker offers only what the person's types cover
                   if (!covered && active) return <button key={t.key} type="button" title="Not covered by any user type this person holds — the router ignores it; remove it or add a covering type" onClick={function(){toggleEditTaskType(t.key);}}
-                    style={{padding:'6px 14px',borderRadius:'20px',border:'2px dashed #F59E0B',background:'#FFFBEB',color:'#92400E',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>{t.label} · not covered</button>;
+                    style={{padding:'6px 14px',borderRadius:'20px',border:'2px dashed var(--oq-ln-f59e0b)',background:'var(--oq-bg-fffbeb)',color:'var(--oq-fg-92400e)',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>{t.label} · not covered</button>;
                   return <button key={t.key} type="button" onClick={function(){toggleEditTaskType(t.key);}}
-                    style={{padding:'6px 14px',borderRadius:'20px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EFF6FF':'white',color:active?'#1F4E79':'#6B7280',fontSize:'12px',fontWeight:active?'700':'500',cursor:'pointer'}}>
+                    style={{padding:'6px 14px',borderRadius:'20px',border:'2px solid '+(active?'var(--oq-ln-1f4e79)':'var(--oq-ln-e5e7eb)'),background:active?'var(--oq-bg-eff6ff)':'var(--oq-bg-ffffff)',color:active?'var(--oq-fg-1f4e79)':'var(--oq-fg-6b7280)',fontSize:'12px',fontWeight:active?'700':'500',cursor:'pointer'}}>
                     {t.label}
                   </button>;
                 })}
               </div>
             </div>
-            {err && <div style={{background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'#DC2626',marginTop:'14px'}}>{err}</div>}
+            {err && <div style={{background:'var(--oq-bg-fef2f2)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'var(--oq-fg-dc2626)',marginTop:'14px'}}>{err}</div>}
             <div style={{display:'flex',justifyContent:'flex-end',gap:'8px',marginTop:'18px'}}>
-              <button onClick={function(){setEditFor(null);}} disabled={editSaving} style={{padding:'9px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
-              <button onClick={saveEdit} disabled={editSaving} style={{padding:'9px 18px',background:editSaving?'#9CA3AF':'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:editSaving?'default':'pointer'}}>{editSaving?'Saving...':'Save changes'}</button>
+              <button onClick={function(){setEditFor(null);}} disabled={editSaving} style={{padding:'9px 16px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-6b7280)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving} style={{padding:'9px 18px',background:editSaving?'var(--oq-bg-9ca3af)':'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:editSaving?'default':'pointer'}}>{editSaving?'Saving...':'Save changes'}</button>
             </div>
           </div>
         </div>
@@ -425,17 +425,17 @@ export default function StaffManagementPage({ embedded }) {
 
       {specFor && (
         <div onClick={function(){if(!specSaving)setSpecFor(null);}} style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(17,24,39,0.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'20px'}}>
-          <div onClick={function(e){e.stopPropagation();}} style={{background:'white',borderRadius:'12px',padding:'24px',width:'540px',maxWidth:'100%',boxShadow:'0 10px 40px rgba(0,0,0,0.2)'}}>
-            <div style={{fontSize:'16px',fontWeight:'700',color:'#1F4E79'}}>Routing specialization</div>
-            <div style={{fontSize:'13px',color:'#374151',marginTop:'2px'}}>{specFor.display_name}{specFor.title?' \u00b7 '+specFor.title:''}</div>
-            <div style={{fontSize:'12px',color:'#9CA3AF',margin:'10px 0 8px'}}>Describe, in plain language, the kinds of records or requests this person specializes in \u2014 the system uses it to route matching requests to them within their team.</div>
-            <div style={{fontSize:'12px',color:'#6B7280',background:'#F9FAFB',border:'1px solid #EEF0F2',borderRadius:'8px',padding:'8px 10px',margin:'0 0 12px',lineHeight:'1.55'}}><strong style={{color:'#1F4E79'}}>Tip:</strong> use the words that show up in real requests \u2014 record types, document names, topics \u2014 not an instruction that names the person. Concrete record vocabulary routes far more accurately. <span style={{color:'#065F46'}}>Good: \u201carchived paper and microfilm deeds, plat maps, and land records from the vault.\u201d</span> <span style={{color:'#9A3412'}}>Weaker: \u201call paper requests should go to this person.\u201d</span></div>
+          <div onClick={function(e){e.stopPropagation();}} style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',padding:'24px',width:'540px',maxWidth:'100%',boxShadow:'0 10px 40px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:'16px',fontWeight:'700',color:'var(--oq-fg-1f4e79)'}}>Routing specialization</div>
+            <div style={{fontSize:'13px',color:'var(--oq-fg-374151)',marginTop:'2px'}}>{specFor.display_name}{specFor.title?' \u00b7 '+specFor.title:''}</div>
+            <div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)',margin:'10px 0 8px'}}>Describe, in plain language, the kinds of records or requests this person specializes in \u2014 the system uses it to route matching requests to them within their team.</div>
+            <div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',background:'var(--oq-bg-f9fafb)',border:'1px solid var(--oq-ln-eef0f2)',borderRadius:'8px',padding:'8px 10px',margin:'0 0 12px',lineHeight:'1.55'}}><strong style={{color:'var(--oq-fg-1f4e79)'}}>Tip:</strong> use the words that show up in real requests \u2014 record types, document names, topics \u2014 not an instruction that names the person. Concrete record vocabulary routes far more accurately. <span style={{color:'var(--oq-fg-065f46)'}}>Good: \u201carchived paper and microfilm deeds, plat maps, and land records from the vault.\u201d</span> <span style={{color:'var(--oq-fg-9a3412)'}}>Weaker: \u201call paper requests should go to this person.\u201d</span></div>
             <textarea value={specText} onChange={function(e){setSpecText(e.target.value);}} rows={5}
               placeholder="e.g., All records related to the mounted unit: horses (purchase, veterinary, farrier), saddle and tack inventory, and barn maintenance."
-              style={{width:'100%',padding:'10px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontFamily:'inherit',lineHeight:'1.5',resize:'vertical',boxSizing:'border-box',outline:'none'}}/>
+              style={{width:'100%',padding:'10px 12px',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'14px',fontFamily:'inherit',lineHeight:'1.5',resize:'vertical',boxSizing:'border-box',outline:'none'}}/>
             <div style={{display:'flex',justifyContent:'flex-end',gap:'8px',marginTop:'16px'}}>
-              <button onClick={function(){setSpecFor(null);}} disabled={specSaving} style={{padding:'9px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
-              <button onClick={saveSpec} disabled={specSaving} style={{padding:'9px 18px',background:specSaving?'#9CA3AF':'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:specSaving?'default':'pointer'}}>{specSaving?'Saving...':'Save'}</button>
+              <button onClick={function(){setSpecFor(null);}} disabled={specSaving} style={{padding:'9px 16px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-6b7280)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
+              <button onClick={saveSpec} disabled={specSaving} style={{padding:'9px 18px',background:specSaving?'var(--oq-bg-9ca3af)':'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:specSaving?'default':'pointer'}}>{specSaving?'Saving...':'Save'}</button>
             </div>
           </div>
         </div>

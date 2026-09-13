@@ -31,7 +31,7 @@ import { G, ClockChip, DecidedByBadge, ConfirmPopup, GateRow } from '../componen
 // EVERY NUMBER COMES FROM `/parent-finance/:id/view`. A screen that recomputes a money figure is a second
 // implementation of the rule, and the two will disagree the first time one of them is edited.
 
-var btn = { font: 'inherit', fontSize: 13, background: G.navy, color: '#fff', border: 'none',
+var btn = { font: 'inherit', fontSize: 13, background: G.navy, color: 'var(--oq-fg-ffffff)', border: 'none',
   borderRadius: 5, padding: '6px 14px', fontWeight: 600, cursor: 'pointer' };
 var btnQuiet = Object.assign({}, btn, { background: C.surface2, color: C.ink, border: '1px solid ' + G.line, fontWeight: 500 });
 var btnOff = Object.assign({}, btnQuiet, { opacity: 0.5, cursor: 'not-allowed' });
@@ -116,7 +116,7 @@ export default function ParentFinancialPage() {
       .catch(function (e) { setBusy(false); setMsg((e.response && e.response.data && e.response.data.error) || e.message); });
   }
 
-  if (err) return <div style={{ padding: 20, color: '#8C3A2B' }}>{err}</div>;
+  if (err) return <div style={{ padding: 20, color: 'var(--oq-fg-8c3a2b)' }}>{err}</div>;
   if (!v) return <div style={{ padding: 20, color: C.muted }}>Loading…</div>;
 
   var p = v.parent, net = v.netting, rule = v.releaseRule, alloc = v.allocation;
@@ -167,7 +167,7 @@ export default function ParentFinancialPage() {
           {net.refundOutstanding > 0 ? (
             <div>
               <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: C.faint }}>Refund owed back</div>
-              <div style={Object.assign({}, mono, { fontSize: 18, color: '#8C3A2B' })}>{money(net.refundOutstanding)}</div>
+              <div style={Object.assign({}, mono, { fontSize: 18, color: 'var(--oq-fg-8c3a2b)' })}>{money(net.refundOutstanding)}</div>
             </div>
           ) : null}
         </div>
@@ -209,7 +209,7 @@ export default function ParentFinancialPage() {
           <div style={{ fontSize: 12.5, color: C.ink, marginTop: 3, maxWidth: '90ch' }}>{watch.reason}</div>
           <div style={Object.assign({}, kv, { marginTop: 3 })}>
             {watch.citation} · billable now <b style={{ color: C.ink }}>{money(cap.billable)}</b>
-            {cap.forfeited > 0 ? <span> · forfeited unless the statement goes out <b style={{ color: '#8C3A2B' }}>{money(cap.forfeited)}</b></span> : null}
+            {cap.forfeited > 0 ? <span> · forfeited unless the statement goes out <b style={{ color: 'var(--oq-fg-8c3a2b)' }}>{money(cap.forfeited)}</b></span> : null}
           </div>
         </div>
       ) : null}
@@ -426,7 +426,7 @@ export default function ParentFinancialPage() {
           return (
             <div key={a.id} style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap',
               padding: '5px 0', borderBottom: '1px solid ' + C.hair }}>
-              <span style={Object.assign({}, mono, { color: a.type === 'refund' ? '#8C3A2B' : G.statute, minWidth: 88 })}>
+              <span style={Object.assign({}, mono, { color: a.type === 'refund' ? 'var(--oq-fg-8c3a2b)' : G.statute, minWidth: 88 })}>
                 {a.type === 'refund' ? '−' : '+'}{money(a.amount)}
               </span>
               <DecidedByBadge by="person">{a.type}</DecidedByBadge>
@@ -462,7 +462,7 @@ export default function ParentFinancialPage() {
         <Link to={'/requests/' + p.id + '/dispositions'} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Dispositions</Link>
       </div>
       <div style={Object.assign({}, kv, { marginTop: 6, maxWidth: '96ch' })}>{v.cashDrawer.note}</div>
-      {msg ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 8, maxWidth: '96ch' }}>{msg}</div> : null}
+      {msg ? <div style={{ fontSize: 12.5, color: 'var(--oq-fg-8c3a2b)', marginTop: 8, maxWidth: '96ch' }}>{msg}</div> : null}
 
       {/* ── REFUND — WHAT WILL BE WRITTEN, BEFORE IT IS WRITTEN ─────────────────────────────────── */}
       <ConfirmPopup open={refundOpen} title="Record a refund" onClose={function () { setRefundOpen(false); }}

@@ -11,13 +11,13 @@ import StatutePopup from '../components/StatutePopup';
 // /api/request-rules/* (clarification, eligibility) and /api/jurisdiction-profile/policy-settings/confirm
 // (exemption — Legal Rules scope lives there).
 
-var C = { ink: '#12232E', mute: '#5C6F7C', faint: '#8296A4', ph: '#A9B7C2', line: '#D2DCE3', edge: '#BECAD3', wash: '#F2F6F9', pri: '#1E6091', red: '#B02A37', ok: '#1B8A5A', amber: '#9A6512', navy: '#0E3A5C' };
+var C = { ink: 'var(--oq-fg-12232e)', mute: 'var(--oq-fg-5c6f7c)', faint: 'var(--oq-fg-8296a4)', ph: 'var(--oq-fg-a9b7c2)', line: 'var(--oq-ln-d2dce3)', edge: 'var(--oq-ln-becad3)', wash: 'var(--oq-bg-f2f6f9)', pri: 'var(--oq-x-1e6091)', red: 'var(--oq-x-b02a37)', ok: 'var(--oq-x-1b8a5a)', amber: 'var(--oq-x-9a6512)', navy: 'var(--oq-x-0e3a5c)' };
 var STATE = {
-  ready:           { label: 'Ready',           bg: '#E1F2E9', color: '#1B8A5A' },
-  in_progress:     { label: 'In progress',     bg: '#F6EBD6', color: '#9A6512' },
-  not_started:     { label: 'Not started',     bg: '#F3F4F6', color: '#4B5563' },
-  needs_attention: { label: 'Needs attention', bg: '#FEE2E2', color: '#991B1B' },
-  waiting:         { label: 'Waiting',         bg: '#EDE9FE', color: '#5B21B6' },
+  ready:           { label: 'Ready',           bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' },
+  in_progress:     { label: 'In progress',     bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' },
+  not_started:     { label: 'Not started',     bg: 'var(--oq-bg-f3f4f6)', color: 'var(--oq-fg-4b5563)' },
+  needs_attention: { label: 'Needs attention', bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' },
+  waiting:         { label: 'Waiting',         bg: 'var(--oq-bg-ede9fe)', color: 'var(--oq-fg-5b21b6)' },
 };
 var TABS = [
   { key: 'clarification', hubKey: 'clarification', label: 'Vague requests and clarification' },
@@ -29,18 +29,18 @@ var TABS = [
 // what pauses a clock, in plain words
 var TOLL_LABELS = { clarification_pending: 'clarification', payment_pending: 'payment', extension: 'extension', ag_ruling_pending: 'AG ruling' };
 var hint = { fontSize: '11.5px', color: C.faint, lineHeight: '1.4' };
-var card = { background: 'white', border: '1px solid ' + C.line, borderRadius: '10px' };
+var card = { background: 'var(--oq-bg-ffffff)', border: '1px solid ' + C.line, borderRadius: '10px' };
 var cite = { fontSize: '11px', color: C.faint, lineHeight: '1.35' };
 function btn(kind, extra) {
   var base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '36px', padding: '0 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap' };
-  var k = kind === 'pri' ? { background: C.pri, color: 'white', border: '1px solid ' + C.pri }
+  var k = kind === 'pri' ? { background: C.pri, color: 'var(--oq-fg-ffffff)', border: '1px solid ' + C.pri }
     : kind === 'dis' ? { background: C.wash, color: C.ph, border: '1px solid ' + C.line, cursor: 'default' }
-    : { background: 'white', color: C.ink, border: '1px solid ' + C.edge };
+    : { background: 'var(--oq-bg-ffffff)', color: C.ink, border: '1px solid ' + C.edge };
   return Object.assign(base, k, extra || {});
 }
-function inp(extra) { return Object.assign({ boxSizing: 'border-box', height: '32px', border: '1px solid ' + C.edge, borderRadius: '7px', background: 'white', padding: '0 10px', fontSize: '13px', color: C.ink, fontFamily: 'inherit' }, extra || {}); }
+function inp(extra) { return Object.assign({ boxSizing: 'border-box', height: '32px', border: '1px solid ' + C.edge, borderRadius: '7px', background: 'var(--oq-bg-ffffff)', padding: '0 10px', fontSize: '13px', color: C.ink, fontFamily: 'inherit' }, extra || {}); }
 function Bind(props) {
-  var kinds = { fixed: { bg: '#E8EEF4', color: C.navy, border: '#C5D3DF', dashed: false }, soft: { bg: 'white', color: C.mute, border: C.edge, dashed: true } };
+  var kinds = { fixed: { bg: 'var(--oq-bg-e8eef4)', color: C.navy, border: 'var(--oq-ln-c5d3df)', dashed: false }, soft: { bg: 'var(--oq-bg-ffffff)', color: C.mute, border: C.edge, dashed: true } };
   var k = kinds[props.kind || 'soft'];
   return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', whiteSpace: 'nowrap', background: k.bg, color: k.color, border: '1px ' + (k.dashed ? 'dashed' : 'solid') + ' ' + k.border }}>{props.children}</span>;
 }
@@ -70,10 +70,10 @@ function LawPanel(props) {
           <div style={{ fontSize: '14px', fontWeight: '700' }}>What {props.stateName} law says</div>
           <div style={hint}>Loaded when the state was locked. Not editable — click a citation to read the statute text behind it.</div>
         </div>
-        <Pill bg="#E1F2E9" color={C.ok}>{props.rules.length} rule{props.rules.length === 1 ? '' : 's'}</Pill>
+        <Pill bg="var(--oq-bg-e1f2e9)" color={C.ok}>{props.rules.length} rule{props.rules.length === 1 ? '' : 's'}</Pill>
       </div>
       {props.rules.map(function (r) {
-        return <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '64px minmax(0, 1fr)', gap: '10px', alignItems: 'start', padding: '11px 16px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px', lineHeight: '1.45' }}>
+        return <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '64px minmax(0, 1fr)', gap: '10px', alignItems: 'start', padding: '11px 16px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px', lineHeight: '1.45' }}>
           <RuleId>{r.id}</RuleId>
           <div>{r.summary}
             <div style={Object.assign({}, cite, { marginTop: '3px' })}>
@@ -83,7 +83,7 @@ function LawPanel(props) {
           </div>
         </div>;
       })}
-      <div style={{ padding: '12px 16px', borderTop: '1px solid #EEF2F5', marginTop: 'auto' }}>
+      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--oq-ln-eef2f5)', marginTop: 'auto' }}>
         <span style={hint}>The deadlines here are the state's, not choices. They are shown so the choices on the right make sense.</span>
       </div>
     </div>
@@ -144,8 +144,8 @@ export default function RequestRulesPage() {
   var t = TABS.filter(function (x) { return x.key === tab; })[0];
   var hubRow = hub[t.hubKey];
   // APPROVAL MODEL (2026-08-31): each tab is its own hub row; the pill is that row's three-colour indicator.
-  var APPROVAL = { red: { label: 'Not started', bg: '#FEE2E2', color: '#991B1B' }, yellow: { label: 'Awaiting approval', bg: '#F6EBD6', color: '#9A6512' }, green: { label: 'Approved', bg: '#E1F2E9', color: '#1B8A5A' } };
-  var TABCOL = { red: '#DC2626', yellow: '#D97706', green: '#16A34A' };
+  var APPROVAL = { red: { label: 'Not started', bg: 'var(--oq-bg-fee2e2)', color: 'var(--oq-fg-991b1b)' }, yellow: { label: 'Awaiting approval', bg: 'var(--oq-bg-f6ebd6)', color: 'var(--oq-fg-9a6512)' }, green: { label: 'Approved', bg: 'var(--oq-bg-e1f2e9)', color: 'var(--oq-fg-1b8a5a)' } };
+  var TABCOL = { red: 'var(--oq-x-dc2626)', yellow: 'var(--oq-x-d97706)', green: 'var(--oq-x-16a34a)' };
   var ap = (hubRow && hubRow.approval) || null;
   var st = ap ? APPROVAL[ap] : STATE[(hubRow && hubRow.state) || 'not_started'];
   var reLabel = hubRow && hubRow.changedSinceApproval ? 'Re-approve — attest as complete' : (ap ? 'Approve — attest as complete' : 'Attest as complete');
@@ -224,7 +224,7 @@ export default function RequestRulesPage() {
     var d = data.tabs.clarification;
     var stat = d.statutory;
     function row(label, control, right) {
-      return <div style={{ display: 'grid', gridTemplateColumns: '180px minmax(0, 1fr) 150px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid #EEF2F5' }}>
+      return <div style={{ display: 'grid', gridTemplateColumns: '180px minmax(0, 1fr) 150px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid var(--oq-ln-eef2f5)' }}>
         <div style={{ fontSize: '12.5px', fontWeight: '600', lineHeight: '1.35', paddingTop: '2px' }}>{label}</div>
         <div>{control}</div>
         <div style={cite}>{right}</div>
@@ -235,13 +235,13 @@ export default function RequestRulesPage() {
     return (
       <div>
         <ChoiceHead sub="Five choices. Confirming the suggested answer is still a decision, and it is recorded with your name."
-          pill={<Pill bg="#F6EBD6" color={C.amber}>{5 - d.unconfirmed} of 5 decided</Pill>} />
+          pill={<Pill bg="var(--oq-bg-f6ebd6)" color={C.amber}>{5 - d.unconfirmed} of 5 decided</Pill>} />
 
         {/* the master switch — the act that lets this hub row move at all */}
         <div style={{ margin: '0 16px 12px', padding: '12px 14px', background: C.wash, border: '1px solid ' + C.line, borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button type="button" disabled={!can || busy === 'toggle'} onClick={toggleEnabled} title={clarOn ? 'Switch clarification off' : 'Switch clarification on'}
             style={{ width: '34px', height: '20px', borderRadius: '999px', border: 0, padding: 0, position: 'relative', cursor: can ? 'pointer' : 'default', background: clarOn ? C.ok : C.edge, flexShrink: 0 }}>
-            <span style={{ width: '16px', height: '16px', borderRadius: '999px', background: 'white', position: 'absolute', top: '2px', left: clarOn ? '16px' : '2px', transition: 'left .15s' }} />
+            <span style={{ width: '16px', height: '16px', borderRadius: '999px', background: 'var(--oq-bg-ffffff)', position: 'absolute', top: '2px', left: clarOn ? '16px' : '2px', transition: 'left .15s' }} />
           </button>
           <div style={{ flexGrow: 1 }}>
             <div style={{ fontSize: '12.5px', fontWeight: '600' }}>Ask for clarification when a request is unclear</div>
@@ -321,12 +321,12 @@ export default function RequestRulesPage() {
     return (
       <div>
         <ChoiceHead sub="Four choices. Confirming a suggested answer is still a decision, and it is recorded with your name."
-          pill={<Pill bg="#F6EBD6" color={C.amber}>{4 - d.unconfirmed} of 4 decided</Pill>} />
+          pill={<Pill bg="var(--oq-bg-f6ebd6)" color={C.amber}>{4 - d.unconfirmed} of 4 decided</Pill>} />
 
         {nreason ? cardBox(<div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ fontSize: '12.5px', fontWeight: '600', flexGrow: 1 }}>{nreason.label}</div>
-            <Pill bg={libEmpty ? '#EDE9FE' : '#E1F2E9'} color={libEmpty ? '#5B21B6' : C.ok}>{libEmpty ? 'Not loaded yet' : d.redactionLibrary.approvedRules + ' rules loaded'}</Pill>
+            <Pill bg={libEmpty ? 'var(--oq-x-ede9fe)' : 'var(--oq-x-e1f2e9)'} color={libEmpty ? 'var(--oq-x-5b21b6)' : C.ok}>{libEmpty ? 'Not loaded yet' : d.redactionLibrary.approvedRules + ' rules loaded'}</Pill>
           </div>
           <div style={{ fontSize: '12.5px', marginTop: '6px', lineHeight: '1.45' }}>Every denial cites a reason from the <b>Redaction rules library</b>, keyed to the statute it relies on. That library is its own setup row: documents go in, rules come out as drafts, legal approves them.{libEmpty ? ' Nothing is loaded yet.' : ''}</div>
           {!nreason.confirmed ? <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginTop: '9px', fontSize: '12.5px', cursor: can ? 'pointer' : 'default' }}>
@@ -335,7 +335,7 @@ export default function RequestRulesPage() {
           </label> : null}
           {decided(nreason)}
           <div style={hint}><button type="button" onClick={function () { nav('/setup/redaction-rules'); }} style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer' }}>Open the Redaction rules library →</button></div>
-        </div>, { background: '#FDF9F0', borderColor: '#F1D9A8' }) : null}
+        </div>, { background: 'var(--oq-bg-fdf9f0)', borderColor: 'var(--oq-ln-f1d9a8)' }) : null}
 
         {dlegal ? cardBox(<div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
           <div style={{ flexGrow: 1 }}>
@@ -388,10 +388,10 @@ export default function RequestRulesPage() {
         {gated.map(function (dim) {
           var cur = posture[dim.key] !== undefined ? posture[dim.key] : dim.gated;
           var isInc = dim.key === 'incarceration';
-          return <div key={dim.key} style={{ margin: '0 16px 12px', padding: '12px 14px', border: '1px solid #F1D9A8', background: '#FDF9F0', borderRadius: '8px' }}>
+          return <div key={dim.key} style={{ margin: '0 16px 12px', padding: '12px 14px', border: '1px solid var(--oq-ln-f1d9a8)', background: 'var(--oq-bg-fdf9f0)', borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ fontSize: '12.5px', fontWeight: '600', flexGrow: 1 }}>{isInc ? 'Requests from incarcerated individuals' : 'Eligibility rule: ' + dim.key.replace(/_/g, ' ')}</div>
-              {dim.confirmed ? <Pill bg="#E1F2E9" color={C.ok}>Decided</Pill> : <Pill bg="#F6EBD6" color={C.amber}>Confirm the city's posture</Pill>}
+              {dim.confirmed ? <Pill bg="var(--oq-bg-e1f2e9)" color={C.ok}>Decided</Pill> : <Pill bg="var(--oq-bg-f6ebd6)" color={C.amber}>Confirm the city's posture</Pill>}
             </div>
             <div style={{ fontSize: '12.5px', marginTop: '6px', lineHeight: '1.45' }}>
               {isInc ? <span>{stateName} <b>allows</b> the city to refuse these requests; it does not require it. The system is set up to act on this rule, so the city must decide on the record.</span>
@@ -418,7 +418,7 @@ export default function RequestRulesPage() {
           <div style={hint}>{stateName} keeps eligibility simple. Listed so it is clear the decision{gated.length === 1 ? '' : 's'} above {gated.length === 1 ? 'is' : 'are'} all there is.</div>
         </div>
         {quiet.map(function (dim) {
-          return <div key={dim.key} style={{ display: 'grid', gridTemplateColumns: '170px minmax(0, 1fr)', gap: '10px', alignItems: 'start', padding: '9px 16px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px', lineHeight: '1.4' }}>
+          return <div key={dim.key} style={{ display: 'grid', gridTemplateColumns: '170px minmax(0, 1fr)', gap: '10px', alignItems: 'start', padding: '9px 16px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px', lineHeight: '1.4' }}>
             <span style={{ fontWeight: '600', textTransform: 'capitalize' }}>{dim.key.replace(/_/g, ' ')}</span>
             <div>{DIM_COPY[dim.key] || 'Not switched on for ' + stateName + '.'} <span style={{ fontSize: '11px', fontWeight: '700', color: C.ok }}>✓ nothing to decide</span></div>
           </div>;
@@ -453,33 +453,33 @@ export default function RequestRulesPage() {
         title="Open the statute text behind this clock" style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline dotted' }}>{short}</button>;
     }
     function grp(title, n) {
-      return <div style={{ padding: '12px 16px 6px', fontSize: '12px', fontWeight: '700', background: '#F8FAFC', borderTop: '1px solid ' + C.line }}>{title} <span style={{ fontWeight: '500', color: C.faint }}>· {n}</span></div>;
+      return <div style={{ padding: '12px 16px 6px', fontSize: '12px', fontWeight: '700', background: 'var(--oq-bg-f8fafc)', borderTop: '1px solid ' + C.line }}>{title} <span style={{ fontWeight: '500', color: C.faint }}>· {n}</span></div>;
     }
     return (
       <div>
         <ChoiceHead sub="Statutory figures read as law — changing one is a proposal with a citation. Service targets are the city's own numbers, editable here." pill={null} />
         {grp('Set by ' + stateName + ' law', statutory.length)}
         {statutory.map(function (r) {
-          return <div key={r.clockType} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 150px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px', lineHeight: '1.45' }}>
+          return <div key={r.clockType} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 150px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px', lineHeight: '1.45' }}>
             <div>
               <b>{r.label}</b>{r.primary ? <span style={{ color: C.amber, fontWeight: '700' }}> · the primary clock</span> : null}
               <div style={Object.assign({}, cite, { marginTop: '2px' })}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', background: '#E8EEF4', color: C.navy, border: '1px solid #C5D3DF', marginRight: '6px' }}>Fixed</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', background: 'var(--oq-bg-e8eef4)', color: C.navy, border: '1px solid var(--oq-ln-c5d3df)', marginRight: '6px' }}>Fixed</span>
                 {clockCite(r)}
                 {(r.tollReasons || []).length ? <span> · pauses for: {(r.tollReasons || []).map(function (tr) { return TOLL_LABELS[tr] || tr.replace(/_/g, ' '); }).join(' · ')}</span> : null}
               </div>
             </div>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: C.navy, background: '#E8EEF4', border: '1px solid #C5D3DF', borderRadius: '6px', padding: '5px 8px', textAlign: 'center', lineHeight: '1.3' }}>{r.duration}</div>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: C.navy, background: 'var(--oq-bg-e8eef4)', border: '1px solid var(--oq-ln-c5d3df)', borderRadius: '6px', padding: '5px 8px', textAlign: 'center', lineHeight: '1.3' }}>{r.duration}</div>
           </div>;
         })}
         {grp("This city's own service targets", targets.length)}
         {targets.map(function (r) {
           var val = edits['target/' + r.clockType] !== undefined ? edits['target/' + r.clockType] : (r.durationRaw != null ? String(r.durationRaw) : '');
-          return <div key={r.clockType} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 220px', gap: '12px', alignItems: 'center', padding: '12px 16px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px', lineHeight: '1.45' }}>
+          return <div key={r.clockType} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 220px', gap: '12px', alignItems: 'center', padding: '12px 16px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px', lineHeight: '1.45' }}>
             <div>
               <b>{r.label}</b>
               <div style={Object.assign({}, cite, { marginTop: '2px' })}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', background: 'white', color: C.mute, border: '1px dashed ' + C.edge, marginRight: '6px' }}>Not a legal deadline</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', background: 'var(--oq-bg-ffffff)', color: C.mute, border: '1px dashed ' + C.edge, marginRight: '6px' }}>Not a legal deadline</span>
                 {r.useCase || 'The city\'s own pacing number.'} Blank = no target.
               </div>
             </div>
@@ -498,9 +498,9 @@ export default function RequestRulesPage() {
           <div>Weekends: <b>Saturday and Sunday</b> are not business days.</div>
           <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             {cal.holidayCount
-              ? <Pill bg="#E1F2E9" color={C.ok}>Holiday calendar: {cal.holidayCount} days · {String(cal.holidayFirst).slice(0, 4)}–{String(cal.holidayLast).slice(0, 4)}</Pill>
+              ? <Pill bg="var(--oq-bg-e1f2e9)" color={C.ok}>Holiday calendar: {cal.holidayCount} days · {String(cal.holidayFirst).slice(0, 4)}–{String(cal.holidayLast).slice(0, 4)}</Pill>
               : <React.Fragment>
-                  <Pill bg="#FEE2E2" color="#991B1B">Holiday calendar: 0 days loaded</Pill>
+                  <Pill bg="var(--oq-bg-fee2e2)" color="var(--oq-fg-991b1b)">Holiday calendar: 0 days loaded</Pill>
                   <button type="button" disabled={!can || busy === 'holidays'} onClick={loadHolidays} style={btn(can ? 'sec' : 'dis', { height: '28px', fontSize: '12px' })}>{busy === 'holidays' ? 'Loading…' : 'Load the US federal set'}</button>
                 </React.Fragment>}
           </div>
@@ -531,7 +531,7 @@ export default function RequestRulesPage() {
       setEdit(c.path, cur);
     }
     function row(c, control) {
-      return <div key={c.key} style={{ display: 'grid', gridTemplateColumns: '200px minmax(0, 1fr) 110px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid #EEF2F5' }}>
+      return <div key={c.key} style={{ display: 'grid', gridTemplateColumns: '200px minmax(0, 1fr) 110px', gap: '12px', alignItems: 'start', padding: '12px 16px', borderTop: '1px solid var(--oq-ln-eef2f5)' }}>
         <div style={{ fontSize: '12.5px', fontWeight: '600', lineHeight: '1.35', paddingTop: '2px' }}>{c.label}</div>
         <div>{control}
           <div style={Object.assign({}, cite, { marginTop: '6px' })}><Bind kind="soft">Silent</Bind> {c.note}</div>
@@ -563,10 +563,10 @@ export default function RequestRulesPage() {
     }
     return (
       <div>
-        <ChoiceHead sub="Three choices. Confirming each records who decided, and when." pill={d.unconfirmed ? <Pill bg="#F6EBD6" color={C.amber}>{(d.choices.length - d.unconfirmed) + ' of ' + d.choices.length + ' confirmed'}</Pill> : <Pill bg="#E1F2E9" color={C.ok}>all confirmed</Pill>} />
+        <ChoiceHead sub="Three choices. Confirming each records who decided, and when." pill={d.unconfirmed ? <Pill bg="var(--oq-bg-f6ebd6)" color={C.amber}>{(d.choices.length - d.unconfirmed) + ' of ' + d.choices.length + ' confirmed'}</Pill> : <Pill bg="var(--oq-bg-e1f2e9)" color={C.ok}>all confirmed</Pill>} />
 
         {/* the designated addresses — read from the agency screen, never typed here (TX-style § 552.234(c)) */}
-        <div style={{ margin: '4px 16px 10px', padding: '10px 12px', background: '#F8FAFC', border: '1px solid ' + C.line, borderRadius: '8px', fontSize: '12.5px', lineHeight: '1.5' }}>
+        <div style={{ margin: '4px 16px 10px', padding: '10px 12px', background: 'var(--oq-bg-f8fafc)', border: '1px solid ' + C.line, borderRadius: '8px', fontSize: '12.5px', lineHeight: '1.5' }}>
           <Bind kind="fixed">Designated addresses</Bind>{' '}
           {d.addresses && (d.addresses.email || d.addresses.mailing)
             ? <span>Requests count as received at <b>{d.addresses.email || 'the contact e-mail'}</b>{d.addresses.mailing ? <span> and <b>{d.addresses.mailing}</b></span> : null} — the addresses from the agency screen, shown to requestors on the portal and in every letter.</span>
@@ -593,8 +593,8 @@ export default function RequestRulesPage() {
     var L = data.letters && data.letters.clarification;
     return (
       <div onClick={function () { setLetter(false); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(18,35,46,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-        <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', width: '680px', maxWidth: '94%', maxHeight: '86vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 18px', borderBottom: '1px solid ' + C.line, background: '#F8FAFC' }}>
+        <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'var(--oq-bg-ffffff)', borderRadius: '12px', width: '680px', maxWidth: '94%', maxHeight: '86vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 18px', borderBottom: '1px solid ' + C.line, background: 'var(--oq-bg-f8fafc)' }}>
             <div style={{ flexGrow: 1 }}>
               <div style={{ fontSize: '14px', fontWeight: '700' }}>{isDenial ? 'The denial letter — standard structure' : 'The clarification letter — standard wording'}</div>
               <div style={hint}>{isDenial ? 'The letter is drafted at denial time in the denial compose step; this is the structure every one carries.' : 'Exactly as the system sends it today, filled in from the request. Read-only in this slice.'}</div>
@@ -613,8 +613,8 @@ export default function RequestRulesPage() {
             </div>
           ) : (
             <div style={{ padding: '20px 26px' }}>
-              <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '13.5px', lineHeight: '1.55', color: '#111', whiteSpace: 'pre-wrap' }}>{L ? L.text : ''}</div>
-              <div style={{ marginTop: '14px', padding: '10px 12px', background: '#FDF9F0', border: '1px solid #F1D9A8', borderRadius: '8px' }}>
+              <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '13.5px', lineHeight: '1.55', color: 'var(--oq-fg-111111)', whiteSpace: 'pre-wrap' }}>{L ? L.text : ''}</div>
+              <div style={{ marginTop: '14px', padding: '10px 12px', background: 'var(--oq-bg-fdf9f0)', border: '1px solid var(--oq-ln-f1d9a8)', borderRadius: '8px' }}>
                 <span style={hint}><b>The reply-window sentence</b> is the warning the law requires — the letter must say what happens if the requestor does not reply.{L && !L.graceDays ? ' It appears once the reply window above is set.' : ''}</span>
               </div>
             </div>
@@ -649,7 +649,7 @@ export default function RequestRulesPage() {
         {attestBtn()}
       </div>
 
-      {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
+      {err ? <div style={{ background: 'var(--oq-bg-fef2f2)', border: '1px solid var(--oq-ln-fca5a5)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
 
       <div style={card}>
         {/* tabs: one screen, three hub rows; each dot shows its row's hub state */}
@@ -672,11 +672,11 @@ export default function RequestRulesPage() {
             <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '3px' }}>{headSub}</div>
           </div>
           {tab === 'exemptions' && data.tabs.exemptions.redactionLibrary && data.tabs.exemptions.redactionLibrary.approvedRules === 0
-            ? <Pill bg="#EDE9FE" color="#5B21B6">Reasons library · not loaded yet</Pill> : null}
+            ? <Pill bg="var(--oq-bg-ede9fe)" color="var(--oq-fg-5b21b6)">Reasons library · not loaded yet</Pill> : null}
           {tab === 'eligibility' && td.unconfirmed > 0
-            ? <Pill bg="#F6EBD6" color={C.amber}>{td.unconfirmed === 1 ? '1 decision to confirm' : td.unconfirmed + ' decisions to confirm'}</Pill> : null}
+            ? <Pill bg="var(--oq-bg-f6ebd6)" color={C.amber}>{td.unconfirmed === 1 ? '1 decision to confirm' : td.unconfirmed + ' decisions to confirm'}</Pill> : null}
           {tab === 'deadlines' && td.calendar && td.calendar.holidayCount === 0
-            ? <Pill bg="#FEE2E2" color="#991B1B">Holiday calendar empty</Pill> : null}
+            ? <Pill bg="var(--oq-bg-fee2e2)" color="var(--oq-fg-991b1b)">Holiday calendar empty</Pill> : null}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '480px minmax(0, 1fr)', gap: 0 }}>

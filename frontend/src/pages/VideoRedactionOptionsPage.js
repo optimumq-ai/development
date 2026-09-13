@@ -25,7 +25,7 @@ export default function VideoRedactionOptionsPage() {
     <SetupScreen hubKey="av_redaction" laneLabel="Request Fulfillment Process Setup — Redaction and Release" title="Video Redaction Options"
       intro="How this city handles redaction of video and audio records. Documents are always redacted inside Optimum Q. This is the city-wide default; teams will be able to override it once team routing is configured.">
       {function (s) {
-        if (mode === null) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
+        if (mode === null) return <div style={{ color: 'var(--oq-fg-9ca3af)' }}>Loading…</div>;
         return (
           <div>
             {msg ? <Msg text={msg.text} ok={msg.ok} /> : null}

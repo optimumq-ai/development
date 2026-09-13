@@ -116,7 +116,7 @@ export default function DispositionsPage() {
                 {it.decidedBy ? <DecidedByBadge by={it.decidedBy}>{BADGE_WORDS[it.decidedBy]}</DecidedByBadge> : null}
                 {it.sweep ? (
                   <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
-                    borderRadius: 3, padding: '2px 7px', background: '#F2F6F9', color: G.navy,
+                    borderRadius: 3, padding: '2px 7px', background: 'var(--oq-bg-f2f6f9)', color: G.navy,
                     border: '1px solid ' + G.line }}>Sweep · per attested config</span>
                 ) : null}
               </div>
@@ -218,7 +218,7 @@ export default function DispositionsPage() {
               onClick={commit}
               style={{ cursor: (gate.gate && gate.gate.blocked) ? 'not-allowed' : 'pointer',
                 background: (gate.gate && gate.gate.blocked) ? C.surface2 : C.blue,
-                color: (gate.gate && gate.gate.blocked) ? C.faint : '#fff',
+                color: (gate.gate && gate.gate.blocked) ? C.faint : 'var(--oq-fg-ffffff)',
                 border: '1px solid ' + ((gate.gate && gate.gate.blocked) ? C.hair : C.blue),
                 borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
               {busy === 'close' ? 'Closing…' : 'Submit — close & notify'}

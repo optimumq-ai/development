@@ -27,7 +27,7 @@ var kv = { fontSize: 12.5, color: C.muted };
 function Tag(props) {
   var tints = {
     vague: { bg: G.amberBg, fg: G.amberInk, bd: G.amberLine },
-    denial: { bg: '#F7E9E5', fg: '#8C3A2B', bd: '#C08A7E' }
+    denial: { bg: 'var(--oq-bg-f7e9e5)', fg: 'var(--oq-fg-8c3a2b)', bd: 'var(--oq-ln-c08a7e)' }
   };
   var t = tints[props.kind];
   return (
@@ -48,7 +48,7 @@ export default function MrrOverviewPage() {
       .catch(function (e) { setErr((e.response && e.response.data && e.response.data.error) || e.message); });
   }, []);
 
-  if (err) return <div style={{ padding: 20, color: '#8C3A2B' }}>{err}</div>;
+  if (err) return <div style={{ padding: 20, color: 'var(--oq-fg-8c3a2b)' }}>{err}</div>;
   if (!d) return <div style={{ padding: 20, color: C.muted }}>Loading…</div>;
 
   var th = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted,
@@ -81,7 +81,7 @@ export default function MrrOverviewPage() {
                 <tr key={r.requestId} style={{ cursor: 'pointer' }} onClick={function () { nav('/mrr/' + r.taskId); }}>
                   <td style={td}>
                     <div style={{ fontFamily: C.mono, fontWeight: 700, color: G.navy }}>{r.requestNumber}
-                      {r.highPriority ? <span style={{ marginLeft: 6, background: '#F9E4E4', color: '#B23A3A', fontWeight: 800, fontSize: 10, borderRadius: 10, padding: '2px 7px', letterSpacing: '.04em', verticalAlign: 1 }}>HIGH PRIORITY</span> : null}</div>
+                      {r.highPriority ? <span style={{ marginLeft: 6, background: 'var(--oq-bg-f9e4e4)', color: 'var(--oq-fg-b23a3a)', fontWeight: 800, fontSize: 10, borderRadius: 10, padding: '2px 7px', letterSpacing: '.04em', verticalAlign: 1 }}>HIGH PRIORITY</span> : null}</div>
                     <div style={kv}>{r.descriptionShort}</div>
                   </td>
                   <td style={td}>{r.requestorName}</td>

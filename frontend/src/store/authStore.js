@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 import api from '../lib/api';
+import { applyTheme, isTheme } from '../lib/theme';
+// A signed-in user's display choice follows the PERSON (users.ui_theme), not the browser: apply it whenever
+// the server hands us the user. docs/SPEC_display_theme.md.
+function adoptTheme(user) { if (user && isTheme(user.ui_theme)) applyTheme(user.ui_theme); }
 
 export const useAuthStore = create(function(set, get) {
   return {
@@ -13,6 +17,7 @@ export const useAuthStore = create(function(set, get) {
         if (d.requiresMfa) { localStorage.setItem('oq_token', d.preAuthToken); return d; }
         localStorage.setItem('oq_token', d.accessToken);
         set({ user: d.user, isAuthenticated: true });
+        adoptTheme(d.user);
         return d;
       } catch(e) { return { error: (e.response && e.response.data && e.response.data.error) || 'Login failed' }; }
     },
@@ -21,6 +26,7 @@ export const useAuthStore = create(function(set, get) {
         var r = await api.post('/auth/mfa/verify', { token: token });
         localStorage.setItem('oq_token', r.data.accessToken);
         set({ user: r.data.user, isAuthenticated: true });
+        adoptTheme(r.data.user);
         return {};
       } catch(e) { return { error: (e.response && e.response.data && e.response.data.error) || 'MFA failed' }; }
     },
@@ -39,7 +45,17 @@ export const useAuthStore = create(function(set, get) {
       try {
         var r = await api.get('/auth/me');
         set({ user: r.data.user, isAuthenticated: true });
+        adoptTheme(r.data.user);
       } catch(e) { set({ isAuthenticated: false }); }
+    },
+    // Display theme choice from the account menu: instant on screen, remembered in this browser, saved on the
+    // account so it follows the person to any machine. A failed save leaves the screen as chosen (the browser
+    // still remembers it) and returns the error for the menu to show.
+    setTheme: async function(key) {
+      var k = applyTheme(key);
+      var u = get().user; if (u) set({ user: Object.assign({}, u, { ui_theme: k }) });
+      try { await api.put('/auth/me/display', { theme: k }); return {}; }
+      catch(e) { return { error: (e.response && e.response.data && e.response.data.error) || 'Could not save the display choice' }; }
     },
     // v3 user-type model (SPEC_user_type_model §7, S2): /auth/me carries authorities, permissionGroups, inOro.
     // Every screen gates on these (S4); the legacy role helpers were deleted in S5.

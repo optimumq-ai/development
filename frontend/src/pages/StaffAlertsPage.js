@@ -10,7 +10,7 @@ import SetupScreen, { lbl, inp, hint, field, Msg, PrimaryButton, BLUE } from '..
 // colour comes from this tab alone. The requestor acknowledgement switch moved to Request rules → Request Intake.
 
 var TABS = [['alerts', 'Alerts'], ['deadlines', 'Deadline alerts']];
-var TABCOL = { red: '#DC2626', yellow: '#D97706', green: '#16A34A' };
+var TABCOL = { red: 'var(--oq-x-dc2626)', yellow: 'var(--oq-x-d97706)', green: 'var(--oq-x-16a34a)' };
 var KEYS = ['overdue_alert_days', 'escalation_days'];
 
 export default function StaffAlertsPage() {
@@ -38,45 +38,45 @@ export default function StaffAlertsPage() {
   function tabBar(row) {
     var marks = (row && row.tabs) || {};
     return (
-      <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #D2DCE3', marginBottom: '18px' }}>
+      <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid var(--oq-ln-d2dce3)', marginBottom: '18px' }}>
         {TABS.map(function (t) {
           var on = tab === t[0]; var mk = t[0] === 'deadlines' ? marks[t[0]] : null;
-          return <button key={t[0]} type="button" onClick={function () { goTab(t[0]); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', background: 'none', border: 'none', borderBottom: '2px solid ' + (on ? BLUE : 'transparent'), marginBottom: '-1px', fontSize: '13px', fontWeight: 600, color: on ? BLUE : '#5C6F7C', cursor: 'pointer', fontFamily: 'inherit' }}>
+          return <button key={t[0]} type="button" onClick={function () { goTab(t[0]); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', background: 'none', border: 'none', borderBottom: '2px solid ' + (on ? BLUE : 'transparent'), marginBottom: '-1px', fontSize: '13px', fontWeight: 600, color: on ? BLUE : 'var(--oq-fg-5c6f7c)', cursor: 'pointer', fontFamily: 'inherit' }}>
             {t[1]}{mk && TABCOL[mk] ? <span title={mk === 'red' ? 'Required settings missing' : (mk === 'green' ? 'Approved' : 'Awaiting approval')} style={{ width: '8px', height: '8px', borderRadius: '50%', background: TABCOL[mk], display: 'inline-block' }} /> : null}
           </button>;
         })}
       </div>
     );
   }
-  var th = { fontSize: '11px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: '#8296A4', textAlign: 'left', padding: '0 10px 8px', borderBottom: '1px solid #D2DCE3' };
-  var td = { padding: '11px 10px', borderBottom: '1px solid #EEF2F5', verticalAlign: 'top', fontSize: '13px', lineHeight: '1.45' };
+  var th = { fontSize: '11px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--oq-fg-8296a4)', textAlign: 'left', padding: '0 10px 8px', borderBottom: '1px solid var(--oq-ln-d2dce3)' };
+  var td = { padding: '11px 10px', borderBottom: '1px solid var(--oq-ln-eef2f5)', verticalAlign: 'top', fontSize: '13px', lineHeight: '1.45' };
   function alertsBody() {
-    if (!alerts) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
+    if (!alerts) return <div style={{ color: 'var(--oq-fg-9ca3af)' }}>Loading…</div>;
     return (
       <div>
-        <p style={{ margin: '0 0 14px', fontSize: '13px', color: '#5C6F7C', maxWidth: '66ch', lineHeight: '1.5' }}>These are the alerts that light up the bell at the top of the screen. Each one goes to the people it names — nobody has to subscribe, and nothing here can be switched off.</p>
+        <p style={{ margin: '0 0 14px', fontSize: '13px', color: 'var(--oq-fg-5c6f7c)', maxWidth: '66ch', lineHeight: '1.5' }}>These are the alerts that light up the bell at the top of the screen. Each one goes to the people it names — nobody has to subscribe, and nothing here can be switched off.</p>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead><tr><th style={th}>Alert</th><th style={th}>When it is sent</th><th style={th}>Who receives it</th></tr></thead>
             <tbody>{alerts.map(function (a) {
-              return <tr key={a.kind}><td style={Object.assign({}, td, { fontWeight: 600, whiteSpace: 'nowrap' })}>{a.title}</td><td style={Object.assign({}, td, { color: '#5C6F7C' })}>{a.when}</td><td style={Object.assign({}, td, { whiteSpace: 'nowrap' })}>{a.who}</td></tr>;
+              return <tr key={a.kind}><td style={Object.assign({}, td, { fontWeight: 600, whiteSpace: 'nowrap' })}>{a.title}</td><td style={Object.assign({}, td, { color: 'var(--oq-fg-5c6f7c)' })}>{a.when}</td><td style={Object.assign({}, td, { whiteSpace: 'nowrap' })}>{a.who}</td></tr>;
             })}</tbody>
           </table>
         </div>
-        <p style={{ margin: '14px 0 0', fontSize: '12px', color: '#8296A4', maxWidth: '66ch', lineHeight: '1.5' }}>Alerts stay on the bell and on My Tasks until dismissed. An identical alert is not stacked while the first is still waiting to be read — it is refreshed instead. Sending an alert by email as well is a future option, per alert.</p>
+        <p style={{ margin: '14px 0 0', fontSize: '12px', color: 'var(--oq-fg-8296a4)', maxWidth: '66ch', lineHeight: '1.5' }}>Alerts stay on the bell and on My Tasks until dismissed. An identical alert is not stacked while the first is still waiting to be read — it is refreshed instead. Sending an alert by email as well is a future option, per alert.</p>
       </div>
     );
   }
   function deadlinesBody(s) {
-    if (!form) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
+    if (!form) return <div style={{ color: 'var(--oq-fg-9ca3af)' }}>Loading…</div>;
     var red = s.row && s.row.tabs && s.row.tabs.deadlines === 'red';
     return (
       <div>
         {msg ? <Msg text={msg.text} ok={msg.ok} /> : null}
-        <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#5C6F7C', maxWidth: '66ch', lineHeight: '1.5' }}>When overdue work is flagged to staff, and when it is raised to a supervisor. Both must be saved — a shipped default is not a decision.</p>
+        <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'var(--oq-fg-5c6f7c)', maxWidth: '66ch', lineHeight: '1.5' }}>When overdue work is flagged to staff, and when it is raised to a supervisor. Both must be saved — a shipped default is not a decision.</p>
         <div style={field}>
-          <label style={lbl}>Overdue alert — warn staff{red && !form.overdue_alert_days ? <span style={{ color: '#DC2626', fontWeight: 500 }}> · required, not saved</span> : null}</label>
-          <select value={form.overdue_alert_days} disabled={!s.can} onChange={function (e) { set('overdue_alert_days', e.target.value); }} style={Object.assign({}, inp, red && !form.overdue_alert_days ? { border: '1px solid #DC2626' } : {})}>
+          <label style={lbl}>Overdue alert — warn staff{red && !form.overdue_alert_days ? <span style={{ color: 'var(--oq-fg-dc2626)', fontWeight: 500 }}> · required, not saved</span> : null}</label>
+          <select value={form.overdue_alert_days} disabled={!s.can} onChange={function (e) { set('overdue_alert_days', e.target.value); }} style={Object.assign({}, inp, red && !form.overdue_alert_days ? { border: '1px solid var(--oq-ln-dc2626)' } : {})}>
             <option value="">Choose…</option>
             <option value="0">On the deadline day</option>
             <option value="1">1 day before the deadline</option>
@@ -87,8 +87,8 @@ export default function StaffAlertsPage() {
           <div style={hint}>The assigned person sees the request flagged in their worklist this far ahead of the deadline.</div>
         </div>
         <div style={field}>
-          <label style={lbl}>Supervisor escalation — escalate automatically after{red && !form.escalation_days ? <span style={{ color: '#DC2626', fontWeight: 500 }}> · required, not saved</span> : null}</label>
-          <select value={form.escalation_days} disabled={!s.can} onChange={function (e) { set('escalation_days', e.target.value); }} style={Object.assign({}, inp, red && !form.escalation_days ? { border: '1px solid #DC2626' } : {})}>
+          <label style={lbl}>Supervisor escalation — escalate automatically after{red && !form.escalation_days ? <span style={{ color: 'var(--oq-fg-dc2626)', fontWeight: 500 }}> · required, not saved</span> : null}</label>
+          <select value={form.escalation_days} disabled={!s.can} onChange={function (e) { set('escalation_days', e.target.value); }} style={Object.assign({}, inp, red && !form.escalation_days ? { border: '1px solid var(--oq-ln-dc2626)' } : {})}>
             <option value="">Choose…</option>
             <option value="1">1 day overdue</option>
             <option value="2">2 days overdue</option>

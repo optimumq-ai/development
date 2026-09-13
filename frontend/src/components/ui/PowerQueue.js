@@ -107,7 +107,7 @@ export default function PowerQueue(props) {
         onClick={function () { runAct(a); }}
         style={{ font: 'inherit', fontSize: 13, fontWeight: 700, padding: '8px 15px', borderRadius: 6,
           cursor: (off || !current) ? 'not-allowed' : 'pointer', opacity: (off || !current) ? 0.5 : 1,
-          background: primary ? G.navy : C.surface, color: primary ? '#fff' : C.ink,
+          background: primary ? G.navy : C.surface, color: primary ? 'var(--oq-fg-ffffff)' : C.ink,
           border: '1px solid ' + (primary ? G.navy : G.line) }}>
         {a.label} {a.key ? <span style={{ fontSize: 10.5, fontWeight: 800, background: primary ? 'rgba(255,255,255,.22)' : C.surface2, border: '1px solid ' + (primary ? 'rgba(255,255,255,.4)' : G.line), borderRadius: 3, padding: '1px 6px', marginLeft: 4 }}>{a.key}</span> : null}
       </button>
@@ -116,7 +116,7 @@ export default function PowerQueue(props) {
 
   return (
     <div>
-      <div style={{ background: G.navy, color: '#fff', borderRadius: 8, padding: '9px 14px', display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
+      <div style={{ background: G.navy, color: 'var(--oq-fg-ffffff)', borderRadius: 8, padding: '9px 14px', display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
         <span style={{ fontWeight: 800, fontSize: 14 }}>{props.title}</span>
         <span style={{ fontSize: 12, opacity: 0.85 }}>{props.contextLine}</span>
         <span style={{ marginLeft: 'auto', fontFamily: C.mono, fontSize: 12.5, fontWeight: 700 }}>

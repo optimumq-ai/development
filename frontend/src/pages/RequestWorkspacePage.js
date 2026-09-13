@@ -158,8 +158,8 @@ export default function RequestWorkspacePage() {
     setEscalating(false);
   }
 
-  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px',color:'#9CA3AF'}}>Loading request...</div>;
-  if (!request) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px'}}><div style={{textAlign:'center'}}><div style={{fontSize:'48px',marginBottom:'16px'}}>⚠️</div><div style={{fontSize:'16px',color:'#4B5563'}}>{err||'Request not found'}</div></div></div>;
+  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px',color:'var(--oq-fg-9ca3af)'}}>Loading request...</div>;
+  if (!request) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px'}}><div style={{textAlign:'center'}}><div style={{fontSize:'48px',marginBottom:'16px'}}>⚠️</div><div style={{fontSize:'16px',color:'var(--oq-fg-4b5563)'}}>{err||'Request not found'}</div></div></div>;
 
   var sc = STAGE_COLORS[request.stage];
   var stageIdx = STAGES.indexOf(request.stage);
@@ -169,29 +169,29 @@ export default function RequestWorkspacePage() {
 
   return (
     <div style={{maxWidth:'1200px',display:'flex',flexDirection:'column',gap:'20px'}}>
-      {err ? <div role="alert" style={{background:'#FEF2F2',border:'1px solid #FECACA',color:'#B91C1C',borderRadius:'8px',padding:'10px 14px',fontSize:'13px',display:'flex',justifyContent:'space-between',gap:'12px'}}><span>{err}</span><button onClick={function(){setErr('');}} style={{background:'none',border:'none',color:'#B91C1C',cursor:'pointer',fontWeight:'700'}}>×</button></div> : null}
+      {err ? <div role="alert" style={{background:'var(--oq-bg-fef2f2)',border:'1px solid var(--oq-ln-fecaca)',color:'var(--oq-fg-b91c1c)',borderRadius:'8px',padding:'10px 14px',fontSize:'13px',display:'flex',justifyContent:'space-between',gap:'12px'}}><span>{err}</span><button onClick={function(){setErr('');}} style={{background:'none',border:'none',color:'var(--oq-fg-b91c1c)',cursor:'pointer',fontWeight:'700'}}>×</button></div> : null}
       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'16px'}}>
         <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-          <button onClick={function(){nav('/requests');}} style={{background:'none',border:'none',cursor:'pointer',color:'#6B7280',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>
+          <button onClick={function(){nav('/requests');}} style={{background:'none',border:'none',cursor:'pointer',color:'var(--oq-fg-6b7280)',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>
           <div>
             <div style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
               <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0',fontFamily:'monospace'}}>{request.request_number}</h1>
               {sc&&<span style={{background:sc.bg,color:sc.color,fontSize:'12px',fontWeight:'600',padding:'4px 12px',borderRadius:'20px'}}>{STAGE_LABELS[request.stage]||request.stage}</span>}
-              {request.is_mrr?<span style={{background:'#CCFBF1',color:'#0F766E',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>MRR</span>:null}
-              {request.certification_requested?<span title="The requestor asked for certified copies. A certification sheet is generated when the request completes." style={{background:'#EEF2FF',color:'#3730A3',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CERTIFICATION REQUESTED</span>:null}
-              {request.legal_flag?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚖ LEGAL HOLD</span>:null}
-              {od?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚠ OVERDUE</span>:null}
-              {isComplete?<span style={{background:'#F0FDF4',color:'#166534',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CLOSED</span>:null}
+              {request.is_mrr?<span style={{background:'var(--oq-bg-ccfbf1)',color:'var(--oq-fg-0f766e)',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>MRR</span>:null}
+              {request.certification_requested?<span title="The requestor asked for certified copies. A certification sheet is generated when the request completes." style={{background:'var(--oq-bg-eef2ff)',color:'var(--oq-fg-3730a3)',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CERTIFICATION REQUESTED</span>:null}
+              {request.legal_flag?<span style={{background:'var(--oq-bg-fef2f2)',color:'var(--oq-fg-dc2626)',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚖ LEGAL HOLD</span>:null}
+              {od?<span style={{background:'var(--oq-bg-fef2f2)',color:'var(--oq-fg-dc2626)',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚠ OVERDUE</span>:null}
+              {isComplete?<span style={{background:'var(--oq-bg-f0fdf4)',color:'var(--oq-fg-166534)',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CLOSED</span>:null}
             </div>
-            <p style={{color:'#9CA3AF',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {prettyChannel(request.submission_channel)}
+            <p style={{color:'var(--oq-fg-9ca3af)',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {prettyChannel(request.submission_channel)}
               {/* BW5 — the Disposition record's ONLY entry point (Draft 8 rev 2: "reached from the request
                   header anywhere, read-only for anyone who can see the request; no task type"). */}
               {' · '}<span onClick={function(){nav('/requests/'+request.id+'/dispositions');}}
-                style={{color:'#1F4E79',cursor:'pointer',fontWeight:600}}>Dispositions</span>
+                style={{color:'var(--oq-fg-1f4e79)',cursor:'pointer',fontWeight:600}}>Dispositions</span>
               {/* BW7 — the parent financial view's other door. Reached from the request header on ANY request;
                   the route resolves to the parent, so a child link and a parent link show one ledger. */}
               {' · '}<span onClick={function(){nav('/requests/'+request.id+'/financial');}}
-                style={{color:'#1F4E79',cursor:'pointer',fontWeight:600}}>Financial view</span>
+                style={{color:'var(--oq-fg-1f4e79)',cursor:'pointer',fontWeight:600}}>Financial view</span>
             </p>
           </div>
         </div>
@@ -199,120 +199,120 @@ export default function RequestWorkspacePage() {
           <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'6px'}}>
             <button onClick={function(){if(canAdvance)setShowAdvance(!showAdvance);}}
               disabled={!canAdvance}
-              style={{padding:'10px 20px',background:canAdvance?'#1F4E79':'#9CA3AF',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:canAdvance?'pointer':'not-allowed',whiteSpace:'nowrap'}}>
+              style={{padding:'10px 20px',background:canAdvance?'var(--oq-bg-1f4e79)':'var(--oq-bg-9ca3af)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:canAdvance?'pointer':'not-allowed',whiteSpace:'nowrap'}}>
               {nextStageLabel(request.stage)||'Advance Stage'} →
             </button>
             {!canAdvance&&request.stage==='record_search'&&(
-              <div style={{fontSize:'11px',color:'#D97706',textAlign:'right'}}>Attach a record and include at least one in the response first</div>
+              <div style={{fontSize:'11px',color:'var(--oq-fg-d97706)',textAlign:'right'}}>Attach a record and include at least one in the response first</div>
             )}
           </div>
         )}
       </div>
 
       {showAdvance&&(
-        <div style={{background:'#EBF3FB',border:'2px solid #1F4E79',borderRadius:'12px',padding:'20px'}}>
-          <h3 style={{margin:'0 0 12px',fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>Advance to: {STAGE_LABELS[nextStage(request.stage)]||'Closed'}</h3>
+        <div style={{background:'var(--oq-bg-ebf3fb)',border:'2px solid var(--oq-ln-1f4e79)',borderRadius:'12px',padding:'20px'}}>
+          <h3 style={{margin:'0 0 12px',fontSize:'15px',fontWeight:'700',color:'var(--oq-fg-1f4e79)'}}>Advance to: {STAGE_LABELS[nextStage(request.stage)]||'Closed'}</h3>
           <textarea value={stageNote} onChange={function(e){setStageNote(e.target.value);}}
             placeholder="Optional notes for the audit log..."
-            style={{width:'100%',padding:'10px 12px',border:'1px solid #D6E4F0',borderRadius:'8px',fontSize:'14px',outline:'none',minHeight:'80px',resize:'vertical',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}}/>
+            style={{width:'100%',padding:'10px 12px',border:'1px solid var(--oq-ln-d6e4f0)',borderRadius:'8px',fontSize:'14px',outline:'none',minHeight:'80px',resize:'vertical',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}}/>
           <div style={{display:'flex',gap:'10px'}}>
-            <button onClick={advanceStage} disabled={advancing} style={{padding:'10px 24px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
+            <button onClick={advanceStage} disabled={advancing} style={{padding:'10px 24px',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
               {advancing?'Advancing...':'Confirm Advance'}
             </button>
-            <button onClick={function(){setShowAdvance(false);}} style={{padding:'10px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',cursor:'pointer'}}>Cancel</button>
+            <button onClick={function(){setShowAdvance(false);}} style={{padding:'10px 16px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-6b7280)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'14px',cursor:'pointer'}}>Cancel</button>
           </div>
         </div>
       )}
 
-      <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'20px'}}>
-        <div style={{fontSize:'12px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'12px'}}>Processing Pipeline</div>
+      <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'20px'}}>
+        <div style={{fontSize:'12px',fontWeight:'600',color:'var(--oq-fg-9ca3af)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'12px'}}>Processing Pipeline</div>
         <div style={{display:'flex',alignItems:'center',overflowX:'auto'}}>
           {STAGES.map(function(s,i){
             var done=stageIdx>i; var current=stageIdx===i;
             return(
               <div key={s} style={{display:'flex',alignItems:'center',flex:i<STAGES.length-1?'1':'none'}}>
                 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'6px',minWidth:'80px'}}>
-                  <div style={{width:'32px',height:'32px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'700',background:done?'#1F4E79':current?'#EBF3FB':'#F9FAFB',color:done?'white':current?'#1F4E79':'#D1D5DB',border:current?'2px solid #1F4E79':done?'none':'2px solid #E5E7EB'}}>
+                  <div style={{width:'32px',height:'32px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'700',background:done?'var(--oq-bg-1f4e79)':current?'var(--oq-bg-ebf3fb)':'var(--oq-bg-f9fafb)',color:done?'var(--oq-fg-ffffff)':current?'var(--oq-fg-1f4e79)':'var(--oq-fg-d1d5db)',border:current?'2px solid var(--oq-ln-1f4e79)':done?'none':'2px solid var(--oq-ln-e5e7eb)'}}>
                     {done?'✓':i+1}
                   </div>
-                  <div style={{fontSize:'10px',textAlign:'center',color:done||current?'#1F4E79':'#9CA3AF',fontWeight:current?'700':'400',lineHeight:'1.3'}}>{STAGE_LABELS[s]}</div>
+                  <div style={{fontSize:'10px',textAlign:'center',color:done||current?'var(--oq-fg-1f4e79)':'var(--oq-fg-9ca3af)',fontWeight:current?'700':'400',lineHeight:'1.3'}}>{STAGE_LABELS[s]}</div>
                 </div>
-                {i<STAGES.length-1&&<div style={{flex:1,height:'2px',background:done?'#1F4E79':'#E5E7EB',margin:'0 4px',marginBottom:'20px'}}/>}
+                {i<STAGES.length-1&&<div style={{flex:1,height:'2px',background:done?'var(--oq-bg-1f4e79)':'var(--oq-bg-e5e7eb)',margin:'0 4px',marginBottom:'20px'}}/>}
               </div>
             );
           })}
         </div>
       </div>
 
-      <div style={{display:'flex',borderBottom:'2px solid #E5E7EB',gap:'0'}}>
+      <div style={{display:'flex',borderBottom:'2px solid var(--oq-ln-e5e7eb)',gap:'0'}}>
         {[['details','Request Details'],['routing','Routing'],['records','Records'],['documents','Search Documents'],['fees','Fees'],['financial','Financial Profile']].concat(request.av_applicable?[['redaction','Redaction for Audio/Video']]:[]).concat([['history','Audit History'],['actions','Actions']]).map(function(item){
-          return <button key={item[0]} onClick={function(){setTab(item[0]);}} style={{padding:'12px 20px',background:'none',border:'none',borderBottom:tab===item[0]?'2px solid #1F4E79':'2px solid transparent',marginBottom:'-2px',fontSize:'14px',fontWeight:tab===item[0]?'700':'500',color:tab===item[0]?'#1F4E79':'#6B7280',cursor:'pointer'}}>{item[1]}</button>;
+          return <button key={item[0]} onClick={function(){setTab(item[0]);}} style={{padding:'12px 20px',background:'none',border:'none',borderBottom:tab===item[0]?'2px solid var(--oq-ln-1f4e79)':'2px solid transparent',marginBottom:'-2px',fontSize:'14px',fontWeight:tab===item[0]?'700':'500',color:tab===item[0]?'var(--oq-fg-1f4e79)':'var(--oq-fg-6b7280)',cursor:'pointer'}}>{item[1]}</button>;
         })}
       </div>
 
       {tab==='details'&&(
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'20px'}}>
-          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
-            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Requestor Information</div>
+          <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid var(--oq-ln-f3f4f6)'}}>Requestor Information</div>
             {[['Name',request.requestor_name],['Email',request.requestor_email],['Phone',request.requestor_phone||'—'],['Type',request.requestor_type],['Delivery',request.delivery_method]].map(function(item){
-              return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'#111',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
+              return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'var(--oq-fg-9ca3af)',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'var(--oq-fg-111111)',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
             })}
             {identity && (function(){
               var basisLabel = { portal_account:'Portal account', verified_email:'Verified email (link clicked)', staff_confirmed:'Staff-confirmed identity' }[identity.anchor && identity.anchor.basis];
               var anchored = !!basisLabel;
               return (
-                <div style={{borderTop:'1px solid #F3F4F6',paddingTop:'12px'}}>
-                  <div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'}}>Identity</div>
+                <div style={{borderTop:'1px solid var(--oq-ln-f3f4f6)',paddingTop:'12px'}}>
+                  <div style={{fontSize:'11px',fontWeight:'600',color:'var(--oq-fg-9ca3af)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'}}>Identity</div>
                   <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
-                    <span style={{background:anchored?'#F0FDF4':'#F3F4F6',color:anchored?'#166534':'#6B7280',fontSize:'11px',fontWeight:'700',padding:'3px 10px',borderRadius:'20px'}}>
+                    <span style={{background:anchored?'var(--oq-bg-f0fdf4)':'var(--oq-bg-f3f4f6)',color:anchored?'var(--oq-fg-166534)':'var(--oq-fg-6b7280)',fontSize:'11px',fontWeight:'700',padding:'3px 10px',borderRadius:'20px'}}>
                       {anchored?('Anchored — '+basisLabel):'Not anchored — anonymous for ledger purposes'}
                     </span>
                     {identity.identityConfirmed
-                      ? <span style={{fontSize:'12px',color:'#6B7280'}}>Confirmed in person by {identity.identityConfirmedBy||'staff'}</span>
-                      : <button onClick={confirmIdentity} disabled={identityBusy} style={{padding:'5px 12px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#1F4E79',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>Confirm identity (in person)</button>}
+                      ? <span style={{fontSize:'12px',color:'var(--oq-fg-6b7280)'}}>Confirmed in person by {identity.identityConfirmedBy||'staff'}</span>
+                      : <button onClick={confirmIdentity} disabled={identityBusy} style={{padding:'5px 12px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-1f4e79)',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>Confirm identity (in person)</button>}
                   </div>
                 </div>
               );
             })()}
           </div>
-          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
-            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Request Information</div>
+          <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid var(--oq-ln-f3f4f6)'}}>Request Information</div>
             {[['Classification',request.classification?request.classification.replace(/_/g,' '):'—'],['Request Fulfillment Team',request.department_name||'Unassigned'],['Deadline',request.deadline_date||'—'],['Fee Waiver',request.fee_waiver_requested?'Yes — Requested':'No'],['MRR',request.is_mrr?'Yes — Multi-Record Request':'No']].map(function(item){
-              return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'#111',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
+              return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'var(--oq-fg-9ca3af)',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'var(--oq-fg-111111)',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
             })}
           </div>
-          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
-            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px',gridColumn:'1/-1'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid var(--oq-ln-f3f4f6)',marginBottom:'16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
               <span>Deadlines &amp; Clocks</span>
-              {clocks.length===0?<button onClick={startClocks} disabled={clockBusy} style={{padding:'6px 14px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#1F4E79',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Start clocks</button>:null}
+              {clocks.length===0?<button onClick={startClocks} disabled={clockBusy} style={{padding:'6px 14px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-1f4e79)',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Start clocks</button>:null}
             </div>
-            {clocks.length===0?<p style={{fontSize:'13px',color:'#9CA3AF',margin:'0'}}>No statutory clocks on this request yet.</p>:(
+            {clocks.length===0?<p style={{fontSize:'13px',color:'var(--oq-fg-9ca3af)',margin:'0'}}>No statutory clocks on this request yet.</p>:(
               <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
                 {clocks.map(function(c){
-                  var badge = c.state==='satisfied'?{bg:'#F0FDF4',color:'#166534',label:'Satisfied'}:c.state==='tolled'?{bg:'#FEF3C7',color:'#92400E',label:'Paused'}:c.state==='expired'?{bg:'#FDE8E8',color:'#9B1C1C',label:'Overdue'}:{bg:'#EBF3FB',color:'#1F4E79',label:'Running'};
+                  var badge = c.state==='satisfied'?{bg:'var(--oq-bg-f0fdf4)',color:'var(--oq-fg-166534)',label:'Satisfied'}:c.state==='tolled'?{bg:'var(--oq-bg-fef3c7)',color:'var(--oq-fg-92400e)',label:'Paused'}:c.state==='expired'?{bg:'var(--oq-bg-fde8e8)',color:'var(--oq-fg-9b1c1c)',label:'Overdue'}:{bg:'var(--oq-bg-ebf3fb)',color:'var(--oq-fg-1f4e79)',label:'Running'};
                   return (
-                    <div key={c.clockId} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px 14px',display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'}}>
+                    <div key={c.clockId} style={{border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',padding:'12px 14px',display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'}}>
                       <span style={{background:badge.bg,color:badge.color,fontSize:'11px',fontWeight:'700',padding:'3px 10px',borderRadius:'20px',whiteSpace:'nowrap'}}>{badge.label}</span>
                       <div style={{flex:'1',minWidth:'180px'}}>
-                        <div style={{fontSize:'14px',fontWeight:'600',color:'#111'}}>{c.label}{c.isPrimary?' · primary':''}</div>
-                        <div style={{fontSize:'12px',color:'#6B7280'}}>due {c.dueDate} · {c.remainingDays>=0?(c.remainingDays+' day'+(c.remainingDays===1?'':'s')+' left'):(Math.abs(c.remainingDays)+' day'+(Math.abs(c.remainingDays)===1?'':'s')+' overdue')} · {String(c.basis).replace('_',' ')}{c.tolledDays?(' · '+c.tolledDays+' day'+(c.tolledDays===1?'':'s')+' paused'):''}</div>
+                        <div style={{fontSize:'14px',fontWeight:'600',color:'var(--oq-fg-111111)'}}>{c.label}{c.isPrimary?' · primary':''}</div>
+                        <div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)'}}>due {c.dueDate} · {c.remainingDays>=0?(c.remainingDays+' day'+(c.remainingDays===1?'':'s')+' left'):(Math.abs(c.remainingDays)+' day'+(Math.abs(c.remainingDays)===1?'':'s')+' overdue')} · {String(c.basis).replace('_',' ')}{c.tolledDays?(' · '+c.tolledDays+' day'+(c.tolledDays===1?'':'s')+' paused'):''}</div>
                       </div>
                       {c.state!=='satisfied'&&(
                         <div style={{display:'flex',alignItems:'center',gap:'6px',flexWrap:'wrap'}}>
                           {c.currentlyTolled?(
-                            <button onClick={function(){resumeClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Resume</button>
+                            <button onClick={function(){resumeClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'none',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Resume</button>
                           ):(
                             <span style={{display:'flex',gap:'6px',alignItems:'center'}}>
-                              <select value={reasonByClock[c.clockId]||'clarification_pending'} onChange={function(e){var v=e.target.value;setReasonByClock(function(p){var n=Object.assign({},p);n[c.clockId]=v;return n;});}} style={{padding:'6px 8px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'12px'}}>
+                              <select value={reasonByClock[c.clockId]||'clarification_pending'} onChange={function(e){var v=e.target.value;setReasonByClock(function(p){var n=Object.assign({},p);n[c.clockId]=v;return n;});}} style={{padding:'6px 8px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',fontSize:'12px'}}>
                                 <option value="clarification_pending">Awaiting clarification</option>
                                 <option value="payment_pending">Awaiting payment</option>
                                 <option value="ag_ruling_pending">Awaiting AG ruling</option>
                                 <option value="extension">Extension</option>
                               </select>
-                              <button onClick={function(){tollClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#92400E',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Pause</button>
+                              <button onClick={function(){tollClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-92400e)',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Pause</button>
                             </span>
                           )}
-                          <button onClick={function(){satisfyClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#166534',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Mark satisfied</button>
+                          <button onClick={function(){satisfyClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-166534)',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Mark satisfied</button>
                         </div>
                       )}
                     </div>
@@ -320,67 +320,67 @@ export default function RequestWorkspacePage() {
                 })}
               </div>
             )}
-            <p style={{fontSize:'11px',color:'#9CA3AF',marginTop:'12px',lineHeight:'1.5'}}>Pausing a clock (awaiting clarification, payment, or an AG ruling) stops the count; the due date moves out by the paused time. The primary clock drives the request deadline date.</p>
+            <p style={{fontSize:'11px',color:'var(--oq-fg-9ca3af)',marginTop:'12px',lineHeight:'1.5'}}>Pausing a clock (awaiting clarification, payment, or an AG ruling) stops the count; the due date moves out by the paused time. The primary clock drives the request deadline date.</p>
           </div>
 
           {request.exemption_model ? (
-          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
-            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px'}}>Exemptions &amp; AG Pre-clearance</div>
+          <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px',gridColumn:'1/-1'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid var(--oq-ln-f3f4f6)',marginBottom:'16px'}}>Exemptions &amp; AG Pre-clearance</div>
             {request.exemption_model==='pre_clearance'?(
-              <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>This jurisdiction requires an Attorney General ruling before records may be withheld. Submitting for pre-clearance pauses the response clock until the ruling is recorded.</p>
+              <p style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',margin:'0 0 16px',lineHeight:'1.5'}}>This jurisdiction requires an Attorney General ruling before records may be withheld. Submitting for pre-clearance pauses the response clock until the ruling is recorded.</p>
             ):(
-              <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>This jurisdiction reviews exemptions internally; the requestor’s recourse is appeal{request.exemption_model==='self_appeal_court'?' or court':''}. Asserting an exemption does not pause the response clock.</p>
+              <p style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',margin:'0 0 16px',lineHeight:'1.5'}}>This jurisdiction reviews exemptions internally; the requestor’s recourse is appeal{request.exemption_model==='self_appeal_court'?' or court':''}. Asserting an exemption does not pause the response clock.</p>
             )}
             {request.stage==='ag_review'?(
-              <div style={{border:'1px solid #FEF3C7',background:'#FFFBEB',borderRadius:'8px',padding:'14px 16px'}}>
-                <div style={{fontSize:'14px',fontWeight:'600',color:'#92400E',marginBottom:'10px'}}>Awaiting Attorney General ruling — response clock paused.</div>
+              <div style={{border:'1px solid var(--oq-ln-fef3c7)',background:'var(--oq-bg-fffbeb)',borderRadius:'8px',padding:'14px 16px'}}>
+                <div style={{fontSize:'14px',fontWeight:'600',color:'var(--oq-fg-92400e)',marginBottom:'10px'}}>Awaiting Attorney General ruling — response clock paused.</div>
                 <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
-                  <select value={agOutcome} onChange={function(e){setAgOutcome(e.target.value);}} style={{padding:'8px 10px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'13px'}}>
+                  <select value={agOutcome} onChange={function(e){setAgOutcome(e.target.value);}} style={{padding:'8px 10px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',fontSize:'13px'}}>
                     <option value="sustained">Ruling: withholding sustained</option>
                     <option value="partial">Ruling: partial release</option>
                     <option value="overruled">Ruling: must release</option>
                   </select>
-                  <input value={exemptionNote} onChange={function(e){setExemptionNote(e.target.value);}} placeholder="Ruling note (optional)" style={{flex:'1',minWidth:'200px',padding:'8px 10px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'13px'}} />
-                  <button onClick={recordAgRuling} disabled={clockBusy} style={{padding:'8px 16px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Record AG ruling</button>
+                  <input value={exemptionNote} onChange={function(e){setExemptionNote(e.target.value);}} placeholder="Ruling note (optional)" style={{flex:'1',minWidth:'200px',padding:'8px 10px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',fontSize:'13px'}} />
+                  <button onClick={recordAgRuling} disabled={clockBusy} style={{padding:'8px 16px',borderRadius:'8px',border:'none',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Record AG ruling</button>
                 </div>
               </div>
             ):(
               <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
-                <input value={exemptionNote} onChange={function(e){setExemptionNote(e.target.value);}} placeholder="Basis / records to withhold (optional)" style={{flex:'1',minWidth:'200px',padding:'8px 10px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'13px'}} />
-                <button onClick={assertExemption} disabled={clockBusy} style={{padding:'8px 16px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>{request.exemption_model==='pre_clearance'?'Submit for AG pre-clearance':'Assert exemption (internal review)'}</button>
+                <input value={exemptionNote} onChange={function(e){setExemptionNote(e.target.value);}} placeholder="Basis / records to withhold (optional)" style={{flex:'1',minWidth:'200px',padding:'8px 10px',borderRadius:'8px',border:'1px solid var(--oq-ln-e5e7eb)',fontSize:'13px'}} />
+                <button onClick={assertExemption} disabled={clockBusy} style={{padding:'8px 16px',borderRadius:'8px',border:'none',background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>{request.exemption_model==='pre_clearance'?'Submit for AG pre-clearance':'Assert exemption (internal review)'}</button>
               </div>
             )}
           </div>
           ):null}
 
-          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
-            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px'}}>Description of Records Requested</div>
-            <p style={{fontSize:'14px',color:'#374151',lineHeight:'1.7',margin:'0',whiteSpace:'pre-wrap'}}>{request.description}</p>
+          <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px',gridColumn:'1/-1'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid var(--oq-ln-f3f4f6)',marginBottom:'16px'}}>Description of Records Requested</div>
+            <p style={{fontSize:'14px',color:'var(--oq-fg-374151)',lineHeight:'1.7',margin:'0',whiteSpace:'pre-wrap'}}>{request.description}</p>
           </div>
           {selectedRecords.length > 0 && (
-            <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
-              <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px',display:'flex',alignItems:'center',gap:'10px'}}>
+            <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px',gridColumn:'1/-1'}}>
+              <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid var(--oq-ln-f3f4f6)',marginBottom:'16px',display:'flex',alignItems:'center',gap:'10px'}}>
                 <span>Records the Requestor Selected from Search Results</span>
-                <span style={{fontSize:'12px',background:'#F0FDF4',color:'#166534',border:'1px solid #86EFAC',borderRadius:'10px',padding:'2px 8px',fontWeight:'600'}}>{selectedRecords.length}</span>
+                <span style={{fontSize:'12px',background:'var(--oq-bg-f0fdf4)',color:'var(--oq-fg-166534)',border:'1px solid var(--oq-ln-86efac)',borderRadius:'10px',padding:'2px 8px',fontWeight:'600'}}>{selectedRecords.length}</span>
               </div>
-              <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>
+              <p style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',margin:'0 0 16px',lineHeight:'1.5'}}>
                 These are the specific records the requestor picked while submitting their request. They represent what the requestor explicitly identified — use them as a starting point for fulfillment.
               </p>
               <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
                 {selectedRecords.map(function(sr){
                   var restricted = sr.public_availability === 'restricted';
                   return (
-                    <div key={sr.id} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px 14px',background: restricted ? '#FFFBEB' : 'white'}}>
+                    <div key={sr.id} style={{border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',padding:'12px 14px',background: restricted ? 'var(--oq-bg-fffbeb)' : 'var(--oq-bg-ffffff)'}}>
                       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'12px'}}>
                         <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontSize:'14px',fontWeight:'600',color:'#111',marginBottom:'4px'}}>{sr.title || sr.record_id}</div>
-                          <div style={{fontSize:'12px',color:'#6B7280'}}>
-                            <span>Source: <strong style={{color:'#374151'}}>{sr.source_system || 'Unknown'}</strong></span>
-                            <span style={{marginLeft:'12px'}}>Record ID: <code style={{background:'#F3F4F6',padding:'1px 5px',borderRadius:'3px',fontSize:'11px'}}>{sr.record_id}</code></span>
+                          <div style={{fontSize:'14px',fontWeight:'600',color:'var(--oq-fg-111111)',marginBottom:'4px'}}>{sr.title || sr.record_id}</div>
+                          <div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)'}}>
+                            <span>Source: <strong style={{color:'var(--oq-fg-374151)'}}>{sr.source_system || 'Unknown'}</strong></span>
+                            <span style={{marginLeft:'12px'}}>Record ID: <code style={{background:'var(--oq-bg-f3f4f6)',padding:'1px 5px',borderRadius:'3px',fontSize:'11px'}}>{sr.record_id}</code></span>
                           </div>
                         </div>
                         {restricted && (
-                          <span style={{flexShrink:0,fontSize:'11px',fontWeight:'700',color:'#92400E',background:'#FEF3C7',border:'1px solid #FCD34D',borderRadius:'10px',padding:'3px 10px'}}>⚠ Redaction Review Required</span>
+                          <span style={{flexShrink:0,fontSize:'11px',fontWeight:'700',color:'var(--oq-fg-92400e)',background:'var(--oq-bg-fef3c7)',border:'1px solid var(--oq-ln-fcd34d)',borderRadius:'10px',padding:'3px 10px'}}>⚠ Redaction Review Required</span>
                         )}
                       </div>
                     </div>
@@ -393,25 +393,25 @@ export default function RequestWorkspacePage() {
       )}
 
       {tab==='records'&&(
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px'}}>
           <RecordsPanel requestId={request.id} stage={request.stage} onChange={loadRecords}/>
         </div>
       )}
 
       {tab==='routing'&&(
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px'}}>
           <WorkflowDecisionPanel requestId={request.id}/>
         </div>
       )}
 
       {tab==='documents'&&(
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px'}}>
           <DocSearchPanel requestId={request.id}/>
         </div>
       )}
 
       {tab==='fees'&&(
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px'}}>
           <FeeWaiverDecisionPanel request={request} onChange={load}/>
           <FeeEstimatePanel requestId={request.id}/>
           <ObjectionPanel requestId={request.id}/>
@@ -422,29 +422,29 @@ export default function RequestWorkspacePage() {
       )}
 
       {tab==='redaction'&&(
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px'}}>
           <AvRedactionPanel requestId={request.id}/>
         </div>
       )}
 
       {tab==='history'&&(<>
         <RequestTimelinePanel requestId={request.id} />
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden'}}>
-          {history.length===0?<div style={{padding:'48px',textAlign:'center',color:'#9CA3AF'}}>No history yet</div>:(
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',overflow:'hidden'}}>
+          {history.length===0?<div style={{padding:'48px',textAlign:'center',color:'var(--oq-fg-9ca3af)'}}>No history yet</div>:(
             <div style={{display:'flex',flexDirection:'column'}}>
               {history.map(function(h,i){
-                return <div key={h.id} style={{display:'flex',gap:'16px',padding:'16px 20px',borderBottom:i<history.length-1?'1px solid #F3F4F6':'none'}}>
-                  <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'#EBF3FB',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'700',color:'#1F4E79',flexShrink:0}}>
+                return <div key={h.id} style={{display:'flex',gap:'16px',padding:'16px 20px',borderBottom:i<history.length-1?'1px solid var(--oq-ln-f3f4f6)':'none'}}>
+                  <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'var(--oq-bg-ebf3fb)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'700',color:'var(--oq-fg-1f4e79)',flexShrink:0}}>
                     {h.actor_name?h.actor_name[0].toUpperCase():'?'}
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px',flexWrap:'wrap'}}>
-                      <span style={{fontSize:'13px',fontWeight:'600',color:'#111'}}>{h.actor_name}</span>
-                      <span style={{background:'#F3F4F6',color:'#6B7280',fontSize:'11px',fontWeight:'600',padding:'2px 8px',borderRadius:'20px'}}>{h.action.replace(/_/g,' ')}</span>
-                      {h.stage_from&&h.stage_to&&<span style={{fontSize:'12px',color:'#9CA3AF'}}>{STAGE_LABELS[h.stage_from]||h.stage_from} → {STAGE_LABELS[h.stage_to]||h.stage_to}</span>}
+                      <span style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-111111)'}}>{h.actor_name}</span>
+                      <span style={{background:'var(--oq-bg-f3f4f6)',color:'var(--oq-fg-6b7280)',fontSize:'11px',fontWeight:'600',padding:'2px 8px',borderRadius:'20px'}}>{h.action.replace(/_/g,' ')}</span>
+                      {h.stage_from&&h.stage_to&&<span style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>{STAGE_LABELS[h.stage_from]||h.stage_from} → {STAGE_LABELS[h.stage_to]||h.stage_to}</span>}
                     </div>
-                    {h.notes&&<p style={{fontSize:'13px',color:'#6B7280',margin:'0',fontStyle:'italic'}}>{h.notes}</p>}
-                    <div style={{fontSize:'12px',color:'#9CA3AF',marginTop:'4px'}}>{new Date(h.created_at).toLocaleString()}</div>
+                    {h.notes&&<p style={{fontSize:'13px',color:'var(--oq-fg-6b7280)',margin:'0',fontStyle:'italic'}}>{h.notes}</p>}
+                    <div style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)',marginTop:'4px'}}>{new Date(h.created_at).toLocaleString()}</div>
                   </div>
                 </div>;
               })}
@@ -454,75 +454,75 @@ export default function RequestWorkspacePage() {
       </>)}
 
       {tab==='actions'&&(
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
-          <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Request Actions</div>
+        <div style={{background:'var(--oq-bg-ffffff)',borderRadius:'12px',border:'1px solid var(--oq-ln-e5e7eb)',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
+          <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid var(--oq-ln-f3f4f6)'}}>Request Actions</div>
           <div style={{marginBottom:'16px'}}>
-            <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Assign Request</div>
+            <div style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'8px'}}>Assign Request</div>
             <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
               <select onChange={function(e){if(e.target.value)assignRequest(e.target.value);}} value={request.assigned_to||''}
-                style={{padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none',background:'white',cursor:'pointer'}}>
+                style={{padding:'8px 12px',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',outline:'none',background:'var(--oq-bg-ffffff)',cursor:'pointer'}}>
                 <option value="">— Unassigned —</option>
                 {staff.filter(function(s){return s.status==='active';}).map(function(s){
                   return <option key={s.id} value={s.id}>{s.display_name}{s.title?' — '+s.title:''}</option>;
                 })}
               </select>
               <button onClick={function(){try{var t=localStorage.getItem('oq_token');var p=JSON.parse(atob(t.split('.')[1]));assignRequest(p.sub);}catch(e){}}} disabled={assigning}
-                style={{padding:'8px 14px',background:'#EBF3FB',color:'#1F4E79',border:'1px solid #D6E4F0',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
+                style={{padding:'8px 14px',background:'var(--oq-bg-ebf3fb)',color:'var(--oq-fg-1f4e79)',border:'1px solid var(--oq-ln-d6e4f0)',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
                 Assign to Me
               </button>
               {request.assigned_to&&<button onClick={function(){assignRequest(null);}} disabled={assigning}
-                style={{padding:'8px 14px',background:'white',color:'#9CA3AF',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>
+                style={{padding:'8px 14px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-9ca3af)',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>
                 Unassign
               </button>}
             </div>
-            {request.assigned_to_name&&<div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Currently assigned to: <strong>{request.assigned_to_name}</strong></div>}
+            {request.assigned_to_name&&<div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',marginTop:'6px'}}>Currently assigned to: <strong>{request.assigned_to_name}</strong></div>}
           </div>
           <div style={{marginBottom:'16px'}}>
-            <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Request Fulfillment Team</div>
+            <div style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'8px'}}>Request Fulfillment Team</div>
             <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
               <select onChange={function(e){if(e.target.value)rerouteRequest(e.target.value);}} value={request.department_id||''} disabled={rerouting}
-                style={{padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none',background:'white',cursor:'pointer'}}>
+                style={{padding:'8px 12px',border:'1px solid var(--oq-ln-e5e7eb)',borderRadius:'8px',fontSize:'13px',outline:'none',background:'var(--oq-bg-ffffff)',cursor:'pointer'}}>
                 <option value="">— Unrouted —</option>
                 {teams.map(function(t){
                   return <option key={t.id} value={t.id}>{t.name}</option>;
                 })}
               </select>
-              {rerouting&&<span style={{fontSize:'12px',color:'#9CA3AF'}}>Re-routing...</span>}
+              {rerouting&&<span style={{fontSize:'12px',color:'var(--oq-fg-9ca3af)'}}>Re-routing...</span>}
             </div>
-            <div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Currently routed to: <strong>{request.department_name||'Unrouted'}</strong>. Changing this moves the request to another team{request.assigned_to_name?' and may clear the current assignment':''}.</div>
+            <div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',marginTop:'6px'}}>Currently routed to: <strong>{request.department_name||'Unrouted'}</strong>. Changing this moves the request to another team{request.assigned_to_name?' and may clear the current assignment':''}.</div>
           </div>
           {isDirector&&(
             <div style={{marginBottom:'16px'}}>
-              <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Legal Escalation</div>
+              <div style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'8px'}}>Legal Escalation</div>
               {request.legal_flag?(
-                <div style={{fontSize:'13px',color:'#B91C1C',background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'10px 12px'}}>
+                <div style={{fontSize:'13px',color:'var(--oq-fg-b91c1c)',background:'var(--oq-bg-fef2f2)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'8px',padding:'10px 12px'}}>
                   ⚖ Flagged for legal (advanced) redaction{request.legal_flag_type?' — '+request.legal_flag_type.replace(/_/g,' ').toLowerCase():''}. Redaction on this request routes to legal staff.
                 </div>
               ):(
                 <div>
                   <button onClick={escalateLegal} disabled={escalating}
-                    style={{padding:'8px 16px',background:'white',color:'#B91C1C',border:'1px solid #FCA5A5',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:escalating?'default':'pointer'}}>
+                    style={{padding:'8px 16px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-b91c1c)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:escalating?'default':'pointer'}}>
                     {escalating?'Escalating…':'⚖ Escalate for Legal Redaction'}
                   </button>
-                  <div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Marks this request as needing legal (advanced) redaction. Any active redaction task is reassigned to legal staff; if redaction hasn't started, it will route to legal when it does.</div>
+                  <div style={{fontSize:'12px',color:'var(--oq-fg-6b7280)',marginTop:'6px'}}>Marks this request as needing legal (advanced) redaction. Any active redaction task is reassigned to legal staff; if redaction hasn't started, it will route to legal when it does.</div>
                 </div>
               )}
             </div>
           )}
           {!isComplete&&(
             <div>
-              <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Close Request</div>
+              <div style={{fontSize:'13px',fontWeight:'600',color:'var(--oq-fg-374151)',marginBottom:'8px'}}>Close Request</div>
               <div style={{display:'flex',gap:'10px',flexWrap:'wrap'}}>
                 {[['No Responsive Records','CLOSE_NO_RECORDS'],['Withdrawn by Requestor','CLOSE_WITHDRAWN'],['Denied','CLOSE_DENIED']].map(function(item){
                   return <button key={item[1]} onClick={function(){if(window.confirm('Close this request as: '+item[0]+'?'))closeRequest(item[0]);}}
-                    style={{padding:'8px 16px',background:'white',color:'#DC2626',border:'1px solid #FCA5A5',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
+                    style={{padding:'8px 16px',background:'var(--oq-bg-ffffff)',color:'var(--oq-fg-dc2626)',border:'1px solid var(--oq-ln-fca5a5)',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
                     {item[0]}
                   </button>;
                 })}
               </div>
             </div>
           )}
-          {isComplete&&<div style={{padding:'16px',background:'#F0FDF4',borderRadius:'8px',color:'#166534',fontSize:'14px'}}>This request is closed. Closure reason: {request.closure_reason||'Not specified'}</div>}
+          {isComplete&&<div style={{padding:'16px',background:'var(--oq-bg-f0fdf4)',borderRadius:'8px',color:'var(--oq-fg-166534)',fontSize:'14px'}}>This request is closed. Closure reason: {request.closure_reason||'Not specified'}</div>}
         </div>
       )}
     </div>

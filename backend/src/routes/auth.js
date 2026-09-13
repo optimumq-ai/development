@@ -23,6 +23,17 @@ router.get('/me', requireAuth, async function(req, res) {
   return res.json({ user: user });
 });
 
+// DISPLAY COLOURS (docs/SPEC_display_theme.md). The choice follows the person: saved on the account, returned
+// in /auth/me as ui_theme, applied by the browser on sign-in. The wire values are the three theme keys.
+const UI_THEMES = ['standard', 'hc-light', 'hc-dark'];
+router.put('/me/display', requireAuth, async function(req, res) {
+  const theme = req.body && req.body.theme;
+  if (UI_THEMES.indexOf(theme) === -1) return res.status(400).json({ error: 'theme must be one of ' + UI_THEMES.join(', ') });
+  await run('UPDATE users SET ui_theme = ? WHERE id = ?', [theme, req.user.sub]);
+  const user = await getUserById(req.user.sub);
+  return res.json({ user: user });
+});
+
 router.post('/password/change', requireAuth, async function(req, res) {
   const newPassword = req.body.newPassword;
   if (!newPassword || newPassword.length < 10) return res.status(400).json({ error: 'Password must be at least 10 characters' });

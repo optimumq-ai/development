@@ -67,16 +67,16 @@ export default function AdministrationPage() {
     <div>
       <div style={{ marginBottom: '16px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 2px' }}>Administration</h1>
-        <p style={{ color: '#9CA3AF', fontSize: '13px', margin: 0 }}>Technical setup and configuration — everything that shapes how the system runs.</p>
+        <p style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '13px', margin: 0 }}>Technical setup and configuration — everything that shapes how the system runs.</p>
       </div>
       {/* C17: with every tab but Setup retired, a one-tab strip is noise — render it only when there is a choice. */}
-      {tabs.filter(function (t) { return !t.hidden; }).length > 1 ? <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', borderBottom: '2px solid #E5E7EB', marginBottom: '20px' }}>
+      {tabs.filter(function (t) { return !t.hidden; }).length > 1 ? <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', borderBottom: '2px solid var(--oq-ln-e5e7eb)', marginBottom: '20px' }}>
         {tabs.filter(function (t) { return !t.hidden; }).map(function (t) {
           const on = t.key === active.key;
           return (
             <button key={t.key} onClick={function () { setParams({ tab: t.key }); }}
-              style={{ padding: '8px 14px', border: 'none', borderBottom: '2px solid ' + (on ? '#1F4E79' : 'transparent'),
-                marginBottom: '-2px', background: 'none', color: on ? '#1F4E79' : '#6B7280',
+              style={{ padding: '8px 14px', border: 'none', borderBottom: '2px solid ' + (on ? 'var(--oq-ln-1f4e79)' : 'transparent'),
+                marginBottom: '-2px', background: 'none', color: on ? 'var(--oq-fg-1f4e79)' : 'var(--oq-fg-6b7280)',
                 fontSize: '13px', fontWeight: on ? '700' : '500', cursor: 'pointer', whiteSpace: 'nowrap' }}>
               {t.label}
             </button>

@@ -83,7 +83,7 @@ export default function MrrActivityTaskPage() {
       });
   }
 
-  if (err && !data) return <div style={{ padding: 20, color: C.warn || '#8C3A2B' }}>{err}</div>;
+  if (err && !data) return <div style={{ padding: 20, color: C.warn || 'var(--oq-fg-8c3a2b)' }}>{err}</div>;
   if (!data) return <div style={{ padding: 20, color: C.muted }}>Loading…</div>;
 
   var act = data.activity;
@@ -150,7 +150,7 @@ export default function MrrActivityTaskPage() {
               style={{ width: '100%', fontSize: 13, padding: 8, border: '1px solid ' + G.line,
                 borderRadius: 5, fontFamily: 'inherit', marginBottom: 8 }} />
             <button onClick={complete} disabled={busy}
-              style={{ font: 'inherit', fontSize: 13, background: G.navy, color: '#fff', border: 'none',
+              style={{ font: 'inherit', fontSize: 13, background: G.navy, color: 'var(--oq-fg-ffffff)', border: 'none',
                 borderRadius: 5, padding: '6px 14px', fontWeight: 600, cursor: busy ? 'not-allowed' : 'pointer',
                 opacity: busy ? 0.5 : 1 }}>
               {busy ? 'Recording…' : 'Mark complete'}
@@ -161,7 +161,7 @@ export default function MrrActivityTaskPage() {
           </div>
         )}
         {done ? <div style={{ fontSize: 12.5, color: G.statute, marginTop: 8 }}>Saved.</div> : null}
-        {err ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 8 }}>{err}</div> : null}
+        {err ? <div style={{ fontSize: 12.5, color: 'var(--oq-fg-8c3a2b)', marginTop: 8 }}>{err}</div> : null}
       </Panel>
 
       {/* ONE REQUEST, ONE VOICE. No contact-requestor control here — by design and by rule. */}

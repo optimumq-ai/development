@@ -33,7 +33,7 @@ const ALL = [
   'verify_branch_profile', 'verify_clock_matrix', 'verify_approval_modules', 'verify_requestor_ledger', 'verify_identity_anchors',
   'verify_bw2_catalog', 'verify_bw3_intake_review', 'verify_bw4_estimate', 'verify_bw5_close', 'verify_bw6_mrr', 'verify_mrr_priority', 'verify_external_links', 'verify_bw7_financial',
   'verify_bw8_release_review', 'verify_bw9_golive', 'verify_bw9b_editors', 'verify_status_check',
-  'verify_record_verification', 'verify_ops_dashboard', 'verify_health_scoring',
+  'verify_record_verification', 'verify_ops_dashboard', 'verify_health_scoring', 'verify_display_theme', 'verify_theme_tokens',
   'verify_e2e_tx', 'verify_e2e_oh',
   // LAST on purpose: it benchmarks, SWAPS, and restores the test database — the world it leaves is
   // its own benchmark, but nothing else should have to run after a database swap.

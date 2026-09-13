@@ -10,16 +10,16 @@ import GoLiveBanner from '../components/ui/GoLiveBanner';
 // task's BUDGET (the early-warning layer), never the statutory clock, which gets its own clearly-labeled
 // pane. Recent Requests is retired (redundant with the Request Queue). v2 idiom, scoped styles.
 const STYLES = `
-.ops{--page:transparent;--panel:#EBF3FB;--surface:#FFFFFF;--civic:#1F4E79;--civic-700:#163A5C;
-  --civic-tint:#E7EEF6;--ink:#14202B;--muted:#5B6B7A;--hair:#C9D6E2;
-  --warn:#C77A0A;--warn-bg:#FBEFD7;--serious:#B23A3A;--serious-bg:#F9E4E4;
-  --critical:#7C1D1D;--critical-bg:#F3D2D2;--ok:#17803D;--ok-bg:#E6F4EC;
+.ops{--page:transparent;--panel:var(--oq-bg-ebf3fb);--surface:var(--oq-bg-ffffff);--civic:var(--oq-x-1f4e79);--civic-700:var(--oq-x-163a5c);
+  --civic-tint:var(--oq-bg-e7eef6);--ink:var(--oq-fg-14202b);--muted:var(--oq-fg-5b6b7a);--hair:var(--oq-ln-c9d6e2);
+  --warn:var(--oq-x-c77a0a);--warn-bg:var(--oq-bg-fbefd7);--serious:var(--oq-x-b23a3a);--serious-bg:var(--oq-bg-f9e4e4);
+  --critical:var(--oq-x-7c1d1d);--critical-bg:var(--oq-bg-f3d2d2);--ok:var(--oq-x-17803d);--ok-bg:var(--oq-bg-e6f4ec);
   --shadow:0 1px 2px rgba(20,32,43,.06),0 6px 20px rgba(20,32,43,.06);
   max-width:1200px;color:var(--ink);font-size:14px;line-height:1.45}
 .ops *{box-sizing:border-box}
 .ops .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
 .ops h1{font-size:24px;font-weight:700;margin:0 0 4px}
-.ops .sub{color:#9CA3AF;font-size:14px;margin:0}
+.ops .sub{color:var(--oq-fg-9ca3af);font-size:14px;margin:0}
 .ops .customize{background:white;border:1px solid var(--hair);color:var(--civic);padding:9px 16px;
   border-radius:9px;font-weight:600;font-size:13px;cursor:pointer}
 .ops .panes{display:flex;flex-direction:column;gap:16px;margin-top:16px}
@@ -59,7 +59,7 @@ const STYLES = `
 .ops .hcell{border-radius:8px;padding:10px 8px;text-align:center;font-size:13px;font-weight:700}
 .ops .hcell small{display:block;font-weight:400;font-size:11px;margin-top:2px}
 .ops .hc-ok{background:var(--ok-bg);color:var(--ok)} .ops .hc-warn{background:var(--warn-bg);color:var(--warn)}
-.ops .hc-bad{background:var(--serious-bg);color:var(--serious)} .ops .hc-none{background:#F0F2F5;color:#9CA3AF}
+.ops .hc-bad{background:var(--serious-bg);color:var(--serious)} .ops .hc-none{background:var(--oq-bg-f0f2f5);color:var(--oq-fg-9ca3af)}
 .ops .hrow{font-size:13.5px;font-weight:700;padding:12px 6px 0}
 .ops .hrow small{display:block;font-weight:600;font-size:11.5px}
 .ops .strip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--hair);
@@ -68,24 +68,24 @@ const STYLES = `
 .ops .note{font-size:11px;color:var(--muted);margin-top:8px}
 .ops-overlay{position:fixed;inset:0;background:rgba(20,32,43,.45);display:flex;align-items:center;
   justify-content:center;padding:20px;z-index:60}
-.ops-modal{width:100%;max-width:560px;background:#EBF3FB;border:1px solid #C9D6E2;border-radius:14px;
+.ops-modal{width:100%;max-width:560px;background:var(--oq-bg-ebf3fb);border:1px solid var(--oq-ln-c9d6e2);border-radius:14px;
   box-shadow:0 10px 32px rgba(20,32,43,.18);padding:24px 26px;max-height:86vh;overflow-y:auto}
-.ops-modal h2{font-size:20px;font-weight:700;margin:0 0 4px;color:#14202B}
-.ops-modal .lede{color:#5B6B7A;font-size:13px;margin:0 0 16px}
-.ops-modal .row{display:flex;align-items:flex-start;gap:10px;background:white;border:1px solid #C9D6E2;
+.ops-modal h2{font-size:20px;font-weight:700;margin:0 0 4px;color:var(--oq-fg-14202b)}
+.ops-modal .lede{color:var(--oq-fg-5b6b7a);font-size:13px;margin:0 0 16px}
+.ops-modal .row{display:flex;align-items:flex-start;gap:10px;background:white;border:1px solid var(--oq-ln-c9d6e2);
   border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
-.ops-modal .rt{font-weight:700;font-size:14px;color:#14202B}
-.ops-modal .rd{font-size:12px;color:#5B6B7A;margin-top:2px}
+.ops-modal .rt{font-weight:700;font-size:14px;color:var(--oq-fg-14202b)}
+.ops-modal .rd{font-size:12px;color:var(--oq-fg-5b6b7a);margin-top:2px}
 .ops-modal .scopebtns{display:flex;gap:6px;margin-top:8px}
-.ops-modal .sb{padding:5px 12px;border-radius:8px;border:2px solid #E5E7EB;background:white;font-size:12px;
-  font-weight:600;color:#5B6B7A;cursor:pointer}
-.ops-modal .sb.on{border-color:#1F4E79;background:#EBF3FB;color:#1F4E79}
+.ops-modal .sb{padding:5px 12px;border-radius:8px;border:2px solid var(--oq-ln-e5e7eb);background:white;font-size:12px;
+  font-weight:600;color:var(--oq-fg-5b6b7a);cursor:pointer}
+.ops-modal .sb.on{border-color:var(--oq-x-1f4e79);background:var(--oq-bg-ebf3fb);color:var(--oq-fg-1f4e79)}
 .ops-modal .actions{display:flex;gap:12px;justify-content:flex-end;margin-top:14px}
-.ops-modal .btn{background:#1F4E79;color:#fff;border:1px solid #1F4E79;padding:10px 18px;border-radius:9px;
+.ops-modal .btn{background:var(--oq-bg-1f4e79);color:var(--oq-fg-ffffff);border:1px solid var(--oq-ln-1f4e79);padding:10px 18px;border-radius:9px;
   font-weight:600;font-size:14px;cursor:pointer}
-.ops-modal .btn.sec{background:transparent;color:#1F4E79}
-.ops-modal .err{background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px 12px;
-  font-size:13px;color:#DC2626;margin-top:10px}
+.ops-modal .btn.sec{background:transparent;color:var(--oq-fg-1f4e79)}
+.ops-modal .err{background:var(--oq-bg-fef2f2);border:1px solid var(--oq-ln-fca5a5);border-radius:8px;padding:10px 12px;
+  font-size:13px;color:var(--oq-fg-dc2626);margin-top:10px}
 `;
 
 const NODE_LABELS = { estimate:'Estimate', record_search:'Record search', redaction:'Redaction',
@@ -127,7 +127,7 @@ function NodesTable({ nodes, showBudget, budgets }) {
         <th>1 day late</th><th>2 days late</th><th>&gt;2 days late</th><th>Health</th></tr></thead>
       <tbody>
         {(nodes || []).length === 0
-          ? <tr><td colSpan={8} style={{ textAlign:'center', color:'#9CA3AF' }}>No open tasks</td></tr>
+          ? <tr><td colSpan={8} style={{ textAlign:'center', color:'var(--oq-fg-9ca3af)' }}>No open tasks</td></tr>
           : nodes.map(n => (
             <tr key={n.taskType}>
               <td>{nodeLabel(n.taskType)}{showBudget && budgets[n.taskType] != null
@@ -202,7 +202,7 @@ export default function DashboardPage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '256px' }}>
-      <div style={{ fontSize: '16px', color: '#6B7280' }}>Loading dashboard...</div>
+      <div style={{ fontSize: '16px', color: 'var(--oq-fg-6b7280)' }}>Loading dashboard...</div>
     </div>
   );
 

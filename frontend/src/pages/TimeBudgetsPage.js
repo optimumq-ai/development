@@ -33,7 +33,7 @@ export default function TimeBudgetsPage() {
     <SetupScreen hubKey="time_budgets" laneLabel="System Features and Options" title="How many days a task should take"
       intro="A working target for each kind of task. When a task runs past its budget it shows as late on the dashboard — an early warning that a slow early step is eating into the legal deadline. These are targets your office sets, not legal deadlines; the statutory clock is tracked separately and is never affected by these numbers.">
       {function (s) {
-        if (!budgets) return <div style={{ color: '#9CA3AF' }}>Loading…</div>;
+        if (!budgets) return <div style={{ color: 'var(--oq-fg-9ca3af)' }}>Loading…</div>;
         return (
           <div>
             {msg ? <Msg text={msg.text} ok={msg.ok} /> : null}
@@ -41,15 +41,15 @@ export default function TimeBudgetsPage() {
               var edited = edits[b.task_type] !== undefined;
               var val = edited ? edits[b.task_type] : String(b.budget_days);
               return (
-                <div key={b.task_type} style={{ display: 'flex', alignItems: 'center', gap: '14px', borderBottom: '1px solid #EEF2F5', padding: '10px 0' }}>
+                <div key={b.task_type} style={{ display: 'flex', alignItems: 'center', gap: '14px', borderBottom: '1px solid var(--oq-ln-eef2f5)', padding: '10px 0' }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>{label(b.task_type)}</div>
-                    <div style={{ fontSize: '11.5px', color: '#8296A4' }}>{b.source === 'supervisor' && b.updated_by ? 'Set by ' + b.updated_by : 'Provisional default — not yet reviewed by your office'}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--oq-fg-374151)' }}>{label(b.task_type)}</div>
+                    <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-8296a4)' }}>{b.source === 'supervisor' && b.updated_by ? 'Set by ' + b.updated_by : 'Provisional default — not yet reviewed by your office'}</div>
                   </div>
                   <input type="number" min="0.5" max="365" step="0.5" value={val} disabled={!s.can}
                     onChange={function (e) { var v = e.target.value; setEdits(function (ed) { var n = Object.assign({}, ed); n[b.task_type] = v; return n; }); }}
-                    style={{ width: '90px', padding: '8px 10px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', textAlign: 'right', fontFamily: 'inherit' }} />
-                  <span style={{ fontSize: '12px', color: '#5C6F7C', width: '34px' }}>days</span>
+                    style={{ width: '90px', padding: '8px 10px', border: '1px solid var(--oq-ln-d1d5db)', borderRadius: '8px', fontSize: '13px', textAlign: 'right', fontFamily: 'inherit' }} />
+                  <span style={{ fontSize: '12px', color: 'var(--oq-fg-5c6f7c)', width: '34px' }}>days</span>
                   <PrimaryButton disabled={!s.can || !edited || busy === b.task_type} onClick={function () { save(b.task_type, s.reload); }}>{busy === b.task_type ? 'Saving…' : 'Save'}</PrimaryButton>
                 </div>
               );

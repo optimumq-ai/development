@@ -53,29 +53,29 @@ export default function UserTypesPage() {
     setSaving(false);
   }
 
-  var th = { textAlign: 'left', padding: '10px 12px', fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1px solid #E5E7EB', verticalAlign: 'bottom' };
-  var td = { padding: '10px 12px', fontSize: '13px', color: '#374151', verticalAlign: 'top', borderBottom: '1px solid #F3F4F6' };
+  var th = { textAlign: 'left', padding: '10px 12px', fontSize: '11px', fontWeight: '700', color: 'var(--oq-fg-6b7280)', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1px solid var(--oq-ln-e5e7eb)', verticalAlign: 'bottom' };
+  var td = { padding: '10px 12px', fontSize: '13px', color: 'var(--oq-fg-374151)', verticalAlign: 'top', borderBottom: '1px solid var(--oq-ln-f3f4f6)' };
   var chip = function (text, bg, color, key) {
     return <span key={key || text} style={{ display: 'inline-block', background: bg, color: color, fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '12px', margin: '0 4px 4px 0' }}>{text}</span>;
   };
 
-  if (err && !data) return <div style={{ padding: '24px', color: '#DC2626' }}>{err}</div>;
-  if (!data) return <div style={{ padding: '24px', color: '#9CA3AF' }}>Loading user types…</div>;
+  if (err && !data) return <div style={{ padding: '24px', color: 'var(--oq-fg-dc2626)' }}>{err}</div>;
+  if (!data) return <div style={{ padding: '24px', color: 'var(--oq-fg-9ca3af)' }}>Loading user types…</div>;
 
   return (
     <SetupScreen laneLabel="Organization Departments, Teams, and Staff Setup" title="User Types" maxWidth="960px" note="Reached from Organization → Staff → View user types"
       intro="The catalog of user types: what each may be routed, what it may do, and which parts of setup it may change.">
     {function () { return (
     <div>
-      <div style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 14px', lineHeight: '1.6', maxWidth: '860px' }}>
+      <div style={{ fontSize: '13px', color: 'var(--oq-fg-6b7280)', margin: '0 0 14px', lineHeight: '1.6', maxWidth: '860px' }}>
         A person holds one or more <strong>user types</strong>. Everything else follows from the type: the work the system may route to
         them (<strong>task menu</strong>), what they may do to work they don’t own (<strong>authority</strong>), and which parts of setup they
         may change (<strong>permission groups</strong>). Team types are held against a fulfillment team; a person can hold them on
         several teams, and can be in the Open Records Office at the same time. Display names can be renamed to your city’s terms;
         the wiring is fixed.
       </div>
-      {err && <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: '#DC2626', marginBottom: '12px' }}>{err}</div>}
-      <div style={{ overflowX: 'auto', background: 'white', border: '1px solid #E5E7EB', borderRadius: '10px' }}>
+      {err && <div style={{ background: 'var(--oq-bg-fef2f2)', border: '1px solid var(--oq-ln-fca5a5)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: 'var(--oq-fg-dc2626)', marginBottom: '12px' }}>{err}</div>}
+      <div style={{ overflowX: 'auto', background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '10px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
           <thead><tr>
             <th style={th}>User type</th><th style={th}>Scope</th><th style={th}>Task menu</th><th style={th}>Authority</th><th style={th}>Permission groups</th>
@@ -89,23 +89,23 @@ export default function UserTypesPage() {
                     {isEd ? (
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                         <input value={editing.name} onChange={function (e) { setEditing({ key: t.key, name: e.target.value }); }} maxLength={80}
-                          style={{ padding: '6px 8px', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '13px', width: '220px' }} />
-                        <button onClick={saveName} disabled={saving} style={{ padding: '6px 10px', background: '#1F4E79', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Save</button>
-                        <button onClick={function () { setEditing(null); }} disabled={saving} style={{ padding: '6px 10px', background: 'white', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
+                          style={{ padding: '6px 8px', border: '1px solid var(--oq-ln-bfdbfe)', borderRadius: '6px', fontSize: '13px', width: '220px' }} />
+                        <button onClick={saveName} disabled={saving} style={{ padding: '6px 10px', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Save</button>
+                        <button onClick={function () { setEditing(null); }} disabled={saving} style={{ padding: '6px 10px', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-6b7280)', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
                       </div>
                     ) : (
                       <div>
-                        <div style={{ fontWeight: '600', color: '#111' }}>{t.displayName}{t.legalRulesOwner ? <span title="Owner of the Legal Rules attestations" style={{ marginLeft: '6px', fontSize: '10px', color: '#6D28D9', fontWeight: '700' }}>LEGAL OWNER</span> : null}</div>
-                        <div style={{ fontSize: '11px', color: '#9CA3AF', fontFamily: 'monospace' }}>{t.key}
-                          {canRename ? <button onClick={function () { setEditing({ key: t.key, name: t.displayName }); }} style={{ marginLeft: '8px', background: 'none', border: 'none', color: '#1F4E79', fontSize: '11px', cursor: 'pointer', padding: 0 }}>Rename</button> : null}
+                        <div style={{ fontWeight: '600', color: 'var(--oq-fg-111111)' }}>{t.displayName}{t.legalRulesOwner ? <span title="Owner of the Legal Rules attestations" style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--oq-fg-6d28d9)', fontWeight: '700' }}>LEGAL OWNER</span> : null}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', fontFamily: 'monospace' }}>{t.key}
+                          {canRename ? <button onClick={function () { setEditing({ key: t.key, name: t.displayName }); }} style={{ marginLeft: '8px', background: 'none', border: 'none', color: 'var(--oq-fg-1f4e79)', fontSize: '11px', cursor: 'pointer', padding: 0 }}>Rename</button> : null}
                         </div>
                       </div>
                     )}
                   </td>
-                  <td style={td}>{t.scope === 'team' ? chip('per team', '#D1FAE5', '#065F46') : chip('office', '#EDE9FE', '#6D28D9')}</td>
-                  <td style={td}>{t.taskMenu.length ? t.taskMenu.map(function (k) { return chip(TASK_LABEL[k] || k, '#EFF6FF', '#1F4E79', k); }) : <span style={{ color: '#D1D5DB' }}>—</span>}</td>
-                  <td style={td}>{t.authorities.length ? t.authorities.map(function (k) { return chip(AUTHORITY_LABEL[k] || k, '#FEF3C7', '#92400E', k); }) : <span style={{ color: '#D1D5DB' }}>—</span>}</td>
-                  <td style={td}>{t.permissionGroups.length ? t.permissionGroups.map(function (k) { return chip(GROUP_LABEL[k] || k, '#F3F4F6', '#374151', k); }) : <span style={{ color: '#D1D5DB' }}>—</span>}</td>
+                  <td style={td}>{t.scope === 'team' ? chip('per team', 'var(--oq-bg-d1fae5)', 'var(--oq-fg-065f46)') : chip('office', 'var(--oq-bg-ede9fe)', 'var(--oq-fg-6d28d9)')}</td>
+                  <td style={td}>{t.taskMenu.length ? t.taskMenu.map(function (k) { return chip(TASK_LABEL[k] || k, 'var(--oq-bg-eff6ff)', 'var(--oq-fg-1f4e79)', k); }) : <span style={{ color: 'var(--oq-fg-d1d5db)' }}>—</span>}</td>
+                  <td style={td}>{t.authorities.length ? t.authorities.map(function (k) { return chip(AUTHORITY_LABEL[k] || k, 'var(--oq-bg-fef3c7)', 'var(--oq-fg-92400e)', k); }) : <span style={{ color: 'var(--oq-fg-d1d5db)' }}>—</span>}</td>
+                  <td style={td}>{t.permissionGroups.length ? t.permissionGroups.map(function (k) { return chip(GROUP_LABEL[k] || k, 'var(--oq-bg-f3f4f6)', 'var(--oq-fg-374151)', k); }) : <span style={{ color: 'var(--oq-fg-d1d5db)' }}>—</span>}</td>
                 </tr>
               );
             })}

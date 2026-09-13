@@ -38,7 +38,7 @@ function btn(kind) {
   var base = { font: 'inherit', fontSize: 13, borderRadius: 5, padding: '6px 14px', cursor: 'pointer', fontWeight: 600 };
   if (kind === 'sec') return Object.assign({}, base, { background: C.surface, color: C.blue, border: '1px solid ' + C.blue });
   if (kind === 'quiet') return Object.assign({}, base, { background: C.surface2, color: C.ink, border: '1px solid ' + G.line, fontWeight: 500 });
-  return Object.assign({}, base, { background: C.blue, color: '#fff', border: 'none' });
+  return Object.assign({}, base, { background: C.blueBg, color: 'var(--oq-fg-ffffff)', border: 'none' });
 }
 
 // The clock strip's kicker per kind. `none` gets no kicker — there is nothing to title.
@@ -437,7 +437,7 @@ export default function IntakeReviewTaskPage() {
                   {ledger.allowance && ledger.allowance.metered ? (
                     <div style={{ marginTop: 8, borderLeft: '3px solid ' + G.navy, paddingLeft: 10 }}>
                       <b>Free personnel time</b> · {ledger.allowance.usedYear} of {ledger.allowance.hoursPerYear} hours used in the last 12 months{ledger.allowance.hoursPerMonth != null ? ' · ' + ledger.allowance.usedMonth + ' of ' + ledger.allowance.hoursPerMonth + ' this month' : ''}
-                      {ledger.allowance.over ? <div style={{ color: '#B02A37', marginTop: 3 }}>At the cap — every hour on this request is chargeable; the estimate gate applies it.</div> : null}
+                      {ledger.allowance.over ? <div style={{ color: 'var(--oq-fg-b02a37)', marginTop: 3 }}>At the cap — every hour on this request is chargeable; the estimate gate applies it.</div> : null}
                     </div>
                   ) : null}
                   {ledger.allowance && ledger.allowance.exempt ? <div style={Object.assign({}, kv, { marginTop: 8 })}>Free personnel time is not metered — {ledger.allowance.exemptReason}.</div> : null}

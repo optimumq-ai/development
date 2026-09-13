@@ -67,15 +67,15 @@ import PublicLibraryPage from './pages/PublicLibraryPage';
 function Guard({ c }) {
   const store = useAuthStore();
   if (!store.isAuthenticated) return React.createElement(Navigate, { to: '/login', replace: true });
-  if (!store.user) return React.createElement('div', { style:{ display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#9CA3AF',fontSize:'14px' } }, 'Loading...');
+  if (!store.user) return React.createElement('div', { style:{ display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--oq-fg-9ca3af)',fontSize:'14px' } }, 'Loading...');
   return c;
 }
 function Soon({ t }) {
   return React.createElement('div', { style: { display:'flex', alignItems:'center', justifyContent:'center', height:'256px' } },
     React.createElement('div', { style: { textAlign:'center' } },
       React.createElement('div', { style: { fontSize:'48px', marginBottom:'16px' } }, '🚧'),
-      React.createElement('h2', { style: { fontSize:'20px', fontWeight:'600', color:'#4B5563', margin:'0 0 8px' } }, t),
-      React.createElement('p', { style: { color:'#9CA3AF', fontSize:'14px', margin:0 } }, 'Under active development')
+      React.createElement('h2', { style: { fontSize:'20px', fontWeight:'600', color:'var(--oq-fg-4b5563)', margin:'0 0 8px' } }, t),
+      React.createElement('p', { style: { color:'var(--oq-fg-9ca3af)', fontSize:'14px', margin:0 } }, 'Under active development')
     )
   );
 }
