@@ -10339,3 +10339,23 @@ user_types 77, setup_hub 107; live untouched. Screenshots: /tmp/oq-session/o1_de
 + 11 record types), o2_team.png (Open Records Office: 4 steps + kept-on-record), o3_staff.png (Deactivate now).
 Spec: SPEC_setup_hub list-model section (2026-09-08 paragraph). NOTE: the "Open Records hub" flag on a
 department/team is a step, not a hard block — move the flag on Edit first.
+
+## 2026-09-13 — Display colour option: sample mark-up delivered (Kevin's high-contrast ask); nothing built
+
+Kevin (2026-09-13): add a choice in the account menu (click the name, top right, where Sign Out lives) between the
+standard UI colours and a higher-contrast option; he uploaded `~/exchange/colorsuploaded.zip` (16 swatches: white,
+muted white, light gray, light slate, medium slate, asphault, carbon, nearly black; royal, violet, wasabi, dijon, vday;
+gogreen, warningyellow, dangerred) and asked for a sample mark-up using the colours I judge best. DELIVERED, not built:
+`~/exchange/COLOR_SCHEME_SAMPLE_2026-09-13.html` + `.png` — the Request Queue rendered three times (standard as today;
+high-contrast LIGHT = recommended: white panels on light gray, nearly-black text and 2px borders, royal for buttons/
+links/selected, vday destructive, the three status colours as fills with nearly-black text; high-contrast DARK as the
+alternative: asphault on nearly black, violet takes the button role because royal is 2.1:1 on black). Each row carries
+the swatch→role legend with measured WCAG ratios (light slate 4.47:1 on white → placeholders only). The account menu is
+shown open with a new "Display" section (Standard colours / High contrast) above Sign Out.
+**Build note for whoever picks this up:** the frontend has ~3,400 hard-coded hex literals across 85 files (inline
+styles), plus `lib/theme.js` `C.*` (1,157 uses) and a handful of `var(--…)` on the portal. A user-selectable theme
+needs those literals routed through shared CSS variables first (the drift defect theme.js already documents) — a
+mechanical codemod of the ~40 dominant values, then a `[data-theme]` override block; the per-user choice is a
+`localStorage` key read in AppLayout, same pattern as `oq_nav_pinned`. Waiting on Kevin's pick (light vs dark, or
+changes to the mapping) before any of that. Kevin is continuing setup-screen mark-ups meanwhile; the Fee rules
+re-approval (→ v3) is STILL pending on live (checked today: active fee_profiles row is v2).
