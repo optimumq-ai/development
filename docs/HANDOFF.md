@@ -10621,3 +10621,27 @@ and K9" routing specialization.
 **NEXT:** Kevin's four decisions (§6 of the document); then delete + `node src/db/gen_fixture_seed.js` + suite; the guided
 record-type/source removal slice if he says yes; then item 5 (setup-flow map discussion). Still pending from Kevin:
 certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).
+
+## 2026-09-14 — Item 4 decision executed: the two demo sources DELETED; fixture edited by hand; a fixture-drift finding
+
+Kevin: "delete the two sources, keep the other six for now." Re-verified zero footprint (no repository_id reference in any
+table, no system_config mention), then deleted **Demo Document Library** (`repo-demo`) and **Development Services Drive**
+(`repo-80tdz1ho`) through `DELETE /api/repositories/:id` as his admin login (200, 200) — 21 → 19 sources on live.
+**Fixture:** `repo-demo` was one row in `seed_fixture.sql` (repo-80tdz1ho was never in it); removed that ONE line by hand.
+**Why not `gen_fixture_seed.js`:** I ran it first — the regenerated file differed from the checked-in fixture by
+476 insertions / 650 deletions: −112 `jurisdiction_profile_sections` (jps-) rows, −55 `config_history`, −14 `legal_sources`
+(ls-tx-), record types +16/−9, users and system_config churn. The fixture has been CURATED away from live since its last
+regeneration (the harness-order memory already notes it ships researched TX payment-clock values where live holds
+defaults), so a blind regen would have overwritten that curation and changed what every harness boots from. Reverted the
+regen; the drift is now a standing finding: **fixture vs live diverge by ~1,100 lines — needs a deliberate reconciliation
+session** (decide per table whether live or the fixture is right, then regenerate). Not this slice.
+**Verification state at sign-off (Kevin stopped for the night):** the full suite was launched against the edited fixture
+and was STILL RUNNING when this was committed — verdict in `/tmp/oq-shot/full.status` + `/tmp/oq-shot/full.log`
+(grep `❌|passed|LIVE`). **Tomorrow's first act: read that verdict before anything else.** Expected: 2 standing reds
+(stage_bypass #1, bw9_golive E1a), live untouched. If the fixture edit broke a harness, the one-line removal at the
+`record_repositories` block is the only candidate.
+**NEXT (Kevin): item 5** — the setup-flow map discussion: what "Configure with AI" (connector), "Find Variants" (taxonomy)
+and fingerprint discovery each do today, their limits (the ~15-file AI sample), and the optimal flow connector → census /
+inventory → AI discovery associates record types to groupings; feeds item 6 (inventory build). Decisions still open from
+item 4: owners for the 10 owner-less buckets; guided record-type/source removal slice — yes / later; the "Open Records
+Office" test team row. Still pending: certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).

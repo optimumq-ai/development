@@ -459,7 +459,6 @@ ON CONFLICT DO NOTHING;
 INSERT INTO "record_repositories" ("id", "name", "connector_type", "status", "config", "sort_order", "created_at", "description") VALUES
   ('repo-911-demo', '911 Call Management System (demo)', 'nena911', 'active', '{"note":"Synthetic CAD/dispatch emulator"}', 60, '2026-07-04 03:48:54', NULL),
   ('repo-axon', 'Axon Evidence (Police Records)', 'axon', 'active', '{"baseUrl":"http://localhost:4002","apiKey":"demo-axon-key-replace-in-production"}', 30, '2026-05-28 05:52:23', NULL),
-  ('repo-demo', 'Demo Document Library', 'demo', 'active', '{}', 10, '2026-05-27 03:24:18', NULL),
   ('repo-email-demo', 'City Email System (demo)', 'email', 'active', '{"threshold":150}', 400, '2026-07-04 03:04:33', NULL),
   ('repo-filestore-sample', 'Sample Network Drive (PDFs)', 'filestore', 'active', '{"path":"/opt/optimumq/sample_repo"}', 10, '2026-06-08 19:53:34', NULL),
   ('repo-imptest', 'Test Import Drop', 'import', 'active', '{"path":"/opt/optimumq/imports/testdrop","mode":"push","subdir":"testdrop","end_to_end":true,"review_assignee":"fb3721fb-6d52-4437-837f-fc8a1be71887","template_id":"","record_type_id":""}', 60, '2026-07-07 04:07:43', ''),

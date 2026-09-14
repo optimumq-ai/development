@@ -61,7 +61,7 @@ Deletion order is the reverse, and what each deletion strands if done bare:
 | Record types | 92 | 76 seeded · 7 discovered and active · 8 discovered drafts (all variants of Building permits) · 1 manual. 15 categories. |
 | Owner links | 75 | 11 departments own records (Police 11, Clerk 11, Building & Planning 11, Finance 10, HR 5, PIO 5, Public Works 5, Attorney 5, IT 4, Fire 4, Parks 3). **10 active buckets have NO owner** and so cannot route: 911 Call Records · Animal impound & intake · Direct deposit authorizations · Employee pay stubs · Employee tax forms (W-2) · Employee timesheets · Forensic device images · Mobile device contents · Payroll registers · Vendor invoices. |
 | Fulfiller overrides | 1 | Historical Property & Land Records → City Clerk Records & Archives. |
-| Sources | 21 | 11 shipped by the fixture (demo/sample systems and the three connector stubs) + 10 filestore drives added on this box (the nine department drives migrated 2026-09-04 and two leftovers). **53 of 84 buckets have no source at all**; Laserfiche ECM alone is linked to 21 types. |
+| Sources | 21 → **19** (Demo Document Library and Development Services Drive deleted 2026-09-14 on Kevin's decision; the six other demo sources kept for now) | 11 shipped by the fixture (10 after the deletion) (demo/sample systems and the three connector stubs) + 10 filestore drives added on this box (the nine department drives migrated 2026-09-04 and two leftovers). **53 of 84 buckets have no source at all**; Laserfiche ECM alone is linked to 21 types. |
 
 ### The two sources Kevin wants deleted
 
@@ -113,7 +113,7 @@ live alone does not.
 
 ## 6. Decisions for Kevin
 
-- Delete the two sources now (recommended), and which of the other six zero-footprint demo sources go with them.
+- ~~Delete the two sources now~~ **DECIDED 2026-09-14: deleted; the other six stay for now.**
 - Record types stay as starter data (recommended) — and who owns each of the 10 owner-less buckets.
 - Build guided record-type deletion (and the matching source guard) as the next slice — yes / later.
 - The "Open Records Office" team row: delete it, or is it real?
