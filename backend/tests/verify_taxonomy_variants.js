@@ -94,6 +94,16 @@ async function api(method, path, body) {
     vRow && vRow.parent_name === 'Bucket ' + TAG);
   ok('C2 the variant INHERITS the parent\'s owner department for routing',
     vRow && vRow.owner_department_id === 'dept-police');
+  // Kevin 2026-09-13: a variant has NO routing of its own — the list shows the parent's, and writing one is refused.
+  var listedAll = (await api('GET', '/taxonomy/record-types')).body; listedAll = Array.isArray(listedAll) ? listedAll : (listedAll.record_types || listedAll.types || []);
+  var listed = listedAll.filter(function (r) { return r.id === variant.id; })[0];
+  ok('C3 the taxonomy list shows the variant with its parent\'s routing, marked inherited (was "No owning dept")',
+    listed && listed.routing_inherited === true && listed.owner_department_id === 'dept-police');
+  var rr = await fetch('http://localhost:' + PORT + '/api/taxonomy/record-types/' + variant.id + '/routing', { method: 'PATCH', headers: { Authorization: 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ owning_department_id: 'dept-police' }) });
+  var rd = await fetch('http://localhost:' + PORT + '/api/taxonomy/record-types/' + variant.id + '/departments', { method: 'POST', headers: { Authorization: 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ department_id: 'dept-police', role: 'owner' }) });
+  var ownLinks = await db.get('SELECT count(*)::int AS n FROM record_type_departments WHERE record_type_id = ?', [variant.id]);
+  ok('C4 setting routing ON a variant is refused (422) by both write paths and nothing is written',
+    rr.status === 422 && rd.status === 422 && Number(ownLinks.n) === 0);
 
   console.log('\n=== D. LEAVE THE WORLD AS FOUND ===');
   await db.run('DELETE FROM requests WHERE id = ?', [reqId]);

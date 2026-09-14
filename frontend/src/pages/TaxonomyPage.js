@@ -7,7 +7,8 @@ import SetupScreen from '../components/setup/SetupScreen';
 // TAXONOMY — the hub's `taxonomy` row, and the door for `calibration` and `record_owners` too (C17, Kevin
 // 2026-08-30: the hidden admin Taxonomy tab becomes this dedicated screen at /setup/taxonomy).
 // LIST MODEL (§3e, 2026-08-31): all three rows are lists over the SAME record types, so the body is one
-// page — what the ?tab= chooses is which of the three setup items the strip is signing off (the
+// page — what the ?tab= chooses is which of the three setup items is being signed off (the pill strip that
+// switched them was removed 2026-09-14 — Kevin: it looked like navigation and went nowhere; the hub doors carry ?tab=) (the
 // Organization pattern, minus the content split, because the content really is shared). Each row keeps
 // its own count, health, "Ready for approval" and approval.
 var SETUP_ROWS = [
@@ -149,14 +150,6 @@ export default function TaxonomyPage() {
       intro="The record types this city holds, grouped by category, with each type's release posture, owning department and estimate calibration. Three setup rows open here: Taxonomy, how much work each record type takes, and which department owns which records.">
     {function () { return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--oq-fg-9ca3af)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Setting up</span>
-        {SETUP_ROWS.map(function (r) {
-          var on = r.tab === setupRow.tab;
-          return <button key={r.tab} onClick={function () { setParams(r.tab === 'types' ? {} : { tab: r.tab }); }}
-            style={{ fontSize: '12.5px', padding: '6px 13px', borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit', border: '1px solid ' + (on ? 'var(--oq-ln-1f4e79)' : 'var(--oq-ln-d1d5db)'), background: on ? 'var(--oq-bg-ebf3fb)' : 'var(--oq-bg-ffffff)', color: on ? 'var(--oq-fg-1f4e79)' : 'var(--oq-fg-4b5563)', fontWeight: on ? 700 : 500 }}>{r.label}</button>;
-        })}
-      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
         <p style={{ color: 'var(--oq-fg-5c6f7c)', fontSize: '13px', margin: 0 }}>Current, live taxonomy &mdash; {types.length} record types across {cats.filter(function(c){ return types.some(function(t){ return t.category_id === c.id; }); }).length} categories</p>
         <div style={{ border: '1px solid var(--oq-ln-dbeafe)', borderRadius: '10px', padding: '12px 14px', background: 'var(--oq-bg-f8faff)', minWidth: '300px', flexShrink: 0 }}>
@@ -305,7 +298,8 @@ export default function TaxonomyPage() {
                             <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)', marginTop: '2px' }}>Pinned by: {t.identifying_facets.join(' \u00b7 ')}</div>
                           ) : null}
                           <div style={{ fontSize: '12px', color: 'var(--oq-fg-6b7280)', marginTop: '4px' }}>
-                            Routing: <strong>{t.owner_department_name || 'No owning dept'}</strong>{t.fulfillment_team_name ? ' -> ' + t.fulfillment_team_name : ''}{t.fulfillment_team_is_override ? ' (override)' : ''}
+                            {/* A variant has no routing of its own — it follows its parent's (Kevin 2026-09-13). */}
+                            Routing: {t.routing_inherited ? <span>follows <em>{parentName}</em> — </span> : null}<strong>{t.owner_department_name || 'No owning dept'}</strong>{t.fulfillment_team_name ? ' -> ' + t.fulfillment_team_name : ''}{t.fulfillment_team_is_override && !t.routing_inherited ? ' (override)' : ''}
                           </div>
                         </div>
                       );

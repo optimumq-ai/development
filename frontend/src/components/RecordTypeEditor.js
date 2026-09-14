@@ -80,7 +80,8 @@ export default function RecordTypeEditor(props) {
       var rid = init.id;
       if (props.mode === 'create') { payload.code = f.code.trim(); var resp = await api.post('/taxonomy/record-types', payload); rid = resp.data && resp.data.id; }
       else { await api.patch('/taxonomy/record-types/' + init.id, payload); }
-      if (rid) { await api.patch('/taxonomy/record-types/' + rid + '/routing', { owning_department_id: owningDeptId || null, fulfillment_team_id: teamOverrideId || null }); }
+      // A variant has no routing of its own — it follows its parent's (the server refuses the write).
+      if (rid && !f.parent_record_type_id) { await api.patch('/taxonomy/record-types/' + rid + '/routing', { owning_department_id: owningDeptId || null, fulfillment_team_id: teamOverrideId || null }); }
       if (rid) { await api.patch('/taxonomy/record-types/' + rid + '/sources', { repository_ids: selectedSources }); }
       props.onSaved();
     } catch (e) {
@@ -130,6 +131,10 @@ export default function RecordTypeEditor(props) {
         <select value={f.category_id} disabled={!!f.parent_record_type_id} onChange={function(e){ set('category_id', e.target.value); }} style={inp}>
           {props.categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
         </select>
+        {f.parent_record_type_id ? <div style={{ fontSize: '12px', color: 'var(--oq-fg-6b7280)', padding: '8px 10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', background: 'var(--oq-bg-f9fafb)' }}>
+          <b>Routing follows the parent.</b> A variant is handled by the department and fulfillment team of the record type it belongs to; set those on the parent.
+        </div> : null}
+        {f.parent_record_type_id ? null : <React.Fragment>
         <label style={lab}>Owning City Department</label>
         <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginBottom: '4px', marginTop: '-2px' }}>The org-chart department that owns these records. The AI matches requests to this.</div>
         <select value={owningDeptId} onChange={function(e){ setOwningDeptId(e.target.value); }} style={inp}>
@@ -142,6 +147,7 @@ export default function RecordTypeEditor(props) {
           <option value="">Use owning City Department default{derivedTeam ? ' (' + derivedTeam.name + ')' : ''}</option>
           {teams.map(function(t){ return <option key={t.id} value={t.id}>{t.name} (override)</option>; })}
         </select>
+        </React.Fragment>}
         <label style={lab}>Found in these sources</label>
         <div style={{ fontSize: '11px', color: 'var(--oq-fg-9ca3af)', marginBottom: '6px', marginTop: '-2px' }}>Which connected systems hold this record type. Auto-filled by AI scans for scannable sources; set API systems (Axon, Tyler) here by hand. Powers search targeting.</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

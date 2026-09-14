@@ -10540,3 +10540,48 @@ one popup — the five harnesses above are the ones that read them).
 **NEXT:** item 3 (Taxonomy small fixes: remove the SETTING UP strip; variants inherit the parent's routing — Kevin's
 discussion questions first) → 4 → 5 → 6 → 7 per the 2026-09-14 order. Pending from Kevin: certified copy SETS (item 1e);
 inspection requests as a feature; whether "capped copy schedule" is the discretion signal he meant for Minimum fee.
+
+## 2026-09-14 — Markup item 3: Taxonomy small fixes BUILT; Kevin's variant questions answered from the code
+
+**Built:** (1) the "Setting up · Taxonomy · How much work… · Which department owns…" pill strip is gone from
+`/setup/taxonomy` (it switched which hub row the page signs off; the hub doors still carry `?tab=`, so nothing is lost).
+(2) **A variant has no routing of its own.** The engine ALREADY routed variants through the parent (`classifier.catalogRows`
+COALESCE walk-up, same in libraryShelf and redactionTemplates) — "Routing: No owning department" was a DISPLAY defect in the
+taxonomy list's `attachRouting`, which never walked up. Now: the list shows "Routing: follows Building permits — Dept ->
+Team" (`routing_inherited`), the record-type editor hides the owner/team fields for a variant and says why, and both routing
+write paths (`PATCH …/routing`, `POST …/departments`) answer 422 for a variant. Live check before building: all 8 variants
+(all under Building permits, all still DRAFT) had 0 own routing links — nothing to migrate.
+
+**Kevin's discussion questions (answered from `SPEC_taxonomy_classification` §1 + the code):**
+- *How is a variant discovered?* "Find variants" on a bucket → `discover-variants` scans the bucket's LINKED sources. For
+  file-backed sources code reads EVERY document once and stores a 10-feature layout fingerprint (`document_fingerprints`);
+  documents matching an already-approved variant's signature are counted under it (recognition), the rest are clustered at
+  8-of-10 agreement (min 3), and the AI's only job is naming a cluster. Non-file sources fall back to the old 50-sample AI
+  digest. Approval inserts ONE draft variant under that bucket (parent + category aligned) and stamps the cluster's
+  fingerprints with the variant id.
+- *Is the source knowable from discovery?* YES — every fingerprinted document carries its `repository_id`, and the
+  proposal stores the sources it was found in (`discovery_meta.repos`, `example_sources`). But it is stored as EVIDENCE
+  only: **no `record_type_repositories` link is written for the variant**, and `recordSearch` reads sources for the chosen
+  type id WITHOUT walking up to the parent — so a request classified to a variant today searches NO sources (all 8 live
+  variants have 0 own sources vs the parent's 3). Two fixes are possible, Kevin's call: (a) write the discovered source
+  links at approval (exact: the census knows where each document lives), and/or (b) inherit the parent's sources at search
+  time when the variant has none (safe superset). Recommendation: BOTH — (a) is what discovery already knows, (b) covers
+  hand-made variants. Not built this slice (his "discuss" items).
+- *Does re-typing a variant move it?* YES. The editor's Parent field lists buckets; `PATCH /record-types/:id` validates the
+  new parent (one level, no cycles) and re-aligns the category to the new parent's; the list nests it there at once. The
+  fingerprint stamps travel with the variant id, so recognition keeps working under the new bucket. NOT re-derived on a move:
+  the variant's own descriptive fields, and its inherited attachments now come from the NEW parent (estimate profile, time
+  budgets, legal gate, routing).
+- *Could a variant belong to a different record type than its parent?* Discovery can only ever propose a variant under the
+  bucket whose sources it scanned, so a mis-parented variant arises in exactly one case Kevin named: a bucket linked to an
+  enterprise-wide store that holds other departments' documents too. The fingerprint census cannot tell departments apart
+  (layout only). Practical answer: keep buckets linked to their OWN department's sources; where an enterprise store is linked,
+  the human approving the proposal is the check, and re-parenting (above) is the repair. Recommend documenting this as the
+  guidance rather than adding per-variant routing back.
+**Evidence:** `verify_taxonomy_variants` C3 (list shows the parent's routing, `routing_inherited`) + C4 (both routing writes
+422 on a variant, nothing written) → 16/16; subset in suite order setup_hub 107 · taxonomy_variants 16 · variant_discovery 12 ·
+mass_handoff 14 · fingerprint_discovery 23 · request_gates 44 = **216/0, live untouched**; live screenshot: strip gone,
+variant card reads "Routing: follows Building permits — …". Spec: `SPEC_taxonomy_classification.md` §1 (routing + strip).
+**NEXT:** Kevin's answers on the source question above (a / b / both) — small build either way; then item 4 (Record
+Sources: the interdependency document departments ↔ teams ↔ record types ↔ sources, then delete the two demo sources).
+Still pending from Kevin: certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).

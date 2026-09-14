@@ -48,11 +48,16 @@ async function attachRouting(list) {
     if (l.role === 'fulfiller' && !fulfillerOf[l.record_type_id]) fulfillerOf[l.record_type_id] = l.department_id;
   });
   list.forEach(function(rt){
-    var ownerId = ownerOf[rt.id] || null;
+    // A variant follows its PARENT's routing (Kevin 2026-09-13) — the same walk-up the classifier catalog,
+    // the library shelf and redaction templates already do; the list used to show "No owning dept" for it.
+    var inherit = !!(rt.parent_record_type_id && !ownerOf[rt.id] && !fulfillerOf[rt.id]);
+    var src = inherit ? rt.parent_record_type_id : rt.id;
+    rt.routing_inherited = inherit;
+    var ownerId = ownerOf[src] || null;
     var ownerDept = ownerId ? dById[ownerId] : null;
     rt.owner_department_id = ownerId;
     rt.owner_department_name = ownerDept ? ownerDept.name : null;
-    var overrideId = fulfillerOf[rt.id] || null;
+    var overrideId = fulfillerOf[src] || null;
     var teamId = overrideId || (ownerDept ? ownerDept.processed_by : null);
     var team = teamId ? dById[teamId] : null;
     rt.fulfillment_team_id = teamId || null;
@@ -251,9 +256,12 @@ router.delete('/record-types/:id', requireAuth, EDIT, async function(req, res) {
 });
 
 // ===== LINKS: departments (owner/fulfiller) =====
+// A variant has no routing of its own (Kevin 2026-09-13): the owner and fulfilment team are its parent's.
+var VARIANT_ROUTING_MSG = 'A variant follows its parent record type\'s routing — set the owning department and fulfillment team on the parent.';
 router.post('/record-types/:id/departments', requireAuth, EDIT, async function(req, res) {
-  var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
+  var rt = await get('SELECT id, parent_record_type_id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
+  if (rt.parent_record_type_id && (req.body.role === 'owner' || req.body.role === 'fulfiller' || !req.body.role)) return res.status(422).json({ error: VARIANT_ROUTING_MSG });
   if (!req.body.department_id) return res.status(400).json({ error: 'department_id is required' });
   var role = req.body.role === 'fulfiller' ? 'fulfiller' : 'owner';
   var dup = await get('SELECT id FROM record_type_departments WHERE record_type_id=? AND department_id=? AND role=?', [req.params.id, req.body.department_id, role]);
@@ -275,8 +283,9 @@ router.delete('/record-types/:id/departments/:linkId', requireAuth, EDIT, async 
 
 // ===== ROUTING: owning department + optional fulfillment team override =====
 router.patch('/record-types/:id/routing', requireAuth, EDIT, async function(req, res) {
-  var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
+  var rt = await get('SELECT id, parent_record_type_id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
+  if (rt.parent_record_type_id) return res.status(422).json({ error: VARIANT_ROUTING_MSG });
   var ownId = req.body.owning_department_id || null;
   var teamId = req.body.fulfillment_team_id || null;
   if (ownId) {
