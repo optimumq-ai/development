@@ -132,6 +132,11 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   ok('C8a the pre-list single extra cost still prices (stored input_json re-prices identically)', pvL.body.requestLevel.otherSubtotal === 7 && pvL.body.requestLevel.other.length === 1 && pvL.body.requestLevel.other[0].description === 'One', JSON.stringify(pvL.body.requestLevel.other));
   var pvW = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'draft', quantities: { searchHours: 3, bwPages: 200 }, waived: true });
   ok('C9 the Test tab shows the requestor\'s notice itself: no placeholder request number, and "Fee waived" reads through to it', !/PREVIEW/.test(pvStd.body.requestorNotice.subject + pvStd.body.requestorNotice.text) && /fees waived/i.test(pvW.body.requestorNotice.subject) && /have been waived/.test(pvW.body.requestorNotice.text) && pvW.body.effectiveTotal === 0, pvW.body.requestorNotice.subject);
+  // Kevin 2026-09-14: the sandbox took no recordings or media although the request's fees tab does. TX: $10 per
+  // recording + $1 per minute of the total; CD $1.25. The notice itemises them (it priced them silently before).
+  var pvAV = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'draft', quantities: { searchHours: 0, bwPages: 0, av: { recordings: 2, minutes: 40 }, media: [{ type: 'cd', count: 1 }] } });
+  var avR = pvAV.body.requestLevel, avTxt = pvAV.body.requestorNotice.text;
+  ok('C10 recordings + media price in the sandbox: 2 recordings × $10 + 40 minutes × $1 = $60, CD $1.25; each is a line on the requestor notice', pvAV.status === 200 && Math.abs(avR.avSubtotal - 60) < 0.001 && Math.abs(avR.mediaSubtotal - 1.25) < 0.001 && /- Recordings: 2 at \$10\.00 each = \$20\.00/.test(avTxt) && /- Recording time: 40 minutes at \$1\.00\/minute = \$40\.00/.test(avTxt) && /- Media \(CD\): 1 at \$1\.25 = \$1\.25/.test(avTxt), JSON.stringify({ av: avR.avSubtotal, media: avR.mediaSubtotal, lines: avTxt.split('\n').filter(function (l) { return /^- /.test(l); }) }));
   await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'commercial': { value: 'none' }, 'rules.deMinimis': { value: 5 } } });
 
   console.log('\n=== D. APPROVING ===');

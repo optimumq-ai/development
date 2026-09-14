@@ -495,7 +495,7 @@ export default function FeeEstimatePanel(props) {
                   <div><label style={lbl}>Recordings</label>
                     <input type="number" step="1" value={q.avRecordings} onChange={function (e) { setQ(c.id, 'avRecordings', e.target.value === '' ? 0 : parseInt(e.target.value, 10)); }} style={inp} />
                   </div>
-                  <div><label style={lbl}>Rec. minutes</label>
+                  <div><label style={lbl}>Rec. minutes (total)</label>
                     <input type="number" step="1" value={q.avMinutes} onChange={function (e) { setQ(c.id, 'avMinutes', e.target.value === '' ? 0 : parseInt(e.target.value, 10)); }} style={inp} />
                   </div>
                 </div>

@@ -17,11 +17,19 @@ function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 async function previewWith(config, b, versionLabel) {
   b = b || {};
   const q = b.quantities || {};
+  const quantities = {
+    searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), programmingHours: num(q.programmingHours),
+    bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages)
+  };
+  // Recordings (body-worn camera, 911 audio): a count plus the TOTAL minutes across them — the engine bills
+  // minutes in aggregate, less any free-minute allowance once. Electronic media: one type + count. Both were
+  // missing from the sandbox (Kevin 2026-09-14) although the request's fees tab has always taken them.
+  const av = q.av || {};
+  if (num(av.recordings) > 0 || num(av.minutes) > 0) quantities.av = { recordings: num(av.recordings), minutes: num(av.minutes) };
+  const media = (Array.isArray(q.media) ? q.media : []).filter(function (m) { return m && m.type && num(m.count) > 0; }).map(function (m) { return { type: String(m.type), count: num(m.count) }; });
+  if (media.length) quantities.media = media;
   const request = {
-    components: [{ id: 'sandbox', recordType: b.recordTypeId || 'sandbox', quantities: {
-      searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), programmingHours: num(q.programmingHours),
-      bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages)
-    } }],
+    components: [{ id: 'sandbox', recordType: b.recordTypeId || 'sandbox', quantities: quantities }],
     delivery: (b.delivery && b.delivery.method) ? b.delivery : { method: 'email' },
     certification: (b.certification && num(b.certification.count) > 0) ? { count: num(b.certification.count) } : null,
     // Extra costs: a list of { description, amount } (a lone object is accepted for older callers).

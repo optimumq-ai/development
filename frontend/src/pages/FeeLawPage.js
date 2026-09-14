@@ -526,7 +526,7 @@ export default function FeeLawPage() {
 // row reads (POST /onboarding/fees/test-result).
 function TestTab(props) {
   var data = props.data, can = props.can, ht = props.hubTest;
-  var [q, setQ] = useState({ searchHours: 2, reviewHours: 1, programmingHours: 0, bwPages: 120, colorPages: 0, oversizedPages: 0 });
+  var [q, setQ] = useState({ searchHours: 2, reviewHours: 1, programmingHours: 0, bwPages: 120, colorPages: 0, oversizedPages: 0, avRecordings: 0, avMinutes: 0, mediaType: 'cd', mediaCount: 0 });
   var [opt, setOpt] = useState({ delivery: 'email', purpose: '', waived: false, certification: 0 });
   // Extra costs: each a short description + amount; as many as the request needs (Kevin 2026-09-13).
   var [extras, setExtras] = useState([{ description: '', amount: '' }]);
@@ -536,7 +536,10 @@ function TestTab(props) {
   var [against, setAgainst] = useState(data.version ? 'active' : 'draft');
   var run = useCallback(function () {
     var other = extras.filter(function (x) { return num(x.amount) !== 0; }).map(function (x) { return { description: x.description, amount: num(x.amount) }; });
-    api.post('/fee-law/preview', { against: against, quantities: q, delivery: { method: opt.delivery }, purpose: opt.purpose || null, waived: opt.waived, certification: { count: num(opt.certification) }, other: other })
+    // Recordings and media ride along the way the request's fees tab sends them (Kevin 2026-09-14).
+    var quantities = { searchHours: q.searchHours, reviewHours: q.reviewHours, programmingHours: q.programmingHours, bwPages: q.bwPages, colorPages: q.colorPages, oversizedPages: q.oversizedPages,
+      av: { recordings: num(q.avRecordings), minutes: num(q.avMinutes) }, media: [{ type: q.mediaType, count: num(q.mediaCount) }] };
+    api.post('/fee-law/preview', { against: against, quantities: quantities, delivery: { method: opt.delivery }, purpose: opt.purpose || null, waived: opt.waived, certification: { count: num(opt.certification) }, other: other })
       .then(function (r) { setOut(r.data); setErr(''); })
       .catch(function (e) { setErr(errText(e, 'The estimate could not be computed.')); });
   }, [q, opt, extras, against]);
@@ -574,6 +577,11 @@ function TestTab(props) {
         <div><label style={lbl}>B&W pages</label>{numInp('bwPages')}</div>
         <div><label style={lbl}>Color pages</label>{numInp('colorPages')}</div>
         <div><label style={lbl}>Oversized pages</label>{numInp('oversizedPages')}</div>
+        <div><label style={lbl}>Recordings</label>{numInp('avRecordings')}</div>
+        <div><label style={lbl}>Minutes of recording, total</label>{numInp('avMinutes')}</div>
+        <div style={{ gridColumn: '1 / -1', marginTop: '-4px' }}><div style={hint}>Body-worn camera or audio. Minutes are the total across all the recordings; any free-minute allowance comes off once.</div></div>
+        <div><label style={lbl}>Electronic media</label><select value={q.mediaType} onChange={function (e) { setQ1('mediaType', e.target.value); }} style={inp(false)}><option value="cd">CD</option><option value="dvd">DVD</option><option value="usb">USB</option></select></div>
+        <div><label style={lbl}>Media count</label>{numInp('mediaCount')}</div>
         <div><label style={lbl}>Delivery</label><select value={opt.delivery} onChange={function (e) { setO('delivery', e.target.value); }} style={inp(false)}><option value="email">Email</option><option value="pickup">Pickup</option><option value="mail">Mail</option></select></div>
         <div><label style={lbl}>Purpose</label><select value={opt.purpose} onChange={function (e) { setO('purpose', e.target.value); }} style={inp(false)}><option value="">Standard</option><option value="commercial">Commercial</option></select></div>
         <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Records certified</label><input type="number" min="0" step="1" value={opt.certification} onChange={function (e) { setO('certification', e.target.value); }} style={inp(false)} />

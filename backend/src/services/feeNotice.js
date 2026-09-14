@@ -74,6 +74,12 @@ function buildLines(R) {
     if (li.amount > 0 || pages > 0) { var note = li.freePagesApplied ? ' (first ' + li.freePagesApplied + ' pages at no charge)' : ''; lines.push('- ' + label + ': ' + pages + ' pages at ' + money(li.rate) + '/page = ' + money(li.amount) + note); }
   });
   (R.media || []).forEach(function (li) { if (li.needsActual) lines.push('- Media (' + String(li.type || '').toUpperCase() + '): actual cost to be determined'); else if (li.amount > 0) lines.push('- Media (' + String(li.type || '').toUpperCase() + '): ' + li.count + ' at ' + money(li.rate) + ' = ' + money(li.amount)); });
+  // Recordings (body-worn camera, audio): per recording and per minute of the total, less any free minutes.
+  // They were priced into the total but never itemised here (Kevin 2026-09-14), so the lines did not add up.
+  (R.av || []).forEach(function (li) {
+    if (li.kind === 'av_recording' && li.amount > 0) lines.push('- Recordings: ' + li.count + ' at ' + money(li.rate) + ' each = ' + money(li.amount));
+    else if (li.kind === 'av_minute' && (li.amount > 0 || li.freeMinutesApplied)) { var fm = li.freeMinutesApplied ? ' (first ' + li.freeMinutesApplied + ' minutes at no charge)' : ''; lines.push('- Recording time: ' + (li.billableMinutes != null ? li.billableMinutes : li.totalMinutes) + ' minutes at ' + money(li.rate) + '/minute = ' + money(li.amount) + fm); }
+  });
   if (R.delivery && R.delivery.amount > 0) lines.push('- Delivery (' + R.delivery.method + '): ' + money(R.delivery.amount));
   else if (R.delivery && R.delivery.needsActual) lines.push('- Delivery (' + R.delivery.method + '): actual cost to be determined');
   if (R.certification && R.certification.amount > 0) lines.push('- Certification: ' + R.certification.count + ' at ' + money(R.certification.rate) + ' = ' + money(R.certification.amount));

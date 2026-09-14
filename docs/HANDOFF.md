@@ -10490,3 +10490,18 @@ Estimate panel visually checked on a live open estimate task (rows render, purpo
 Minimum fee → the TX-9xxx research-record corpus task, plus dropping Minimum fee from the template for a state that sets
 none). Kevin's two answers pending from this slice: (e) certified copy SETS, and whether the removed "Inspection"
 purpose should come back as a real inspection-request feature (§9).
+
+## 2026-09-14 — Item 1b (Kevin, same day): Test tab takes recordings + media; the notice itemises recordings
+
+Kevin: the Test tab had no way to enter body-cam footage although the request's fees tab asks for recordings and
+minutes, and the State mandate tab shows $10 per recording + $1 per minute. True — `previewWith` sent only the six
+labor/page numbers. BUILT: the Test tab takes **Recordings**, **Minutes of recording, total** and **Electronic media**
+(type + count), and the preview passes them exactly as the fees tab does. His minutes question, answered from the
+engine: minutes are the TOTAL across all recordings on the request item — the engine sums them and takes any free-minute
+allowance off once (the panel's label now reads "Rec. minutes (total)"). Found while wiring it: **the requestor notice
+never itemised recordings** — the total included them but the "based on" lines did not — so both real estimates and the
+sandbox now print "Recordings: 2 at $10.00 each = $20.00" and "Recording time: 40 minutes at $1.00/minute = $40.00".
+**Evidence:** `verify_fee_law` C10 (2 recordings × $10 + 40 min × $1 = $60, CD $1.25, each a notice line) → 57/57; fee
+subset (11 harnesses) **362/0, live untouched**; live Test tab screenshot against approved v3: $98.75 whose lines now add
+up (18.75 + 3.75 + 15 + 1.25 + 20 + 40). Full suite not re-run for this addendum (additive: two inputs, a pass-through,
+notice lines); the 2940/2 run above covers the rest of today's change. Spec §8 input list updated.
