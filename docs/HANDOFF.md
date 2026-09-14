@@ -10402,3 +10402,43 @@ background (the old hairline under it dropped), and the mark/wordmark PNGs got `
 f9fafb, made with PIL from the originals). Verified: rail header screenshotted collapsed + hover-expanded in all three
 modes (composite in chat); `verify_theme_tokens` 13/13 (a JSX comment carrying a hex tripped A1 once — reworded).
 Suite not re-run: change is a token value, two PNGs and one style attribute; the static harness is the relevant check.
+
+## 2026-09-14 — Kevin's "markup sep 13.doc" read; colour schemes CLOSED; proposed order for the next sessions
+
+Colour schemes: Kevin — "look good, consider them completed." Source doc: `~/exchange/markup sep 13.doc` (4 pp;
+text at /tmp/oq-markup/markup.txt this session). Items, grouped, with what is already true in the tree:
+1. **Fee rules → Test tab** (`/setup/fee-law?tab=test`; preview goes through `feeSandbox.previewWith` → the SAME
+   `feeEngine` as real estimates, so engine fixes land in both; the SCREENS differ): (a) Purpose = Commercial shows no
+   surcharge — engine reads `request.purpose` + `profile.purposeOverrides.commercial` (feeEngine.js:166-173); check
+   the preview passes purpose through and the approved schedule carries the override; (b) replace the computation
+   card + "Show the notice…" button with the requestor's notice by default; (c) Extra cost → multiple described line
+   items, shown on the requestor's estimate (engine: `other` is a single number today); (d) Purpose = Inspection →
+   $0 (no inspection concept exists in code or spec — document "log an inspection request + schedule" as a future
+   enhancement); (e) "Certified copies" wording — Kevin reads it as full copy SETS; engine charges `certification.count
+   × rate` once per request — needs his call.
+2. **Fee rules → City tab** cite popups EMPTY for Commercial surcharge, Certified copy charge, Minimum fee — this is the
+   standing OPEN "populate the TX-9xxx research records" corpus task (2026-09-08). Plus: drop **Minimum fee** from the
+   template for a state that sets none and gives the city no discretion (TX) — a template rule, not a screen tweak.
+3. **Taxonomy small fixes:** remove the "SETTING UP: Taxonomy · How much work… · Which department owns…" strip (Kevin:
+   not needed; buttons go nowhere — TaxonomyPage.js:15-16,153); variants show "Routing: No owning department" →
+   inherit the parent's routing and remove per-variant routing. His discussion questions first: how a variant is
+   discovered (fingerprint census, SPEC_taxonomy_classification §1), whether its source is knowable from discovery,
+   whether re-typing a variant moves it under the other record type.
+4. **Record Sources:** wants Demo Document Library + Development Services Drive DELETED, but FIRST a document of the
+   interdependencies departments ↔ fulfillment teams ↔ record types ↔ sources, and a decision on whether record types
+   ship as starter data (if so, add record-type delete in the UI — `DELETE /taxonomy/record-types/:id` exists;
+   repositories have `DELETE /repositories/:id`).
+5. **Setup-flow map (discussion):** what "Configure with AI" (connector), "Find Variants" (taxonomy) and fingerprint
+   discovery each do today, their limits (the ~15-file AI sample), and the optimal flow: connector → census/inventory →
+   AI discovery associates record types to groupings. Feeds 6.
+6. **Document Inventory/Census — BUILD.** Design CLOSED 2026-09-04 (three rounds: documents = fingerprint groupings +
+   layouts; data systems = kind enumeration + render recipes; embed tiers; field-redacted embeddings). NOT built. Next
+   step per that record: mockup session (per-source census button, Inventory Information screen, "Identical Grouping"
+   rename), then slices. Kevin adds: a button to view a snapshot of an actual document / rendered data record; and
+   (future unless simple) map inventory items back to taxonomy with click-to-view + fix wrong metadata.
+7. **Estimate + redaction templates seeded from actual record samples** (design talk; after 6 exists): save a template
+   at "done" when none exists for the record type/variant; static vs floating vs ad-hoc layouts; simple vs complex
+   redaction content.
+**Proposed order:** 1 → 2 → 3 → 4 → 5 → 6 → 7 (bounded, testable fixes on the screens Kevin is using now; then the
+discussion items that need his answers; then the inventory mockup + build, which everything after depends on).
+Recommend a NEW session to start item 1 (this one carried the whole colour build).
