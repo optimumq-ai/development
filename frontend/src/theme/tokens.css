@@ -23,6 +23,7 @@
   --oq-t-crit: #B02A37;
   --oq-t-critBg: #B02A37;
   --oq-t-critTint: #F8E7E8;
+  --oq-t-logoBg: #314AB6;
   --oq-bg-000000: #000000;
   --oq-x-000000: var(--oq-bg-000000);
   --oq-fg-03543f: #03543F;
@@ -401,6 +402,7 @@
   --oq-t-crit: #ba1428;
   --oq-t-critBg: #ba1428;
   --oq-t-critTint: #ffffff;
+  --oq-t-logoBg: #293D93;
   --oq-bg-000000: #0c0c0c;
   --oq-x-000000: var(--oq-bg-000000);
   --oq-fg-03543f: #0c0c0c;
@@ -779,6 +781,7 @@
   --oq-t-crit: #ff0206;
   --oq-t-critBg: #ff0206;
   --oq-t-critTint: #0c0c0c;
+  --oq-t-logoBg: #174EC0;
   --oq-bg-000000: #555555;
   --oq-x-000000: var(--oq-bg-000000);
   --oq-fg-03543f: #00cc05;

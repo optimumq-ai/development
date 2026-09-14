@@ -19,6 +19,11 @@ The account menu (click the name, top right) carries a **Display** section above
   browser's.
 - Standard is the **absence** of a theme: no `data-oq-theme` attribute on `<html>`, every variable resolves to
   the value the app had before. Nobody sees a change until they choose one (verified by pixel diff, §5).
+- **The one deliberate exception (Kevin, 2026-09-14): the logo band.** The block at the top of the nav rail
+  where the mark sits is a coloured band in every mode — `--oq-t-logoBg` = `#314AB6` standard · `#293D93`
+  high contrast light · `#174EC0` high contrast dark — and the mark is drawn in `#F9FAFB` on it
+  (`public/brand/optimumq-mark-light.png`, `optimumq-wordmark-light.png`: the same artwork with its black
+  replaced). These are Kevin's own picks for the brand band, not swatch-folder colours.
 - **Citizen-facing surfaces are excluded** — the public portal, wizard, library, map, status-check and
   record-verification modals, the paper form, the contribution page, and the Magic screen keep their own design
   and their own dark mode. Only staff screens theme.

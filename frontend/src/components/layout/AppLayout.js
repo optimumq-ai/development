@@ -103,10 +103,12 @@ export default function AppLayout() {
       <aside style={asideStyle} onMouseEnter={enter} onMouseLeave={leave} onFocus={enter} onBlur={leave} aria-label="Main navigation">
         {/* Kevin 2026-09-08: his logo replaces the OPTIMUM Q + agency text (the agency name already heads the
             top bar). Collapsed: the (Q) mark cropped from the same artwork; expanded: the full wordmark. */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: open ? 'space-between' : 'center', gap: '8px', padding: open ? '10px 12px' : '10px 0', height: '57px', boxSizing: 'border-box', borderBottom: '1px solid var(--oq-ln-f3f4f6)' }}>
+        {/* Kevin 2026-09-14: the logo block is a coloured brand band in every display mode (--oq-t-logoBg: his
+            three blues, one per mode) and the mark is the near-white (f9fafb) rendering of the same artwork (brand/*-light.png). */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: open ? 'space-between' : 'center', gap: '8px', padding: open ? '10px 12px' : '10px 0', height: '57px', boxSizing: 'border-box', background: 'var(--oq-t-logoBg)' }}>
           {open
-            ? <img src="/brand/optimumq-wordmark.png" alt="OPTIMUM Q" style={{ height: '34px', width: 'auto', display: 'block', flexShrink: 1, minWidth: 0, maxWidth: '150px', objectFit: 'contain' }} />
-            : <img src="/brand/optimumq-mark.png" alt="OPTIMUM Q" title="OPTIMUM Q" style={{ height: '26px', width: 'auto', display: 'block' }} />}
+            ? <img src="/brand/optimumq-wordmark-light.png" alt="OPTIMUM Q" style={{ height: '34px', width: 'auto', display: 'block', flexShrink: 1, minWidth: 0, maxWidth: '150px', objectFit: 'contain' }} />
+            : <img src="/brand/optimumq-mark-light.png" alt="OPTIMUM Q" title="OPTIMUM Q" style={{ height: '26px', width: 'auto', display: 'block' }} />}
           {open ? (
             <button onClick={togglePin} title={pinned ? 'Let the panel shrink to icons when the pointer leaves it' : 'Keep the panel open all the time'}
               style={{ display: 'flex', alignItems: 'center', gap: '5px', background: pinned ? 'var(--oq-bg-eef3f8)' : 'var(--oq-bg-ffffff)', border: '1px solid ' + (pinned ? 'var(--oq-ln-c5d3e1)' : 'var(--oq-ln-e5e7eb)'), borderRadius: '6px', cursor: 'pointer', color: pinned ? 'var(--oq-fg-1f4e79)' : 'var(--oq-fg-6b7280)', fontSize: '10.5px', fontWeight: '600', padding: '4px 7px', whiteSpace: 'nowrap', flexShrink: 0 }}>

@@ -151,6 +151,9 @@ const T = {
   crit:       ['#B02A37', K.vday,        K.red],
   critBg:     ['#B02A37', K.vday,        K.red],
   critTint:   ['#F8E7E8', K.white,       K.black],      // partner is crit (stays coloured) → pale
+  // Kevin 2026-09-14: the logo block at the top of the nav rail is a coloured band in EVERY mode (his three
+  // blues), with the mark drawn in #F9FAFB on it. Not from the swatch folder — his own picks for the brand band.
+  logoBg:     ['#314AB6', '#293D93',     '#174EC0'],
 };
 
 // ---- collect what the source uses ---------------------------------------------------------------------------

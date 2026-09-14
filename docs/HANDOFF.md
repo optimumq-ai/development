@@ -10392,3 +10392,13 @@ or seed the task) — left for a stages session, not this slice.
 palette); dark standalone red text on asphault 3.6:1. Kevin can add swatches later; the generator absorbs them.
 STILL PENDING FOR KEVIN: Fee rules re-approval → v3 (live fee_profiles active row is still v2).
 NEXT: Kevin's setup-screen mark-ups as they land in ~/exchange; page-width sweep parked behind them.
+
+## 2026-09-14 — Logo band: Kevin's three blues, near-white mark, every mode
+
+Kevin's only finding after the colour change: in high-contrast dark the logo block at the top of the rail merged with
+the nav pane. His fix, for all modes: band background **#314AB6 standard · #293D93 HC light · #174EC0 HC dark**, mark
+in **#F9FAFB**. BUILT: `--oq-t-logoBg` added to the generator's semantic table (spec §1), the rail header takes it as
+background (the old hairline under it dropped), and the mark/wordmark PNGs got `-light` twins (alpha kept, black →
+f9fafb, made with PIL from the originals). Verified: rail header screenshotted collapsed + hover-expanded in all three
+modes (composite in chat); `verify_theme_tokens` 13/13 (a JSX comment carrying a hex tripped A1 once — reworded).
+Suite not re-run: change is a token value, two PNGs and one style attribute; the static harness is the relevant check.
