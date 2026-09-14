@@ -10442,3 +10442,51 @@ text at /tmp/oq-markup/markup.txt this session). Items, grouped, with what is al
 **Proposed order:** 1 → 2 → 3 → 4 → 5 → 6 → 7 (bounded, testable fixes on the screens Kevin is using now; then the
 discussion items that need his answers; then the inventory mockup + build, which everything after depends on).
 Recommend a NEW session to start item 1 (this one carried the whole colour build).
+
+## 2026-09-14 — Markup item 1 BUILT: Fee rules → Test tab shows the requestor's notice; "5%" decisions price; extra costs are a list
+
+Commit 79eb738. Kevin's five sub-items on `/setup/fee-law?tab=test`, and what each turned out to be:
+- **(a) Commercial showed no surcharge — a live-money bug, not a screen bug.** The commercial decision was stored as the
+  TEXT "5%" (the page's number regex only accepts bare digits; the server accepted anything) and the approved **v3**
+  schedule carried `surchargePct: "5%"` and `deposit.percent: "50%"` verbatim; `Number("5%")` is NaN and the engine
+  priced both as **0** — so real estimates had no commercial surcharge AND no deposit. Three layers now: `feeLaw.decide`
+  stores the number inside a figure typed with its unit ("5%", "$3", "30 days"; text with no figure on a numeric item is
+  refused by name), `compose` coerces older stored text, and the engine's `num()` strips `$ , %` so **live v3 prices
+  correctly without re-approval** (verified on live: Commercial sample → "5% surcharge on $58.00 = $2.90").
+- **(b) Notice by default.** The staff computation card and "Show the notice…" button are gone; the right pane IS the
+  notice the requestor would receive, badged "priced against approved v3 / the unapproved draft". "Fee waived" reads
+  through to it; no placeholder request number. The "Payment received" input went with the card (nothing displayed it
+  any more). Found once the notice became the display: the itemised lines omitted the **20% overhead on staff time**, so
+  they did not add up to the total — it is now a line ("Overhead on staff time (20%): $3.75"). This changes the notice
+  real estimates send too.
+- **(c) Extra costs are a list** (description + amount, Add another / Remove) on BOTH the Test tab and the estimate
+  panel (Kevin: "the changes need to be made to both"). Engine: `request.other` is a list; a lone object — every estimate
+  saved before today — still prices, so stored `input_json` re-prices identically; `requestLevel.other` is the list, each
+  its own line on the notice.
+- **(d) Inspection → $0:** no inspection concept exists in code or spec; the "Inspection" purpose choices on the Test tab
+  and the estimate panel priced at STANDARD rates under an "Inspection (no fee)" label, so both were **removed** rather
+  than faked to $0 in the sandbox (it must stay the real engine's answer). Logged as a future enhancement in
+  `SPEC_fees_estimates_payments.md` §9 (log an inspection request, what is to be inspected, schedule it; Texas allows
+  personnel-time charges on inspection only narrowly, § 552.271 — research before encoding).
+- **(e) "Certified copies" wording — KEVIN'S CALL PENDING.** The engine charges count × the certified copy charge, one
+  per record certified (`per_record`); it does not multiply the copies. Relabelled **"Records certified"** with that
+  meaning spelled out under it. Kevin reads "3 certified copies" of 100 pages as three full copy SETS (300 pages, each
+  set certified) — whether to add a copy-set multiplier awaits his answer (§9).
+**Evidence:** `verify_fee_law` +6 cases (C6 "5%"/"$5" stored as 5 · C6a "a few percent" refused · C7 Commercial 5%
+surcharge in the notice, Standard none · C8 two extra costs $20.50, $0 one dropped, each a notice line · C8a legacy
+single object · C9 notice has no PREVIEW number, waiver reads through); fee subset (11 harnesses) **361/0, live
+untouched**; live Test tab screenshotted after the build swap (Commercial + Courier $12 + Archive retrieval $8.50 → $60.90
+against approved v3). Specs: `SPEC_fees_estimates_payments.md` §1 (other list + unit-typed figures), §8 rewritten, §9
+two new gaps; `SPEC_setup_hub.md` F1 Test-tab clause.
+**Not touched:** the graduated-band and estimate-panel wording elsewhere; items 2–7 of the 2026-09-14 list.
+**Process note:** an UNANCHORED `pgrep -f "run_suite.js"` matches your own shell wrapper — it reported "SUITE RUNNING"
+and silently skipped a build and a live restart; use `pgrep -f '^node .*run_suite.js'`.
+**Full suite after the commit: 2940 passed, 2 failed, live untouched.** Both reds are the standing ones from the
+2026-09-13 handoff, unchanged: `verify_stage_bypass` #1 (classifier drift on the harness's own tag text) and
+`verify_bw9_golive` E1a (order-dependent; passes alone). Every fee/estimate harness green (`verify_fee_law` 56/56,
+`verify_bw4_estimate` 70/70, `verify_estimate_reconcile` 20/20, `verify_erp_line_items` 20/20, `verify_e2e_tx` 36/36).
+Estimate panel visually checked on a live open estimate task (rows render, purpose = Standard · Commercial; nothing saved).
+**NEXT:** item 2 of the 2026-09-14 list (City tab cite popups empty for Commercial surcharge / Certified copy charge /
+Minimum fee → the TX-9xxx research-record corpus task, plus dropping Minimum fee from the template for a state that sets
+none). Kevin's two answers pending from this slice: (e) certified copy SETS, and whether the removed "Inspection"
+purpose should come back as a real inspection-request feature (§9).
