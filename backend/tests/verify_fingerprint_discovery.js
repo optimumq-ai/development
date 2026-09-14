@@ -139,6 +139,9 @@ async function makeInspection(file, inspector) {
   ok('D3 the approved variant stores the signature and the counted flag', !!meta.signature && meta.counted === true && meta.estimated_count === 6);
   var stamped = await db.get('SELECT count(*)::int AS n FROM document_fingerprints WHERE matched_record_type_id = ?', [variant.id]);
   ok('D4 the cluster\'s documents are stamped as belonging to the variant', Number(stamped.n) === 6);
+  // Kevin 2026-09-14: approval writes the variant's SOURCES from where its documents actually live — drive A only.
+  var vSources = await db.all('SELECT repository_id FROM record_type_repositories WHERE record_type_id = ?', [variant.id]);
+  ok('D5 the approved variant is linked to exactly the repository its documents were found in (drive A)', vSources.length === 1 && vSources[0].repository_id === repoA);
 
   console.log('\n=== E. CROSS-LOCATION RECOGNITION — Kevin\'s date-split-storage case ===');
   for (var k = 0; k < 3; k++) await makePermit(dirB + '/newer_permit_' + k + '.pdf', 'Later Applicant ' + k, '2026-0' + (400 + k));
@@ -167,6 +170,7 @@ async function makeInspection(file, inspector) {
 
   console.log('\n=== F. LEAVE THE WORLD AS FOUND ===');
   await db.run('DELETE FROM document_fingerprints WHERE repository_id IN (?,?)', [repoA, repoB]);
+  await db.run('DELETE FROM record_type_repositories WHERE record_type_id IN (?,?)', [variant.id, bucket.id]);
   await db.run('DELETE FROM record_repositories WHERE id IN (?,?)', [repoA, repoB]);
   for (var idd of [variant.id, bucket.id]) { await api('DELETE', '/taxonomy/record-types/' + idd); }
   fs.rmSync(dirA, { recursive: true, force: true }); fs.rmSync(dirB, { recursive: true, force: true });

@@ -105,6 +105,19 @@ async function api(method, path, body) {
   ok('C4 setting routing ON a variant is refused (422) by both write paths and nothing is written',
     rr.status === 422 && rd.status === 422 && Number(ownLinks.n) === 0);
 
+  // Kevin 2026-09-14: a variant with no sources of its own SEARCHES its parent's (before: searched nothing).
+  var rs = require('/opt/optimumq/backend/src/services/recordSearch');
+  var anyRepo = await db.get('SELECT id FROM record_repositories ORDER BY id LIMIT 1');
+  await db.run("INSERT INTO record_type_repositories (id, record_type_id, repository_id, format, filter_spec, sort_order) VALUES (?,?,?,?,?,?)", ['rr-' + TAG, bucket.id, anyRepo.id, null, '{}', 100]);
+  var vRt = await db.get('SELECT id, parent_record_type_id FROM record_types WHERE id = ?', [variant.id]);
+  var inh = await rs.sourceIdsFor(vRt), own = await rs.sourceIdsFor({ id: bucket.id, parent_record_type_id: null });
+  ok('C5 the variant with no source links searches its PARENT\'s sources, marked inherited; the bucket\'s own are its own',
+    inh.inherited === true && inh.sourceIds.length === 1 && inh.sourceIds[0] === anyRepo.id && own.inherited === false && own.sourceIds[0] === anyRepo.id);
+  await db.run("INSERT INTO record_type_repositories (id, record_type_id, repository_id, format, filter_spec, sort_order) VALUES (?,?,?,?,?,?)", ['rr2-' + TAG, variant.id, anyRepo.id, null, '{}', 100]);
+  var ownV = await rs.sourceIdsFor(vRt);
+  ok('C6 once the variant has a source of its own, that wins (not inherited)', ownV.inherited === false && ownV.sourceIds.length === 1);
+  await db.run('DELETE FROM record_type_repositories WHERE id IN (?,?)', ['rr-' + TAG, 'rr2-' + TAG]);
+
   console.log('\n=== D. LEAVE THE WORLD AS FOUND ===');
   await db.run('DELETE FROM requests WHERE id = ?', [reqId]);
   await db.run('DELETE FROM record_type_estimate_profiles WHERE record_type_id IN (?,?)', [bucket.id, variant.id]);

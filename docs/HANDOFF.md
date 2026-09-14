@@ -10585,3 +10585,19 @@ variant card reads "Routing: follows Building permits — …". Spec: `SPEC_taxo
 **NEXT:** Kevin's answers on the source question above (a / b / both) — small build either way; then item 4 (Record
 Sources: the interdependency document departments ↔ teams ↔ record types ↔ sources, then delete the two demo sources).
 Still pending from Kevin: certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).
+
+## 2026-09-14 — Variant sources: BOTH built (Kevin: "build both")
+
+**At approval:** `applyGroupingProposal` now writes the variant's `record_type_repositories` links = the DISTINCT
+repositories of the cluster's stamped fingerprints (exact — where the documents live, not a copy of the bucket's list);
+the legacy sample path falls back to the proposal's `example_sources`. **At search time:** `recordSearch.sourceIdsFor` —
+a variant with no links of its own searches its PARENT's sources (`sourcesInherited: true`); own links win when present.
+This is what makes the 8 live draft variants (0 own sources) searchable once activated, and it is the same inheritance
+pattern routing, estimate profiles and time budgets already follow. Spec: `SPEC_taxonomy_classification.md` §1.
+**Evidence:** `verify_fingerprint_discovery` D5 (approved variant linked to exactly drive A) → 24/24; `verify_taxonomy_variants`
+C5/C6 (variant with no links searches the parent's, inherited; its own link wins) → 18/18; subset in suite order search_intents 29 ·
+search_resolve 32 · search_intent_gate 37 · taxonomy_variants 18 · variant_discovery 12 · fingerprint_discovery 24 =
+**152/0, live untouched**. No UI change; no build. Live API restarted on the new code.
+**NEXT:** item 4 (Record Sources: the interdependency document departments ↔ teams ↔ record types ↔ sources, decide whether
+record types ship as starter data, then delete Demo Document Library + Development Services Drive). Still pending from
+Kevin: certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).

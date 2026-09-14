@@ -126,8 +126,18 @@ async function aiClassifyType(query, rts) {
   return rts[n - 1];
 }
 
+// Where a record type's documents live. A VARIANT with no source links of its own searches its PARENT's sources
+// (Kevin 2026-09-14): before this a request classified to a variant searched nothing — the taxonomy's inheritance
+// pattern (routing, estimate profile, time budgets) applied to sources. A variant's own links, when present, win.
+async function sourceIdsFor(rt) {
+  var links = await all('SELECT repository_id FROM record_type_repositories WHERE record_type_id = ?', [rt.id]);
+  if (links.length || !rt.parent_record_type_id) return { sourceIds: links.map(function (l) { return l.repository_id; }), inherited: false };
+  var up = await all('SELECT repository_id FROM record_type_repositories WHERE record_type_id = ?', [rt.parent_record_type_id]);
+  return { sourceIds: up.map(function (l) { return l.repository_id; }), inherited: up.length > 0 };
+}
+
 async function matchRecordType(query) {
-  var rts = await all("SELECT id, name, synonyms, keywords FROM record_types WHERE status = 'active'");
+  var rts = await all("SELECT id, name, synonyms, keywords, parent_record_type_id FROM record_types WHERE status = 'active'");
   if (!rts.length) return null;
   var scored = scoreTypesByKeyword(query, rts);
   var top = scored[0] || { hits: 0 };
@@ -148,11 +158,12 @@ async function matchRecordType(query) {
     if (!chosen && top.hits >= 2) chosen = top.rt; // fall back to old keyword behavior
   }
   if (!chosen) return null;
-  var links = await all('SELECT repository_id FROM record_type_repositories WHERE record_type_id = ?', [chosen.id]);
+  var src = await sourceIdsFor(chosen);
   return {
     recordTypeId: chosen.id,
     recordTypeName: chosen.name,
-    sourceIds: links.map(function(l){ return l.repository_id; }),
+    sourceIds: src.sourceIds,
+    sourcesInherited: src.inherited,
     expandedTerms: flatTokens(chosen.synonyms).concat(flatTokens(chosen.keywords)).slice(0, 10).join(' ')
   };
 }
@@ -281,4 +292,4 @@ async function judgeResults(query, results) {
   } catch (e) { console.error('[searchJudge] failed, returning unfiltered:', e && e.message); return results; }
 }
 
-module.exports = { searchAll: searchAll, nativeSearchAll: nativeSearchAll, matchRecordType: matchRecordType, judgeResults: judgeResults, searchPublicReady: searchPublicReady };
+module.exports = { searchAll: searchAll, nativeSearchAll: nativeSearchAll, matchRecordType: matchRecordType, sourceIdsFor: sourceIdsFor, judgeResults: judgeResults, searchPublicReady: searchPublicReady };

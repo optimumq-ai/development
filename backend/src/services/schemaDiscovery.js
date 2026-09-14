@@ -366,10 +366,20 @@ async function applyGroupingProposal(bucketId, p) {
     (typeof p.confidence === 'number' ? p.confidence : null), 900, massCand, meta]);
   // Stamp the cluster's documents in the fingerprint index: they now BELONG to this variant, so
   // the next scan reports them as recognized instead of re-clustering them.
+  // The variant's SOURCES are written here too (Kevin 2026-09-14): discovery knows exactly which repositories the
+  // cluster's documents live in, so the variant gets those links — not a copy of the whole bucket's list. Exact
+  // set = the distinct repositories of the stamped fingerprints; the legacy sample path has only example_sources.
+  var sourceIds = [];
   if (Array.isArray(p.fingerprint_ids) && p.fingerprint_ids.length) {
     var fph = p.fingerprint_ids.map(function () { return '?'; }).join(',');
     await run('UPDATE document_fingerprints SET matched_record_type_id = ? WHERE id IN (' + fph + ')', [id].concat(p.fingerprint_ids));
+    sourceIds = (await all('SELECT DISTINCT repository_id FROM document_fingerprints WHERE id IN (' + fph + ')', p.fingerprint_ids)).map(function (r) { return r.repository_id; });
   }
+  if (!sourceIds.length && Array.isArray(p.example_sources)) {
+    p.example_sources.forEach(function (es) { if (es && es.repository_id && sourceIds.indexOf(es.repository_id) === -1) sourceIds.push(es.repository_id); });
+  }
+  var fmts = p.formats && p.formats.length ? p.formats : ['document'];
+  for (var si = 0; si < sourceIds.length; si++) await linkRepo(id, sourceIds[si], fmts);
   embedIndex.bg(embedIndex.reindexRecordTypes([id]), 'discover-variant');
   return await get('SELECT * FROM record_types WHERE id = ?', [id]);
 }
