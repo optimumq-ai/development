@@ -10645,3 +10645,28 @@ and fingerprint discovery each do today, their limits (the ~15-file AI sample), 
 inventory → AI discovery associates record types to groupings; feeds item 6 (inventory build). Decisions still open from
 item 4: owners for the 10 owner-less buckets; guided record-type/source removal slice — yes / later; the "Open Records
 Office" test team row. Still pending: certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).
+
+## 2026-09-14 (evening) — Overnight verdict read; markup item 5: the setup-flow map DELIVERED (discussion input; nothing built)
+
+**First act:** the full suite launched against the hand-edited fixture finished **2948 passed / 2 failed** — exactly the two
+standing reds (stage_bypass #1, bw9_golive E1a), **LIVE UNTOUCHED** in 12 tables. The one-line `repo-demo` fixture removal broke
+nothing. Tree was clean at `2cf7baa`.
+**Item 5:** `docs/DESIGN_setup_flow_map.md` (copy `~/exchange/DESIGN_setup_flow_map_2026-09-14.md`): the four mechanisms side by
+side (Configure with AI · Scan source · Find variants · fingerprint census) — where, API, what each reads, the AI's job, what is
+WRITTEN and when, gate, model — verified against the code and live DB; what the map exposes; the target flow; six decisions; a
+build sketch for item 6.
+**Findings that matter:** (1) the dependency runs backwards — Find variants / the census only read sources already linked to a
+bucket, and the only automatic link-writer is Scan source, the weakest path (~9 files' text reach the model: alphabetical first
+50 × 1,500 chars, digest cut at 14,000); (2) **Scan source writes drafts AND source↔type links immediately, no approval** — the
+only AI path in the system that does; (3) `/discovery` (the Scan source page) has **no navigation entry** since the hub
+conversion — orphan route; (4) every filestore read is top-folder-only and `.pdf`-only (sub-folders invisible); (5) only
+filestore + structured can be enumerated at all — Laserfiche (21 linked types), Tyler, Axon, 911, email, paper index are
+search-only; (6) live: 298 fingerprints on 5 drives, 160 stamped (all Development Services), 138 unassigned.
+**Proposed flow:** connect (+ test connection) → per-source census, taxonomy-free (the 2026-09-04 design) → associate over
+GROUPINGS (recognition, then one naming call per grouping; approval writes links + stamps + variant) → bind. Retires the 50-file
+sample digest, immediate link-writing, and the orphan page; Find variants keeps its UI, reads the census store.
+**NEXT (Kevin):** the six decisions in §4 of the document (order/decoupling; retire Scan source; links on approval only;
+sub-folders as grouping hint; non-file sources; enterprise stores). Then item 6: inventory mockup session → slices (§5 sketch).
+Still open from item 4: owners for the 10 owner-less buckets; guided record-type/source removal slice; the "Open Records Office"
+test team row; the fixture-vs-live drift reconciliation (~1,100 lines). Still pending: certified copy SETS (1e); inspection
+requests; the Minimum-fee discretion signal (2).
