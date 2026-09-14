@@ -52,7 +52,7 @@
 <div style="padding: 20px; width: 1000px;">
   <div class="card" style="padding: 10px 14px; margin-bottom: 14px; display:flex; gap:14px; align-items:center;">
     <span class="pill p-info">Technical Setup</span>
-    <span style="font-size:12px;color:#5C6F7C;flex-grow:1;">Record Sources and Connectors — the same list as today, with a census line and two buttons per source</span>
+    <span style="font-size:12px;color:#5C6F7C;flex-grow:1;">Record Sources and Connectors — the same list as today, with a census line and ONE Inventory door per source (Kevin, 2026-09-14)</span>
     <span class="hint" style="margin:0">Census runs one source at a time, in the background</span>
   </div>
 
@@ -73,10 +73,9 @@
       </div>
       <div class="right">
         <span class="pill p-ok"><span class="dot"></span>Connected</span>
-        <div class="census"><b style="color:#12232E">Census 2026-09-14 07:02</b> · 166 files · 4 identical groupings · 12 need OCR<br>Since then: <b style="color:#9A6512">6 new, 2 changed</b> — refresh re-reads only those</div>
+        <div class="census"><b style="color:#12232E">Census 2026-09-14 07:02</b> · 166 files · 4 identical groupings · 12 need OCR<br>Since then: <b style="color:#9A6512">6 new, 2 changed</b> — refresh from Inventory</div>
         <div style="display:flex;gap:6px;">
-          <button class="btn b-soft">View inventory</button>
-          <button class="btn">Refresh census</button>
+          <button class="btn b-soft">Inventory</button>
           <button class="btn">Edit</button>
           <button class="btn b-danger">Delete</button>
         </div>
@@ -95,7 +94,7 @@
         <div class="meter"><div style="width:70%"></div></div>
         <div class="census">Reading file <b style="color:#12232E">49 of 70</b> · about 1 minute left · you can leave this page</div>
         <div style="display:flex;gap:6px;">
-          <button class="btn b-soft">View progress</button>
+          <button class="btn b-soft">Inventory</button>
           <button class="btn">Edit</button>
           <button class="btn b-dis">Delete</button>
         </div>
@@ -113,11 +112,11 @@
         <span class="pill p-ok"><span class="dot"></span>Connected</span>
         <div class="census"><b style="color:#9A6512">No census yet.</b> The system does not know what this drive holds,<br>so nothing on it can be associated to a record type or searched.</div>
         <div style="display:flex;gap:6px;">
-          <button class="btn b-dis" title="One source at a time">Perform census</button>
+          <button class="btn b-soft">Inventory</button>
           <button class="btn">Edit</button>
           <button class="btn b-danger">Delete</button>
         </div>
-        <div class="hint" style="margin:0">Waits for Finance Shared Drive to finish — one census at a time protects the file server</div>
+        <div class="hint" style="margin:0">The first census is started inside Inventory — it waits for Finance Shared Drive to finish (one at a time)</div>
       </div>
     </div>
 
@@ -132,8 +131,7 @@
         <span class="pill p-ok"><span class="dot"></span>Connected</span>
         <div class="census"><b style="color:#12232E">Census 2026-09-12 18:40</b> · 3 record kinds · 41,218 rows · 1 field template<br>No change since</div>
         <div style="display:flex;gap:6px;">
-          <button class="btn b-soft">View inventory</button>
-          <button class="btn">Refresh census</button>
+          <button class="btn b-soft">Inventory</button>
           <button class="btn">Edit</button>
           <button class="btn b-danger">Delete</button>
         </div>

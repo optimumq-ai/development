@@ -10700,3 +10700,13 @@ grouping.
 table extensions · Inventory Information screen · Associate step · Find variants rewired + Scan source retired + nav rename to
 "Identical Grouping" · data-system census later). Still open: fixture-vs-live drift reconciliation; 10 owner-less buckets;
 guided record-type/source removal; certified-copy SETS; inspection requests; Minimum-fee signal.
+
+## 2026-09-14 (late, b) — Kevin's two calls on the inventory drawings applied: ONE Inventory door per card; "Everything else" = a file list
+
+Kevin: "one Inventory door per card, everything else just a file list." Applied to the artboards and re-rendered
+(`~/exchange/inventory_1…6_*.png`, guide updated): every source card now carries a single **Inventory** button (the first census,
+its progress and every refresh live inside the Inventory screen — new artboard `InventoryEmpty.dc.html` / `inventory_6` shows the
+never-censused state with Perform census queued behind the running one); the "Everything else" row expands inline into a plain
+monospace file list, no screen of its own. canvas.json annotation `open` now records the two decisions; (c) Not-needed semantics,
+(d) the no-census card for search-only systems, (e) OCR opt-in per source vs per grouping remain open. Nothing built.
+**NEXT:** Kevin's remaining markup (c–e) + the six flow-map decisions → slice the census build per the flow map §5.

@@ -1,20 +1,85 @@
 {
   "artboards": [
-    { "file": "Main.dc.html",       "x": 0,    "y": 0,    "w": 1040, "h": 900,  "title": "Record Sources — the census line and two buttons per source (five states)" },
-    { "file": "Inventory.dc.html",  "x": 1140, "y": 0,    "w": 1140, "h": 1180, "title": "Inventory Information — a documents source (drive)" },
-    { "file": "Sample.dc.html",     "x": 0,    "y": 1000, "w": 980,  "h": 760,  "title": "View sample — one document of a grouping, with the label set" },
-    { "file": "Associate.dc.html",  "x": 2380, "y": 0,    "w": 820,  "h": 900,  "title": "Associate — recognition, AI suggestion, human decision" },
-    { "file": "DataSystem.dc.html", "x": 1140, "y": 1280, "w": 1140, "h": 900,  "title": "Inventory Information — a data system (kinds and fields)" }
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1040,
+      "h": 900,
+      "title": "Record Sources \u2014 the census line and ONE Inventory door per source (five states)"
+    },
+    {
+      "file": "Inventory.dc.html",
+      "x": 1140,
+      "y": 0,
+      "w": 1140,
+      "h": 1180,
+      "title": "Inventory Information \u2014 a documents source (drive)"
+    },
+    {
+      "file": "Sample.dc.html",
+      "x": 0,
+      "y": 1000,
+      "w": 980,
+      "h": 760,
+      "title": "View sample \u2014 one document of a grouping, with the label set"
+    },
+    {
+      "file": "Associate.dc.html",
+      "x": 2380,
+      "y": 0,
+      "w": 820,
+      "h": 900,
+      "title": "Associate \u2014 recognition, AI suggestion, human decision"
+    },
+    {
+      "file": "DataSystem.dc.html",
+      "x": 1140,
+      "y": 1280,
+      "w": 1140,
+      "h": 900,
+      "title": "Inventory Information \u2014 a data system (kinds and fields)"
+    },
+    {
+      "file": "InventoryEmpty.dc.html",
+      "x": 2380,
+      "y": 1000,
+      "w": 1140,
+      "h": 620,
+      "title": "Inventory Information \u2014 never censused: where the first census is started"
+    }
   ],
   "annotations": [
-    { "id": "decided", "x": 0, "y": -230, "w": 1040,
-      "text": "DECIDED 2026-09-04 (three rounds) and drawn here: census runs PER SOURCE, one at a time, as a background job with progress · per-source Inventory Information (totals · readable / needs-OCR / unsupported · file types · identical groupings with counts + template status · linked types · last census + incremental diff) · documents = fingerprint groupings + layouts, data systems = kind enumeration + render recipes · embed tiers (kind description always · prose rows opt-in with cost · never pure id/date/number kinds) · field-REDACTED renderings are what embed · 'Identical Grouping' is the name (nav 'Find Same-Format Records' renamed in this build) · OCR-then-census for image files, as an opt-in with a visible cost · every file type counted, unreadables reported, never skipped. Kevin's 2026-09-13 add: a button to view a snapshot of an actual document / rendered record — drawn as 'View sample' and 'View a rendered record'." },
-    { "id": "flow", "x": 1140, "y": -230, "w": 1140,
-      "text": "FROM THE FLOW MAP (item 5, DESIGN_setup_flow_map.md), drawn on the assumption Kevin confirms it: the census needs NO record type linked (a bare drive can be censused); association happens over GROUPINGS, recognition first, then one AI naming call, and a HUMAN approval writes the type↔source link, the fingerprint stamps, the draft variant and the signature — nothing before. 'Find variants' on the Taxonomy page keeps its modal but reads this census store; the Scan source page (/discovery) retires. Sub-folders are walked; the folder path is shown as a hint under each grouping (decision 4), not used as a grouping rule." },
-    { "id": "open", "x": 2380, "y": -230, "w": 820,
-      "text": "OPEN FOR KEVIN on these drawings: (a) the two buttons per source card — 'View inventory' + 'Refresh census' (drawn) vs one 'Inventory' door with the refresh inside; (b) does the ungrouped remainder ('Everything else') deserve its own list screen, or is a file list enough; (c) 'Not needed' on a grouping — keep the Mass Redaction dismiss semantics (drawn) or hide the grouping entirely; (d) for search-only systems (Laserfiche) the card says plainly that no census is possible — acceptable until their APIs are wired? (e) OCR opt-in per source (drawn: one button for all 12) vs per grouping." },
-    { "id": "cost", "x": 0, "y": 1800, "w": 980,
-      "text": "COST AND SAFETY, as drawn: the census itself is model-free (hashing, text extraction, fingerprinting) — the only paid steps are OCR (opt-in, priced) and one small naming call per unrecognised grouping at association time. Row-level embedding of a data kind is gated on its field template existing (sequence: census → field template → embed). Nothing on this screen releases a record; it is setup, gated like Record Sources today (System Admin / Director)." }
+    {
+      "id": "decided",
+      "x": 0,
+      "y": -230,
+      "w": 1040,
+      "text": "DECIDED 2026-09-04 (three rounds) and drawn here: census runs PER SOURCE, one at a time, as a background job with progress \u00b7 per-source Inventory Information (totals \u00b7 readable / needs-OCR / unsupported \u00b7 file types \u00b7 identical groupings with counts + template status \u00b7 linked types \u00b7 last census + incremental diff) \u00b7 documents = fingerprint groupings + layouts, data systems = kind enumeration + render recipes \u00b7 embed tiers (kind description always \u00b7 prose rows opt-in with cost \u00b7 never pure id/date/number kinds) \u00b7 field-REDACTED renderings are what embed \u00b7 'Identical Grouping' is the name (nav 'Find Same-Format Records' renamed in this build) \u00b7 OCR-then-census for image files, as an opt-in with a visible cost \u00b7 every file type counted, unreadables reported, never skipped. Kevin's 2026-09-13 add: a button to view a snapshot of an actual document / rendered record \u2014 drawn as 'View sample' and 'View a rendered record'."
+    },
+    {
+      "id": "flow",
+      "x": 1140,
+      "y": -230,
+      "w": 1140,
+      "text": "FROM THE FLOW MAP (item 5, DESIGN_setup_flow_map.md), drawn on the assumption Kevin confirms it: the census needs NO record type linked (a bare drive can be censused); association happens over GROUPINGS, recognition first, then one AI naming call, and a HUMAN approval writes the type\u2194source link, the fingerprint stamps, the draft variant and the signature \u2014 nothing before. 'Find variants' on the Taxonomy page keeps its modal but reads this census store; the Scan source page (/discovery) retires. Sub-folders are walked; the folder path is shown as a hint under each grouping (decision 4), not used as a grouping rule."
+    },
+    {
+      "id": "open",
+      "x": 2380,
+      "y": -230,
+      "w": 820,
+      "text": "DECIDED (Kevin, 2026-09-14 late): ONE 'Inventory' door per source card \u2014 the first census, its progress and every refresh live inside the Inventory screen (drawn: InventoryEmpty for a never-censused source; Refresh census on the censused ones). 'Everything else' is just a FILE LIST \u2014 no screen of its own (drawn expanded inline under the row). STILL OPEN: (c) 'Not needed' on a grouping \u2014 keep the Mass Redaction dismiss semantics (drawn) or hide the grouping entirely; (d) for search-only systems (Laserfiche) the card says plainly that no census is possible \u2014 acceptable until their APIs are wired? (e) OCR opt-in per source (drawn: one button for all 12) vs per grouping."
+    },
+    {
+      "id": "cost",
+      "x": 0,
+      "y": 1800,
+      "w": 980,
+      "text": "COST AND SAFETY, as drawn: the census itself is model-free (hashing, text extraction, fingerprinting) \u2014 the only paid steps are OCR (opt-in, priced) and one small naming call per unrecognised grouping at association time. Row-level embedding of a data kind is gated on its field template existing (sequence: census \u2192 field template \u2192 embed). Nothing on this screen releases a record; it is setup, gated like Record Sources today (System Admin / Director)."
+    }
   ],
-  "launch": { "view": "canvas" }
+  "launch": {
+    "view": "canvas"
+  }
 }
