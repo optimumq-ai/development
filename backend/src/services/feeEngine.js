@@ -14,7 +14,12 @@
 // Used in two MODES by passing different quantities: ESTIMATE (projected) and FINAL (actual).
 // ES5 style to match the codebase. All money rounded to cents.
 
-function num(x) { x = Number(x); return isFinite(x) ? x : 0; }
+// A config figure that arrives as entered text — "5%", "$3", "50 %", "1,000" — is the number inside it, not 0.
+// Number("5%") is NaN, and NaN priced as 0 is a SILENT under-charge: the live TX v3 schedule carried the
+// commercial surcharge as "5%" and the deposit as "50%", and every estimate read both as nothing (Kevin's
+// 2026-09-13 markup: "selecting Commercial seems to generate no surcharge"). Decisions are normalised at entry
+// now (feeLaw.decide) and at compose; this is the last line, for schedules approved before that fix.
+function num(x) { if (typeof x === 'string') x = x.replace(/[$,%\s]/g, ''); x = Number(x); return isFinite(x) ? x : 0; }
 function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 function r4(n) { return Math.round((Number(n) || 0) * 10000) / 10000; }
 function capWord(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
@@ -317,10 +322,17 @@ function compute(profile, request) {
   var certCount = num(request && request.certification && request.certification.count);
   if (certCount > 0 && cert.rate) { var camt = r2(certCount * num(cert.rate)); certItem = { kind: 'certification', unit: cert.unit || 'per_record', count: certCount, rate: num(cert.rate), amount: camt }; certSubtotal += camt; }
 
-  // ---- other: a staff-entered one-off cost not covered by the configured scope (amount + label) ----
-  var otherItem = null, otherSubtotal = 0;
-  var other = request && request.other;
-  if (other && num(other.amount) !== 0) { otherSubtotal = r2(num(other.amount)); otherItem = { kind: 'other', description: (other.description || 'Other'), amount: otherSubtotal }; }
+  // ---- other: staff-entered one-off costs not covered by the configured scope, each a description + amount
+  // (Kevin 2026-09-13: "extra cost should not be a single dollar amount entry … allow multiple extra items …
+  // and the detail should be shown on the detailed estimate that the requestor receives"). `request.other` is
+  // a LIST; the pre-2026-09-14 single object is still accepted so stored input_json re-prices identically.
+  var otherItems = [], otherSubtotal = 0;
+  var otherIn = request && request.other;
+  (Array.isArray(otherIn) ? otherIn : (otherIn ? [otherIn] : [])).forEach(function (o) {
+    if (!o || num(o.amount) === 0) return;
+    var oa = r2(num(o.amount)); otherSubtotal = r2(otherSubtotal + oa);
+    otherItems.push({ kind: 'other', description: (o.description || 'Other'), amount: oa });
+  });
 
   // ---- staff-entered ACTUAL amounts for 'actual'-rated lines (Kevin 2026-08-26) ----
   // A rate of 'actual' prices to $0 / needsActual until staff enter the real figure on the estimate screen:
@@ -435,7 +447,7 @@ function compute(profile, request) {
       av: avItems, avSubtotal: r2(avSubtotal),
       delivery: deliveryItem, deliverySubtotal: r2(deliverySubtotal),
       certification: certItem, certificationSubtotal: r2(certSubtotal),
-      other: otherItem, otherSubtotal: r2(otherSubtotal),
+      other: otherItems.length ? otherItems : null, otherSubtotal: r2(otherSubtotal),
       actualsEntered: actualsEntered,
       freeAllowances: { freeLaborHours: num(rules.freeLaborHours), freePageAllowance: freePages },
       adjustedSubtotal: adjustedSubtotal,

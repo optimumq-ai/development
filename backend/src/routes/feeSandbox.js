@@ -24,7 +24,10 @@ async function previewWith(config, b, versionLabel) {
     } }],
     delivery: (b.delivery && b.delivery.method) ? b.delivery : { method: 'email' },
     certification: (b.certification && num(b.certification.count) > 0) ? { count: num(b.certification.count) } : null,
-    other: (b.other && num(b.other.amount) !== 0) ? { amount: num(b.other.amount), description: b.other.description || 'Extra cost' } : null,
+    // Extra costs: a list of { description, amount } (a lone object is accepted for older callers).
+    other: (Array.isArray(b.other) ? b.other : (b.other ? [b.other] : []))
+      .filter(function (o) { return o && num(o.amount) !== 0; })
+      .map(function (o) { return { amount: num(o.amount), description: (o.description || '').trim() || 'Extra cost' }; }),
     purpose: b.purpose || null
   };
   const fc = engine.compute(config, request);
@@ -44,10 +47,13 @@ async function previewWith(config, b, versionLabel) {
   });
 
   const agencyRow = await get("SELECT value FROM system_config WHERE key='agency_name'");
+  // The notice IS the Test tab's display now (Kevin 2026-09-13): no placeholder number, and the waiver
+  // switch reads through to it the way a granted waiver does on a real estimate.
   const notice = feeNotice.buildNotice(
-    { request_number: 'PREVIEW', requestor_name: 'Requestor' },
+    { request_number: '', requestor_name: 'Requestor' },
     fc,
-    { agencyName: (agencyRow && agencyRow.value) || 'the City', paymentPlan: paymentPlan }
+    { agencyName: (agencyRow && agencyRow.value) || 'the City', paymentPlan: paymentPlan, feeWaiver: { granted: waived },
+      computationMethod: (rl.purposeApplied && rl.purpose === 'commercial') ? 'Commercial rates' : 'Standard' }
   );
 
   return {

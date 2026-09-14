@@ -72,6 +72,8 @@ const CATALOG = [
   { key: 'repeat',                      label: 'Repeat / aggregated requests',          bucket: 'computation',      path: 'requestRules.sameDayAggregation', parse: 'text', unit: 'rule' },
 ];
 const BY_KEY = {}; CATALOG.forEach(function (c) { BY_KEY[c.key] = c; });
+// Catalog parse kinds whose city value is ONE number (the unit is display only).
+const NUMERIC_PARSE = ['rate', 'usd', 'pct', 'int', 'num', 'days', 'increment', 'hours2', 'maxfee'];
 
 // ---- value parsing ---------------------------------------------------------------------------------
 // The template's `value` is verified prose. "0.10 | 0.125" on a municipal ceiling row is AG rate |
@@ -449,6 +451,15 @@ async function decide(jid, items, user) {
     var val = d.value;
     if (val === '' || val === undefined) val = null;
     if (typeof val === 'string' && /^\s*-?\d+(\.\d+)?\s*$/.test(val)) val = Number(val);
+    // A figure typed with its unit — "5%", "$3", ".50", "30 days" — is the number inside it. Stored as text it
+    // reached the engine as NaN and priced as 0 (the live "5%" commercial surcharge, 2026-09-13). Text that
+    // holds no number at all on a numeric item is refused by name rather than saved as a figure of nothing.
+    var cat = BY_KEY[k] || {};
+    if (typeof val === 'string' && NUMERIC_PARSE.indexOf(cat.parse) !== -1 && !/^\s*(none|no|actual)/i.test(val)) {
+      var found = nums(val);
+      if (!found.length) { refused.push({ key: k, why: 'enter a figure' + (cat.unit ? ' in ' + cat.unit : '') + ' (e.g. 5 for 5%), "none" or "actual"' }); return; }
+      val = found[0];
+    }
     // Electronic media arrives as one field per item (Kevin 2026-09-08): each is a figure, 'actual', or empty;
     // a figure above that item's state ceiling is refused by name.
     if (r.key === 'media' && val && typeof val === 'object') {
@@ -497,6 +508,10 @@ function compose(s) {
   var noneToZero = function (v) { return v === 'none' || v == null ? 0 : v; };
   s.rows.forEach(function (r) {
     var v = r.city && r.city.value;
+    // A decision recorded as text on a numeric item before decide() normalised them ("5%", "50%", ".50") is
+    // its number here, so the draft and the next approval price it — never a string the engine reads as 0.
+    var cat = BY_KEY[r.key] || {};
+    if (typeof v === 'string' && NUMERIC_PARSE.indexOf(cat.parse) !== -1 && v !== 'none' && v !== 'actual') { var fn = nums(v); if (fn.length) v = fn[0]; }
     switch (r.key) {
       case 'media': { var m = (v && typeof v === 'object') ? v : (r.law.parsed || {}); if (m.cd != null) cfg.media.cd = m.cd; if (m.dvd != null) cfg.media.dvd = m.dvd; if (m.usb != null) cfg.media.usb = m.usb; return; }
       case 'av': { var a = (v && typeof v === 'object') ? v : (r.law.parsed || {}); ['perRecording', 'perMinute', 'freeMinutes'].forEach(function (k) { if (a[k] != null) cfg.av[k] = a[k]; }); return; }

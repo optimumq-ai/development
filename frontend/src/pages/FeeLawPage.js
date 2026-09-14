@@ -519,23 +519,27 @@ export default function FeeLawPage() {
   );
 }
 
-// TEST AN ESTIMATE — the live fee-engine sandbox (formerly on Fee Configuration): prices hypothetical
-// quantities against the ACTIVE fee schedule through the real engine, shows the requestor notice, and
-// records the outcome the hub's "Try a test estimate" row reads (POST /onboarding/fees/test-result).
+// TEST AN ESTIMATE — the live fee-engine sandbox: prices hypothetical quantities against the approved fee
+// schedule (or the screen's unapproved draft) through the real engine, and shows — as the whole result — the
+// notice the requestor would receive (Kevin 2026-09-13: the staff computation card and its "show the notice"
+// button are gone; what the requestor sees IS the test). Records the outcome the hub's "Try a test estimate"
+// row reads (POST /onboarding/fees/test-result).
 function TestTab(props) {
   var data = props.data, can = props.can, ht = props.hubTest;
   var [q, setQ] = useState({ searchHours: 2, reviewHours: 1, programmingHours: 0, bwPages: 120, colorPages: 0, oversizedPages: 0 });
-  var [opt, setOpt] = useState({ delivery: 'email', purpose: '', waived: false, payment: 0, certification: 0, other: 0 });
+  var [opt, setOpt] = useState({ delivery: 'email', purpose: '', waived: false, certification: 0 });
+  // Extra costs: each a short description + amount; as many as the request needs (Kevin 2026-09-13).
+  var [extras, setExtras] = useState([{ description: '', amount: '' }]);
   var [out, setOut] = useState(null);
   var [err, setErr] = useState('');
   var [busy, setBusy] = useState('');
-  var [showNotice, setShowNotice] = useState(false);
   var [against, setAgainst] = useState(data.version ? 'active' : 'draft');
   var run = useCallback(function () {
-    api.post('/fee-law/preview', { against: against, quantities: q, delivery: { method: opt.delivery }, purpose: opt.purpose || null, waived: opt.waived, payment: num(opt.payment), certification: { count: num(opt.certification) }, other: { amount: num(opt.other), description: 'Extra cost' } })
+    var other = extras.filter(function (x) { return num(x.amount) !== 0; }).map(function (x) { return { description: x.description, amount: num(x.amount) }; });
+    api.post('/fee-law/preview', { against: against, quantities: q, delivery: { method: opt.delivery }, purpose: opt.purpose || null, waived: opt.waived, certification: { count: num(opt.certification) }, other: other })
       .then(function (r) { setOut(r.data); setErr(''); })
       .catch(function (e) { setErr(errText(e, 'The estimate could not be computed.')); });
-  }, [q, opt, against]);
+  }, [q, opt, extras, against]);
   useEffect(function () { var t = setTimeout(run, 300); return function () { clearTimeout(t); }; }, [run]);
   async function record(outcome) {
     setBusy(outcome);
@@ -545,9 +549,12 @@ function TestTab(props) {
   }
   function setQ1(k, v) { setQ(Object.assign({}, q, (function () { var o = {}; o[k] = v; return o; })())); }
   function setO(k, v) { setOpt(Object.assign({}, opt, (function () { var o = {}; o[k] = v; return o; })())); }
+  function setX(i, k, v) { setExtras(extras.map(function (x, j) { if (j !== i) return x; var o = Object.assign({}, x); o[k] = v; return o; })); }
+  function addX() { setExtras(extras.concat([{ description: '', amount: '' }])); }
+  function rmX(i) { var n = extras.filter(function (x, j) { return j !== i; }); setExtras(n.length ? n : [{ description: '', amount: '' }]); }
   var numInp = function (k) { return <input type="number" step="any" value={q[k]} onChange={function (e) { setQ1(k, e.target.value === '' ? 0 : parseFloat(e.target.value)); }} style={inp(false)} />; };
-  var R = out && out.requestLevel;
   var tst = STATE[(ht && ht.state) || 'not_started'];
+  var notice = out && out.requestorNotice;
 
   var draftOnly = !data.version;
   return <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '380px minmax(0, 1fr)', gap: '20px' }}>
@@ -556,7 +563,7 @@ function TestTab(props) {
       <div style={Object.assign({}, hint, { marginTop: '3px', marginBottom: '10px' })}>Priced through the real fee engine — the same code path as a real estimate. Nothing is saved.</div>
       <div style={{ marginBottom: '12px', padding: '8px 10px', background: C.wash, border: '1px solid ' + C.line, borderRadius: '8px', fontSize: '12.5px' }}>
         <div style={{ fontWeight: '600', marginBottom: '4px' }}>Price against</div>
-        <label style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '3px' }}><input type="radio" name="against" checked={against === 'draft'} onChange={function () { setAgainst('draft'); }} />the figures as they stand now (unapproved draft{draftOnly ? '' : ''})</label>
+        <label style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '3px' }}><input type="radio" name="against" checked={against === 'draft'} onChange={function () { setAgainst('draft'); }} />the figures as they stand now (unapproved draft)</label>
         <label style={{ display: 'flex', gap: '6px', alignItems: 'center', color: draftOnly ? C.ph : C.ink }}><input type="radio" name="against" disabled={draftOnly} checked={against === 'active'} onChange={function () { setAgainst('active'); }} />the approved schedule{data.version ? ' · v' + data.version.version : ' · none yet'}</label>
         {draftOnly ? <div style={Object.assign({}, hint, { marginTop: '4px' })}>Undecided city items price as "none" until you decide them. Approve version 1 to make this the schedule real estimates use.</div> : null}
       </div>
@@ -568,18 +575,29 @@ function TestTab(props) {
         <div><label style={lbl}>Color pages</label>{numInp('colorPages')}</div>
         <div><label style={lbl}>Oversized pages</label>{numInp('oversizedPages')}</div>
         <div><label style={lbl}>Delivery</label><select value={opt.delivery} onChange={function (e) { setO('delivery', e.target.value); }} style={inp(false)}><option value="email">Email</option><option value="pickup">Pickup</option><option value="mail">Mail</option></select></div>
-        <div><label style={lbl}>Purpose</label><select value={opt.purpose} onChange={function (e) { setO('purpose', e.target.value); }} style={inp(false)}><option value="">Standard</option><option value="commercial">Commercial</option><option value="inspection">Inspection only</option></select></div>
-        <div><label style={lbl}>Certified copies</label><input type="number" value={opt.certification} onChange={function (e) { setO('certification', e.target.value); }} style={inp(false)} /></div>
-        <div><label style={lbl}>Extra cost ($)</label><input type="number" step="any" value={opt.other} onChange={function (e) { setO('other', e.target.value); }} style={inp(false)} /></div>
-        <div><label style={lbl}>Payment received ($)</label><input type="number" step="any" value={opt.payment} onChange={function (e) { setO('payment', e.target.value); }} style={inp(false)} /></div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '6px' }}><label style={{ fontSize: '12.5px', display: 'flex', gap: '6px', alignItems: 'center' }}><input type="checkbox" checked={opt.waived} onChange={function (e) { setO('waived', e.target.checked); }} />Fee waived</label></div>
+        <div><label style={lbl}>Purpose</label><select value={opt.purpose} onChange={function (e) { setO('purpose', e.target.value); }} style={inp(false)}><option value="">Standard</option><option value="commercial">Commercial</option></select></div>
+        <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Records certified</label><input type="number" min="0" step="1" value={opt.certification} onChange={function (e) { setO('certification', e.target.value); }} style={inp(false)} />
+          <div style={Object.assign({}, hint, { marginTop: '3px' })}>How many records carry a certification. Charged at the certified copy charge per record; it does not multiply the copies.</div></div>
       </div>
+      <div style={{ marginTop: '12px' }}>
+        <label style={lbl}>Extra costs</label>
+        <div style={Object.assign({}, hint, { marginBottom: '6px' })}>One-off costs not covered by the schedule — a courier, a third-party retrieval fee. Each appears as its own line on the requestor's estimate.</div>
+        {extras.map(function (x, i) {
+          return <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px' }}>
+            <input type="text" value={x.description} placeholder="Description" onChange={function (e) { setX(i, 'description', e.target.value); }} style={inp(false, { flex: 1, minWidth: 0 })} />
+            <input type="number" step="any" value={x.amount} placeholder="$" onChange={function (e) { setX(i, 'amount', e.target.value); }} style={inp(false, { width: '96px' })} />
+            <button type="button" onClick={function () { rmX(i); }} title="Remove this extra cost" style={btn('sec', { height: '30px', padding: '0 9px' })}>Remove</button>
+          </div>;
+        })}
+        <button type="button" onClick={addX} style={btn('sec', { height: '28px' })}>Add another extra cost</button>
+      </div>
+      <div style={{ marginTop: '12px' }}><label style={{ fontSize: '12.5px', display: 'flex', gap: '6px', alignItems: 'center' }}><input type="checkbox" checked={opt.waived} onChange={function (e) { setO('waived', e.target.checked); }} />Fee waived</label></div>
       <div style={{ marginTop: '18px', padding: '12px 14px', background: C.wash, border: '1px solid ' + C.line, borderRadius: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', height: '22px', padding: '0 9px', borderRadius: '999px', background: tst.bg, color: tst.color, fontSize: '11px', fontWeight: '700' }}>{tst.label}</span>
           <span style={{ fontSize: '12px', fontWeight: '600' }}>Try a test estimate</span>
         </div>
-        <div style={Object.assign({}, hint, { marginTop: '4px' })}>{ht ? ht.evidence + '. ' : ''}{draftOnly ? 'The outcome can be recorded once a version is approved.' : 'Does the estimate on the right look right for this city?'}</div>
+        <div style={Object.assign({}, hint, { marginTop: '4px' })}>{ht ? ht.evidence + '. ' : ''}{draftOnly ? 'The outcome can be recorded once a version is approved.' : 'Does the notice on the right read right for this city?'}</div>
         <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
           <button type="button" disabled={!can || draftOnly || busy !== ''} onClick={function () { record('confirmed'); }} style={btn(can && !draftOnly ? 'pri' : 'dis', { height: '32px' })}>{busy === 'confirmed' ? 'Recording…' : 'It behaves correctly'}</button>
           <button type="button" disabled={!can || draftOnly || busy !== ''} onClick={function () { record('issues'); }} style={btn(can && !draftOnly ? 'sec' : 'dis', { height: '32px' })}>{busy === 'issues' ? 'Recording…' : 'Something is off'}</button>
@@ -587,39 +605,10 @@ function TestTab(props) {
       </div>
     </div>
     <div style={Object.assign({}, card, { background: 'var(--oq-bg-f9fafb)', padding: '14px 16px', alignSelf: 'start' })}>
-      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>Estimate {out ? <span style={{ fontSize: '11px', fontWeight: '700', color: out.against === 'active' ? C.ok : C.amber, background: out.against === 'active' ? 'var(--oq-bg-e1f2e9)' : 'var(--oq-bg-f6ebd6)', borderRadius: '999px', padding: '2px 8px', marginLeft: '6px' }}>{out.against === 'active' ? 'approved ' + out.configVersion : 'unapproved draft'}</span> : null}</div>
+      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>What the requestor would receive {out ? <span style={{ fontSize: '11px', fontWeight: '700', color: out.against === 'active' ? C.ok : C.amber, background: out.against === 'active' ? 'var(--oq-bg-e1f2e9)' : 'var(--oq-bg-f6ebd6)', borderRadius: '999px', padding: '2px 8px', marginLeft: '6px' }}>{out.against === 'active' ? 'priced against approved ' + out.configVersion : 'priced against the unapproved draft'}</span> : null}</div>
       {err ? <div style={{ fontSize: '12.5px', color: C.red }}>{err}</div> : null}
       {!out && !err ? <div style={{ fontSize: '12px', color: C.ph }}>Calculating…</div> : null}
-      {R ? <div style={{ fontSize: '12.5px' }}>
-        {(R.components || (out.components || [])).length ? null : null}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <Line k="Labor" v={money(R.laborSubtotal)} />
-          <Line k="Duplication" v={money(R.duplicationSubtotal)} />
-          <Line k="Media" v={money(R.mediaSubtotal)} />
-          {R.deliverySubtotal ? <Line k="Delivery" v={money(R.deliverySubtotal)} /> : null}
-          {R.certificationSubtotal ? <Line k="Certification" v={money(R.certificationSubtotal)} /> : null}
-          {R.otherSubtotal ? <Line k="Extra cost" v={money(R.otherSubtotal)} /> : null}
-          <Line k="Gross subtotal" v={money(R.grossSubtotal)} />
-          {R.freeAllowances && (R.freeAllowances.freePageAllowance || R.freeAllowances.freeLaborHours) ? <Line k="Free allowances" v={(R.freeAllowances.freePageAllowance || 0) + ' pg / ' + (R.freeAllowances.freeLaborHours || 0) + ' hr'} muted /> : null}
-          <Line k="Adjusted subtotal" v={money(R.adjustedSubtotal)} />
-          {out.flags && out.flags.floorApplied ? <Line k="Minimum fee applied" v="" muted /> : null}
-          {out.flags && out.flags.ceilingApplied ? <Line k="Request ceiling applied" v="" amber /> : null}
-          {out.flags && out.flags.deMinimisWaived ? <Line k="De minimis — waived" v="" amber /> : null}
-          {out.waived ? <Line k="Fee waived" v="" amber /> : null}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: '800', color: C.navy, marginTop: '8px', paddingTop: '8px', borderTop: '2px solid ' + C.navy }}><span>TOTAL</span><span>{money(out.effectiveTotal)}</span></div>
-        <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <Line k={'Deposit due' + (out.deposit && out.deposit.basis ? ' (' + out.deposit.basis + ')' : '')} v={money(out.deposit && out.deposit.required)} />
-          <Line k="Balance after payment" v={money(out.payment && out.payment.balanceDue)} />
-          <Line k="Estimate notice to requestor" v={R.estimateNotifyTriggered ? 'required' : 'not required'} muted={!R.estimateNotifyTriggered} />
-          {out.paymentPlan ? <Line k="Payment plan" v={(out.paymentPlan.mode || out.paymentPlan.gate || '') + (out.paymentTimingSource === 'derived' ? ' (derived from the schedule)' : '')} muted /> : null}
-        </div>
-        {out.requestorNotice ? <div style={{ marginTop: '12px' }}>
-          <button type="button" onClick={function () { setShowNotice(!showNotice); }} style={btn('sec', { height: '30px' })}>{showNotice ? 'Hide' : 'Show'} the notice the requestor would receive</button>
-          {showNotice ? <div style={{ marginTop: '8px', background: 'var(--oq-bg-ffffff)', border: '1px solid ' + C.line, borderRadius: '8px', padding: '10px 12px', fontSize: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}><b>{out.requestorNotice.subject}</b>{'\n\n'}{out.requestorNotice.text}</div> : null}
-        </div> : null}
-      </div> : null}
+      {notice ? <div style={{ background: 'var(--oq-bg-ffffff)', border: '1px solid ' + C.line, borderRadius: '8px', padding: '12px 14px', fontSize: '12.5px', whiteSpace: 'pre-wrap', lineHeight: '1.55' }}><b>{notice.subject}</b>{'\n\n'}{notice.text}</div> : null}
     </div>
   </div>;
 }
-function Line(props) { return <div style={{ display: 'flex', justifyContent: 'space-between', color: props.amber ? 'var(--oq-fg-92400e)' : props.muted ? 'var(--oq-fg-8296a4)' : 'var(--oq-fg-374151)' }}><span>{props.k}</span><span>{props.v}</span></div>; }

@@ -63,6 +63,10 @@ function num(n) { n = Number(n); return isFinite(n) ? n : 0; }
 function buildLines(R) {
   var lines = [];
   (R.labor || []).forEach(function (li) { if (li.amount > 0) lines.push('- ' + (LABOR_LABEL[li.kind] || 'Staff time') + ': ' + hrLabel(li.billableHours) + ' at ' + money(li.rate) + '/hour = ' + money(li.amount)); });
+  // The overhead charged on staff time (TX: 20%) is part of the total, so it is a line — without it the lines
+  // above did not add up to the figure the requestor is asked to accept (seen 2026-09-14 once the notice became
+  // the Test tab's display).
+  if (num(R.laborOverhead) > 0) lines.push('- Overhead on staff time (' + num(R.laborOverheadPct) + '%): ' + money(R.laborOverhead));
   (R.duplication || []).forEach(function (li) {
     var label = DUP_LABEL[li.kind] || 'Copies';
     if (li.needsActual) { lines.push('- ' + label + ': actual cost to be determined'); return; }
@@ -73,7 +77,8 @@ function buildLines(R) {
   if (R.delivery && R.delivery.amount > 0) lines.push('- Delivery (' + R.delivery.method + '): ' + money(R.delivery.amount));
   else if (R.delivery && R.delivery.needsActual) lines.push('- Delivery (' + R.delivery.method + '): actual cost to be determined');
   if (R.certification && R.certification.amount > 0) lines.push('- Certification: ' + R.certification.count + ' at ' + money(R.certification.rate) + ' = ' + money(R.certification.amount));
-  if (R.other && R.other.amount) lines.push('- ' + (R.other.description || 'Other') + ': ' + money(R.other.amount));
+  // Extra costs: a list since 2026-09-14; a feeContext saved before then holds one object.
+  (Array.isArray(R.other) ? R.other : (R.other ? [R.other] : [])).forEach(function (o) { if (o && o.amount) lines.push('- ' + (o.description || 'Other') + ': ' + money(o.amount)); });
   return lines;
 }
 function relevantTrace(R) { return ((R && R.rulesTrace) || []).filter(function (t) { return ['free_allowances', 'surcharge', 'min_fee', 'max_fee', 'de_minimis'].indexOf(t.rule) >= 0 && (t.applied || t.configured); }); }

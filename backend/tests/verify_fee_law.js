@@ -11,6 +11,8 @@
 //      active) with the state's figures mapped by engine path and the city's decisions; approving again
 //      makes v2 and supersedes v1 — never edits in place; config_history carries the decisions.
 //   E. The hub reads it: not_started with "no fee schedule version yet" → in_progress with "v1" → attest.
+//   C6–C9 (2026-09-14, Kevin's Test-tab markup): a decision typed with its unit ("5%") is stored as its number and
+//      prices as a commercial surcharge; extra costs are a list, each on the requestor notice; the notice is the result.
 //
 // BREAKS THIS SHOULD CATCH: take the AG rate instead of the municipal ceiling (A3) · let a city value exceed
 // the ceiling (C2) · approve with undecided rows (D1) · UPDATE the active profile instead of versioning (D3).
@@ -111,6 +113,26 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
 
   var pv = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'active', quantities: { searchHours: 3, bwPages: 200 } });
   ok('C5 the test calculator prices against the DRAFT before any version exists (200 pages less the 10 free at 0.125 = $23.75; 3 search hrs at the $12 decision, 1 free → $24)', pv.status === 200 && pv.body.against === 'draft' && pv.body.configVersion === 'draft' && Math.abs(pv.body.requestLevel.duplicationSubtotal - 23.75) < 0.01 && Math.abs(pv.body.requestLevel.laborSubtotal - 24) < 0.01, JSON.stringify(pv.body).slice(0, 200));
+
+  // Kevin's 2026-09-13 markup (Test tab): the commercial surcharge decided as "5%" reached the engine as TEXT and
+  // priced as 0 — Purpose = Commercial showed no surcharge. Normalised at entry; the draft prices it; the notice says so.
+  var pctDec = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'commercial': { value: '5%' }, 'rules.deMinimis': { value: '$5' } } });
+  ok('C6 a figure typed with its unit ("5%", "$5") is stored as the NUMBER inside it', pctDec.status === 200 && pctDec.body.refused.length === 0 && rowOf(pctDec.body.screen, 'commercial').city.value === 5 && rowOf(pctDec.body.screen, 'rules.deMinimis').city.value === 5, JSON.stringify(rowOf(pctDec.body.screen, 'commercial').city));
+  var noNum = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'commercial': { value: 'a few percent' } } });
+  ok('C6a text holding no figure on a numeric item is refused by name; the 5 stands', noNum.body.refused.length === 1 && noNum.body.refused[0].key === 'commercial' && rowOf(noNum.body.screen, 'commercial').city.value === 5, JSON.stringify(noNum.body.refused));
+  var pvStd = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'draft', quantities: { searchHours: 3, bwPages: 200 }, purpose: null });
+  var pvCom = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'draft', quantities: { searchHours: 3, bwPages: 200 }, purpose: 'commercial' });
+  ok('C7 Purpose = Commercial applies the 5% surcharge the city decided (Standard: none), and the requestor notice explains it',
+    pvStd.body.requestLevel.surcharge === 0 && pvCom.body.requestLevel.purposeApplied === true && pvCom.body.requestLevel.surchargePct === 5 && Math.abs(pvCom.body.requestLevel.surcharge - 0.05 * pvCom.body.requestLevel.adjustedSubtotal) < 0.011 && /5% surcharge/.test(pvCom.body.requestorNotice.text) && !/surcharge/.test(pvStd.body.requestorNotice.text),
+    JSON.stringify({ std: pvStd.body.requestLevel.surcharge, com: pvCom.body.requestLevel.surcharge, pct: pvCom.body.requestLevel.surchargePct }));
+  var pvX = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'draft', quantities: { searchHours: 3, bwPages: 200 }, other: [{ description: 'Courier', amount: 12 }, { description: 'Archive retrieval', amount: 8.5 }, { description: 'nothing', amount: 0 }] });
+  var xR = pvX.body.requestLevel;
+  ok('C8 extra costs are a LIST: two described lines total $20.50, the $0 one dropped, each its own line on the requestor\'s estimate', Array.isArray(xR.other) && xR.other.length === 2 && Math.abs(xR.otherSubtotal - 20.5) < 0.001 && /- Courier: \$12\.00/.test(pvX.body.requestorNotice.text) && /- Archive retrieval: \$8\.50/.test(pvX.body.requestorNotice.text), JSON.stringify(xR.other));
+  var pvL = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'draft', quantities: { searchHours: 0, bwPages: 0 }, other: { description: 'One', amount: 7 } });
+  ok('C8a the pre-list single extra cost still prices (stored input_json re-prices identically)', pvL.body.requestLevel.otherSubtotal === 7 && pvL.body.requestLevel.other.length === 1 && pvL.body.requestLevel.other[0].description === 'One', JSON.stringify(pvL.body.requestLevel.other));
+  var pvW = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'draft', quantities: { searchHours: 3, bwPages: 200 }, waived: true });
+  ok('C9 the Test tab shows the requestor\'s notice itself: no placeholder request number, and "Fee waived" reads through to it', !/PREVIEW/.test(pvStd.body.requestorNotice.subject + pvStd.body.requestorNotice.text) && /fees waived/i.test(pvW.body.requestorNotice.subject) && /have been waived/.test(pvW.body.requestorNotice.text) && pvW.body.effectiveTotal === 0, pvW.body.requestorNotice.subject);
+  await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'commercial': { value: 'none' }, 'rules.deMinimis': { value: 5 } } });
 
   console.log('\n=== D. APPROVING ===');
   var a0 = await callAs(U.dir, 'POST', '/fee-law/approve', {});

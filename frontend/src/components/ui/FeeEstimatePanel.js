@@ -22,7 +22,7 @@ export default function FeeEstimatePanel(props) {
   var [ledger, setLedger] = useState(null);   // WS5 requestor-ledger gate result (prior balance · personnel-time cap · same-day siblings)
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
-  var [other, setOther] = useState({ amount: 0, description: '' });
+  var [other, setOther] = useState([{ amount: '', description: '' }]);   // extra costs: description + amount each, as many as needed (Kevin 2026-09-13)
   var [certification, setCertification] = useState({ requested: false, count: 0, rate: null, unit: 'per_record' });
   var [prefilled, setPrefilled] = useState({});
   var [resp, setResp] = useState({ busy: false, msg: '' });
@@ -109,7 +109,11 @@ export default function FeeEstimatePanel(props) {
       if (r.data.request && r.data.request.purpose) setPurpose(r.data.request.purpose);
       var ard = r.data.actualRateDrivers || []; setActualRateDrivers(ard); if (ard.length) { var ro = {}; ard.forEach(function (k) { ro[k] = (r.data.laborRates || {})[k] || 0; }); setRateOverrides(ro); }
       if (r.data.latest && r.data.latest.input && r.data.latest.input.actualAmounts) setActualAmounts(r.data.latest.input.actualAmounts);
-      if (r.data.latest && r.data.latest.input && r.data.latest.input.other) setOther({ amount: r.data.latest.input.other.amount || 0, description: r.data.latest.input.other.description || '' });
+      if (r.data.latest && r.data.latest.input && r.data.latest.input.other) {
+        var prevOther = r.data.latest.input.other;   // a list since 2026-09-14; earlier estimates saved one object
+        var lst = (Array.isArray(prevOther) ? prevOther : [prevOther]).map(function (o) { return { amount: o.amount || 0, description: o.description || '' }; });
+        setOther(lst.length ? lst : [{ amount: '', description: '' }]);
+      }
       var certCtx = r.data.certification || {};
       var latestCert = r.data.latest && r.data.latest.input && r.data.latest.input.certification;
       setCertification({
@@ -132,7 +136,7 @@ export default function FeeEstimatePanel(props) {
         if (num(q.avRecordings) > 0 || num(q.avMinutes) > 0) quant.av = { recordings: num(q.avRecordings), minutes: num(q.avMinutes) };
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
-      var otherPayload = (num(other.amount) !== 0 || (other.description || '').trim()) ? { amount: num(other.amount), description: other.description || 'Other' } : null;
+      var otherPayload = other.filter(function (o) { return num(o.amount) !== 0; }).map(function (o) { return { amount: num(o.amount), description: (o.description || '').trim() || 'Other' }; });
       var certPayload = certification.requested ? { count: num(certification.count) || 1 } : { count: 0 };
       var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, certification: certPayload, other: otherPayload, purpose: purpose, rateOverrides: rateOverrides, actualAmounts: actualAmounts });
       setResult(r.data.estimate.feeContext);
@@ -499,15 +503,19 @@ export default function FeeEstimatePanel(props) {
             );
           })}
           <div style={{ border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '10px', padding: '14px', marginBottom: '12px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--oq-fg-111111)', marginBottom: '4px' }}>Other charge <span style={{ fontWeight: 400, color: 'var(--oq-fg-9ca3af)' }}>(optional &middot; a one-off cost not covered above)</span></div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-              <div style={{ flex: 1 }}><label style={lbl}>Description</label><input type="text" value={other.description} onChange={function (e) { setOther(function (o) { return Object.assign({}, o, { description: e.target.value }); }); }} placeholder="e.g. third-party retrieval fee, special postage" style={inp} /></div>
-              <div style={{ width: '120px' }}><label style={lbl}>Amount $</label><input type="number" step="any" value={other.amount} onChange={function (e) { setOther(function (o) { return Object.assign({}, o, { amount: e.target.value === '' ? 0 : parseFloat(e.target.value) }); }); }} style={inp} /></div>
-            </div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--oq-fg-111111)', marginBottom: '4px' }}>Extra costs <span style={{ fontWeight: 400, color: 'var(--oq-fg-9ca3af)' }}>(optional &middot; one-off costs not covered above &middot; each is its own line on the requestor's estimate)</span></div>
+            {other.map(function (o, i) {
+              return <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', marginBottom: '6px' }}>
+                <div style={{ flex: 1 }}><label style={lbl}>Description</label><input type="text" value={o.description} onChange={function (e) { var v = e.target.value; setOther(function (l) { return l.map(function (x, j) { return j === i ? Object.assign({}, x, { description: v }) : x; }); }); }} placeholder="e.g. third-party retrieval fee, special postage" style={inp} /></div>
+                <div style={{ width: '120px' }}><label style={lbl}>Amount $</label><input type="number" step="any" value={o.amount} onChange={function (e) { var v = e.target.value; setOther(function (l) { return l.map(function (x, j) { return j === i ? Object.assign({}, x, { amount: v }) : x; }); }); }} style={inp} /></div>
+                <button type="button" title="Remove this extra cost" onClick={function () { setOther(function (l) { var n = l.filter(function (x, j) { return j !== i; }); return n.length ? n : [{ amount: '', description: '' }]; }); }} style={{ height: '34px', padding: '0 10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', background: 'var(--oq-bg-ffffff)', fontSize: '12px', cursor: 'pointer' }}>Remove</button>
+              </div>;
+            })}
+            <button type="button" onClick={function () { setOther(function (l) { return l.concat([{ amount: '', description: '' }]); }); }} style={{ height: '28px', padding: '0 10px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '8px', background: 'var(--oq-bg-ffffff)', fontSize: '12px', cursor: 'pointer' }}>Add another extra cost</button>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
             <div><label style={lbl}>Delivery</label><select value={delivery} onChange={function (e) { setDelivery(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="email">Email</option><option value="pickup">Pickup</option><option value="mail">Mail</option></select></div>
-            <div><label style={lbl}>Purpose</label><select value={purpose} onChange={function (e) { setPurpose(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="standard">Standard</option><option value="commercial">Commercial</option><option value="inspection">Inspection (on-site)</option></select></div>
+            <div><label style={lbl}>Purpose</label><select value={purpose} onChange={function (e) { setPurpose(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="standard">Standard</option><option value="commercial">Commercial</option></select></div>
             <div>
               <label style={lbl}>Certification{ctx.certification && ctx.certification.requested ? <span style={{ color: 'var(--oq-fg-03543f)' }}> &middot; requestor asked</span> : null}</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '30px' }}>
@@ -555,7 +563,7 @@ export default function FeeEstimatePanel(props) {
                   {R.surcharge ? <Row k={(R.purpose === 'commercial' ? 'Commercial' : 'Purpose') + ' surcharge (' + R.surchargePct + '%)'} v={money(R.surcharge)} /> : null}
                   <Row k="Media" v={money(R.mediaSubtotal)} />
                   {R.avSubtotal ? <Row k="Audio/Video" v={money(R.avSubtotal)} /> : null}
-                  {R.other ? <Row k={R.other.description} v={money(R.other.amount)} /> : null}
+                  {(Array.isArray(R.other) ? R.other : (R.other ? [R.other] : [])).map(function (o, i) { return <Row key={'other' + i} k={o.description} v={money(o.amount)} />; })}
                   {R.certification ? <Row k={"Certification (" + R.certification.count + " " + (R.certification.unit === 'per_record' ? (R.certification.count === 1 ? 'record' : 'records') : 'request') + ")"} v={money(R.certificationSubtotal)} /> : null}
                   {R.deliverySubtotal ? <Row k="Delivery" v={money(R.deliverySubtotal)} /> : null}
                   {(R.freeAllowances.freePageAllowance || R.freeAllowances.freeLaborHours) ? <Row k="Free allowances" muted v={(R.freeAllowances.freePageAllowance || 0) + ' pg / ' + (R.freeAllowances.freeLaborHours || 0) + ' hr'} /> : null}
