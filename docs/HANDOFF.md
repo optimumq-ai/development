@@ -10505,3 +10505,38 @@ sandbox now print "Recordings: 2 at $10.00 each = $20.00" and "Recording time: 4
 subset (11 harnesses) **362/0, live untouched**; live Test tab screenshot against approved v3: $98.75 whose lines now add
 up (18.75 + 3.75 + 15 + 1.25 + 20 + 40). Full suite not re-run for this addendum (additive: two inputs, a pass-through,
 notice lines); the 2940/2 run above covers the rest of today's change. Spec §8 input list updated.
+
+## 2026-09-14 — Markup item 2 BUILT: City-tab cite popups populated; Minimum fee omitted where the state gives no room
+
+Kevin's three empty popups (Commercial surcharge, Certified copy charge, Minimum fee) had ONE cause and the Minimum-fee
+ask a second answer:
+- **The resolver read only half the corpus.** `rulesResearch.js` indexed `pruned/pruned_discovery.json` (ST-00NN). The
+  step-2 fee-gap pass banked its new rules — overhead, media, certification, commercial, bands, cap, repeat — as ST-9NNN in
+  `alignment/fee_gap_new_rules.json` (346 records, 48 for TX), which the fee templates cite by id and nothing ever read. So
+  "populate the TX-9xxx research records" was never a research task: the records existed. The resolver now indexes both
+  files (1,463 records; the pruned corpus wins on a duplicate id). Commercial's popup shows TX-9041 (§ 552.222: no inquiry
+  into purpose, verbatim), Certification's shows TX-9029 (§ 552.232(b)-(c): certification of prior production is free) and
+  TX-9042 (§ 552.266: municipal court clerk copies per ordinance). Screenshotted on live.
+- **A silent item's popup hid its research note.** The popup rendered the note only inside the findings list, and a
+  silent item has no findings — so Minimum fee (and any silent row) opened blank. The note now shows under "What the
+  research found" whenever there are no findings. NOTE: the templates' `notes` fields are truncated with "…" in the
+  generated files themselves (e.g. Commercial's ends "The only requestor-cl…") — a builder/gather artefact, not fixed here.
+- **Minimum fee is OMITTED for Texas** (Kevin: the state sets none and gives the city no discretion → not on the screen).
+  Built as a data-driven rule applied when the template is read (`feeLaw.OMIT_RULES`, `screen.omitted[]`), not by editing
+  the generated templates: Minimum fee is dropped where the state is silent on it AND its copy charges are a fixed or
+  capped statutory schedule (a city bound to a schedule cannot add a charge the schedule does not list); it stays where the
+  state speaks (OH, TN) or leaves copy charges to the body's own reasonable-cost schedule. Result across the 32 templates:
+  omitted in 16 (CO CT FL GA IL IN MA MI MN MO NJ NY OK PA TX WA), kept in 16 (AL AZ CA ID KS LA NC NE NV OH OR SC TN UT
+  VA WI). The City tab carries a one-line footnote naming the omitted item and why; deciding it is refused as unknown; the
+  engine keeps the skeleton's 0. TX: 13 → 12 deferral rows; Kevin's earlier "none" decision stays in the store, inert.
+  Kevin's assumption I built on: "no discretion" = a capped statutory copy schedule. If he wants a different signal, it
+  is one function.
+**Evidence:** `verify_fee_law` A6/A6a/A7 (+ counts 13 → 12 in A5/B2/C4/G8) → 60/60; subset in suite order
+`verify_setup_hub` 107 · `verify_agency_setup` 20 · `verify_fee_law` 60 · `verify_bw9b_editors` 36 · `verify_golden_setup` 44
+= **267/0, live untouched**; live screenshots: City tab footnote, Commercial and Certification popups with verbatim statute
+records. Spec: `SPEC_setup_hub.md` F1 (both corpora, silent-item note, `screen.omitted[]` + the Minimum-fee rule).
+Full suite not re-run for this slice (the 2940/2 run earlier today stands; this touched the resolver, the screen builder and
+one popup — the five harnesses above are the ones that read them).
+**NEXT:** item 3 (Taxonomy small fixes: remove the SETTING UP strip; variants inherit the parent's routing — Kevin's
+discussion questions first) → 4 → 5 → 6 → 7 per the 2026-09-14 order. Pending from Kevin: certified copy SETS (item 1e);
+inspection requests as a feature; whether "capped copy schedule" is the discretion signal he meant for Minimum fee.

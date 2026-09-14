@@ -19,6 +19,12 @@ var path = require('path');
 
 var CORPUS_PATH = process.env.RULES_RESEARCH_PATH ||
   path.join(__dirname, '..', '..', '..', 'docs', 'rules_research', 'pruned', 'pruned_discovery.json');
+// The step-2 fee-gap pass banked its NEW rules (ids <ST>-9NNN — overhead, media, certification, commercial,
+// bands, cap, repeat…) in a second file the fee templates cite by id. Until 2026-09-14 only the pruned corpus
+// was read, so every 9NNN citation answered "no research record" and the Fee rules cite popups for
+// Commercial surcharge and Certified copy charge opened empty (Kevin's 2026-09-13 markup).
+var GAP_CORPUS_PATH = process.env.RULES_RESEARCH_GAP_PATH ||
+  path.join(__dirname, '..', '..', '..', 'docs', 'rules_research', 'alignment', 'fee_gap_new_rules.json');
 
 var index = null;   // rule_id -> record (with state attached)
 var loadedAt = null;
@@ -38,6 +44,18 @@ function load() {
     loadedAt = new Date().toISOString();
   } catch (e) {
     console.error('[rulesResearch] corpus unavailable:', e && e.message);
+  }
+  try {
+    var gap = JSON.parse(fs.readFileSync(GAP_CORPUS_PATH, 'utf8'));
+    var byState = (gap && gap.rules_by_state) || {};
+    Object.keys(byState).forEach(function (code) {
+      (byState[code] || []).forEach(function (r) {
+        if (r && r.rule_id && !index[r.rule_id]) index[r.rule_id] = Object.assign({ state: null, state_code: code, corpus: 'fee_gap' }, r);
+      });
+    });
+    loadedAt = loadedAt || new Date().toISOString();
+  } catch (e) {
+    console.error('[rulesResearch] fee-gap corpus unavailable:', e && e.message);
   }
   return index;
 }
@@ -59,5 +77,5 @@ function resolve(ruleIds) {
   return { found: found, missing: missing };
 }
 
-module.exports = { rule: rule, resolve: resolve, CORPUS_PATH: CORPUS_PATH,
+module.exports = { rule: rule, resolve: resolve, CORPUS_PATH: CORPUS_PATH, GAP_CORPUS_PATH: GAP_CORPUS_PATH,
   _stats: function () { load(); return { rules: Object.keys(index || {}).length, loadedAt: loadedAt }; } };

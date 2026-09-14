@@ -373,6 +373,9 @@ export default function FeeLawPage() {
             </div>
             <Pill bg={c.undecided ? 'var(--oq-x-f6ebd6)' : 'var(--oq-x-e1f2e9)'} color={c.undecided ? C.amber : C.ok}>{c.decided} of {c.deferral} decided</Pill>
           </div>
+          {(data.omitted || []).length ? <div style={Object.assign({}, hint, { padding: '0 16px 10px' })}>
+            {data.omitted.map(function (o) { return <div key={o.key}>Not on this screen for {stateName}: <b>{o.label}</b> — {o.why}</div>; })}
+          </div> : null}
           <Group title="Fee computation" n={by(defr, 'computation').length} />
           {head3}{by(defr, 'computation').map(function (r) { return <React.Fragment key={r.key}>{DeferralRow({ row: r })}</React.Fragment>; })}
           <Group title="Estimates, deposits, payment and their clocks" n={by(defr, 'estimate_payment').length + (clock.enabled ? clock.choices.length : 0)} />

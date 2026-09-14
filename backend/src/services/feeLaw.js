@@ -411,12 +411,35 @@ function row(item, t, dec) {
   return r;
 }
 
+// ---- items with no place on a state's screen (Kevin 2026-09-13) --------------------------------------
+// An item the state neither sets nor leaves to the city is not a decision — it is noise. Each rule reads the
+// template's verified cells and answers WHY the item is omitted, or null to keep it. The row is dropped from
+// the screen, a decision on it is refused as an unknown item, and the engine keeps the skeleton's default.
+//   rules.minFee — a minimum charge exists only where the state names one (OH, TN speak to it) or where the
+//   state leaves copy charges to the body's own reasonable-cost schedule (a city may then adopt a minimum as
+//   part of it). Where the state is silent AND its copy charges are a fixed or capped statutory schedule, the
+//   chargeable categories are the schedule's and a minimum is not among them — TX: no minimum in ch. 552 or
+//   1 TAC ch. 70, and § 552.262(a) binds cities to the AG rules within 25%.
+var OMIT_RULES = {
+  'rules.minFee': function (items) {
+    var mf = items['rules.minFee'] || {}, bw = items['dup.bw.rate'] || {};
+    var stateSilent = !mf.resolution || mf.resolution === 'silent';
+    var cappedSchedule = bw.resolution === 'ceiling' || bw.resolution === 'value';
+    return (stateSilent && cappedSchedule) ? 'The state names no minimum fee, and its copy charges are a fixed or capped statutory schedule the city may not add a minimum to.' : null;
+  }
+};
+function omittedItems(items) {
+  return CATALOG.map(function (c) { var fn = OMIT_RULES[c.key]; var why = fn ? fn(items || {}) : null; return why ? { key: c.key, label: c.label, why: why } : null; }).filter(Boolean);
+}
+
 async function screen(jid) {
   var prof = jid ? await get('SELECT id, code, name FROM jurisdiction_profiles WHERE id = ?', [jid]) : await activeJurisdiction();
   if (!prof) return { jurisdiction: null, rows: [], counts: null, version: null };
   var tpl = templateItems(prof.code);
   var dec = await decisions(prof.id);
-  var rows = CATALOG.map(function (item) { return row(item, tpl.items[item.key] || {}, dec); });
+  var omitted = omittedItems(tpl.items);
+  var omittedKeys = omitted.map(function (o) { return o.key; });
+  var rows = CATALOG.filter(function (item) { return omittedKeys.indexOf(item.key) === -1; }).map(function (item) { return row(item, tpl.items[item.key] || {}, dec); });
   rows = rows.concat(waiverRows(tpl.items, dec));
   var mandate = rows.filter(function (r) { return r.binding !== 'deferral'; });
   var deferral = rows.filter(function (r) { return r.binding === 'deferral'; });
@@ -427,6 +450,7 @@ async function screen(jid) {
     jurisdiction: { id: prof.id, code: prof.code, name: prof.name || tpl.stateName, stateName: tpl.stateName },
     template: { file: tpl.file, sha: tpl.sha },
     rows: rows,
+    omitted: omitted,
     counts: { mandate: mandate.length, ceilings: ceilings.length, ceilingsDefaulted: ceilings.filter(function (r) { return r.city.source === 'default'; }).length, deferral: deferral.length, decided: deferral.length - undecided.length, undecided: undecided.length, gaps: rows.filter(function (r) { return r.gap; }).length },
     document: dec.document || null,
     waiver: await waiverState(prof.id, dec),
@@ -611,3 +635,4 @@ async function readDocument(jid, text, docName, user) {
 }
 
 module.exports = { CATALOG: CATALOG, BY_KEY: BY_KEY, DECISIONS_DOMAIN: DECISIONS_DOMAIN, WAIVER_GROUNDS: WAIVER_GROUNDS, CLOCK_FIELDS: CLOCK_FIELDS, parseValue: parseValue, screen: screen, decide: decide, decideWaiver: decideWaiver, decideClock: decideClock, clockPrefills: clockPrefills, approve: approve, compose: compose, readDocument: readDocument, templateItems: templateItems };
+module.exports.omittedItems = omittedItems;

@@ -74,7 +74,21 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   var bw = rowOf(s0, 'dup.bw.rate'), prog = rowOf(s0, 'labor.programming.rate'), oh = rowOf(s0, 'labor.overheadPct'), media = rowOf(s0, 'media');
   ok('A3 TX B&W copy: ceiling is the MUNICIPAL figure 0.125 (AG 0.10 + 25%), shown as the law\'s value', bw.binding === 'ceiling' && bw.ceiling === 0.125 && bw.law.ag === 0.1 && /0\.125/.test(bw.law.display), JSON.stringify(bw.law));
   ok('A4 programming labor ceiling 35.625 · overhead FIXED at 20% reads "as law" (not editable) · media parsed cd 1.25 / dvd 3.75 / usb actual', prog.ceiling === 35.625 && oh.binding === 'fixed' && oh.editable === false && oh.city.value === 20 && media.law.parsed.cd === 1.25 && media.law.parsed.dvd === 3.75 && media.law.parsed.usb === 'actual', JSON.stringify([prog.ceiling, oh.city, media.law.parsed]));
-  ok('A5 the screen splits 23 mandate / 13 deferral (the two waiver ground rows included); NO ledger gaps since the ledger reads the schedule (2026-09-08)', s0.counts.mandate === 23 && s0.counts.deferral === 13 && s0.counts.gaps === 0 && s0.rows.every(function (r) { return r.bucket === 'computation' || r.bucket === 'estimate_payment' || r.bucket === 'waiver'; }), JSON.stringify(s0.counts));
+  ok('A5 the screen splits 23 mandate / 12 deferral (the two waiver ground rows included; Minimum fee omitted for TX); NO ledger gaps since the ledger reads the schedule (2026-09-08)', s0.counts.mandate === 23 && s0.counts.deferral === 12 && s0.counts.gaps === 0 && s0.rows.every(function (r) { return r.bucket === 'computation' || r.bucket === 'estimate_payment' || r.bucket === 'waiver'; }), JSON.stringify(s0.counts));
+  // Kevin's 2026-09-13 markup (City tab): Minimum fee has no place on a TX screen — the state names none and its copy
+  // charges are a capped schedule; the item is omitted with its reason and a decision on it is refused.
+  var mfRow = rowOf(s0, 'rules.minFee');
+  ok('A6 Minimum fee is OMITTED for TX (state silent + capped copy schedule), listed with its reason', !mfRow && s0.omitted && s0.omitted.length === 1 && s0.omitted[0].key === 'rules.minFee' && /capped/.test(s0.omitted[0].why), JSON.stringify(s0.omitted));
+  var mfDec = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'rules.minFee': { value: 'none' } } });
+  ok('A6a …and deciding it is refused as an unknown item', mfDec.status === 200 && mfDec.body.refused.length === 1 && /unknown/.test(mfDec.body.refused[0].why), JSON.stringify(mfDec.body.refused));
+  // Kevin's 2026-09-13 markup: the Commercial-surcharge and Certified-copy cite popups were EMPTY — their TX-9xxx ids live
+  // in the fee-gap corpus (alignment/fee_gap_new_rules.json), which the resolver never read.
+  var rr = await callAs(U.dir, 'GET', '/jurisdiction-profile/rules-research/TX-9041');
+  var rr2 = await callAs(U.dir, 'GET', '/jurisdiction-profile/rules-research/TX-9029');
+  var comm = rowOf(s0, 'commercial'), cert = rowOf(s0, 'certification');
+  ok('A7 fee-gap research records resolve with verbatim statute language: TX-9041 (no inquiry into purpose) behind Commercial, TX-9029 (free certification of prior production) behind Certification',
+    rr.status === 200 && rr.body.rule && rr.body.rule.source_language && /purpose/i.test(rr.body.rule.atomic_rule) && rr.body.rule.corpus === 'fee_gap' && comm.law.rules.indexOf('TX-9041') >= 0 && rr2.status === 200 && rr2.body.rule && cert.law.rules.indexOf('TX-9029') >= 0,
+    JSON.stringify({ rr: rr.status, rr2: rr2.status, comm: comm && comm.law.rules, cert: cert && cert.law.rules }));
   // Kevin's Fee-rules markup, 2026-09-08
   var rp = rowOf(s0, 'repeat'), dl = rowOf(s0, 'delivery'), mx = rowOf(s0, 'rules.maxFee');
   ok('A5b a prose rule reads as sentences: no underscores, capital first letter, all four findings kept for the popup, city column "as law"', /^Same day aggregation: all requests/.test(rp.law.display) && rp.law.display.indexOf('_') === -1 && rp.law.segments.length === 4 && /^Prior unpaid > \$100/.test(rp.law.segments[2]) && rp.city.value === 'as law', JSON.stringify([rp.law.display, rp.law.segments, rp.city.value]));
@@ -97,7 +111,7 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
 
   console.log('\n=== B. DEFAULTS ===');
   ok('B1 every ceiling row starts AT the ceiling, source "default"', s0.rows.filter(function (r) { return r.binding === 'ceiling' && r.ceiling != null; }).every(function (r) { return r.city.value === r.ceiling && r.city.source === 'default'; }) && s0.counts.ceilingsDefaulted === s0.counts.ceilings);
-  ok('B2 every deferral row starts undecided; 0 of 13 decided; no version', s0.counts.decided === 0 && s0.counts.undecided === 13 && s0.version === null);
+  ok('B2 every deferral row starts undecided; 0 of 12 decided; no version', s0.counts.decided === 0 && s0.counts.undecided === 12 && s0.version === null);
 
   console.log('\n=== C. DECIDING ===');
   var st = await callAs(U.staff, 'PUT', '/fee-law/decisions', { items: { 'rules.freePages': { value: 10 } } });
@@ -107,9 +121,9 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   ok('C2 a city value above the ceiling is refused BY NAME and not saved; one under it is saved', over.status === 200 && over.body.refused.length === 1 && over.body.refused[0].key === 'dup.bw.rate' && /ceiling of 0\.125/.test(over.body.refused[0].why) && rowOf(sAfter, 'dup.bw.rate').city.value === 0.125 && rowOf(sAfter, 'labor.search.rate').city.value === 12 && rowOf(sAfter, 'labor.search.rate').city.source === 'hand', JSON.stringify(over.body.refused));
   var fx = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'labor.overheadPct': { value: 5 } } });
   ok('C3 a fixed row cannot be decided ("set by law")', fx.body.refused.length === 1 && /set by law/.test(fx.body.refused[0].why) && rowOf(fx.body.screen, 'labor.overheadPct').city.value === 20);
-  var dec = { 'dup.specialty.rate': { value: 'actual' }, 'dup.tiers': { value: 'none' }, 'rules.freePages': { value: 10 }, 'labor.increment': { value: 15 }, 'rules.freeLaborHours': { value: 1 }, 'rules.deMinimis': { value: 5 }, 'rules.minFee': { value: 'none' }, 'delivery': { value: 'actual' }, 'certification': { value: 1 }, 'commercial': { value: 'none' }, 'estimate.validityDays': { value: 30 }, 'rules.deposit.percent': { value: 50 } };
+  var dec = { 'dup.specialty.rate': { value: 'actual' }, 'dup.tiers': { value: 'none' }, 'rules.freePages': { value: 10 }, 'labor.increment': { value: 15 }, 'rules.freeLaborHours': { value: 1 }, 'rules.deMinimis': { value: 5 }, 'delivery': { value: 'actual' }, 'certification': { value: 1 }, 'commercial': { value: 'none' }, 'estimate.validityDays': { value: 30 }, 'rules.deposit.percent': { value: 50 } };
   var d1 = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: dec });
-  ok('C4 twelve decisions saved ("none" and "actual" count as decisions) → 12 of 13, 1 undecided', d1.status === 200 && d1.body.refused.length === 0 && d1.body.screen.counts.decided === 12 && d1.body.screen.counts.undecided === 1, JSON.stringify(d1.body.screen && d1.body.screen.counts));
+  ok('C4 eleven decisions saved ("none" and "actual" count as decisions) → 11 of 12, 1 undecided', d1.status === 200 && d1.body.refused.length === 0 && d1.body.screen.counts.decided === 11 && d1.body.screen.counts.undecided === 1, JSON.stringify(d1.body.screen && d1.body.screen.counts));
 
   var pv = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'active', quantities: { searchHours: 3, bwPages: 200 } });
   ok('C5 the test calculator prices against the DRAFT before any version exists (200 pages less the 10 free at 0.125 = $23.75; 3 search hrs at the $12 decision, 1 free → $24)', pv.status === 200 && pv.body.against === 'draft' && pv.body.configVersion === 'draft' && Math.abs(pv.body.requestLevel.duplicationSubtotal - 23.75) < 0.01 && Math.abs(pv.body.requestLevel.laborSubtotal - 24) < 0.01, JSON.stringify(pv.body).slice(0, 200));
@@ -150,7 +164,7 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
     cfg && cfg.duplication.bw.rate === 0.125 && cfg.labor.programming.rate === 35.625 && cfg.labor.overheadPct === 20 && cfg.labor.search.billableWhen && cfg.labor.search.billableWhen.trigger === 'pages' && cfg.labor.search.billableWhen.threshold === 50 &&
     cfg.requestRules.estimateNotifyThreshold === 40 && cfg.estimatePolicy.requesterResponseDays === 10 && cfg.estimatePolicy.revisionNotifyPercent === 20 && cfg.requestRules.deposit.threshold === 100 && cfg.media.cd === 1.25 && cfg.media.dvd === 3.75 && cfg.av.perRecording === 10 && cfg.av.perMinute === 1, JSON.stringify(cfg).slice(0, 400));
   ok('D2b the composed schedule carries the two cross-request rules the ledger reads: personnel-time allowance 36 h/yr · 15 h/mo (the state floor, defaulted) and same-day aggregation ON', cfg && cfg.requestRules.personnelTimeAllowance && cfg.requestRules.personnelTimeAllowance.hoursPerYear === 36 && cfg.requestRules.personnelTimeAllowance.hoursPerMonth === 15 && cfg.requestRules.sameDayAggregation === true, JSON.stringify(cfg && cfg.requestRules));
-  ok('D2b …and the city\'s decisions: search $12 (under the cap) · free pages 10 · increment 15 min → 0.25 h · de-minimis $5 · min fee none → 0 · certification $1 · validity 30 · deposit 50% · specialty actual · no commercial override',
+  ok('D2b …and the city\'s decisions: search $12 (under the cap) · free pages 10 · increment 15 min → 0.25 h · de-minimis $5 · min fee omitted → skeleton 0 · certification $1 · validity 30 · deposit 50% · specialty actual · no commercial override',
     cfg && cfg.labor.search.rate === 12 && cfg.requestRules.freePageAllowance === 10 && cfg.labor.search.increment === 0.25 && cfg.requestRules.deMinimis === 5 && cfg.requestRules.minFee === 0 && cfg.certification.rate === 1 && cfg.estimatePolicy.estimateValidityDays === 30 && cfg.requestRules.deposit.percent === 50 && cfg.duplication.specialty.rate === 'actual' && !cfg.purposeOverrides, JSON.stringify(cfg).slice(0, 400));
   var pv2 = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'active', quantities: { searchHours: 0, bwPages: 200 } });
   ok('D2c …and the calculator now prices against the approved v1 when asked', pv2.status === 200 && pv2.body.against === 'active' && pv2.body.configVersion === 'v1' && Math.abs(pv2.body.requestLevel.duplicationSubtotal - 23.75) < 0.01, JSON.stringify(pv2.body).slice(0, 160));
@@ -286,8 +300,8 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   var cStaff = await callAs(U.staff, 'POST', '/fee-law/clock', { enabled: false });
   ok('G7 staff cannot touch the clock settings', cStaff.status === 403);
   var a4 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
-  ok('G8 Approve never waits on the clock settings (they gate Attest, not the schedule); deferral count unchanged at 13',
-    a4.status === 200 && a4.body.screen.counts.deferral === 13, JSON.stringify(a4.body.screen && a4.body.screen.counts));
+  ok('G8 Approve never waits on the clock settings (they gate Attest, not the schedule); deferral count unchanged at 12',
+    a4.status === 200 && a4.body.screen.counts.deferral === 12, JSON.stringify(a4.body.screen && a4.body.screen.counts));
   // restore the payment policy store byte-identically, stamp included (residue-free: verify_requestor_ledger
   // and the bw9 go-live walk run later and must see the store exactly as the suite reset left it)
   if (pcSnap == null) await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'payment'");
