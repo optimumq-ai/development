@@ -10601,3 +10601,23 @@ search_resolve 32 · search_intent_gate 37 · taxonomy_variants 18 · variant_di
 **NEXT:** item 4 (Record Sources: the interdependency document departments ↔ teams ↔ record types ↔ sources, decide whether
 record types ship as starter data, then delete Demo Document Library + Development Services Drive). Still pending from
 Kevin: certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).
+
+## 2026-09-14 — Markup item 4: the interdependency document DELIVERED; nothing deleted (Kevin's go needed)
+
+`docs/DESIGN_setup_interdependencies.md` (copy in `~/exchange/DESIGN_setup_interdependencies_2026-09-14.md`): the four
+objects and their link tables, the direction of dependence (setup order / deletion order and what a bare delete strands),
+a live census, the two sources' footprint, what the install fixture ships, recommendations, decisions.
+**Findings that matter:** (1) both sources Kevin named have ZERO footprint (no types, fingerprints, files, index rows) — safe
+to delete; six more fixture demo sources are equally empty. (2) `DELETE /repositories/:id` is a BARE row delete — no
+guard, unlike departments/teams/staff (orgRemoval, 2026-09-08); recorded as a gap in `SPEC_sources_imports_connectors` §5.
+(3) Record types DO ship as starter data — the fixture carries 94 types, 75 owner links, 11 sources, 46 source links — so
+Kevin's condition for a record-type delete option is met; `DELETE /taxonomy/record-types/:id` exists but checks only
+variants (not the 1,555 fulfilled_records, 4 requests, 160 fingerprints that reference types) and the UI has no Delete.
+Recommended: a GUIDED removal on the orgRemoval pattern (delete when clean, retire when history references it) for record
+types AND sources — one slice. (4) 10 active buckets have no owner (payroll/HR, 911, forensic, animal impound) and cannot
+route; 53 of 84 buckets have no source. (5) Test residue: "Open Records Office" stored as a TEAM with a "TEST: mounted unit
+and K9" routing specialization.
+**Not done, on purpose:** no deletion, no fixture regeneration, no code — the document was the ask and deletion is Kevin's go.
+**NEXT:** Kevin's four decisions (§6 of the document); then delete + `node src/db/gen_fixture_seed.js` + suite; the guided
+record-type/source removal slice if he says yes; then item 5 (setup-flow map discussion). Still pending from Kevin:
+certified copy SETS (1e); inspection requests; the Minimum-fee discretion signal (2).
