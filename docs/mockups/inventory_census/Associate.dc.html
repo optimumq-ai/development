@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E; font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .src { display: flex; align-items: flex-start; gap: 16px; background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 12px; padding: 15px 18px; }
+    .name { font-size: 15px; font-weight: 700; color: #12232E; }
+    .desc { font-size: 13px; color: #4B5563; margin-top: 3px; line-height: 1.4; }
+    .holds { font-size: 12.5px; color: #5C6F7C; margin-top: 6px; } .holds b { color: #374151; font-weight: 600; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+    .p-ok { background: #E1F2E9; color: #1B8A5A; } .p-warn { background: #F6EBD6; color: #9A6512; } .p-info { background: #E8EEF4; color: #0E3A5C; }
+    .p-grey { background: #F0F2F5; color: #5B6B7A; } .p-red { background: #FEE2E2; color: #991B1B; } .p-blue { background: #EBF3FB; color: #1F4E79; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #1B8A5A; display: inline-block; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 7px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; border: 1px solid #BECAD3; background: #FFFFFF; color: #12232E; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border-color: #1E6091; } .b-soft { background: #EBF3FB; color: #1F4E79; border-color: #C9D6E2; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border-color: #D2DCE3; cursor: default; } .b-danger { color: #B02A37; }
+    .b-lg { height: 36px; padding: 0 14px; font-size: 13px; }
+    .right { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; min-width: 250px; }
+    .census { font-size: 11.5px; color: #5C6F7C; text-align: right; line-height: 1.45; }
+    .meter { height: 8px; background: #E8EEF4; border-radius: 999px; overflow: hidden; width: 240px; } .meter > div { height: 100%; background: #1E6091; }
+    .sect { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .h1 { font-size: 20px; font-weight: 700; } .h2 { font-size: 15px; font-weight: 700; color: #12232E; }
+    .sub { font-size: 12px; color: #8296A4; margin-top: 2px; line-height: 1.4; }
+    .stat { flex: 1; padding: 12px 14px; border: 1px solid #D2DCE3; border-radius: 9px; background: #FFFFFF; }
+    .stat .n { font-size: 24px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; } .stat .l { font-size: 12px; color: #5C6F7C; margin-top: 3px; }
+    .row { display: grid; gap: 10px; align-items: center; padding: 10px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .row.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .bar { display: flex; height: 14px; border-radius: 6px; overflow: hidden; } .bar > div { height: 100%; }
+    .leg { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #5C6F7C; margin-right: 14px; } .leg i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .note { background: #F7F9FB; border: 1px dashed #BECAD3; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #5C6F7C; line-height: 1.45; }
+    .link { color: #1E6091; font-weight: 600; }
+    .field { display: flex; flex-direction: column; gap: 5px; } .lbl { font-size: 12.5px; font-weight: 600; }
+    .in { display: flex; align-items: center; height: 34px; border: 1px solid #BECAD3; border-radius: 7px; background: #FFFFFF; padding: 0 11px; font-size: 13px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .radio { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid #D2DCE3; border-radius: 8px; } .radio.on { border-color: #1E6091; background: #F5F9FC; }
+    .rb { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #BECAD3; margin-top: 2px; flex: none; } .radio.on .rb { border-color: #1E6091; background: radial-gradient(#1E6091 45%, #FFFFFF 50%); }
+    .doc { background: #FFFFFF; border: 1px solid #BECAD3; box-shadow: 0 2px 8px rgba(18,35,46,.12); padding: 26px 30px; font-family: "Times New Roman", serif; font-size: 11px; color: #222; line-height: 1.5; position: relative; }
+    .doc .lab { background: #FFF3C4; outline: 1px solid #E5C24A; padding: 0 2px; }
+    .doc .val { color: #8296A4; border-bottom: 1px dotted #BECAD3; }
+  </style>
+</helmet>
+<div style="padding: 20px; width: 780px;">
+  <div class="card">
+    <div style="padding:14px 20px; border-bottom:1px solid #D2DCE3; display:flex; align-items:center;">
+      <div style="flex-grow:1;"><div class="h2">Associate "Unnamed grouping 4" with a record type</div>
+        <div class="sub">9 documents (counted) · uniform layout · /Permits/Legacy-2017 · Development Services Shared Drive</div></div>
+      <button class="btn">✕</button>
+    </div>
+
+    <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span class="pill p-grey" style="margin-top:2px">1 · Recognition</span>
+        <div style="font-size:13px;line-height:1.5;">No match to the stored signature of any approved variant. <span class="hint" style="display:inline">(If a known template had turned up on this drive it would have been counted under that variant here, with nothing to approve.)</span></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span class="pill p-blue" style="margin-top:2px">2 · AI suggestion</span>
+        <div style="font-size:13px;line-height:1.5;flex:1;">
+          <div class="card" style="padding:10px 12px;background:#F5F9FC;">
+            The AI read two first-page excerpts and the field labels. It suggests a <b>variant of Building permits</b>:
+            <b>"Building Permit (pre-2018 form)"</b> — confidence 84%.
+            <div class="hint" style="margin-top:4px;">"Same permit number, address and contractor fields as the standard form, but an older two-column layout with a 'Plan check fee' line that the current form dropped."</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span class="pill p-grey" style="margin-top:2px">3 · Your decision</span>
+        <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+          <div class="radio on"><span class="rb"></span><div style="flex:1">
+            <div style="font-size:13px;font-weight:600;">A new variant under a bucket</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+              <div class="field"><span class="lbl">Parent bucket</span><div class="in">Building permits ▾</div></div>
+              <div class="field"><span class="lbl">Variant name</span><div class="in">Building Permit (pre-2018 form)</div></div>
+            </div>
+            <div class="hint">Created as a <b>draft</b>. Drafts do not classify requests until someone activates them on the Taxonomy page.</div>
+          </div></div>
+          <div class="radio"><span class="rb"></span><div style="flex:1">
+            <div style="font-size:13px;font-weight:600;">An existing record type or variant</div>
+            <div class="in empty" style="margin-top:8px;">Choose a type or variant…</div>
+            <div class="hint">Pick this when the AI is wrong about the bucket — for example a drive that also holds another department's forms.</div>
+          </div></div>
+          <div class="radio"><span class="rb"></span><div><div style="font-size:13px;font-weight:600;">Leave it unassociated for now</div><div class="hint">It stays listed as "Not yet associated" and is searchable once indexed.</div></div></div>
+        </div>
+      </div>
+
+      <div class="note">On <b>Approve</b> the system will: create the draft variant · link it to <b>this source</b> (where the 9 documents live) · stamp the 9 documents with it · store the layout signature so the next census recognises this form anywhere it appears · list it under Mass Redaction as "Waiting for a template". Nothing is written before you approve.</div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;"><button class="btn b-lg">Cancel</button><button class="btn b-pri b-lg">Approve</button></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

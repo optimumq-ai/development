@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E; font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .src { display: flex; align-items: flex-start; gap: 16px; background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 12px; padding: 15px 18px; }
+    .name { font-size: 15px; font-weight: 700; color: #12232E; }
+    .desc { font-size: 13px; color: #4B5563; margin-top: 3px; line-height: 1.4; }
+    .holds { font-size: 12.5px; color: #5C6F7C; margin-top: 6px; } .holds b { color: #374151; font-weight: 600; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+    .p-ok { background: #E1F2E9; color: #1B8A5A; } .p-warn { background: #F6EBD6; color: #9A6512; } .p-info { background: #E8EEF4; color: #0E3A5C; }
+    .p-grey { background: #F0F2F5; color: #5B6B7A; } .p-red { background: #FEE2E2; color: #991B1B; } .p-blue { background: #EBF3FB; color: #1F4E79; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #1B8A5A; display: inline-block; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 7px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; border: 1px solid #BECAD3; background: #FFFFFF; color: #12232E; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border-color: #1E6091; } .b-soft { background: #EBF3FB; color: #1F4E79; border-color: #C9D6E2; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border-color: #D2DCE3; cursor: default; } .b-danger { color: #B02A37; }
+    .b-lg { height: 36px; padding: 0 14px; font-size: 13px; }
+    .right { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; min-width: 250px; }
+    .census { font-size: 11.5px; color: #5C6F7C; text-align: right; line-height: 1.45; }
+    .meter { height: 8px; background: #E8EEF4; border-radius: 999px; overflow: hidden; width: 240px; } .meter > div { height: 100%; background: #1E6091; }
+    .sect { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .h1 { font-size: 20px; font-weight: 700; } .h2 { font-size: 15px; font-weight: 700; color: #12232E; }
+    .sub { font-size: 12px; color: #8296A4; margin-top: 2px; line-height: 1.4; }
+    .stat { flex: 1; padding: 12px 14px; border: 1px solid #D2DCE3; border-radius: 9px; background: #FFFFFF; }
+    .stat .n { font-size: 24px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; } .stat .l { font-size: 12px; color: #5C6F7C; margin-top: 3px; }
+    .row { display: grid; gap: 10px; align-items: center; padding: 10px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .row.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .bar { display: flex; height: 14px; border-radius: 6px; overflow: hidden; } .bar > div { height: 100%; }
+    .leg { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #5C6F7C; margin-right: 14px; } .leg i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .note { background: #F7F9FB; border: 1px dashed #BECAD3; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #5C6F7C; line-height: 1.45; }
+    .link { color: #1E6091; font-weight: 600; }
+    .field { display: flex; flex-direction: column; gap: 5px; } .lbl { font-size: 12.5px; font-weight: 600; }
+    .in { display: flex; align-items: center; height: 34px; border: 1px solid #BECAD3; border-radius: 7px; background: #FFFFFF; padding: 0 11px; font-size: 13px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .radio { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid #D2DCE3; border-radius: 8px; } .radio.on { border-color: #1E6091; background: #F5F9FC; }
+    .rb { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #BECAD3; margin-top: 2px; flex: none; } .radio.on .rb { border-color: #1E6091; background: radial-gradient(#1E6091 45%, #FFFFFF 50%); }
+    .doc { background: #FFFFFF; border: 1px solid #BECAD3; box-shadow: 0 2px 8px rgba(18,35,46,.12); padding: 26px 30px; font-family: "Times New Roman", serif; font-size: 11px; color: #222; line-height: 1.5; position: relative; }
+    .doc .lab { background: #FFF3C4; outline: 1px solid #E5C24A; padding: 0 2px; }
+    .doc .val { color: #8296A4; border-bottom: 1px dotted #BECAD3; }
+  </style>
+</helmet>
+<div style="padding: 20px; width: 940px;">
+  <div class="card" style="padding:0;">
+    <div style="padding:14px 20px; border-bottom:1px solid #D2DCE3; display:flex; align-items:center; gap:12px;">
+      <div style="flex-grow:1;"><div class="h2">Certificate of Occupancy — a sample document</div>
+        <div class="sub">41 documents (counted) · uniform layout · Building permits › Certificate of Occupancy</div></div>
+      <button class="btn">‹ Previous</button><button class="btn">Next ›</button>
+      <span style="font-size:12px;color:#8296A4;">2 of 41 · CO-2023-0112.pdf</span>
+      <button class="btn" style="margin-left:6px;">✕</button>
+    </div>
+    <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:20px; padding:20px;">
+      <div>
+        <div class="doc" style="min-height:520px;">
+          <div style="text-align:center;font-weight:700;font-size:13px;">CITY OF AUTUMN FALLS</div>
+          <div style="text-align:center;font-size:10px;">Department of Building &amp; Planning</div>
+          <div style="text-align:center;font-weight:700;margin:14px 0 10px;font-size:12px;letter-spacing:.06em;">CERTIFICATE OF OCCUPANCY</div>
+          <div><span class="lab">Permit No.</span> <span class="val">BP-2023-00412</span> &nbsp;&nbsp; <span class="lab">Issued</span> <span class="val">March 14, 2023</span></div>
+          <div style="margin-top:6px;"><span class="lab">Property address</span> <span class="val">1418 Maple Ridge Dr, Autumn Falls</span></div>
+          <div style="margin-top:6px;"><span class="lab">Owner</span> <span class="val">Halcyon Ridge LLC</span></div>
+          <div style="margin-top:6px;"><span class="lab">Occupancy type</span> <span class="val">R-3 Single family</span> &nbsp;&nbsp; <span class="lab">Use group</span> <span class="val">Residential</span></div>
+          <div style="margin-top:14px;line-height:1.6;">This certifies that the structure described above has been inspected and found to comply with the applicable provisions of the City Building Code and the approved plans, and may be occupied for the use stated.</div>
+          <div style="margin-top:22px;"><span class="lab">Building Official</span> <span class="val">______________________</span> &nbsp;&nbsp; <span class="lab">Inspector</span> <span class="val">J. Ortiz</span></div>
+          <div style="position:absolute;bottom:14px;right:22px;font-size:9px;color:#8296A4;">Form B&amp;P-CO rev. 2019 · page 1 of 1</div>
+        </div>
+        <div class="hint" style="margin-top:8px;">First page as stored on the drive. <span style="background:#FFF3C4;padding:0 3px;">Highlighted</span> text is what the layout owns — the fields the template prints; the dotted values change per document. Nothing is redacted in this view.</div>
+      </div>
+      <div>
+        <div class="sect">Why these 41 are one grouping</div>
+        <div style="font-size:13px;line-height:1.6;margin:6px 0 14px;">Every document agrees on at least 8 of 10 layout features: page count, the first and last lines, the position of the text blocks, and the same set of <b>field labels</b> on page 1.</div>
+
+        <div class="sect">Fields this layout owns</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px;">
+          <span class="pill p-grey">Permit No.</span><span class="pill p-grey">Issued</span><span class="pill p-grey">Property address</span><span class="pill p-grey">Owner</span><span class="pill p-grey">Occupancy type</span><span class="pill p-grey">Use group</span><span class="pill p-grey">Building Official</span><span class="pill p-grey">Inspector</span>
+        </div>
+
+        <div class="sect">Where they live</div>
+        <div style="font-size:13px;line-height:1.6;margin:6px 0 14px;">/Permits/CO — 38 documents<br>/Permits/2023 — 3 documents</div>
+
+        <div class="sect">Status</div>
+        <div style="font-size:13px;line-height:1.6;margin:6px 0 14px;">
+          Associated to <b>Building permits › Certificate of Occupancy</b> (draft variant, 2026-09-14).<br>
+          <span class="pill p-warn">Waiting for a template</span> <span class="hint" style="display:inline">— a template drawn on one of these covers all 41</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px;">
+          <button class="btn b-pri b-lg">Start a template from this document</button>
+          <div style="display:flex;gap:8px;"><button class="btn b-lg" style="flex:1">Associate differently</button><button class="btn b-lg" style="flex:1">Not needed</button></div>
+        </div>
+        <div class="hint" style="margin-top:10px;">"Start a template" opens the existing template workspace with this document staged — the same path as Mass Redaction's "Waiting for a template" card.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

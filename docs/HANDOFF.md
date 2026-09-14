@@ -10670,3 +10670,33 @@ sub-folders as grouping hint; non-file sources; enterprise stores). Then item 6:
 Still open from item 4: owners for the 10 owner-less buckets; guided record-type/source removal slice; the "Open Records Office"
 test team row; the fixture-vs-live drift reconciliation (~1,100 lines). Still pending: certified copy SETS (1e); inspection
 requests; the Minimum-fee discretion signal (2).
+
+## 2026-09-14 (late) — Item 6 mockup session: the inventory / census screens DRAWN (five artboards); nothing built
+
+Kevin: "start item 6 inventory mockup session." The claude.ai canvas publisher is not available in this session, so the mockups
+are in the repo format only — `docs/mockups/inventory_census/` (Main · Inventory · Sample · Associate · DataSystem `.dc.html` +
+`canvas.json` with four annotations) — rendered to PNG in `~/exchange/inventory_1…5_*.png` with `INVENTORY_MOCKUPS_2026-09-14.md`
+as the reading guide. Style follows the prior canvases (ledger / setup hub palette); the source card mirrors the live
+SourcesConfig row (screenshot `/tmp/oq-shot/sources-live.png` taken first).
+**What is drawn (all from the 2026-09-04 decisions + the item-5 flow map):** (1) Record Sources card gains a census line +
+"View inventory" / "Refresh census" (five states: censused with incremental diff · running with progress, one at a time ·
+never censused · data system · search-only system that says no census is possible); (2) Inventory Information for a drive —
+stat row (files / readable / image-only with a priced OCR opt-in / unsupported by extension / groupings + ungrouped), file-type
+bar, Identical groupings table (exact counts, layout consistency, record type › variant, template status, View sample, Associate
+on the unassociated row, "Everything else"), linked record types with per-source counts, census history, the layout-not-meaning
+note; (3) View sample — Kevin's snapshot ask: page 1 as stored with the label set highlighted, where they live, status, Start a
+template / Associate differently / Not needed; (4) Associate — recognition → AI suggestion (84%, one naming call) → decision
+(new variant under bucket · existing type/variant · leave) → the "on Approve the system will…" box, nothing written before;
+(5) Inventory Information for a data system — kinds table (rows, fields, date range, field template, embed tier), one rendered
+record with the withheld value blacked out before embedding, checkpoint history.
+**Assumed from the flow map (Kevin's six decisions still pending):** census needs no linked record type; association over
+groupings with human approval writing links/stamps/variant/signature; sub-folders walked, folder shown as a hint only; Scan
+source retires; Find variants keeps its modal but reads the census store.
+**Open on these drawings (for Kevin):** (a) two buttons per card vs one "Inventory" door; (b) does "Everything else" need its
+own screen or a file list; (c) "Not needed" keeps the Mass Redaction dismiss semantics or hides the grouping; (d) search-only
+systems: the plain "no census possible" card acceptable until their APIs are wired; (e) OCR opt-in per source (drawn) vs per
+grouping.
+**NEXT:** Kevin's markup on the five PNGs + the six flow-map decisions → then slice per the flow map §5 (census job + fingerprint
+table extensions · Inventory Information screen · Associate step · Find variants rewired + Scan source retired + nav rename to
+"Identical Grouping" · data-system census later). Still open: fixture-vs-live drift reconciliation; 10 owner-less buckets;
+guided record-type/source removal; certified-copy SETS; inspection requests; Minimum-fee signal.
