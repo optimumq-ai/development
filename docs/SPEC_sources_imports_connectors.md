@@ -64,7 +64,27 @@ types as a bucket › variants tree with per-source counts; census history with 
 **View sample** modal: the document's first page rendered server-side (`GET …/inventory/file/:fp/preview.png`, pdftoppm,
 cached under `uploads/processed/census`), previous/next through the grouping's examples, the label set, where they live,
 status, the doors, and "Open the full PDF".
-**Not yet:** association + the three doors (slice 3), Find variants on the census store + Scan source
+**Association + the three doors `[BUILT 2026-09-15 — slice 3; verify_census_association 31/31]`.** `services/censusAssociate.js`, routes under
+`/repositories/:id/groupings/:gid/…`, source-config gate for every write. **Associate** (an unassociated grouping): `suggest` is the
+ONE paid step of the inventory flow — one small claude-sonnet-5 call with two first-page excerpts + the label set + the count against the
+active catalog, answering `match` (an existing type/variant, or null) and `propose` (a new variant under a bucket); it writes nothing.
+`associate` is the human approval and the only writer: mode `existing` stamps the documents, links the type to this source, and stores
+the signature on the type if it has none (marked `signature_source`); mode `new_variant` goes through `applyGroupingProposal` (draft
+variant, counted, mass-redaction candidate by layout, stamps, link, signature). `DELETE …/associate` undoes: unstamps, drops the source
+link when nothing else here carries the type, and FORGETS the signature this association taught (otherwise the next census would
+quietly re-associate by recognition — found by the harness). **Redact by hand** (`POST/DELETE …/redact-by-hand`): the Mass Redaction
+dismiss, honestly named — `discovery_meta.redact_by_hand = {by, at}`, `mass_redaction_candidate = 0`; undo restores the flag by layout.
+**No redaction needed** (`GET …/no-redaction/check`, `POST/DELETE …/no-redaction {reason}`): a RELEASE decision written to the variant
+(`public_availability = releasable`, `auto_release_eligible = 1`), guarded — the parent bucket's `legal_redaction_required` must be off
+(a legal gate never loosens at a more specific level), the bucket must not be restricted/confidential, not already decided, reason ≥ 10
+chars; who/when/reason and the previous posture are kept in `discovery_meta.no_redaction` and `taxonomy_audit`; undo restores the
+previous posture exactly. The existing record-type-clean bypass (`redactionBypass` case c) then releases a document as-is only when the
+automatic clean read finds nothing — no new release path. All writes report the taxonomy hub rows (`setupHub.afterChange`). **UI:** the
+Inventory page's Associate modal (recognition → "Ask the AI what these documents are" → decision: new variant under a bucket · existing
+type/variant · leave · the "on Approve" note), the No-redaction modal (release-decision banner · what still happens · the checks · "you
+have viewed n of N samples" · required reason · the "on Confirm" note), Redact by hand with confirm, Undo links on decided groupings,
+"Associate differently" (undo association), and the same doors inside View sample.
+**Not yet:** Find variants on the census store + Scan source
 retirement (slice 4), data-system census (slice 5); extractor registry beyond PDF (docx/xlsx/images/CAD metadata) — every
 other type is counted as unsupported today.
 

@@ -354,6 +354,7 @@ async function inventory(repo) {
       labels: (gsig.labels || []).slice(0, 14),          // the field labels the layout owns (View sample)
       record_type: rt ? { id: rt.id, name: rt.name, status: rt.status, parent: parent ? { id: parent.id, name: parent.name } : null } : null,
       redaction: await redactionPosture(rt),
+      decisions: (function () { var m = rt ? (parseJson(rt.discovery_meta, {}) || {}) : {}; return { no_redaction: m.no_redaction ? { by_name: m.no_redaction.by_name, at: m.no_redaction.at, reason: m.no_redaction.reason } : null, redact_by_hand: m.redact_by_hand || null }; })(),
       examples: examples.map(function (e) { return { fingerprint_id: e.id, filename: e.filename, ocr: !!e.ocr }; }),
       first_seen_run_id: g.first_seen_run_id, last_seen_run_id: g.last_seen_run_id
     });

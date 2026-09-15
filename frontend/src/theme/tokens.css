@@ -263,6 +263,7 @@
   --oq-ln-e3b6ba: #E3B6BA;
   --oq-ln-e3eaf0: #E3EAF0;
   --oq-bg-e4f3ec: #E4F3EC;
+  --oq-ln-e5c24a: #E5C24A;
   --oq-ln-e5c98a: #E5C98A;
   --oq-fg-e5e7eb: #E5E7EB;
   --oq-bg-e5e7eb: #E5E7EB;
@@ -322,6 +323,7 @@
   --oq-ln-f59e0b: #F59E0B;
   --oq-ln-f5c2c2: #F5C2C2;
   --oq-bg-f5f3ff: #F5F3FF;
+  --oq-bg-f5f9fc: #F5F9FC;
   --oq-bg-f5f9ff: #F5F9FF;
   --oq-bg-f6ebd6: #F6EBD6;
   --oq-x-f6ebd6: var(--oq-bg-f6ebd6);
@@ -647,6 +649,7 @@
   --oq-ln-e3b6ba: #ba1428;
   --oq-ln-e3eaf0: #0c0c0c;
   --oq-bg-e4f3ec: #00cc05;
+  --oq-ln-e5c24a: #0c0c0c;
   --oq-ln-e5c98a: #0c0c0c;
   --oq-fg-e5e7eb: #ffffff;
   --oq-bg-e5e7eb: #b8b8b8;
@@ -706,6 +709,7 @@
   --oq-ln-f59e0b: #0c0c0c;
   --oq-ln-f5c2c2: #0c0c0c;
   --oq-bg-f5f3ff: #ffffff;
+  --oq-bg-f5f9fc: #ffffff;
   --oq-bg-f5f9ff: #ffffff;
   --oq-bg-f6ebd6: #ffe02c;
   --oq-x-f6ebd6: var(--oq-bg-f6ebd6);
@@ -1031,6 +1035,7 @@
   --oq-ln-e3b6ba: #ff0206;
   --oq-ln-e3eaf0: #777777;
   --oq-bg-e4f3ec: #0c0c0c;
+  --oq-ln-e5c24a: #ffe02c;
   --oq-ln-e5c98a: #ffe02c;
   --oq-fg-e5e7eb: #ffffff;
   --oq-bg-e5e7eb: #0c0c0c;
@@ -1090,6 +1095,7 @@
   --oq-ln-f59e0b: #ffe02c;
   --oq-ln-f5c2c2: #777777;
   --oq-bg-f5f3ff: #0c0c0c;
+  --oq-bg-f5f9fc: #0c0c0c;
   --oq-bg-f5f9ff: #0c0c0c;
   --oq-bg-f6ebd6: #0c0c0c;
   --oq-x-f6ebd6: var(--oq-bg-f6ebd6);

@@ -15,6 +15,7 @@ const EDIT = requirePermission('operations_config');   // S4: sources / record o
 const { all, get, run } = require('../db');
 const catalog = require('../services/connectors/registry');
 const sourceCensus = require('../services/sourceCensus');
+const censusAssociate = require('../services/censusAssociate');
 
 const fs = require('fs');
 const path = require('path');
@@ -177,6 +178,59 @@ router.get('/:id/inventory/file/:fp', requireAuth, EDIT, async function(req, res
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'inline; filename="' + path.basename(f.row.filename).replace(/"/g, '') + '"');
   fs.createReadStream(f.fullPath).pipe(res);
+});
+
+// ===== GROUPING DOORS (inventory slice 3): associate · redact by hand · no redaction needed =====
+// Writes here change record types, so the taxonomy hub rows are told (same hook the taxonomy router runs).
+function hubTouched(req) { try { var HUBt = require('../services/setupHub'); ['taxonomy', 'calibration', 'record_owners'].forEach(function (k) { HUBt.afterChange(k, req.user && (req.user.name || req.user.email)).catch(function () {}); }); } catch (e) {} }
+function actorOf(req) { return { id: req.user && req.user.sub, name: req.user && (req.user.display_name || req.user.name || req.user.email), email: req.user && req.user.email }; }
+async function repoOr404(req, res) { var repo = await get('SELECT * FROM record_repositories WHERE id = ?', [req.params.id]); if (!repo) { res.status(404).json({ error: 'Source not found' }); return null; } return repo; }
+function answer(res, out) { if (out.status && out.status >= 300) return res.status(out.status).json({ error: out.error, checks: out.checks || undefined, run_id: out.run_id }); var body = Object.assign({}, out); delete body.status; res.json(body); }
+
+router.get('/:id/groupings/:gid/catalog', requireAuth, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  res.json(await censusAssociate.catalog());
+});
+router.post('/:id/groupings/:gid/suggest', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  try { answer(res, await censusAssociate.suggest(repo, req.params.gid)); }
+  catch (e) { res.status(500).json({ error: 'The suggestion failed: ' + (e && e.message) }); }
+});
+router.post('/:id/groupings/:gid/associate', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  var out = await censusAssociate.associate(repo, req.params.gid, req.body || {}, actorOf(req));
+  if (out.status === 200) hubTouched(req);
+  answer(res, out);
+});
+router.delete('/:id/groupings/:gid/associate', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  var out = await censusAssociate.dissociate(repo, req.params.gid, actorOf(req));
+  if (out.status === 200) hubTouched(req);
+  answer(res, out);
+});
+router.post('/:id/groupings/:gid/redact-by-hand', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  answer(res, await censusAssociate.redactByHand(repo, req.params.gid, true, actorOf(req)));
+});
+router.delete('/:id/groupings/:gid/redact-by-hand', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  answer(res, await censusAssociate.redactByHand(repo, req.params.gid, false, actorOf(req)));
+});
+router.get('/:id/groupings/:gid/no-redaction/check', requireAuth, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  answer(res, await censusAssociate.noRedactionCheck(repo, req.params.gid));
+});
+router.post('/:id/groupings/:gid/no-redaction', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  var out = await censusAssociate.noRedaction(repo, req.params.gid, (req.body || {}).reason, actorOf(req));
+  if (out.status === 200) hubTouched(req);
+  answer(res, out);
+});
+router.delete('/:id/groupings/:gid/no-redaction', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  var out = await censusAssociate.undoNoRedaction(repo, req.params.gid, actorOf(req));
+  if (out.status === 200) hubTouched(req);
+  answer(res, out);
 });
 
 router.post('/ai-configure', requireAuth, EDIT, async function(req, res) {

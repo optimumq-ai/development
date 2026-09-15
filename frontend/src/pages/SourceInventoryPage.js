@@ -46,6 +46,10 @@ export default function SourceInventoryPage() {
   var [showFiles, setShowFiles] = useState(false);
   var [sample, setSample] = useState(null);   // { grouping, index, url, loading }
   var [staging, setStaging] = useState(null);
+  var [assoc, setAssoc] = useState(null);     // Associate modal state
+  var [noRed, setNoRed] = useState(null);     // No-redaction-needed modal state
+  var [viewed, setViewed] = useState({});     // grouping id -> { fingerprint_id: true } samples opened this visit
+  var [busy, setBusy] = useState(null);
 
   var load = useCallback(async function () {
     try { var r = await api.get('/repositories/' + id + '/inventory'); setInv(r.data); setErr(''); }
@@ -72,6 +76,7 @@ export default function SourceInventoryPage() {
     try {
       var r = await api.get('/repositories/' + id + '/inventory/file/' + ex.fingerprint_id + '/preview.png', { responseType: 'blob' });
       setSample({ grouping: g, index: index, url: URL.createObjectURL(r.data), loading: false });
+      setViewed(function (v) { var n = Object.assign({}, v); n[g.id] = Object.assign({}, n[g.id] || {}); n[g.id][ex.fingerprint_id] = true; return n; });
     } catch (e) { setSample({ grouping: g, index: index, url: null, loading: false, error: errText(e, 'The document could not be opened.') }); }
   }
   async function openPdf() {
@@ -80,6 +85,73 @@ export default function SourceInventoryPage() {
     catch (e) { alert(errText(e, 'The document could not be opened.')); }
   }
   function closeSample() { if (sample && sample.url) URL.revokeObjectURL(sample.url); setSample(null); }
+  function viewedCount(g) { return Object.keys(viewed[g.id] || {}).length; }
+
+  // ---- the three doors + association (slice 3) ----
+  var G = function (g) { return '/repositories/' + id + '/groupings/' + g.id; };
+  async function openAssociate(g) {
+    closeSample();
+    setAssoc({ g: g, catalog: null, suggestion: null, suggesting: false, mode: 'new_variant', parentId: '', name: '', existingId: '', err: '', busy: false });
+    try { var r = await api.get(G(g) + '/catalog'); setAssoc(function (a) { return a ? Object.assign({}, a, { catalog: r.data }) : a; }); }
+    catch (e) { setAssoc(function (a) { return a ? Object.assign({}, a, { err: errText(e, 'The catalog could not be loaded.') }) : a; }); }
+  }
+  async function askSuggestion() {
+    setAssoc(function (a) { return Object.assign({}, a, { suggesting: true, err: '' }); });
+    try {
+      var r = await api.post(G(assoc.g) + '/suggest');
+      var sg = r.data;
+      setAssoc(function (a) {
+        var next = Object.assign({}, a, { suggesting: false, suggestion: sg });
+        if (sg.match && sg.match.record_type_id) { next.mode = 'existing'; next.existingId = sg.match.record_type_id; }
+        if (sg.propose) { if (sg.propose.parent_record_type_id && !next.parentId) next.parentId = sg.propose.parent_record_type_id; if (sg.propose.name && !next.name) next.name = sg.propose.name; if (!sg.match) next.mode = 'new_variant'; }
+        return next;
+      });
+    } catch (e) { setAssoc(function (a) { return Object.assign({}, a, { suggesting: false, err: errText(e, 'The suggestion failed.') }); }); }
+  }
+  async function approveAssociate() {
+    var a = assoc; if (!a) return;
+    if (a.mode === 'leave') { setAssoc(null); return; }
+    setAssoc(Object.assign({}, a, { busy: true, err: '' }));
+    try {
+      var body = a.mode === 'existing' ? { mode: 'existing', record_type_id: a.existingId }
+        : { mode: 'new_variant', parent_record_type_id: a.parentId, name: a.name, code: a.suggestion && a.suggestion.propose && a.suggestion.propose.name === a.name ? a.suggestion.propose.code : null,
+            intent: a.suggestion && a.suggestion.propose ? a.suggestion.propose.intent : null, expected_content: a.suggestion && a.suggestion.propose ? a.suggestion.propose.expected_content : null,
+            synonyms: a.suggestion && a.suggestion.propose ? a.suggestion.propose.synonyms : [], keywords: a.suggestion && a.suggestion.propose ? a.suggestion.propose.keywords : [],
+            identifying_facets: a.suggestion && a.suggestion.propose ? a.suggestion.propose.identifying_facets : [], confidence: a.suggestion && a.suggestion.propose ? a.suggestion.propose.confidence : null };
+      await api.post(G(a.g) + '/associate', body);
+      setAssoc(null); await load();
+    } catch (e) { setAssoc(function (x) { return Object.assign({}, x, { busy: false, err: errText(e, 'The association failed.') }); }); }
+  }
+  async function dissociate(g) {
+    if (!window.confirm('Undo the association of "' + groupingName(g) + '"? Its ' + g.member_count + ' documents go back to "Not yet associated"; the record type itself stays.')) return;
+    setBusy(g.id);
+    try { await api.delete(G(g) + '/associate'); await load(); } catch (e) { alert(errText(e, 'Could not undo.')); }
+    setBusy(null);
+  }
+  async function redactByHand(g, on) {
+    if (on && !window.confirm('Redact by hand: each request\'s copies of "' + groupingName(g) + '" will be reviewed one by one. No redaction template, and Mass Redaction stops suggesting one. You can undo this here.')) return;
+    setBusy(g.id); closeSample();
+    try { if (on) await api.post(G(g) + '/redact-by-hand'); else await api.delete(G(g) + '/redact-by-hand'); await load(); } catch (e) { alert(errText(e, 'Could not record that.')); }
+    setBusy(null);
+  }
+  async function openNoRedaction(g) {
+    closeSample();
+    setNoRed({ g: g, check: null, reason: '', busy: false, err: '' });
+    try { var r = await api.get(G(g) + '/no-redaction/check'); setNoRed(function (n) { return n ? Object.assign({}, n, { check: r.data }) : n; }); }
+    catch (e) { setNoRed(function (n) { return n ? Object.assign({}, n, { err: errText(e, 'The checks could not be loaded.') }) : n; }); }
+  }
+  async function confirmNoRedaction() {
+    var n = noRed; if (!n) return;
+    setNoRed(Object.assign({}, n, { busy: true, err: '' }));
+    try { await api.post(G(n.g) + '/no-redaction', { reason: n.reason }); setNoRed(null); await load(); }
+    catch (e) { setNoRed(function (x) { return Object.assign({}, x, { busy: false, err: errText(e, 'The decision was refused.') }); }); }
+  }
+  async function undoNoRedaction(g) {
+    if (!window.confirm('Undo "No redaction needed" for "' + groupingName(g) + '"? The variant goes back to its previous release posture.')) return;
+    setBusy(g.id);
+    try { await api.delete(G(g) + '/no-redaction'); await load(); } catch (e) { alert(errText(e, 'Could not undo.')); }
+    setBusy(null);
+  }
   // "Start a redaction template" — the existing Mass Redaction path: stage a stamped example of the variant into the
   // redaction-template workspace (POST /redaction-templates/opportunities/:rt/stage-example).
   async function startTemplate(g) {
@@ -91,12 +163,12 @@ export default function SourceInventoryPage() {
     } catch (e) { setStaging(null); alert(errText(e, 'A document could not be staged for the template.')); }
   }
 
+  var groupingName = function (g) { return g.record_type ? g.record_type.name : 'Unnamed grouping ' + g.ordinal; };
   if (err && !inv) return <div style={{ padding: '24px', color: 'var(--oq-fg-991b1b)', fontSize: '14px' }}>{err}</div>;
   if (!inv) return <div style={{ padding: '24px', color: C.faint, fontSize: '14px' }}>Loading inventory…</div>;
 
   var src = inv.source, cz = inv.census, t = inv.totals, cur = cz.current, last = cz.last;
   var never = !last && !cur;
-  var groupingName = function (g) { return g.record_type ? g.record_type.name : 'Unnamed grouping ' + g.ordinal; };
   var dr = cz.drift;
   var driftText = dr ? ((dr.new || dr.changed || dr.removed) ? [dr.new ? dr.new + ' new' : null, dr.changed ? dr.changed + ' changed' : null, dr.removed ? dr.removed + ' removed' : null].filter(Boolean).join(', ') + ' since' : 'No change since') : null;
   var pct = cur && cur.total_files ? Math.round((cur.done_files || 0) / cur.total_files * 100) : 0;
@@ -192,17 +264,20 @@ export default function SourceInventoryPage() {
                     <div>{pill(lay[0], lay[1])}</div>
                     <div>
                       {rt ? <div>{rt.parent ? <span style={{ color: C.mute }}>{rt.parent.name} › </span> : null}<b style={{ color: C.ink }}>{rt.name}</b><div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{rt.status === 'draft' ? 'draft variant — activate on the Taxonomy page' : rt.status}</div></div>
-                        : <div><span style={{ color: 'var(--oq-fg-9a6512)', fontWeight: '600' }}>Not yet associated</span><div style={{ marginTop: '4px' }}><button disabled title="Association arrives in the next slice" style={Object.assign(btn('dis'), { height: '26px', fontSize: '12px' })}>Associate ›</button></div></div>}
+                        : <div><span style={{ color: 'var(--oq-fg-9a6512)', fontWeight: '600' }}>Not yet associated</span><div style={{ marginTop: '4px' }}><button onClick={function () { openAssociate(g); }} style={Object.assign(btn('soft'), { height: '26px', fontSize: '12px' })}>Associate ›</button></div></div>}
+                      {rt ? <div style={{ marginTop: '3px' }}><span onClick={function () { dissociate(g); }} style={{ fontSize: '11.5px', color: C.faint, cursor: 'pointer' }}>{busy === g.id ? 'Working…' : 'Associate differently ›'}</span></div> : null}
                     </div>
                     <div>
                       {red ? pill(red.kind, red.label) : <span style={{ color: 'var(--oq-fg-a9b7c2)' }}>—</span>}
                       {g.redaction === 'waiting' || g.redaction === 'none' ? (
                         <div style={{ marginTop: '4px', fontSize: '12px', lineHeight: '1.7' }}>
                           <span onClick={function () { startTemplate(g); }} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>{staging === g.id ? 'Staging a document…' : 'Start a redaction template ›'}</span><br />
-                          <span title="Arrives in the next slice" style={{ color: 'var(--oq-fg-a9b7c2)', fontWeight: '600' }}>Redact by hand ›</span><br />
-                          <span title="Arrives in the next slice" style={{ color: 'var(--oq-fg-a9b7c2)', fontWeight: '600' }}>No redaction needed ›</span>
+                          <span onClick={function () { redactByHand(g, true); }} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>Redact by hand ›</span><br />
+                          <span onClick={function () { openNoRedaction(g); }} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>No redaction needed ›</span>
                         </div>
                       ) : null}
+                      {g.redaction === 'redact_by_hand' ? <div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{g.decisions && g.decisions.redact_by_hand && g.decisions.redact_by_hand.by ? g.decisions.redact_by_hand.by + ', ' + when(g.decisions.redact_by_hand.at) + ' · ' : ''}each request's copies reviewed one by one · <span onClick={function () { redactByHand(g, false); }} style={{ color: C.priFg, cursor: 'pointer' }}>Undo ›</span></div> : null}
+                      {g.redaction === 'no_redaction' ? <div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{g.decisions && g.decisions.no_redaction ? (g.decisions.no_redaction.by_name || 'staff') + ', ' + when(g.decisions.no_redaction.at) + ' · ' : ''}releases as-is after a clean read · <span onClick={function () { undoNoRedaction(g); }} style={{ color: C.priFg, cursor: 'pointer' }}>Undo ›</span></div> : null}
                     </div>
                     <div style={{ textAlign: 'right' }}>{g.examples.length ? <button onClick={function () { openSample(g, 0); }} style={Object.assign(btn(), { height: '26px', fontSize: '12px' })}>View sample</button> : null}</div>
                   </div>
@@ -247,7 +322,9 @@ export default function SourceInventoryPage() {
         )}
       </div>
 
-      {sample ? <SampleModal sample={sample} groupingName={groupingName} onClose={closeSample} onNav={function (d) { var n = sample.index + d; if (n >= 0 && n < sample.grouping.examples.length) openSample(sample.grouping, n); }} onTemplate={function () { startTemplate(sample.grouping); }} onOpenPdf={openPdf} /> : null}
+      {sample ? <SampleModal sample={sample} groupingName={groupingName} onClose={closeSample} onNav={function (d) { var n = sample.index + d; if (n >= 0 && n < sample.grouping.examples.length) openSample(sample.grouping, n); }} onTemplate={function () { startTemplate(sample.grouping); }} onOpenPdf={openPdf} onAssociate={function () { openAssociate(sample.grouping); }} onDissociate={function () { var g = sample.grouping; closeSample(); dissociate(g); }} onByHand={function () { redactByHand(sample.grouping, true); }} onNoRedaction={function () { openNoRedaction(sample.grouping); }} /> : null}
+      {assoc ? <AssociateModal a={assoc} groupingName={groupingName} onChange={function (patch) { setAssoc(Object.assign({}, assoc, patch)); }} onSuggest={askSuggestion} onApprove={approveAssociate} onClose={function () { setAssoc(null); }} /> : null}
+      {noRed ? <NoRedactionModal n={noRed} groupingName={groupingName} viewed={viewedCount(noRed.g)} onChange={function (patch) { setNoRed(Object.assign({}, noRed, patch)); }} onConfirm={confirmNoRedaction} onClose={function () { setNoRed(null); }} onViewSamples={function () { var g = noRed.g; setNoRed(null); openSample(g, 0); }} /> : null}
     </div>
   );
 }
@@ -297,13 +374,106 @@ function SampleModal(props) {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '18px' }}>
               {rt && (g.redaction === 'waiting' || g.redaction === 'none') ? <button onClick={props.onTemplate} style={Object.assign(btn('pri'), { height: '36px' })}>Start a redaction template from this grouping</button> : null}
-              {rt ? <div style={{ display: 'flex', gap: '8px' }}><button disabled title="Arrives in the next slice" style={Object.assign(btn('dis'), { flex: 1, height: '36px' })}>Redact by hand</button><button disabled title="Arrives in the next slice" style={Object.assign(btn('dis'), { flex: 1, height: '36px' })}>No redaction needed</button></div>
-                : <button disabled title="Association arrives in the next slice" style={Object.assign(btn('dis'), { height: '36px' })}>Associate with a record type</button>}
+              {rt && (g.redaction === 'waiting' || g.redaction === 'none') ? <div style={{ display: 'flex', gap: '8px' }}><button onClick={props.onByHand} style={Object.assign(btn(), { flex: 1, height: '36px' })}>Redact by hand</button><button onClick={props.onNoRedaction} style={Object.assign(btn(), { flex: 1, height: '36px' })}>No redaction needed</button></div> : null}
+              {rt ? <div style={{ textAlign: 'center', fontSize: '12px' }}><span onClick={props.onDissociate} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>Associate differently</span></div>
+                : <button onClick={props.onAssociate} style={Object.assign(btn('pri'), { height: '36px' })}>Associate with a record type</button>}
             </div>
             <div style={Object.assign({}, hint, { marginTop: '10px' })}>"Start a redaction template" opens the redaction-template workspace with one of these documents staged — the same path as Mass Redaction's "Waiting for a redaction template" card.</div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+
+function Backdrop(props) {
+  return <div onClick={props.onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(18,35,46,0.55)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div onClick={function (e) { e.stopPropagation(); }} style={Object.assign({}, card, { width: props.width || '780px', maxWidth: '96vw', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' })}>{props.children}</div>
+  </div>;
+}
+var stepPill = function (kind, t) { return <span style={{ marginTop: '2px', flex: 'none' }}>{pill(kind, t)}</span>; };
+var radio = function (on) { return { display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', border: '1px solid ' + (on ? 'var(--oq-ln-1e6091)' : C.line), borderRadius: '8px', background: on ? 'var(--oq-bg-f5f9fc)' : 'transparent', cursor: 'pointer' }; };
+var rb = function (on) { return <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid ' + (on ? 'var(--oq-ln-1e6091)' : C.edge), marginTop: '2px', flex: 'none', background: on ? 'var(--oq-bg-1e6091)' : 'transparent', boxShadow: on ? 'inset 0 0 0 3px var(--oq-bg-ffffff)' : 'none' }} />; };
+var inp = { display: 'block', width: '100%', boxSizing: 'border-box', height: '34px', border: '1px solid ' + C.edge, borderRadius: '7px', padding: '0 11px', fontSize: '13px', color: C.ink, background: 'var(--oq-bg-ffffff)', fontFamily: 'inherit' };
+var note = { background: 'var(--oq-bg-f7f9fb)', border: '1px dashed ' + C.edge, borderRadius: '8px', padding: '10px 12px', fontSize: '12px', color: C.mute, lineHeight: '1.45' };
+
+function AssociateModal(props) {
+  var a = props.a, g = a.g, cat = a.catalog, sg = a.suggestion;
+  var buckets = cat ? cat.buckets.filter(function (b) { return b.status === 'active'; }) : [];
+  var all = cat ? cat.buckets.concat(cat.variants) : [];
+  var byId = {}; all.forEach(function (r) { byId[r.id] = r; });
+  var canApprove = !a.busy && (a.mode === 'leave' || (a.mode === 'existing' && a.existingId) || (a.mode === 'new_variant' && a.parentId && a.name.trim()));
+  return (
+    <Backdrop onClose={props.onClose}>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid ' + C.line, display: 'flex', alignItems: 'center' }}>
+        <div style={{ flexGrow: 1 }}><div style={{ fontSize: '15px', fontWeight: '700', color: C.ink }}>Associate "{props.groupingName(g)}" with a record type</div>
+          <div style={hint}>{g.member_count} documents (counted) · {(LAYOUT[g.layout] || [0, g.layout])[1].toLowerCase()} layout · {g.folders.map(function (f) { return f.folder; }).join(', ')}</div></div>
+        <button onClick={props.onClose} style={btn()}>✕</button>
+      </div>
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '14px', overflow: 'auto' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>{stepPill('grey', '1 · Recognition')}<div style={{ fontSize: '13px', lineHeight: '1.5', color: C.ink }}>No match to the stored signature of any approved variant. <span style={Object.assign({}, hint, { display: 'inline' })}>(If a known layout had turned up on this source it would have been counted under its variant, with nothing to approve.)</span></div></div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>{stepPill('blue', '2 · AI suggestion')}
+          <div style={{ fontSize: '13px', lineHeight: '1.5', flex: 1 }}>
+            {!sg ? <div><button onClick={props.onSuggest} disabled={a.suggesting} style={btn(a.suggesting ? 'dis' : 'soft')}>{a.suggesting ? 'Reading two excerpts…' : 'Ask the AI what these documents are'}</button><div style={Object.assign({}, hint, { marginTop: '4px' })}>One small call: two first-page excerpts and the field labels. It names; it never counts or writes.</div></div>
+              : <div style={Object.assign({}, card, { padding: '10px 12px', background: 'var(--oq-bg-f5f9fc)' })}>
+                  {sg.match ? <div>The AI reads these as an <b>existing type</b>: <b>{sg.match.parent_name ? sg.match.parent_name + ' › ' : ''}{sg.match.name}</b>{sg.match.confidence != null ? ' — confidence ' + Math.round(sg.match.confidence) + '%' : ''}<div style={Object.assign({}, hint, { marginTop: '4px' })}>{sg.match.reasoning}</div></div> : null}
+                  {sg.propose && sg.propose.name ? <div style={{ marginTop: sg.match ? '8px' : 0 }}>{sg.match ? 'Otherwise, a' : 'It suggests a'} <b>variant of {sg.propose.parent_name || '?'}</b>: <b>"{sg.propose.name}"</b>{sg.propose.confidence != null ? ' — confidence ' + Math.round(sg.propose.confidence) + '%' : ''}<div style={Object.assign({}, hint, { marginTop: '4px' })}>{sg.propose.reasoning}</div></div> : null}
+                </div>}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>{stepPill('grey', '3 · Your decision')}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+            <div style={radio(a.mode === 'new_variant')} onClick={function () { props.onChange({ mode: 'new_variant' }); }}>{rb(a.mode === 'new_variant')}<div style={{ flex: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: C.ink }}>A new variant under a bucket</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '8px' }}>
+                <div><div style={{ fontSize: '12.5px', fontWeight: '600', marginBottom: '5px' }}>Parent bucket</div><select value={a.parentId} onChange={function (e) { props.onChange({ parentId: e.target.value, mode: 'new_variant' }); }} style={inp}><option value="">Choose a bucket…</option>{buckets.map(function (b) { return <option key={b.id} value={b.id}>{b.name}</option>; })}</select></div>
+                <div><div style={{ fontSize: '12.5px', fontWeight: '600', marginBottom: '5px' }}>Variant name</div><input value={a.name} onChange={function (e) { props.onChange({ name: e.target.value, mode: 'new_variant' }); }} placeholder="e.g. Building Permit (pre-2018 form)" style={inp} /></div>
+              </div>
+              <div style={Object.assign({}, hint, { marginTop: '4px' })}>Created as a <b>draft</b>. Drafts do not classify requests until someone activates them on the Taxonomy page.</div>
+            </div></div>
+            <div style={radio(a.mode === 'existing')} onClick={function () { props.onChange({ mode: 'existing' }); }}>{rb(a.mode === 'existing')}<div style={{ flex: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: C.ink }}>An existing record type or variant</div>
+              <select value={a.existingId} onChange={function (e) { props.onChange({ existingId: e.target.value, mode: 'existing' }); }} style={Object.assign({}, inp, { marginTop: '8px' })}><option value="">Choose a type or variant…</option>{all.map(function (r) { return <option key={r.id} value={r.id}>{r.parent_record_type_id ? ((byId[r.parent_record_type_id] || {}).name || '') + ' › ' : ''}{r.name}{r.status === 'draft' ? ' (draft)' : ''}</option>; })}</select>
+              <div style={Object.assign({}, hint, { marginTop: '4px' })}>Pick this when the AI is wrong about the bucket — for example a drive that also holds another department's forms.</div>
+            </div></div>
+            <div style={radio(a.mode === 'leave')} onClick={function () { props.onChange({ mode: 'leave' }); }}>{rb(a.mode === 'leave')}<div><div style={{ fontSize: '13px', fontWeight: '600', color: C.ink }}>Leave it unassociated for now</div><div style={hint}>It stays listed as "Not yet associated" and is searchable once indexed.</div></div></div>
+          </div>
+        </div>
+        <div style={note}>On <b>Approve</b> the system will: {a.mode === 'existing' ? 'stamp the ' + g.member_count + ' documents with the chosen type · link the type to this source · store the layout signature so the next census recognises this form anywhere it appears' : 'create the draft variant · link it to this source (where the ' + g.member_count + ' documents live) · stamp the documents with it · store the layout signature so the next census recognises this form anywhere · list it under Mass Redaction as "Waiting for a redaction template"'}. Nothing is written before you approve.</div>
+        {a.err ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-991b1b)' }}>{a.err}</div> : null}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}><button onClick={props.onClose} style={Object.assign(btn(), { height: '36px' })}>Cancel</button><button onClick={props.onApprove} disabled={!canApprove} style={Object.assign(btn(canApprove ? 'pri' : 'dis'), { height: '36px' })}>{a.busy ? 'Approving…' : (a.mode === 'leave' ? 'Close' : 'Approve')}</button></div>
+      </div>
+    </Backdrop>
+  );
+}
+
+function NoRedactionModal(props) {
+  var n = props.n, g = n.g, ck = n.check, rt = g.record_type;
+  var allowed = ck && ck.allowed, reasonOk = n.reason.trim().length >= 10;
+  return (
+    <Backdrop onClose={props.onClose}>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid ' + C.line, display: 'flex', alignItems: 'center' }}>
+        <div style={{ flexGrow: 1 }}><div style={{ fontSize: '15px', fontWeight: '700', color: C.ink }}>No redaction needed — {props.groupingName(g)}</div>
+          <div style={hint}>{g.member_count} documents (counted){rt ? ' · ' + (rt.parent ? rt.parent.name + ' › ' : '') + rt.name : ''}</div></div>
+        <button onClick={props.onClose} style={btn()}>✕</button>
+      </div>
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '14px', overflow: 'auto' }}>
+        <div style={Object.assign({}, note, { background: 'var(--oq-bg-fffbeb)', borderColor: 'var(--oq-ln-e5c24a)', color: 'var(--oq-fg-374151)' })}>This is a <b>release decision</b> about every document of this layout, not a shortcut around a template. It is written to the variant{rt ? <span> <b>{rt.name}</b></span> : null}: public availability → <b>Releasable</b>, auto-release → <b>on</b>.</div>
+        <div><div style={Object.assign({}, sect, { marginBottom: '6px' })}>What still happens</div><div style={{ fontSize: '13px', lineHeight: '1.55', color: C.ink }}>Every responsive document still gets the automatic <b>clean read</b> before release. Only a read that finds <b>nothing</b> to redact releases the original as-is; a document where the read finds something — a Social Security number, a phone number, a minor's name — goes to a redaction task anyway. The second-eyes release review is unchanged.</div></div>
+        <div><div style={Object.assign({}, sect, { marginBottom: '6px' })}>Checks</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px', color: C.ink }}>
+            {!ck ? <div style={hint}>Checking…</div> : ck.checks.map(function (c) { return <div key={c.key} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>{stepPill(c.passes ? 'ok' : 'red', c.passes ? 'passes' : 'closed')}<div>{c.text}</div></div>; })}
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>{stepPill(props.viewed ? 'ok' : 'warn', props.viewed ? 'looked' : 'look first')}<div>You have viewed <b>{props.viewed} of {g.member_count}</b> sample documents in this grouping. <span onClick={props.onViewSamples} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>View samples ›</span></div></div>
+          </div>
+        </div>
+        <div><div style={{ fontSize: '12.5px', fontWeight: '600', marginBottom: '5px', color: C.ink }}>Why no redaction is needed <span style={{ color: 'var(--oq-fg-b02a37)' }}>*</span></div>
+          <textarea value={n.reason} onChange={function (e) { props.onChange({ reason: e.target.value }); }} rows={3} placeholder="e.g. Inspection reports carry no personal information — inspector name and permit number only — and the same reports are already published on the permit portal." style={Object.assign({}, inp, { height: 'auto', padding: '9px 11px', lineHeight: '1.5', resize: 'vertical' })} />
+          <div style={hint}>Required. Recorded with your name and the date in the taxonomy audit; shown on the grouping.</div></div>
+        <div style={note}>On <b>Confirm</b>: the variant's release posture is written as above · the grouping shows <b>No redaction needed</b> · Mass Redaction stops listing it · the Technical Setup lane turns "changed since approval" for re-approval. Reversible from the grouping row at any time.</div>
+        {n.err ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-991b1b)' }}>{n.err}</div> : null}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}><button onClick={props.onClose} style={Object.assign(btn(), { height: '36px' })}>Cancel</button><button onClick={props.onConfirm} disabled={!allowed || !reasonOk || n.busy} style={Object.assign(btn(allowed && reasonOk && !n.busy ? 'pri' : 'dis'), { height: '36px' })}>{n.busy ? 'Recording…' : 'Confirm — no redaction needed'}</button></div>
+      </div>
+    </Backdrop>
   );
 }

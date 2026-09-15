@@ -10846,3 +10846,32 @@ variant + signature; `census_groupings.record_type_id` set) · Redact by hand (`
 dismiss) · No redaction needed (guarded PATCH: parent legal gate off, bucket availability not restricted/confidential, required
 reason, config history, role bar) · the disabled buttons come alive. Then slice 4 (Find variants on the census store, Scan source
 retired, nav rename "Identical Grouping"), slice 5 (data-system census).
+
+## 2026-09-15 (h) — SLICE 3 BUILT: Associate (one AI naming call, human approval writes) · Redact by hand · No redaction needed (guarded)
+
+**Built:** `services/censusAssociate.js` + routes `/repositories/:id/groupings/:gid/{catalog,suggest,associate,redact-by-hand,
+no-redaction[/check]}` (writes: source-config gate; taxonomy hub rows told). `suggest` = the one paid step (two excerpts + label set +
+count → match an existing type/variant or propose a new variant under a bucket; writes nothing). `associate` = the approval and only
+writer (existing: stamps + link + signature-if-none; new variant: `applyGroupingProposal` → draft, counted, candidate by layout, stamps,
+link, signature); `DELETE` undoes and FORGETS the signature it taught. Redact by hand = the honest Mass Redaction dismiss
+(`discovery_meta.redact_by_hand`, candidate 0), reversible. No redaction needed = release posture on the variant (releasable +
+auto-release), guarded by the parent's legal gate, the bucket's availability, "already decided", a required reason; previous posture
+kept; reversible; in `taxonomy_audit`. UI: Associate + No-redaction modals per the drawings, Redact by hand confirm, Undo links,
+"Associate differently", doors inside View sample; `viewed n of N samples` counted client-side. Spec §6 updated.
+**Evidence:** `verify_census_association` **31/31** (gates ×4 · garbage refused · associate existing → stamps/link/signature/audit,
+409 twice, undo clean · new variant → draft/candidate/counted/signature, 6 stamped, linked to this source, "waiting", Mass Redaction
+lists it, next census recognises a new document (7) · redact by hand → candidate 0, delisted, undo · no-redaction: check passes, short
+reason 400, parent legal gate ON → 422 naming it, Restricted bucket → 422, confirm writes posture + prev + audit, "already decided",
+undo restores exactly · cleanup) + `verify_source_census` 51/51, live untouched. **Live probe:** Finance Shared Drive censused
+(70 files, 4 unassociated groupings, 3.2 s); the AI suggestion on the 25-document grouping took 7.6 s and matched the bucket
+"Business licenses & permits" at 90% with a one-sentence reason; screenshots `~/exchange/inventory_live_5_associate_modal.png`,
+`_6_no_redaction_modal.png`, `_7_finance_inventory_unassociated.png`. No association was approved on live.
+**Findings:** (1) harness D4 caught a real bug — after undoing an association with an existing type, the signature the association
+had stored kept RE-ASSOCIATING the grouping on the next census; fixed with `signature_source` + forget-on-undo. (2) the model returns
+confidence as 0–1 or 0–100; normalised to percent (the first live screenshot shows "1%" from before the fix). (3) Finance's 70 legacy
+fingerprint rows (older feature shape) re-extracted as "changed" on the first census — expected once. (4) Building permits bucket is
+`releasable` on live — worth Kevin's glance when he tries "No redaction needed".
+**NEXT: slice 4** — Find variants on the Taxonomy page reads the census store (no fresh scan; "review the unassociated groupings of
+this bucket's sources", same approval); Scan source retired (`/discovery` route + page, `discover-scan`, `discoverViaSampleDigest`,
+`scan()` on connectors; paste-a-description `POST /taxonomy/discover` stays); nav "Find Same-Format Records" → "Identical Grouping".
+Then slice 5 (data-system census). Full suite launched in the background after this commit — verdict in `/tmp/oq-shot/full3.status`.
