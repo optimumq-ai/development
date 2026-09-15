@@ -30,7 +30,6 @@ import UserTypesPage from './pages/UserTypesPage';
 import FeeLawPage from './pages/FeeLawPage';
 import RequestRulesPage from './pages/RequestRulesPage';
 import ReportsHubPage from './pages/ReportsHubPage';
-import SchemaDiscoveryPage from './pages/SchemaDiscoveryPage';
 import MyTasksPage from './pages/MyTasksPage';
 import EstimateTaskPage from './pages/EstimateTaskPage';
 import TicklerPage from './pages/TicklerPage';
@@ -187,7 +186,7 @@ export default function App() {
           <Route path="taxonomy" element={<Navigate to="/setup/taxonomy" replace />} />
           <Route path="workflow" element={<Navigate to="/setup/workflow-rules" replace />} />
           <Route path="workflow-map" element={<Navigate to="/setup/workflow-rules" replace />} />
-          <Route path="discovery" element={<SchemaDiscoveryPage />} />
+          <Route path="discovery" element={<Navigate to="/setup/record-sources" replace />} />
           <Route path="sources" element={<Navigate to="/setup/record-sources" replace />} />
           <Route path="redaction-rules" element={<Navigate to="/setup/redaction-rules" replace />} />
           {/* Redaction TEMPLATE authoring — samples on the SYS-TEMPLATE-SAMPLES pseudo-request, which has

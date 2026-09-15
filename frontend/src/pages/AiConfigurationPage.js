@@ -17,7 +17,7 @@ var TABS = [['keys', 'AI Service Keys'], ['deployment', 'Deployment Model'], ['t
 var TOUCHPOINTS = [
   { id: 'zone-discovery', feature: 'Redaction zone discovery', fn: 'services/zoneDiscovery.js → discoverZones()', data: 'Full unredacted page text of the document', sensitive: true, core: false, kind: 'llm' },
   { id: 'intake-extract', feature: 'Intake document extraction', fn: 'routes/extract.js', data: 'Raw uploaded request letter (PDF / image)', sensitive: true, core: false, kind: 'llm' },
-  { id: 'schema-discovery', feature: 'Source schema discovery', fn: 'services/schemaDiscovery.js', data: 'Sample rows / text from a source system', sensitive: true, core: false, kind: 'llm' },
+  { id: 'schema-discovery', feature: 'Census grouping naming / association suggestion', fn: 'services/censusAssociate.js · services/schemaDiscovery.js', data: 'Two first-page excerpts + the field labels of one identical grouping (never a sample of the whole source)', sensitive: true, core: false, kind: 'llm' },
   { id: 'search-judge', feature: 'Search relevance judge', fn: 'services/recordSearch.js → judgeResults()', data: 'Titles + summaries of candidate records', sensitive: true, core: true, kind: 'llm' },
   { id: 'classify', feature: 'Request classification & routing', fn: 'services/classifier.js', data: 'The requestor’s own request description', sensitive: true, core: true, kind: 'llm', low: true },
   { id: 'connector-catalog', feature: 'Connector catalog (Laserfiche / Axon / Tyler)', fn: 'services/connectors/*.js', data: 'Record metadata (titles, series)', sensitive: true, core: true, kind: 'llm', low: true },

@@ -20,8 +20,23 @@ Confidence ≥ 70 also pins `record_type_id` onto the request (feeds estimate-pr
 ## 3. Embeddings & semantic layer `[BUILT]`
 `embeddings` table (pgvector) + Voyage AI (`voyageEmbed`), shared by: record-type semantic match (`/semantic-search/record-types`), document search (`/semantic-search/documents`), library/public search, and Smart Routing's user-specialization matching. embedIndex maintains the index.
 
-## 4. Schema discovery `[BUILT — propose/approve]`
-`POST /taxonomy/discover` → connector `scan()` pulls sample documents from a repository → AI identifies distinct record types across samples → for each: either **matches an existing type** (linked to the repo) or **proposes a new one**, inserted as `status='draft'`, `source='discovered'` with confidence + example files. **Humans approve** by activating drafts on TaxonomyPage — drafts don't participate in classification (classifier uses active only). SchemaDiscoveryPage fronts this. Matches the AI-proposes/human-approves principle.
+**Find variants reads the census store `[BUILT 2026-09-15 — inventory build slice 4; verify_census_association G1–G6, verify_variant_discovery 12/12]`.**
+"Find variants" no longer scans anything. `discoverVariantGroupings` reads `census_groupings` for the bucket's linked ACTIVE sources:
+groupings already associated to the bucket or one of its variants are the *recognized* list (exact counts, redaction-template status);
+the unassociated groupings are handed to the AI for NAMING only (one call); approval goes through `applyGroupingProposal` as before, which
+now also marks the census grouping associated. A bucket linked to no source, or only to sources that have never been censused, gets a 422
+that names the sources and points at Record Sources › Inventory — the census is started there, never here. Sources without a census are
+listed on the result (`not_censused`). The per-bucket scan (`discoverViaFingerprints` / `discoverViaSampleDigest`) is RETIRED;
+`fingerprintCensus` + `recognizeAgainstSignatures` remain exported as the model-free kernel the fingerprint harness locks. Nav: "Find
+Same-Format Records" → **"Identical Grouping"** (Kevin's name, 2026-09-04). See `SPEC_sources_imports_connectors.md` §6 for the census.
+
+## 4. Schema discovery — Scan source RETIRED 2026-09-15 (flow-map decision 2); the description helper stays
+The 'Scan source' page (`/discovery`, `SchemaDiscoveryPage`, `POST /taxonomy/discover-scan`, `scanRepository`) is GONE: it read an
+alphabetical first-50 sample squeezed into a 14k-char digest (~9 files' text), and it inserted draft types AND live source↔type links with
+no approval step — the only AI path in the system that wrote without one (`DESIGN_setup_flow_map.md` §2). The census + association
+replace it. **What stays:** `POST /taxonomy/discover` — describe a record or paste one document's text; the AI proposes ONE draft type
+(`status='draft'`, `source='discovered'`) or names the existing type it matches; nothing is linked. Surfaced on the Taxonomy page as
+"From a description" (next to "Manual"). Drafts don't classify until activated.
 
 ## 5. Known gaps / open
 - ~~Variant/sub-type level~~ `[DECIDED + slice 1 BUILT 2026-08-13 — see §1]`; per-variant estimate profiles and time budgets now work through inheritance.

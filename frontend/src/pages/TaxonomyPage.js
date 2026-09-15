@@ -78,6 +78,15 @@ export default function TaxonomyPage() {
       setScanErr((e.response && e.response.data && e.response.data.error) || 'Could not add the variant.');
     }
   }
+  // "From a description" (2026-09-15): the paste-a-description helper that outlived the retired Scan source page —
+  // describe a record (or paste a document's text) and the AI proposes ONE draft type, or names the existing one.
+  var [describe, setDescribe] = useState(null);
+  async function proposeFromDescription() {
+    if (!describe || !describe.text.trim()) return;
+    setDescribe(Object.assign({}, describe, { busy: true, err: '' }));
+    try { var r = await api.post('/taxonomy/discover', { text: describe.text }); setDescribe(Object.assign({}, describe, { busy: false, result: r.data })); load(); }
+    catch (e) { setDescribe(Object.assign({}, describe, { busy: false, err: (e.response && e.response.data && e.response.data.error) || 'The proposal failed.' })); }
+  }
   var [semLoading, setSemLoading] = useState(false);
   var [semErr, setSemErr] = useState('');
 
@@ -156,10 +165,27 @@ export default function TaxonomyPage() {
           <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--oq-fg-374151)', marginBottom: '8px' }}>Add, delete, or edit taxonomy records</div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={function(){ setEditor({ mode: 'create', initial: null }); }} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Manual</button>
-            <button onClick={function(){ navigate('/discovery'); }} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>AI Auto Discovery</button>
+            <button onClick={function(){ setDescribe({ text: '', busy: false, result: null, err: '' }); }} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>From a description</button>
           </div>
         </div>
       </div>
+      {describe ? (
+        <div style={{ border: '1px solid var(--oq-ln-dbeafe)', borderRadius: '10px', padding: '14px 16px', background: 'var(--oq-bg-f8faff)', margin: '0 0 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-374151)', flex: 1 }}>Propose a record type from a description</div>
+            <button onClick={function(){ setDescribe(null); }} style={{ background: 'var(--oq-bg-ffffff)', border: '1px solid var(--oq-ln-c9d6e2)', borderRadius: '6px', fontSize: '12px', padding: '4px 10px', cursor: 'pointer' }}>Close</button>
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--oq-fg-5b6b7a)', margin: '4px 0 8px' }}>Describe the record in a sentence or paste the text of one document. The AI proposes ONE draft type — or names the existing type it already matches. Drafts do not classify until activated. To catalog what a source actually holds, run its census from Record Sources › Inventory instead.</div>
+          <textarea value={describe.text} onChange={function(e){ setDescribe(Object.assign({}, describe, { text: e.target.value })); }} rows={4} placeholder="e.g. Notices the Fire Marshal issues after an annual business inspection, listing violations and a re-inspection date"
+            style={{ width: '100%', boxSizing: 'border-box', border: '1px solid var(--oq-ln-c9d6e2)', borderRadius: '8px', padding: '9px 11px', fontSize: '13px', fontFamily: 'inherit', lineHeight: '1.5' }} />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '8px' }}>
+            <button onClick={proposeFromDescription} disabled={describe.busy || !describe.text.trim()} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: (describe.busy || !describe.text.trim()) ? 'var(--oq-bg-9ca3af)' : 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{describe.busy ? 'Reading…' : 'Propose a draft type'}</button>
+            {describe.err ? <span style={{ fontSize: '12.5px', color: 'var(--oq-fg-dc2626)' }}>{describe.err}</span> : null}
+            {describe.result && describe.result.matched_existing ? <span style={{ fontSize: '12.5px', color: 'var(--oq-fg-17803d)', fontWeight: '600' }}>This already exists in the taxonomy: {describe.result.matched_name}. Nothing was added.</span> : null}
+            {describe.result && describe.result.draft ? <span style={{ fontSize: '12.5px', color: 'var(--oq-fg-17803d)', fontWeight: '600' }}>Draft added: {describe.result.draft.name} — review and activate it below.</span> : null}
+          </div>
+        </div>
+      ) : null}
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         {[['Total types', types.length], ['Auto-release', autoCount], ['Review required', reviewCount], ['Restricted / conf.', sensCount]].map(function(c) {
@@ -328,7 +354,9 @@ export default function TaxonomyPage() {
               <div>
                 <div style={{ fontWeight: 800, fontSize: '18px', color: 'var(--oq-fg-1f4e79)' }}>Discovered groupings in "{scanResult.bucket.name}"</div>
                 <div style={{ fontSize: '13px', color: 'var(--oq-fg-5b6b7a)', margin: '4px 0 16px' }}>
-                  {scanResult.method === 'fingerprint'
+                  {scanResult.method === 'census'
+                    ? <>From the census of {scanResult.repos.join(', ')}{scanResult.censused_at ? ' (' + String(scanResult.censused_at).slice(0, 16) + ')' : ''} — {scanResult.sampled} documents fingerprinted of {scanResult.totalDocuments} files{scanResult.unreadable ? ', ' + scanResult.unreadable + ' unreadable' : ''} · counts are exact{(scanResult.not_censused || []).length ? <span style={{ color: 'var(--oq-fg-92400e)' }}> · not censused yet: {scanResult.not_censused.join(', ')} — run their census from Record Sources › Inventory</span> : null}</>
+                    : scanResult.method === 'fingerprint'
                     ? <>Read and fingerprinted every document — {scanResult.sampled} of {scanResult.totalDocuments} in {scanResult.repos.join(', ')}{scanResult.unreadable ? ' (' + scanResult.unreadable + ' unreadable or image-only, excluded)' : ''} · counts are exact</>
                     : <>Sampled {scanResult.sampled} documents from {scanResult.repos.join(', ')}{scanResult.totalDocuments != null ? ' · about ' + scanResult.totalDocuments + ' documents in the holdings' : ' · totals unavailable for these sources'}</>}
                   {' '}· the AI proposes, you approve — nothing changes until you say so.
@@ -349,7 +377,7 @@ export default function TaxonomyPage() {
                   </div>
                 ) : null}
                 {(scanResult.groupings || []).length === 0 ? (
-                  <div style={{ color: 'var(--oq-fg-5b6b7a)', fontSize: '14px', padding: '10px 0' }}>No clear groupings — the samples look like one kind of document.</div>
+                  <div style={{ color: 'var(--oq-fg-5b6b7a)', fontSize: '14px', padding: '10px 0' }}>{scanResult.method === 'census' ? 'Every identical grouping in these sources is already associated — nothing left to name.' : 'No clear groupings — the samples look like one kind of document.'}</div>
                 ) : scanResult.groupings.map(function (g) {
                   return (
                     <div key={g.code} style={{ display: 'flex', gap: '14px', border: '1px solid var(--oq-ln-e5e7eb)', borderRadius: '10px', padding: '14px 16px', marginBottom: '10px', alignItems: 'flex-start' }}>
@@ -386,7 +414,7 @@ export default function TaxonomyPage() {
                 })}
                 {scanResult.ungroupedShare > 0 ? (
                   <div style={{ fontSize: '12px', color: 'var(--oq-fg-8a97a5)', marginTop: '4px' }}>
-                    About {Math.round(scanResult.ungroupedShare * 100)}% of the {scanResult.method === 'fingerprint' ? 'documents' : 'sample'} didn't {scanResult.method === 'fingerprint' ? 'match any layout grouping' : 'fit any grouping'} and stay{scanResult.method === 'fingerprint' ? '' : 's'} on "{scanResult.bucket.name}".
+                    About {Math.round(scanResult.ungroupedShare * 100)}% of the {scanResult.method !== 'sample' ? 'documents' : 'sample'} didn't {scanResult.method !== 'sample' ? 'match any layout grouping' : 'fit any grouping'} and stay{scanResult.method === 'fingerprint' ? '' : 's'} on "{scanResult.bucket.name}".
                   </div>
                 ) : null}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>

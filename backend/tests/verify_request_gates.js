@@ -77,7 +77,7 @@ var U = {
   ok('A18 apply a variant proposal (inserts a draft): team staff 403', gated(await call(T.search, 'POST', '/taxonomy/record-types/' + NX + '/variants', { name: 'x' })));
   ok('A19 apply a variant proposal: director passes the gate', through(await call(T.dir, 'POST', '/taxonomy/record-types/' + NX + '/variants', { name: 'x' })));
   ok('A20 AI discover (inserts a draft): no-role 403', gated(await call(T.none, 'POST', '/taxonomy/discover', { text: 'x' })));
-  ok('A21 discover-scan (inserts drafts): team staff 403', gated(await call(T.search, 'POST', '/taxonomy/discover-scan', { repository_id: NX })));
+  ok('A21 census association (writes into taxonomy): team staff 403', gated(await call(T.search, 'POST', '/repositories/repo-filestore-sample/groupings/grp-none/associate', { mode: 'existing', record_type_id: 'rt-none' })));
   ok('A22 variant SCAN stays open (compute-only — proposes, inserts nothing)', through(await call(T.none, 'POST', '/taxonomy/record-types/' + NX + '/discover-variants')));
 
   console.log('\n=== B. REQUEST FILES — mutations need the request-work gate ===');
@@ -98,7 +98,7 @@ var U = {
   console.log('\n=== C. READS STAY OPEN to any authenticated staffer; auth before role ===');
   ok('C1 categories list 200', (await call(T.none, 'GET', '/taxonomy/categories')) === 200);
   ok('C2 record types list 200', (await call(T.none, 'GET', '/taxonomy/record-types')) === 200);
-  ok('C3 taxonomy repositories list 200', (await call(T.none, 'GET', '/taxonomy/repositories')) === 200);
+  ok('C3 source inventory read 200', (await call(T.none, 'GET', '/repositories/repo-filestore-sample/inventory')) === 200);
   ok('C4 request files list 200', (await call(T.none, 'GET', '/files/' + NX)) === 200);
   ok('C5 file download reaches the handler (404 on a nonexistent id, not 403)', (await call(T.none, 'GET', '/files/download/' + NX)) === 404);
   ok('C6 no token is 401 not 403 on taxonomy', (await call(null, 'POST', '/taxonomy/categories', {})) === 401);

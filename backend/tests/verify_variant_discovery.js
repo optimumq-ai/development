@@ -51,7 +51,7 @@ async function api(method, path, body) {
   var onVariant = await api('POST', '/taxonomy/record-types/' + variant.id + '/discover-variants');
   ok('B1 scanning a VARIANT is refused in words (scan the bucket)', onVariant.status === 422 && /parent bucket/.test(onVariant.body.error));
   var noSources = await api('POST', '/taxonomy/record-types/' + bucket.id + '/discover-variants');
-  ok('B2 a bucket with no scannable sources is an honest 422', noSources.status === 422 && /No scannable documents/.test(noSources.body.error));
+  ok('B2 a bucket with no censused sources is an honest 422 that points at the census', noSources.status === 422 && /No censused documents/.test(noSources.body.error));
 
   console.log('\n=== C. APPLYING AN APPROVED PROPOSAL — a DRAFT variant with honest provenance ===');
   var applied = (await api('POST', '/taxonomy/record-types/' + bucket.id + '/variants', {

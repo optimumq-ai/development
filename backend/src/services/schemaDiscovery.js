@@ -2,7 +2,7 @@ var { all, get, run } = require('../db');
 var { v4: uuidv4 } = require('uuid');
 var embedIndex = require('./embedIndex');
 var Anthropic = require('@anthropic-ai/sdk');
-var connectors = { filestore: require('./connectors/filestore'), structured: require('./connectors/structured') };
+var connectors = { filestore: require('./connectors/filestore') };   // structured's scan() retired with Scan source; its census is slice 5
 
 function nid(p){ return p + '-' + uuidv4().substring(0, 8); }
 function packArray(a){ return Array.isArray(a) ? JSON.stringify(a) : '[]'; }
@@ -15,62 +15,8 @@ async function linkRepo(recordTypeId, repositoryId, formats) {
   return true;
 }
 
-async function scanRepository(repo) {
-  var connector = connectors[repo.connector_type];
-  if (!connector || !connector.scan) return { error: 'Connector ' + repo.connector_type + ' does not support scanning' };
-  var config = {};
-  try { config = repo.config ? JSON.parse(repo.config) : {}; } catch (e) {}
-  var samples = connector.scan(config);
-  if (!samples.length) return { created: [], matched: [], scanned: 0 };
-  var cats = await all('SELECT id, name FROM categories WHERE active = 1 ORDER BY sort_order');
-  var existing = await all('SELECT code, name FROM record_types ORDER BY name');
-  var catList = cats.map(function(c){ return c.id + ' = ' + c.name; }).join('\n');
-  var existingList = existing.map(function(r){ return r.code + ' (' + r.name + ')'; }).join('; ');
-  var digest = samples.map(function(s){ return '=== FILE: ' + s.filename + ' ===\n' + s.text; }).join('\n\n').substring(0, 14000);
-  var prompt = 'You are a records-management taxonomy expert for a local government public-records system. '
-    + 'Below are sample documents pulled from a records repository. Identify the DISTINCT record types present across the samples, and for EACH distinct type propose ONE catalog entry for the agency taxonomy. '
-    + 'Return ONLY a JSON array, no other text.\n\n'
-    + 'Choose category_id from EXACTLY one of these:\n' + catList + '\n\n'
-    + 'Existing record types (if a discovered type clearly matches one, set matches_existing true and matched_code to its code):\n' + existingList + '\n\n';
-  prompt += 'Rules:\n'
-    + '- One array element per DISTINCT record type. Do NOT emit one element per file; group files of the same kind together.\n'
-    + '- public_availability one of: releasable, review_required, restricted, confidential. Be conservative; default review_required.\n'
-    + '- auto_release_eligible is 1 ONLY if every plausible exemption is detectable from the document content itself. Else 0.\n'
-    + '- code: short kebab-case, unique, not in the existing list.\n'
-    + '- formats: array drawn from document, video, audio, structured_data.\n'
-    + '- example_files: array of sample filenames that exemplify this type.\n\n';
-  prompt += 'Each array element shape:\n'
-    + '{"matches_existing": false, "matched_code": null, "name": "", "code": "", "category_id": "", "intent": "", "expected_content": "", "typical_request_reason": "", "synonyms": [], "disambiguators": [], "keywords": [], "identifying_facets": [], "formats": [], "public_availability": "review_required", "auto_release_eligible": 0, "confidence": 0, "example_files": [], "reasoning": ""}\n\n'
-    + 'SAMPLE DOCUMENTS:\n' + digest;
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3500, messages: [{ role: 'user', content: prompt }] });
-  var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
-  var proposals = JSON.parse(raw);
-  if (!Array.isArray(proposals)) proposals = [];
-  var created = [], matched = [], linked = 0;
-  for (var i = 0; i < proposals.length; i++) {
-    var p = proposals[i];
-    if (p.matches_existing && p.matched_code && existing.find(function(r){ return r.code === p.matched_code; })) {
-      var exRow = await get('SELECT id FROM record_types WHERE code = ?', [p.matched_code]);
-      if (exRow && await linkRepo(exRow.id, repo.id, p.formats)) linked++;
-      matched.push({ name: p.name, matched_code: p.matched_code });
-      continue;
-    }
-    if (!p.category_id || !cats.find(function(c){ return c.id === p.category_id; })) { p.category_id = cats.length ? cats[cats.length - 1].id : null; }
-    var code = (p.code || 'discovered-type').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 48) || 'discovered-type';
-    var dup = await get('SELECT id FROM record_types WHERE code = ?', [code]);
-    if (dup) code = code + '-' + uuidv4().substring(0, 4);
-    var id = nid('rt');
-    var av = ['releasable','review_required','restricted','confidential'].indexOf(p.public_availability) >= 0 ? p.public_availability : 'review_required';
-    var cols = 'id, category_id, name, code, intent, expected_content, typical_request_reason, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, status, source, confidence, sort_order';
-    var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
-    await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', [ id, p.category_id, (p.name || 'Discovered type').toString().substring(0, 200), code, p.intent || null, p.expected_content || null, p.typical_request_reason || null, packArray(p.synonyms), packArray(p.disambiguators), packArray(p.keywords), packArray(p.identifying_facets), packArray(p.formats), (p.formats && p.formats.indexOf('structured_data') >= 0) ? 1 : 0, av, p.auto_release_eligible ? 1 : 0, 'draft', 'discovered', (typeof p.confidence === 'number' ? p.confidence : null), 900 ]);
-    if (await linkRepo(id, repo.id, p.formats)) linked++;
-    created.push({ id: id, name: p.name, code: code, confidence: p.confidence, example_files: p.example_files || [] });
-  }
-  embedIndex.bg(embedIndex.reindexRecordTypes(created.map(function(c){ return c.id; })), 'discover-scan');
-  return { created: created, matched: matched, linked: linked, scanned: samples.length };
-}
+// scanRepository (the 'Scan source' page's sample digest) RETIRED 2026-09-15 — flow-map decision 2: the census reads every
+// file and association is a human approval; a nine-file alphabetical sample had no remaining job.
 
 // ============================================================================================
 // VARIANT GROUPINGS (#14 slice 2 — Kevin's counting concept, design approved 2026-08-13, mockup 3).
@@ -94,6 +40,11 @@ async function scanRepository(repo) {
 // exists because there is no sample. The AI's only job left is naming clusters it is handed —
 // a few small excerpts per cluster, no 14k-char digest ceiling. Sources without file access
 // (laserfiche, etc.) keep the legacy sample-digest flow below.
+// v3 (2026-09-15, inventory build slice 4 — flow-map decisions 1–3): "Find variants" no longer scans anything. It READS
+// THE CENSUS STORE of the bucket's linked sources: groupings already associated to this bucket or its variants are the
+// "recognized" list (exact counts), the unassociated groupings are handed to the AI for NAMING only, and approval goes
+// through applyGroupingProposal as before (which now also marks the census grouping associated). A source that has
+// never been censused is named, not silently skipped — the census is started from Record Sources › Inventory.
 async function discoverVariantGroupings(bucketId) {
   var bucket = await get('SELECT * FROM record_types WHERE id = ?', [bucketId]);
   if (!bucket) return { error: 'Record type not found' };
@@ -101,15 +52,121 @@ async function discoverVariantGroupings(bucketId) {
   var repos = await all(
     "SELECT rp.* FROM record_type_repositories rr JOIN record_repositories rp ON rp.id = rr.repository_id " +
     "WHERE rr.record_type_id = ? AND rp.status = 'active'", [bucketId]);
-
-  // Prefer the fingerprint census wherever a connector exposes real files.
-  var fileRepos = repos.filter(function (r) { var c = connectors[r.connector_type]; return c && c.listFiles; });
-  if (fileRepos.length) {
-    var out = await discoverViaFingerprints(bucket, fileRepos);
-    if (!out.error || out.hadFiles) return out;
-    // No files found on the file-capable repos — fall through to the legacy sample path.
+  if (!repos.length) return { error: 'No censused documents: this type is linked to no source yet. Link a source, run its census from Record Sources › Inventory, then come back.' };
+  var censused = [], notCensused = [], latest = null;
+  for (var i = 0; i < repos.length; i++) {
+    var last = await get("SELECT finished_at FROM source_census_runs WHERE repository_id = ? AND status = 'done' ORDER BY finished_at DESC LIMIT 1", [repos[i].id]);
+    if (last) { censused.push(repos[i]); if (!latest || last.finished_at > latest) latest = last.finished_at; } else notCensused.push(repos[i].name);
   }
-  return await discoverViaSampleDigest(bucket, repos);
+  if (!censused.length) return { error: 'No censused documents: none of the sources linked to this type has had a census yet (' + notCensused.join(', ') + '). Run one from Record Sources › Inventory first.' };
+  var repoIds = censused.map(function (r) { return r.id; });
+  var ph = repoIds.map(function () { return '?'; }).join(',');
+  var repoById = {}; censused.forEach(function (r) { repoById[r.id] = r; });
+  var variants = await all('SELECT id, name FROM record_types WHERE parent_record_type_id = ?', [bucketId]);
+  var mine = {}; mine[bucketId] = bucket.name; variants.forEach(function (v) { mine[v.id] = v.name; });
+  var groupRows = await all('SELECT * FROM census_groupings WHERE repository_id IN (' + ph + ') ORDER BY member_count DESC, ordinal', repoIds);
+  var totals = await get("SELECT count(*)::int AS files, sum(CASE WHEN kind = 'doc' THEN 1 ELSE 0 END)::int AS docs, sum(CASE WHEN kind = 'unreadable' THEN 1 ELSE 0 END)::int AS unreadable FROM document_fingerprints WHERE repository_id IN (" + ph + ')', repoIds);
+
+  // Recognized: groupings already associated to this bucket or one of its variants — exact counts, template status.
+  var recognized = {}, unassoc = [];
+  for (var g = 0; g < groupRows.length; g++) {
+    var row = groupRows[g];
+    if (row.record_type_id && mine[row.record_type_id]) {
+      var r = recognized[row.record_type_id] = recognized[row.record_type_id] || { record_type_id: row.record_type_id, name: mine[row.record_type_id], count: 0, example_files: [], example_sources: [] };
+      r.count += row.member_count || 0;
+      var exIds = []; try { exIds = JSON.parse(row.example_ids || '[]'); } catch (e) {}
+      if (exIds.length && r.example_files.length < 3) {
+        var exs = await all('SELECT filename, repository_id FROM document_fingerprints WHERE id IN (' + exIds.map(function () { return '?'; }).join(',') + ') LIMIT 3', exIds);
+        exs.forEach(function (x) { if (r.example_files.length < 3) { r.example_files.push(x.filename); r.example_sources.push({ filename: x.filename, repository_id: x.repository_id }); } });
+      }
+    } else if (!row.record_type_id) unassoc.push(row);
+    // groupings associated to some OTHER type are that type's business — not shown here
+  }
+  var recList = [];
+  for (var vid in recognized) {
+    var tpl = await get("SELECT 1 AS ok FROM layout_profiles WHERE record_type_id = ? AND status != 'deleted' LIMIT 1", [vid]);
+    recognized[vid].template_ready = !!tpl; recList.push(recognized[vid]);
+  }
+  recList.sort(function (a, b) { return b.count - a.count; });
+
+  // Unassociated groupings: the AI NAMES them (one call, all groupings) — counts, layout and membership are the census's.
+  var groupings = [];
+  if (unassoc.length) {
+    var docFingerprint = require('./docFingerprint');
+    var execFileSync = require('child_process').execFileSync;
+    var pathMod = require('path'), fsMod = require('fs');
+    var memberSets = [];
+    for (var u = 0; u < unassoc.length; u++) {
+      var members = await all('SELECT id, filename, repository_id FROM document_fingerprints WHERE grouping_id = ?', [unassoc[u].id]);
+      memberSets.push(members);
+    }
+    var clusterDigest = unassoc.map(function (row, ci) {
+      var sig = {}; try { sig = JSON.parse(row.signature || '{}') || {}; } catch (e) {}
+      var reps = memberSets[ci].slice(0, 2).map(function (m) {
+        var text = '';
+        try { var cfg = JSON.parse((repoById[m.repository_id] || {}).config || '{}') || {}; var base = pathMod.resolve(cfg.path || '/nonexistent'); var full = pathMod.resolve(base, m.filename);
+          if (full.indexOf(base + pathMod.sep) === 0 && fsMod.existsSync(full)) text = execFileSync('pdftotext', ['-f', '1', '-l', '1', full, '-'], { encoding: 'utf8', timeout: 15000 }); } catch (e) {}
+        return '--- example (' + m.filename + ') ---\n' + (text || '').trim().substring(0, 1100);
+      }).join('\n');
+      return '=== CLUSTER ' + ci + ' — ' + row.member_count + ' documents sharing one layout ===\nForm field labels: ' + ((sig.labels || []).join(', ') || '(none)') + '\n' + reps;
+    }).join('\n\n');
+    var prompt = 'You are a records-management taxonomy expert. The agency record type "' + bucket.name + '"'
+      + (bucket.intent ? ' (' + bucket.intent + ')' : '') + ' contains distinct sub-kinds.\n'
+      + 'A census has ALREADY grouped the documents into clusters of identical layout — your only job is to NAME '
+      + 'and describe each cluster from its example documents. Do not merge, split, or re-count clusters.\n'
+      + 'Return ONLY a JSON array with EXACTLY one element per cluster, in cluster order.\n\n'
+      + 'Rules:\n'
+      + (variants.length ? '- These variants already exist — do not reuse their names: ' + variants.map(function (v) { return v.name; }).join('; ') + '\n' : '')
+      + '- code: short kebab-case.\n\n'
+      + 'Element shape:\n'
+      + '{"cluster": 0, "name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "confidence": 0, "reasoning": ""}\n\n'
+      + 'CLUSTERS:\n' + clusterDigest;
+    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] });
+    var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
+    var names = [];
+    try { names = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try again (the census is saved, so a retry is fast)' }; }
+    if (!Array.isArray(names)) names = [];
+    groupings = unassoc.map(function (row, ci) {
+      var named = names.find(function (n) { return Number(n.cluster) === ci; }) || {};
+      var sig = null; try { sig = JSON.parse(row.signature || 'null'); } catch (e) {}
+      var members = memberSets[ci];
+      return {
+        grouping_id: row.id,
+        name: named.name || ('Layout grouping ' + (ci + 1)),
+        code: named.code || ('grouping-' + (ci + 1)),
+        intent: named.intent || null, expected_content: named.expected_content || null,
+        synonyms: named.synonyms || [], keywords: named.keywords || [],
+        identifying_facets: named.identifying_facets || [], formats: ['document'],
+        confidence: typeof named.confidence === 'number' ? named.confidence : null,
+        reasoning: named.reasoning || null,
+        counted: true,
+        estimated_count: row.member_count,
+        sample_share: totals && totals.docs ? +(row.member_count / totals.docs).toFixed(4) : 0,
+        layout: row.layout || 'uniform',
+        mass_redaction_candidate: row.layout === 'uniform' || row.layout === 'few_layouts',
+        example_files: members.slice(0, 5).map(function (m) { return m.filename; }),
+        example_sources: members.slice(0, 5).map(function (m) { return { filename: m.filename, repository_id: m.repository_id }; }),
+        fingerprint_ids: members.map(function (m) { return m.id; }),
+        signature: sig,
+        source_name: (repoById[row.repository_id] || {}).name || null
+      };
+    });
+  }
+  var grouped = groupRows.reduce(function (n, r) { return n + (r.member_count || 0); }, 0);
+  return {
+    bucket: { id: bucket.id, name: bucket.name },
+    method: 'census',
+    repos: censused.map(function (r) { return r.name; }),
+    not_censused: notCensused,
+    censused_at: latest,
+    sampled: totals ? Number(totals.docs) : 0,            // documents fingerprinted by the census (not a sample)
+    totalDocuments: totals ? Number(totals.files) : 0,   // every file the census counted
+    unreadable: totals ? Number(totals.unreadable) : 0,
+    recognized: recList,
+    ungroupedShare: totals && totals.docs ? Math.round(((Number(totals.docs) - grouped) / Number(totals.docs)) * 100) / 100 : 0,
+    groupings: groupings
+  };
 }
 
 // The deterministic half of v2 — census + recognition + clustering. Everything except cluster
@@ -188,144 +245,8 @@ async function recognizeAgainstSignatures(bucket, rows) {
   return { recognized: recList, unrecognized: unrecognized };
 }
 
-async function discoverViaFingerprints(bucket, fileRepos) {
-  var docFingerprint = require('./docFingerprint');
-  var execFileSync = require('child_process').execFileSync;
-  var census = await fingerprintCensus(bucket, fileRepos);
-  if (!census.rows.length) return { error: 'No scannable documents found in the sources linked to this type', repos: census.scannedRepos, hadFiles: census.totalFiles > 0 };
-
-  var rec = await recognizeAgainstSignatures(bucket, census.rows);
-  var clusters = docFingerprint.cluster(rec.unrecognized)
-    .map(function (idxs) { return idxs.map(function (i) { return rec.unrecognized[i]; }); })
-    .filter(function (members) { return members.length >= 3; })
-    .sort(function (a, b) { return b.length - a.length; });
-  var clustered = clusters.reduce(function (n, c) { return n + c.length; }, 0);
-  var ungroupedCount = rec.unrecognized.length - clustered;
-
-  var groupings = [];
-  if (clusters.length) {
-    // AI names the clusters it is HANDED — a couple of small excerpts each, honest counts attached
-    // by code afterward. The model discovers nothing and counts nothing.
-    var existingVariants = await all('SELECT name FROM record_types WHERE parent_record_type_id = ?', [bucket.id]);
-    var clusterDigest = clusters.map(function (members, ci) {
-      var reps = members.slice(0, 2).map(function (m) {
-        var text = '';
-        try { text = execFileSync('pdftotext', ['-f', '1', '-l', '1', m.fullPath, '-'], { encoding: 'utf8', timeout: 15000 }); } catch (e) {}
-        return '--- example (' + m.filename + ') ---\n' + (text || '').trim().substring(0, 1100);
-      }).join('\n');
-      var labels = (docFingerprint.signature(members.map(function (m) { return m.features; })).labels || []).join(', ');
-      return '=== CLUSTER ' + ci + ' — ' + members.length + ' documents sharing one layout ===\nForm field labels: ' + (labels || '(none)') + '\n' + reps;
-    }).join('\n\n');
-    var prompt = 'You are a records-management taxonomy expert. The agency record type "' + bucket.name + '"'
-      + (bucket.intent ? ' (' + bucket.intent + ')' : '') + ' contains distinct sub-kinds.\n'
-      + 'Deterministic layout analysis has ALREADY grouped the documents into clusters — your only job is to NAME '
-      + 'and describe each cluster from its example documents. Do not merge, split, or re-count clusters.\n'
-      + 'Return ONLY a JSON array with EXACTLY one element per cluster, in cluster order.\n\n'
-      + 'Rules:\n'
-      + (existingVariants.length ? '- These variants already exist — do not reuse their names: ' + existingVariants.map(function (v) { return v.name; }).join('; ') + '\n' : '')
-      + '- code: short kebab-case.\n\n'
-      + 'Element shape:\n'
-      + '{"cluster": 0, "name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "confidence": 0, "reasoning": ""}\n\n'
-      + 'CLUSTERS:\n' + clusterDigest;
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    // 12000, not 3000: the title-veto census (2026-09-04) yields a cluster per FORM TYPE — a drive can
-    // easily produce 10+, and a truncated JSON array here read as 'AI response could not be read'.
-    var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] });
-    var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
-    var names = [];
-    try { names = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again (the fingerprint index is saved, so a retry is fast)' }; }
-    if (!Array.isArray(names)) names = [];
-    groupings = clusters.map(function (members, ci) {
-      var named = names.find(function (n) { return Number(n.cluster) === ci; }) || {};
-      var feats = members.map(function (m) { return m.features; });
-      var layout = docFingerprint.layoutConsistency(feats);
-      return {
-        name: named.name || ('Layout grouping ' + (ci + 1)),
-        code: named.code || ('grouping-' + (ci + 1)),
-        intent: named.intent || null, expected_content: named.expected_content || null,
-        synonyms: named.synonyms || [], keywords: named.keywords || [],
-        identifying_facets: named.identifying_facets || [], formats: ['document'],
-        confidence: typeof named.confidence === 'number' ? named.confidence : null,
-        reasoning: named.reasoning || null,
-        counted: true,
-        estimated_count: members.length,
-        sample_share: census.rows.length ? +(members.length / census.rows.length).toFixed(4) : 0,
-        layout: layout,
-        mass_redaction_candidate: layout === 'uniform' || layout === 'few_layouts',
-        example_files: members.slice(0, 5).map(function (m) { return m.filename; }),
-        example_sources: members.slice(0, 5).map(function (m) { return { filename: m.filename, repository_id: m.repoId }; }),
-        fingerprint_ids: members.map(function (m) { return m.id; }),
-        signature: docFingerprint.signature(feats)
-      };
-    });
-  }
-
-  return {
-    bucket: { id: bucket.id, name: bucket.name },
-    method: 'fingerprint',
-    repos: census.scannedRepos,
-    sampled: census.rows.length,                      // documents actually fingerprinted (census, not a sample)
-    totalDocuments: census.totalFiles,                // exact
-    unreadable: census.unreadable,                    // image-only/broken files, honestly excluded
-    recognized: rec.recognized,
-    ungroupedShare: census.rows.length ? Math.round((ungroupedCount / census.rows.length) * 100) / 100 : 0,
-    groupings: groupings
-  };
-}
-
-// Legacy sample-digest flow — kept verbatim for connectors that cannot expose files.
-async function discoverViaSampleDigest(bucket, repos) {
-  var samples = [], totalDocs = 0, totalKnown = false, scannedRepos = [];
-  repos.forEach(function (repo) {
-    var connector = connectors[repo.connector_type];
-    if (!connector || !connector.scan) return;
-    var config = {};
-    try { config = repo.config ? JSON.parse(repo.config) : {}; } catch (e) {}
-    var s = connector.scan(config) || [];
-    s.forEach(function (x) { samples.push({ filename: x.filename, text: x.text, source: repo.name }); });
-    if (connector.countAll) { totalDocs += connector.countAll(config); totalKnown = true; }
-    scannedRepos.push(repo.name);
-  });
-  if (!samples.length) return { error: 'No scannable documents found in the sources linked to this type', repos: scannedRepos };
-
-  var existingVariants = await all('SELECT name, code FROM record_types WHERE parent_record_type_id = ?', [bucket.id]);
-  var digest = samples.map(function (s) { return '=== FILE: ' + s.filename + ' (' + s.source + ') ===\n' + s.text; }).join('\n\n').substring(0, 14000);
-  var prompt = 'You are a records-management taxonomy expert. The agency catalog has a record type "' + bucket.name + '"'
-    + (bucket.intent ? ' (' + bucket.intent + ')' : '') + ' that may really be a family of distinct sub-kinds.\n'
-    + 'Below are sample documents of this type from the agency\'s own holdings. Group them into the DISTINCT sub-kinds you can '
-    + 'see evidence for, and return ONLY a JSON array, one element per grouping.\n\n'
-    + 'Rules:\n'
-    + '- Only propose a grouping the samples actually support; leave unclear documents ungrouped.\n'
-    + (existingVariants.length ? '- These variants already exist — do not re-propose them: ' + existingVariants.map(function (v) { return v.name; }).join('; ') + '\n' : '')
-    + '- sample_share: the fraction (0-1) of the samples that belong to this grouping.\n'
-    + '- layout: "uniform" when the documents share one consistent layout, "few_layouts" when a small number of layouts cover nearly all, "varied" otherwise.\n'
-    + '- mass_redaction_candidate: true only for uniform or few_layouts groupings — the kind where one redaction template fits the pile.\n'
-    + '- code: short kebab-case.\n\n'
-    + 'Element shape:\n'
-    + '{"name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "formats": ["document"], "confidence": 0, "sample_share": 0, "layout": "varied", "mass_redaction_candidate": false, "example_files": [], "reasoning": ""}\n\n'
-    + 'SAMPLE DOCUMENTS:\n' + digest;
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
-  var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
-  var groupings = [];
-  try { groupings = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again' }; }
-  if (!Array.isArray(groupings)) groupings = [];
-  var groupedShare = 0;
-  groupings.forEach(function (g) {
-    var share = Math.max(0, Math.min(1, Number(g.sample_share) || 0));
-    groupedShare += share;
-    g.sample_share = share;
-    g.estimated_count = totalKnown ? Math.round(share * totalDocs) : null;
-    g.mass_redaction_candidate = !!g.mass_redaction_candidate && (g.layout === 'uniform' || g.layout === 'few_layouts');
-  });
-  return {
-    bucket: { id: bucket.id, name: bucket.name },
-    repos: scannedRepos, sampled: samples.length,
-    totalDocuments: totalKnown ? totalDocs : null,
-    ungroupedShare: Math.max(0, Math.round((1 - groupedShare) * 100)) / 100,
-    groupings: groupings
-  };
-}
+// discoverViaFingerprints / discoverViaSampleDigest RETIRED 2026-09-15 (slice 4): the census store replaces the per-bucket scan.
+// fingerprintCensus + recognizeAgainstSignatures stay exported as the model-free kernel the fingerprint harness locks.
 
 async function applyGroupingProposal(bucketId, p) {
   var bucket = await get('SELECT * FROM record_types WHERE id = ?', [bucketId]);
@@ -374,6 +295,8 @@ async function applyGroupingProposal(bucketId, p) {
     var fph = p.fingerprint_ids.map(function () { return '?'; }).join(',');
     await run('UPDATE document_fingerprints SET matched_record_type_id = ? WHERE id IN (' + fph + ')', [id].concat(p.fingerprint_ids));
     sourceIds = (await all('SELECT DISTINCT repository_id FROM document_fingerprints WHERE id IN (' + fph + ')', p.fingerprint_ids)).map(function (r) { return r.repository_id; });
+    // The census groupings these documents belong to are now associated (slice 4: Find variants reads the census store).
+    await run('UPDATE census_groupings SET record_type_id = ? WHERE record_type_id IS NULL AND id IN (SELECT DISTINCT grouping_id FROM document_fingerprints WHERE grouping_id IS NOT NULL AND id IN (' + fph + '))', [id].concat(p.fingerprint_ids));
   }
   if (!sourceIds.length && Array.isArray(p.example_sources)) {
     p.example_sources.forEach(function (es) { if (es && es.repository_id && sourceIds.indexOf(es.repository_id) === -1) sourceIds.push(es.repository_id); });
@@ -385,7 +308,7 @@ async function applyGroupingProposal(bucketId, p) {
 }
 
 module.exports = {
-  scanRepository: scanRepository, discoverVariantGroupings: discoverVariantGroupings,
+  discoverVariantGroupings: discoverVariantGroupings,
   applyGroupingProposal: applyGroupingProposal,
   // model-free internals of the fingerprint path, exported so the suite can verify the census,
   // persistence, and recognition without a model call (same principle as applyGroupingProposal)

@@ -165,6 +165,25 @@ async function inventory(repoId) { return (await api('GET', '/repositories/' + r
   inv = await inventory(repoId); pG = inv.groupings.find(function (g) { return g.id === permitG.id; });
   ok('E9 undo restores the previous posture exactly; grouping back to "waiting"', undo.status === 200 && restored.public_availability === before.public_availability && restored.auto_release_eligible === before.auto_release_eligible && pG.redaction === 'waiting');
 
+  console.log('\n=== G. FIND VARIANTS reads the census store (no scan, no model call when nothing is left to name) ===');
+  var fv0 = await api('POST', '/taxonomy/record-types/' + bucket.id + '/discover-variants');
+  ok('G1 a bucket linked to no source is refused in words that point at the census', fv0.status === 422 && /No censused documents/.test(fv0.body.error));
+  var repoNever = 'repo-ca-never-' + TAG; var rootNever = '/tmp/ca-never-' + TAG; fs.mkdirSync(rootNever);
+  await db.run("INSERT INTO record_repositories (id, name, connector_type, status, config) VALUES (?,?,?,?,?)", [repoNever, 'CA Never Censused ' + TAG, 'filestore', 'active', JSON.stringify({ path: rootNever })]);
+  await db.run("INSERT INTO record_type_repositories (id, record_type_id, repository_id, format, filter_spec, sort_order) VALUES (?,?,?,?,?,?)", ['rr-ca-n-' + TAG, bucket.id, repoNever, 'document', '{}', 100]);
+  var fv1 = await api('POST', '/taxonomy/record-types/' + bucket.id + '/discover-variants');
+  ok('G2 a bucket whose only source has never been censused is refused and the source is named', fv1.status === 422 && /never|no census|has had a census/i.test(fv1.body.error) && fv1.body.error.indexOf('CA Never Censused') !== -1);
+  // Associate the report grouping to the bucket itself so nothing unassociated remains → no naming call is needed.
+  var aG = await api('POST', G + reportG.id + '/associate', { mode: 'existing', record_type_id: bucket.id });
+  var fv2 = await api('POST', '/taxonomy/record-types/' + bucket.id + '/discover-variants');
+  ok('G3 with the censused source linked (by that approval) the answer comes from the census: method census, exact counts', aG.status === 200 && fv2.status === 200 && fv2.body.method === 'census' && fv2.body.repos.indexOf('CA Drive ' + TAG) !== -1 && fv2.body.sampled === 11 && fv2.body.totalDocuments === 11);
+  var recV = (fv2.body.recognized || []).find(function (r) { return r.record_type_id === variant.id; });
+  var recB = (fv2.body.recognized || []).find(function (r) { return r.record_type_id === bucket.id; });
+  ok('G4 recognized: the variant with 7 documents (no redaction template yet) and the bucket with 4', recV && recV.count === 7 && recV.template_ready === false && recB && recB.count === 4);
+  ok('G5 nothing left to name → no groupings proposed (and so no model call); the never-censused source is listed as such', fv2.body.groupings.length === 0 && fv2.body.not_censused.indexOf('CA Never Censused ' + TAG) !== -1);
+  ok('G6 the retired Scan source endpoint is gone (404)', (await api('POST', '/taxonomy/discover-scan', { repository_id: repoId })).status === 404);
+  await db.run('DELETE FROM record_type_repositories WHERE repository_id = ?', [repoNever]); await db.run('DELETE FROM record_repositories WHERE id = ?', [repoNever]); fs.rmSync(rootNever, { recursive: true, force: true });
+
   console.log('\n=== F. LEAVE THE WORLD AS FOUND ===');
   await db.run('DELETE FROM document_fingerprints WHERE repository_id = ?', [repoId]);
   await db.run('DELETE FROM census_groupings WHERE repository_id = ?', [repoId]);

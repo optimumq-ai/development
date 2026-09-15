@@ -77,7 +77,6 @@
   --oq-fg-1e40af: #1E40AF;
   --oq-x-1e40af: var(--oq-fg-1e40af);
   --oq-fg-1e429f: #1E429F;
-  --oq-x-1e429f: var(--oq-fg-1e429f);
   --oq-fg-1e6091: #1E6091;
   --oq-bg-1e6091: #1E6091;
   --oq-ln-1e6091: #1E6091;
@@ -255,7 +254,6 @@
   --oq-bg-e0e7ff: #E0E7FF;
   --oq-bg-e0f2fe: #E0F2FE;
   --oq-bg-e1effe: #E1EFFE;
-  --oq-x-e1effe: var(--oq-bg-e1effe);
   --oq-bg-e1f2e9: #E1F2E9;
   --oq-x-e1f2e9: var(--oq-bg-e1f2e9);
   --oq-fg-e2e8f0: #E2E8F0;
@@ -378,7 +376,6 @@
   --oq-bg-fff8e5: #FFF8E5;
   --oq-bg-fff8e8: #FFF8E8;
   --oq-bg-fffbeb: #FFFBEB;
-  --oq-bg-fffdf5: #FFFDF5;
   --oq-bg-fffdf7: #FFFDF7;
   --oq-fg-ffffff: #FFFFFF;
   --oq-bg-ffffff: #FFFFFF;
@@ -463,7 +460,6 @@
   --oq-fg-1e40af: #3c28bc;
   --oq-x-1e40af: var(--oq-fg-1e40af);
   --oq-fg-1e429f: #3c28bc;
-  --oq-x-1e429f: var(--oq-fg-1e429f);
   --oq-fg-1e6091: #3c28bc;
   --oq-bg-1e6091: #3c28bc;
   --oq-ln-1e6091: #3c28bc;
@@ -641,7 +637,6 @@
   --oq-bg-e0e7ff: #ffffff;
   --oq-bg-e0f2fe: #ffffff;
   --oq-bg-e1effe: #ffffff;
-  --oq-x-e1effe: var(--oq-bg-e1effe);
   --oq-bg-e1f2e9: #00cc05;
   --oq-x-e1f2e9: var(--oq-bg-e1f2e9);
   --oq-fg-e2e8f0: #ffffff;
@@ -764,7 +759,6 @@
   --oq-bg-fff8e5: #ffe02c;
   --oq-bg-fff8e8: #ffe02c;
   --oq-bg-fffbeb: #ffe02c;
-  --oq-bg-fffdf5: #ffe02c;
   --oq-bg-fffdf7: #ffe02c;
   --oq-fg-ffffff: #ffffff;
   --oq-bg-ffffff: #ffffff;
@@ -849,7 +843,6 @@
   --oq-fg-1e40af: #ffffff;
   --oq-x-1e40af: var(--oq-fg-1e40af);
   --oq-fg-1e429f: #ffffff;
-  --oq-x-1e429f: var(--oq-fg-1e429f);
   --oq-fg-1e6091: #ffffff;
   --oq-bg-1e6091: #8d33cc;
   --oq-ln-1e6091: #8d33cc;
@@ -1027,7 +1020,6 @@
   --oq-bg-e0e7ff: #0c0c0c;
   --oq-bg-e0f2fe: #0c0c0c;
   --oq-bg-e1effe: #0c0c0c;
-  --oq-x-e1effe: var(--oq-bg-e1effe);
   --oq-bg-e1f2e9: #0c0c0c;
   --oq-x-e1f2e9: var(--oq-bg-e1f2e9);
   --oq-fg-e2e8f0: #ffffff;
@@ -1150,7 +1142,6 @@
   --oq-bg-fff8e5: #0c0c0c;
   --oq-bg-fff8e8: #0c0c0c;
   --oq-bg-fffbeb: #0c0c0c;
-  --oq-bg-fffdf5: #0c0c0c;
   --oq-bg-fffdf7: #0c0c0c;
   --oq-fg-ffffff: #ffffff;
   --oq-bg-ffffff: #2a2a2a;

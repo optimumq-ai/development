@@ -10875,3 +10875,28 @@ fingerprint rows (older feature shape) re-extracted as "changed" on the first ce
 this bucket's sources", same approval); Scan source retired (`/discovery` route + page, `discover-scan`, `discoverViaSampleDigest`,
 `scan()` on connectors; paste-a-description `POST /taxonomy/discover` stays); nav "Find Same-Format Records" → "Identical Grouping".
 Then slice 5 (data-system census). Full suite launched in the background after this commit — verdict in `/tmp/oq-shot/full3.status`.
+
+## 2026-09-15 (i) — SLICE 4 BUILT: Find variants reads the census store · Scan source RETIRED · nav "Identical Grouping" · "From a description"
+
+**Built:** `discoverVariantGroupings` rewritten — no scan: recognized = census groupings already associated to the bucket/its variants
+(exact counts, template status); unassociated groupings → one AI NAMING call; approval unchanged (`applyGroupingProposal` now also marks
+the census grouping associated); 422 in words when the bucket has no source or none censused (names them; points at Record Sources ›
+Inventory); `not_censused` listed on the result. RETIRED: `/discovery` (→ redirects to Record Sources), `SchemaDiscoveryPage.js` deleted,
+`POST /taxonomy/discover-scan` + `GET /taxonomy/repositories`, `scanRepository`, `discoverViaFingerprints`, `discoverViaSampleDigest`;
+registry wording for filestore/structured updated; AI-touchpoints entry renamed. KEPT: `POST /taxonomy/discover` as **"From a
+description"** on the Taxonomy page (replaces the "AI Auto Discovery" door; a panel: describe/paste → ONE draft type or "already exists").
+Nav: "Find Same-Format Records" → **"Identical Grouping"**. Harness edits: `verify_request_gates` A21 → census association gate, C3 →
+inventory read; `verify_variant_discovery` B2 regex → "No censused documents"; `verify_census_association` +G1–G6 (no source 422 ·
+never-censused source named · census-backed answer with exact counts · recognized variant 7 + bucket 4 · nothing to name → no model call ·
+`discover-scan` 404). Specs: taxonomy §1 (Find variants on the census) + §4 (Scan source retired), sources §6.
+**Evidence:** subset **213/0**: variant_discovery 12 · fingerprint_discovery 24 · census_association 37 · source_census 51 · request_gates 44 ·
+theme_tokens 13 · taxonomy_variants 18 · mass_handoff 14 — live untouched. Live: Find variants on Building permits answers from the
+census in under a second — "From the census of Development Services Shared Drive (2026-09-15 21:42) — 160 documents fingerprinted of 160
+files · counts are exact · not censused yet: Laserfiche ECM, Sample Network Drive" + 8 recognized variants (25/25/25/25/20/20/10/10), no
+AI call (`~/exchange/inventory_live_8_find_variants_from_census.png`, `_9_taxonomy_from_description.png`). The background full suite
+started after slice 3 was STOPPED at 24 harnesses (its test API predated slice 4 while two harness files changed — it would have reported
+spurious reds); a fresh full suite is launched after this commit — verdict in `/tmp/oq-shot/full4.status` / `full4.log`.
+**NEXT: slice 5** — data-system census for `structured` (kinds, counts, fields, date ranges; render recipes; embed tiers; field
+redaction template status) per the 2026-09-04 round-3 design and the DataSystem artboard; then the standing items (fixture-vs-live drift
+reconciliation; owner-less buckets; guided record-type/source removal; certified-copy SETS; inspection requests; Minimum-fee signal) and
+Kevin's markup of the built screens.
