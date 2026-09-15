@@ -10818,3 +10818,31 @@ option for Kevin.
 (stats · file types · groupings table · Everything-else file list · linked types · history), never-censused state, View sample
 (stream + label set). Then slice 3 (Associate + three doors), slice 4 (Find variants on the census store, Scan source retired,
 nav rename), slice 5 (data-system census).
+
+## 2026-09-15 (g) — SLICE 2 BUILT: the screens — census line + Inventory door on every source card; Inventory Information; View sample
+
+**Built:** `SourcesConfig` cards carry the census line in Kevin's five states (censused + drift · running with the two-pass
+progress · queued behind · no census yet · not available for this connector) and ONE **Inventory** door; Delete disabled while
+a census reads the source; quiet 3-s polling while any census is open. New `pages/SourceInventoryPage.js` at
+`/setup/record-sources/:id/inventory`: Perform/Refresh census lives here (the only place), never-censused state, stat row,
+file-type bar, Identical groupings table (exact counts · layout · record type › variant · redaction-template posture + the
+three doors — **Start a redaction template works now** through the Mass Redaction stage-example path; Redact by hand / No
+redaction needed / Associate drawn disabled until slice 3 · View sample), "Everything else" = inline file list, linked types as
+bucket › variants with counts here, census history with pass timings. **View sample** renders the first page server-side
+(`GET /repositories/:id/inventory/file/:fp/preview.png`, pdftoppm, cached) — a PDF iframe needs a browser plugin and drew blank
+in headless Chromium — with prev/next, the label set, folders, status, doors, "Open the full PDF". Inventory payload gained
+`labels` per grouping. Theme tokens regenerated (`scripts/theme/build-tokens.js`) — no hex literals in source.
+**Evidence:** live screenshots `~/exchange/inventory_live_1…4_*.png` (cards · Development Services inventory with the 8
+associated groupings · sample modal showing IBA-2023-1000 page 1 · Police Records Drive never-censused). Harnesses after the
+build: `verify_theme_tokens` 13/13 · `verify_sources_list` 3/3 · `verify_source_census` 51/51 · `verify_display_theme` 20/20,
+live untouched. **Full suite (background, launched after slice 1): 2996 passed / 5 failed** — the 2 standing reds
+(stage_bypass #1, bw9_golive E1a) + theme_tokens B2–B4, which ran while the frontend edit was mid-way and tokens not yet
+regenerated; rerun 13/13 above. Live untouched.
+**Findings:** (1) the first card render squeezed the left column — the census text had no width cap; fixed (right column
+320 px, text capped). (2) structured/Tyler/Axon/911 cards say "Census not available for this connector" with the search-only
+wording — right for now; the data-system census (slice 5) replaces it for `structured`.
+**NEXT: slice 3** — Associate (recognition → one AI naming call per grouping → decision → approval writes link + stamps + draft
+variant + signature; `census_groupings.record_type_id` set) · Redact by hand (`discovery_meta.redact_by_hand` + opportunities
+dismiss) · No redaction needed (guarded PATCH: parent legal gate off, bucket availability not restricted/confidential, required
+reason, config history, role bar) · the disabled buttons come alive. Then slice 4 (Find variants on the census store, Scan source
+retired, nav rename "Identical Grouping"), slice 5 (data-system census).

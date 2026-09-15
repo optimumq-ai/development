@@ -347,9 +347,11 @@ async function inventory(repo) {
     }
     var exIds = parseJson(g.example_ids, []);
     var examples = exIds.length ? await all('SELECT id, filename, ocr FROM document_fingerprints WHERE id IN (' + exIds.map(function () { return '?'; }).join(',') + ')', exIds) : [];
+    var gsig = parseJson(g.signature, {}) || {};
     groupings.push({
       id: g.id, ordinal: g.ordinal, member_count: g.member_count, layout: g.layout,
       folders: parseJson(g.folders, []),
+      labels: (gsig.labels || []).slice(0, 14),          // the field labels the layout owns (View sample)
       record_type: rt ? { id: rt.id, name: rt.name, status: rt.status, parent: parent ? { id: parent.id, name: parent.name } : null } : null,
       redaction: await redactionPosture(rt),
       examples: examples.map(function (e) { return { fingerprint_id: e.id, filename: e.filename, ocr: !!e.ocr }; }),

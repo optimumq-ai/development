@@ -50,7 +50,21 @@ censusable) · `GET /repositories/:id/census` (availability, current run + progr
 history) · `GET /repositories/:id/inventory/file/:fp` (stream one indexed PDF; 415 for other types) · `GET /repositories` carries
 `census` per source. On boot, runs left queued/running by a previous process are marked failed ("interrupted by a server
 restart") — never resumed silently. Taxonomy's `preview-source-file` accepts sub-folder relative paths (still refuses `..`).
-**Not yet:** the screens (slice 2), association + the three doors (slice 3), Find variants on the census store + Scan source
+**Screens `[BUILT 2026-09-15 — slice 2]`.** Record Sources cards carry the census line (last census · files · groupings ·
+scans read by OCR · drift "n new, m changed since — refresh from Inventory" · running progress with the two passes · "No census
+yet" · "Census not available for this connector") and ONE **Inventory** door (Kevin); Delete is disabled while a census reads
+the source; the list polls every 3 s while any census is open. `/setup/record-sources/:id/inventory` (`SourceInventoryPage`):
+header with Perform/Refresh census (the only place a census starts), progress + phase text, drift; never-censused state; stat
+row (files · fingerprinted with text/OCR split · unreadable · unsupported by type · groupings + ungrouped); file-type bar;
+Identical groupings table (name or "Unnamed grouping N" + folder hints · exact count · layout · record type › variant with
+draft note, or "Not yet associated" · redaction-template posture pill + the three doors — "Start a redaction template" WORKS
+today via the Mass Redaction stage-example path, "Redact by hand" / "No redaction needed" / "Associate" are drawn disabled
+until slice 3 · View sample); "Everything else" expands to a plain file list with unreadable/unsupported tags; linked record
+types as a bucket › variants tree with per-source counts; census history with pass timings; the layout-not-meaning note.
+**View sample** modal: the document's first page rendered server-side (`GET …/inventory/file/:fp/preview.png`, pdftoppm,
+cached under `uploads/processed/census`), previous/next through the grouping's examples, the label set, where they live,
+status, the doors, and "Open the full PDF".
+**Not yet:** association + the three doors (slice 3), Find variants on the census store + Scan source
 retirement (slice 4), data-system census (slice 5); extractor registry beyond PDF (docx/xlsx/images/CAD metadata) — every
 other type is counted as unsupported today.
 

@@ -21,6 +21,7 @@ import TimeBudgetsPage from './pages/TimeBudgetsPage';
 import AgentRulesPage from './pages/AgentRulesPage';
 import AiConfigurationPage from './pages/AiConfigurationPage';
 import RecordSourcesPage from './pages/RecordSourcesPage';
+import SourceInventoryPage from './pages/SourceInventoryPage';
 import WorkflowPage from './pages/WorkflowPage';
 import RuleUpdatesPage from './pages/RuleUpdatesPage';
 import RedactionRulesPage from './pages/RedactionRulesPage';
@@ -173,6 +174,7 @@ export default function App() {
           <Route path="setup/agent-rules" element={<AgentRulesPage />} />
           <Route path="setup/ai-configuration" element={<AiConfigurationPage />} />
           <Route path="setup/record-sources" element={<RecordSourcesPage />} />
+          <Route path="setup/record-sources/:id/inventory" element={<SourceInventoryPage />} />
           <Route path="setup/workflow-rules" element={<WorkflowPage />} />
           <Route path="setup/process-map" element={<Navigate to="/setup/workflow-rules" replace />} />
           <Route path="setup/update-configuration" element={<RuleUpdatesPage />} />

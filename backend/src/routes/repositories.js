@@ -148,6 +148,25 @@ router.get('/:id/inventory', requireAuth, async function(req, res) {
   if (!repo) return res.status(404).json({ error: 'Source not found' });
   res.json(await sourceCensus.inventory(repo));
 });
+// Page-1 preview image of an indexed document (View sample renders this; a PDF iframe depends on a browser plugin).
+// Rendered once per fingerprint with pdftoppm and cached under uploads/processed/census.
+router.get('/:id/inventory/file/:fp/preview.png', requireAuth, EDIT, async function(req, res) {
+  var repo = await get('SELECT * FROM record_repositories WHERE id = ?', [req.params.id]);
+  if (!repo) return res.status(404).json({ error: 'Source not found' });
+  var f = await sourceCensus.fileOf(repo, req.params.fp);
+  if (!f) return res.status(404).json({ error: 'That file is not in this source\'s inventory' });
+  if (f.row.file_type !== 'pdf') return res.status(415).json({ error: 'Only PDF documents can be previewed.' });
+  var dir = path.join(require('../services/docProcessing').PROCESSED_DIR, 'census');
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {}
+  var prefix = path.join(dir, f.row.id + '-' + String(f.row.content_sha256 || '').slice(0, 12));
+  var png = prefix + '.png';
+  if (!fs.existsSync(png)) {
+    try { require('child_process').execFileSync('pdftoppm', ['-png', '-singlefile', '-r', '110', '-f', '1', '-l', '1', f.fullPath, prefix], { timeout: 60000 }); }
+    catch (e) { return res.status(422).json({ error: 'The first page could not be rendered.' }); }
+  }
+  res.setHeader('Content-Type', 'image/png');
+  fs.createReadStream(png).pipe(res);
+});
 // Stream one indexed document (View sample). Only files the census indexed, only inside the source root.
 router.get('/:id/inventory/file/:fp', requireAuth, EDIT, async function(req, res) {
   var repo = await get('SELECT * FROM record_repositories WHERE id = ?', [req.params.id]);

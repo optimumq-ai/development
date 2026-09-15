@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 
 var btnPrimary = {background:'var(--oq-bg-1f4e79)',color:'var(--oq-fg-ffffff)',border:'none',borderRadius:'8px',padding:'9px 14px',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
@@ -24,6 +25,15 @@ export default function SourcesConfig() {
   const [categories, setCategories] = useState([]);
 
   useEffect(function(){ load(); }, []);
+  var navigate = useNavigate();
+  // CENSUS (2026-09-15, inventory slice 2): while any source has a census queued or running, refresh the list quietly
+  // every few seconds so the card's progress line moves without a click.
+  useEffect(function(){
+    var busy = (sources || []).some(function(s){ return s.census && s.census.current; });
+    if (!busy) return;
+    var t = setTimeout(async function(){ try { var sr = await api.get('/repositories'); setSources(sr.data.repositories); } catch(e){} }, 3000);
+    return function(){ clearTimeout(t); };
+  }, [sources]);
 
   async function load() {
     setLoading(true);
@@ -350,9 +360,46 @@ export default function SourcesConfig() {
       </div>
     );
   }
+  // The card's census line (Kevin's drawings 2026-09-14/15): what the last census found, what changed since, or why no
+  // census is possible. ONE door — "Inventory" — opens the Inventory Information screen where the census is started/refreshed.
+  function when(x){ return x ? String(x).slice(0,16) : ''; }
+  function censusBlock(s){
+    var c = s.census; if (!c) return null;
+    if (['import','paper-index','email'].indexOf(s.connector_type) >= 0) return null;
+    var line = { fontSize:'11.5px', color:'var(--oq-fg-5b6b7a)', textAlign:'right', lineHeight:'1.45', maxWidth:'320px' };
+    if (!c.available && !c.last && !c.current) {
+      return <div style={line}><b style={{ color:'var(--oq-fg-5b6b7a)' }}>Census not available for this connector.</b><br/>It can search but cannot list what it holds; record types stay linked by hand.</div>;
+    }
+    if (c.current) {
+      var cur = c.current, pct = cur.total_files ? Math.round((cur.done_files||0) / cur.total_files * 100) : 0;
+      var phase = cur.status === 'queued' ? ('Queued' + (c.queued_behind ? ' behind ' + c.queued_behind.name : '') + ' — one census at a time protects the file server')
+        : cur.phase === 'text' ? ('Pass 1 of 2 — files with a text layer: ' + (cur.done_files||0) + ' of ' + (cur.total_files||0))
+        : cur.phase === 'ocr' ? ('Pass 2 of 2 — reading scans by OCR · ' + (cur.done_files||0) + ' of ' + (cur.total_files||0) + ' files')
+        : cur.phase === 'grouping' ? 'Grouping identical layouts…' : 'Starting…';
+      return (
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'5px' }}>
+          <div style={{ height:'8px', width:'240px', background:'var(--oq-bg-e8eef4)', borderRadius:'999px', overflow:'hidden' }}><div style={{ height:'100%', width: pct + '%', background:'var(--oq-bg-1e6091)' }} /></div>
+          <div style={line}>{phase}<br/>groupings appear after pass 1 · you can leave this page</div>
+        </div>
+      );
+    }
+    if (c.last) {
+      var l = c.last, d = c.drift;
+      var since = d ? ((d.new || d.changed || d.removed) ? <span>Since then: <b style={{ color:'var(--oq-fg-9a6512)' }}>{[d.new ? d.new + ' new' : null, d.changed ? d.changed + ' changed' : null, d.removed ? d.removed + ' removed' : null].filter(Boolean).join(', ')}</b> — refresh from Inventory</span> : 'No change since') : null;
+      return <div style={line}><b style={{ color:'var(--oq-fg-111111)' }}>Census {when(l.finished_at)}</b> · {l.total_files} files · {l.groupings_count} identical grouping{l.groupings_count === 1 ? '' : 's'}{l.ocr_files ? ' · ' + l.ocr_files + ' scan' + (l.ocr_files === 1 ? '' : 's') + ' read by OCR' : ''}{l.unreadable_files ? ' · ' + l.unreadable_files + ' unreadable' : ''}<br/>{since}</div>;
+    }
+    return <div style={line}><b style={{ color:'var(--oq-fg-9a6512)' }}>No census yet.</b> The system does not know what this source holds.</div>;
+  }
+  function inventoryDoor(s){
+    var c = s.census; if (!c) return null;
+    if (['import','paper-index','email'].indexOf(s.connector_type) >= 0) return null;
+    if (!c.available && !c.last && !c.current) return null;
+    return <button onClick={function(){ navigate('/setup/record-sources/' + s.id + '/inventory'); }} style={Object.assign({},btnGhostSm,{background:'var(--oq-bg-ebf3fb)',color:'var(--oq-fg-1f4e79)'})}>Inventory</button>;
+  }
   function renderSourceRow(s){
     var meta = typeMeta(s.connector_type);
     var ig = ingest[s.id] || {};
+    var censusBusy = !!(s.census && s.census.current);
     return (
       <div key={s.id} style={{ display:'flex', alignItems:'flex-start', gap:'16px', background:'var(--oq-bg-ffffff)', border:'1px solid var(--oq-ln-e5e7eb)', borderRadius:'12px', padding:'15px 18px' }}>
         <div style={{ flex:1, minWidth:0 }}>
@@ -360,7 +407,7 @@ export default function SourcesConfig() {
           <div style={{ fontSize:'13px', color:'var(--oq-fg-4b5563)', marginTop:'3px', lineHeight:'1.4' }}>{s.description || meta.description || meta.label}</div>
           {holdsLine(s)}
         </div>
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'7px', minWidth:'215px' }}>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'7px', width:'320px', flex:'none' }}>
           {statusChip(s)}
           {s.connector_type === 'import' ? (
             ig.msg ? <span style={{ fontSize:'11.5px', color: ig.ok ? 'var(--oq-fg-17803d)' : 'var(--oq-fg-dc2626)' }}>{ig.msg}</span>
@@ -369,11 +416,13 @@ export default function SourcesConfig() {
                   {ig.status.ingested} file{ig.status.ingested === 1 ? '' : 's'} brought in{ig.status.errors ? ' \u00b7 ' + ig.status.errors + ' error' + (ig.status.errors > 1 ? 's' : '') : ' \u00b7 0 errors'}
                 </span> : null)
           ) : null}
+          {censusBlock(s)}
           <div style={{ display:'flex', gap:'6px' }}>
+            {inventoryDoor(s)}
             {s.connector_type === 'import' ? <button onClick={function(){ runIngestNow(s); }} disabled={ig.busy} style={Object.assign({},btnGhostSm,{background:'var(--oq-bg-ebf3fb)',color:'var(--oq-fg-1f4e79)'})}>{ig.busy ? 'Checking\u2026' : 'Check now'}</button> : null}
             {s.connector_type === 'paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={Object.assign({},btnGhostSm,{background:'var(--oq-bg-ebf3fb)',color:'var(--oq-fg-1f4e79)'})}>{s.paper_index_count > 0 ? 'Update index' : 'Import index'}</button> : null}
             <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
-            <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'var(--oq-fg-dc2626)'})}>Delete</button>
+            <button onClick={function(){ del(s); }} disabled={censusBusy} title={censusBusy ? 'A census is reading this source' : ''} style={Object.assign({},btnGhostSm,{color: censusBusy ? 'var(--oq-fg-9ca3af)' : 'var(--oq-fg-dc2626)', cursor: censusBusy ? 'default' : 'pointer'})}>Delete</button>
           </div>
         </div>
       </div>
