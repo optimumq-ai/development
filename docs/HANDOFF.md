@@ -10775,3 +10775,15 @@ guide. **All item-6 drawing questions are now closed** (a one door · b file lis
 d no-census card · e OCR second pass). **The census build waits only on Kevin's six flow-map decisions**
 (`docs/DESIGN_setup_flow_map.md` §4: order/decoupling · retire Scan source · links on approval only · sub-folders as hint ·
 non-file sources · enterprise stores). When those land: slice per flow map §5 with the build notes recorded in the 09-15 entries.
+
+## 2026-09-15 (e) — Six flow-map decisions: Kevin took all recommendations; the census build STARTS (slice 1)
+
+Kevin: "go with all your recommendations on the six flow-map decisions, start slicing." Recorded in `DESIGN_setup_flow_map.md`
+§4: (1) connector → census → associate → bind, census taxonomy-free; (2) Scan source retires (page, `discover-scan`, sample
+digest; paste-a-description helper stays); (3) type↔source links written on approval only; (4) sub-folders walked, path is a
+hint; (5) search-only systems: no census until APIs enumerate, hand-linking stays, legacy digest retires; (6) no per-grouping
+department field. **Slices (flow map §5 + the 09-15 build notes):** S1 census job (two passes, recursive, extractor registry,
+stable groupings store, run table, progress, one-at-a-time queue, incremental) + API; S2 Inventory Information screen + source
+card (Inventory door, census line, running/empty states); S3 Associate + View sample + the three doors (redaction template /
+redact by hand / No redaction needed as a guarded PATCH); S4 Find variants rewired to the census store, Scan source retired, nav
+rename "Identical Grouping"; S5 data-system census (kinds) later. Starting S1.

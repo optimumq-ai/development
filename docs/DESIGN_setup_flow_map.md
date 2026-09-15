@@ -85,7 +85,15 @@ paste-a-description endpoint can stay as a manual "propose a type from a descrip
 
 **What is retired.** The 50-file sample digest in both places. Immediate link-writing without approval. The orphan route.
 
-## 4. Decisions for Kevin
+## 4. Decisions — ALL DECIDED 2026-09-15 (Kevin: "go with all your recommendations")
+
+Recorded outcomes: (1) order confirmed; the census is taxonomy-free. (2) Scan source RETIRES (`/discovery`, `discover-scan`, the
+sample digest); the paste-a-description helper stays. (3) links on approval only. (4) sub-folders walked; folder path shown as
+a hint, not a grouping rule. (5) search-only systems: no census until their APIs can enumerate; hand-linking stays; the legacy
+sample-digest path retires with Scan source (it already returns nothing for them). (6) no per-grouping department field; the
+approving human is the check, re-parenting the repair. Original questions kept below for the record.
+
+### The questions as put
 
 1. **Order and decoupling.** Confirm connector → census → associate → bind, with the census runnable on a source that has no
    record type linked yet.
