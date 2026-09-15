@@ -386,9 +386,10 @@ export default function SourcesConfig() {
     if (c.last) {
       var l = c.last, d = c.drift;
       var since = d ? ((d.new || d.changed || d.removed) ? <span>Since then: <b style={{ color:'var(--oq-fg-9a6512)' }}>{[d.new ? d.new + ' new' : null, d.changed ? d.changed + ' changed' : null, d.removed ? d.removed + ' removed' : null].filter(Boolean).join(', ')}</b> — refresh from Inventory</span> : 'No change since') : null;
+      if (c.kind === 'kinds') return <div style={line}><b style={{ color:'var(--oq-fg-111111)' }}>Census {when(l.finished_at)}</b> · {l.total_files} record kind{l.total_files === 1 ? '' : 's'}<br/>Refresh from Inventory</div>;
       return <div style={line}><b style={{ color:'var(--oq-fg-111111)' }}>Census {when(l.finished_at)}</b> · {l.total_files} files · {l.groupings_count} identical grouping{l.groupings_count === 1 ? '' : 's'}{l.ocr_files ? ' · ' + l.ocr_files + ' scan' + (l.ocr_files === 1 ? '' : 's') + ' read by OCR' : ''}{l.unreadable_files ? ' · ' + l.unreadable_files + ' unreadable' : ''}<br/>{since}</div>;
     }
-    return <div style={line}><b style={{ color:'var(--oq-fg-9a6512)' }}>No census yet.</b> The system does not know what this source holds.</div>;
+    return <div style={line}><b style={{ color:'var(--oq-fg-9a6512)' }}>No census yet.</b> The system does not know what this {c.kind === 'kinds' ? 'system' : 'source'} holds.</div>;
   }
   function inventoryDoor(s){
     var c = s.census; if (!c) return null;

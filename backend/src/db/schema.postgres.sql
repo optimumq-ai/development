@@ -1967,3 +1967,27 @@ CREATE TABLE IF NOT EXISTS census_groupings (
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
 CREATE INDEX IF NOT EXISTS idx_census_groupings_repo ON census_groupings(repository_id);
+
+-- DATA-SYSTEM CENSUS (2026-09-15, inventory build slice 5; design HANDOFF 2026-09-04 round 3 + the DataSystem artboard).
+-- A data record is not read, it is RENDERED: per record KIND a recipe composes fields into one honest sentence; the kinds
+-- ARE the grouping. Census for a data system = enumerating its kinds, counts (when the connector reports them), fields.
+ALTER TABLE source_census_runs ADD COLUMN IF NOT EXISTS census_kind TEXT DEFAULT 'documents';   -- documents | kinds
+CREATE TABLE IF NOT EXISTS census_kinds (
+  id TEXT PRIMARY KEY,
+  repository_id TEXT NOT NULL,
+  kind_key TEXT NOT NULL,                  -- the connector's table/kind identifier
+  name TEXT, description TEXT,
+  fields TEXT,                             -- JSON [{name, type: id|number|date|text|prose}]
+  sample TEXT,                             -- JSON sample row (as the connector reports it)
+  row_count BIGINT,                        -- null when the connector does not report counts
+  date_range TEXT,                         -- JSON {from, to} or null
+  record_type_id TEXT,                     -- association (by name at census time, or by hand)
+  match_basis TEXT,                        -- by_name | by_hand | null
+  embed_tier INTEGER DEFAULT 1,            -- 1 kind description always · 2 prose rows opt-in · 3 never (ids/dates/numbers)
+  prose_fields TEXT,                       -- JSON field names that read as prose
+  first_seen_run_id TEXT, last_seen_run_id TEXT,
+  UNIQUE (repository_id, kind_key)
+);
+CREATE INDEX IF NOT EXISTS idx_census_kinds_repo ON census_kinds(repository_id);
+-- Runs can finish within the same second (small sources); order by insertion sequence, not timestamp alone.
+ALTER TABLE source_census_runs ADD COLUMN IF NOT EXISTS seq BIGSERIAL;

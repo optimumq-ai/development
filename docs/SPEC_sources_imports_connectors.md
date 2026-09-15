@@ -84,9 +84,24 @@ Inventory page's Associate modal (recognition → "Ask the AI what these documen
 type/variant · leave · the "on Approve" note), the No-redaction modal (release-decision banner · what still happens · the checks · "you
 have viewed n of N samples" · required reason · the "on Confirm" note), Redact by hand with confirm, Undo links on decided groupings,
 "Associate differently" (undo association), and the same doors inside View sample.
-**Not yet:** Find variants on the census store + Scan source
-retirement (slice 4), data-system census (slice 5); extractor registry beyond PDF (docx/xlsx/images/CAD metadata) — every
-other type is counted as unsupported today.
+**Find variants reads this store and Scan source is retired `[slice 4, 2026-09-15]`** — see `SPEC_taxonomy_classification.md` §1/§4.
+**Data-system census `[BUILT 2026-09-15 — slice 5; verify_kind_census]`.** For connectors that expose `listKinds` (today: `structured`, from its
+JSON definition), the census enumerates record KINDS instead of files (`census_kinds`, one row per kind, stable across runs; runs carry
+`census_kind = 'kinds'`): name, description, typed fields (id · number · date · text · prose — from the field name and the sample value),
+sample row, `row_count` and `date_range` ONLY where the connector reports them (null otherwise — never invented). A kind whose name matches
+an active bucket is associated **by name** at census time (`match_basis = 'by_name'`, shown on the row); the rest are associated by hand
+(`POST/DELETE /repositories/:id/kinds/:kid/associate`, source-config gate; writes the type↔source link with format `structured_data`).
+**Rendering:** a data record is not read, it is rendered — `renderRecord` composes the kind's name and up to five non-id fields into one
+sentence; the values a **field redaction template** (`layout_profiles.kind = 'fields'`, `field_map` of the associated type) withholds are
+blacked out BEFORE the render, so what would embed never carries them. **Embed tiers** computed per kind: 1 kind description only ·
+2 prose fields present (row embedding a priced opt-in, later) · 3 never (all fields ids/dates/numbers). Row embedding itself is NOT built —
+the tier is recorded and shown. Inventory answers `mode: 'data'` with `kinds[]` (fields, counts, date range, record type + basis, field
+template + withheld fields, tier + prose fields, `rendered`), totals (kinds · rows where known · fields · kinds with a field template), and
+the same census history; the Inventory screen shows the DataSystem artboard (kinds table, "View a rendered record", per-kind associate
+dropdown, "Create one ›" to Mass Redaction for the field template). Search-only systems (Laserfiche, Tyler, Axon, 911 emulator, email,
+paper index) remain not censusable until their APIs enumerate.
+**Not yet:** row-level (tier 2) embedding of data kinds; extractor registry beyond PDF (docx/xlsx/images/CAD metadata) — every other file
+type is counted as unsupported today; a census for search-only systems.
 
 ## 5. Known gaps / decisions
 - **Source deletion is unguarded** (found 2026-09-14, `docs/DESIGN_setup_interdependencies.md` §2/§5): `DELETE /repositories/:id` is a bare row delete — `record_type_repositories`, `document_fingerprints`, `paper_index_items`, `request_files.repository_id` and `import_ingest_log` are left dangling. Proposed: the `orgRemoval` pattern (check → delete when clean, refuse/retire otherwise). Awaiting Kevin's go.

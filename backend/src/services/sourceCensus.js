@@ -20,13 +20,14 @@ var { all, get, run } = require('../db');
 var { v4: uuidv4 } = require('uuid');
 var docFingerprint = require('./docFingerprint');
 
-var connectors = { filestore: require('./connectors/filestore') };
+var connectors = { filestore: require('./connectors/filestore'), structured: require('./connectors/structured') };
 var PROGRESS_EVERY = 5;
 
 function nid(p) { return p + '-' + uuidv4().substring(0, 8); }
 function now() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 function cfgOf(repo) { try { return repo.config ? (typeof repo.config === 'string' ? JSON.parse(repo.config) : repo.config) : {}; } catch (e) { return {}; } }
-function connectorFor(repo) { var c = repo && connectors[repo.connector_type]; return (c && c.listAll) ? c : null; }
+function connectorFor(repo) { var c = repo && connectors[repo.connector_type]; return (c && (c.listAll || c.listKinds)) ? c : null; }
+function isKinds(repo) { var c = repo && connectors[repo.connector_type]; return !!(c && c.listKinds && !c.listAll); }
 function parseJson(s, dflt) { try { return s ? JSON.parse(s) : dflt; } catch (e) { return dflt; } }
 function sha256(file) { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); }
 
@@ -34,9 +35,9 @@ function sha256(file) { return crypto.createHash('sha256').update(fs.readFileSyn
 function availability(repo) {
   if (!connectorFor(repo)) return { available: false, reason: 'This connector can search but cannot list what it holds; no census is possible until its API can enumerate records. Record types stay linked by hand.' };
   var cfg = cfgOf(repo);
-  if (!cfg.path) return { available: false, reason: 'This source has no folder path configured.' };
-  if (!fs.existsSync(cfg.path)) return { available: false, reason: 'The source folder is not reachable from this server.' };
-  return { available: true };
+  if (!cfg.path) return { available: false, reason: isKinds(repo) ? 'This source has no system definition configured.' : 'This source has no folder path configured.' };
+  if (!fs.existsSync(cfg.path)) return { available: false, reason: isKinds(repo) ? 'The system definition is not reachable from this server.' : 'The source folder is not reachable from this server.' };
+  return { available: true, kind: isKinds(repo) ? 'kinds' : 'documents' };
 }
 
 // ---------------------------------------------------------------- the queue: one census at a time, in-process
@@ -52,8 +53,8 @@ async function request(repoId, actor) {
   var open = await get("SELECT id, status FROM source_census_runs WHERE repository_id = ? AND status IN ('queued','running') LIMIT 1", [repoId]);
   if (open) return { status: 409, error: 'A census for this source is already ' + open.status + '.', run_id: open.id };
   var id = nid('census');
-  await run('INSERT INTO source_census_runs (id, repository_id, status, requested_by, requested_by_name, requested_at) VALUES (?,?,?,?,?,?)',
-    [id, repoId, 'queued', (actor && actor.id) || null, (actor && actor.name) || null, now()]);
+  await run('INSERT INTO source_census_runs (id, repository_id, status, requested_by, requested_by_name, requested_at, census_kind) VALUES (?,?,?,?,?,?,?)',
+    [id, repoId, 'queued', (actor && actor.id) || null, (actor && actor.name) || null, now(), isKinds(repo) ? 'kinds' : 'documents']);
   queue.push(id);
   var position = queue.length - 1 + (active ? 1 : 0);
   var behind = active ? await get('SELECT r.id, r.repository_id, rp.name AS repository_name FROM source_census_runs r JOIN record_repositories rp ON rp.id = r.repository_id WHERE r.id = ?', [active]) : null;
@@ -105,6 +106,7 @@ async function execute(id) {
   var connector = connectorFor(repo);
   if (!connector) { await setRun(id, { status: 'failed', finished_at: now(), error: 'Source gone or connector cannot list files' }); return; }
   var cfg = cfgOf(repo);
+  if (isKinds(repo)) return executeKinds(id, repo, connector, cfg);
   var t0 = Date.now();
   await setRun(id, { status: 'running', phase: 'text', started_at: now() });
   try {
@@ -174,6 +176,136 @@ async function execute(id) {
   } catch (e) {
     await setRun(id, { status: 'failed', phase: null, finished_at: now(), error: String(e && e.message || e).slice(0, 500) });
   }
+}
+
+// ---------------------------------------------------------------- data systems: the kinds ARE the grouping
+// Field typing from the name and the sample value — id / number / date / text / prose. Prose is what would be worth
+// embedding row by row (tier 2, opt-in); ids, dates and numbers never are (tier 3: filters beat vectors there).
+function typeField(name, value) {
+  var n = String(name || '').toLowerCase();
+  if (/(^|_)(id|no|number|num|code|key|ssn|routing|account|last4)$|_id$|^id$/.test(n)) return 'id';
+  if (/date|_at$|period|year|time/.test(n)) return 'date';
+  if (/note|narrative|description|comment|summary|remarks|findings|reason|text|body/.test(n)) return 'prose';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
+    if (/^-?[\d,.]+$/.test(value.trim())) return 'number';
+    if (value.length > 60 || value.split(/\s+/).length > 8) return 'prose';
+    return 'text';
+  }
+  if (value == null) return /amount|total|count|hours|pay|wages|gross|net|tax|fee|rate|balance|qty/.test(n) ? 'number' : 'text';
+  return 'text';
+}
+function embedTierFor(fields) {
+  var types = fields.map(function (f) { return f.type; });
+  if (types.some(function (t) { return t === 'prose'; })) return 2;              // prose present — opt-in per kind
+  if (types.every(function (t) { return t === 'id' || t === 'number' || t === 'date'; })) return 3;
+  return 1;
+}
+function normName(x) { return String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\b(s|es)\b/g, '').replace(/s\b/g, '').replace(/\s+/g, ' ').trim(); }
+
+async function executeKinds(id, repo, connector, cfg) {
+  var t0 = Date.now();
+  await setRun(id, { status: 'running', phase: 'kinds', started_at: now() });
+  try {
+    var kinds = connector.listKinds(cfg) || [];
+    await setRun(id, { total_files: kinds.length });
+    var types = await all("SELECT id, name FROM record_types WHERE status = 'active' AND parent_record_type_id IS NULL");
+    var byNorm = {}; types.forEach(function (t) { byNorm[normName(t.name)] = t.id; });
+    var c = { new: 0, changed: 0, kept: 0 }, seen = [];
+    for (var i = 0; i < kinds.length; i++) {
+      var k = kinds[i];
+      var fields = k.fields.map(function (f) { return { name: f, type: typeField(f, k.sample ? k.sample[f] : undefined) }; });
+      var prose = fields.filter(function (f) { return f.type === 'prose'; }).map(function (f) { return f.name; });
+      var tier = embedTierFor(fields);
+      var existing = await get('SELECT * FROM census_kinds WHERE repository_id = ? AND kind_key = ?', [repo.id, k.key]);
+      var rtId = existing && existing.record_type_id ? existing.record_type_id : (byNorm[normName(k.name)] || byNorm[normName(k.key)] || null);
+      var basis = existing && existing.record_type_id ? existing.match_basis : (rtId ? 'by_name' : null);
+      var fingerprint = JSON.stringify([k.fields, k.row_count, k.date_range, k.description]);
+      if (existing) {
+        var was = JSON.stringify([parseJson(existing.fields, []).map(function (f) { return f.name; }), existing.row_count != null ? Number(existing.row_count) : null, parseJson(existing.date_range, null), existing.description]);
+        if (was === fingerprint) c.kept++; else c.changed++;
+        await run('UPDATE census_kinds SET name = ?, description = ?, fields = ?, sample = ?, row_count = ?, date_range = ?, record_type_id = ?, match_basis = ?, embed_tier = ?, prose_fields = ?, last_seen_run_id = ? WHERE id = ?',
+          [k.name, k.description, JSON.stringify(fields), k.sample ? JSON.stringify(k.sample) : null, k.row_count, k.date_range ? JSON.stringify(k.date_range) : null, rtId, basis, existing.embed_tier != null && existing.embed_tier !== 1 ? existing.embed_tier : tier, JSON.stringify(prose), id, existing.id]);
+        seen.push(existing.id);
+      } else {
+        var kid = nid('kind'); c.new++;
+        await run('INSERT INTO census_kinds (id, repository_id, kind_key, name, description, fields, sample, row_count, date_range, record_type_id, match_basis, embed_tier, prose_fields, first_seen_run_id, last_seen_run_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+          [kid, repo.id, k.key, k.name, k.description, JSON.stringify(fields), k.sample ? JSON.stringify(k.sample) : null, k.row_count, k.date_range ? JSON.stringify(k.date_range) : null, rtId, basis, tier, JSON.stringify(prose), id, id]);
+        seen.push(kid);
+      }
+      await setRun(id, { done_files: i + 1 });
+    }
+    var gone = await get('SELECT count(*)::int AS n FROM census_kinds WHERE repository_id = ? AND (last_seen_run_id IS NULL OR last_seen_run_id <> ?)', [repo.id, id]);
+    await run('DELETE FROM census_kinds WHERE repository_id = ? AND (last_seen_run_id IS NULL OR last_seen_run_id <> ?)', [repo.id, id]);
+    await setRun(id, { status: 'done', phase: null, finished_at: now(), done_files: kinds.length, new_files: c.new, changed_files: c.changed, removed_files: Number(gone.n), kept_files: c.kept, groupings_count: kinds.length, ungrouped_count: 0, pass1_ms: Date.now() - t0, pass2_ms: 0 });
+  } catch (e) {
+    await setRun(id, { status: 'failed', phase: null, finished_at: now(), error: String(e && e.message || e).slice(0, 500) });
+  }
+}
+
+// One honest sentence per record: the kind's name, then up to five fields that are not ids, with values a field
+// redaction template withholds shown blacked out — this string is what would embed; withheld values never leave.
+function renderRecord(kind, sample, withheld) {
+  var parts = [], wh = {}; (withheld || []).forEach(function (w) { wh[String(w).toLowerCase()] = 1; });
+  var fields = parseJson(kind.fields, []);
+  fields.forEach(function (f) {
+    if (parts.length >= 5 || f.type === 'id') return;
+    var v = sample ? sample[f.name] : undefined; if (v == null) return;
+    var label = f.name.replace(/_/g, ' ');
+    parts.push({ label: label, value: wh[f.name.toLowerCase()] ? null : String(v), withheld: !!wh[f.name.toLowerCase()] });
+  });
+  return { text: kind.name + (parts.length ? ' — ' + parts.map(function (p) { return p.label + ' ' + (p.withheld ? '████' : p.value); }).join(' — ') : ''), parts: parts };
+}
+
+async function fieldTemplateFor(recordTypeId) {
+  if (!recordTypeId) return null;
+  var t = await get("SELECT id, name, field_map FROM layout_profiles WHERE record_type_id = ? AND kind = 'fields' AND status != 'deleted' ORDER BY created_at DESC LIMIT 1", [recordTypeId]);
+  if (!t) return null;
+  return { id: t.id, name: t.name, withheld: parseJson(t.field_map, []).map(function (f) { return f.field; }).filter(Boolean) };
+}
+
+async function kindsInventory(repo, st) {
+  var cfg = cfgOf(repo);
+  var rows = await all('SELECT * FROM census_kinds WHERE repository_id = ? ORDER BY row_count DESC NULLS LAST, name', [repo.id]);
+  var kinds = [], totalRows = 0, rowsKnown = false, fieldCount = 0, withTemplate = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var k = rows[i], rt = k.record_type_id ? await get('SELECT id, name, status FROM record_types WHERE id = ?', [k.record_type_id]) : null;
+    var tpl = await fieldTemplateFor(rt ? rt.id : null); if (tpl) withTemplate++;
+    var fields = parseJson(k.fields, []); fieldCount += fields.length;
+    if (k.row_count != null) { totalRows += Number(k.row_count); rowsKnown = true; }
+    var sample = parseJson(k.sample, null);
+    kinds.push({
+      id: k.id, key: k.kind_key, name: k.name, description: k.description, fields: fields, row_count: k.row_count != null ? Number(k.row_count) : null,
+      date_range: parseJson(k.date_range, null), record_type: rt, match_basis: k.match_basis,
+      field_template: tpl, embed_tier: k.embed_tier, prose_fields: parseJson(k.prose_fields, []),
+      rendered: renderRecord(k, sample, tpl ? tpl.withheld : []),
+      redaction: tpl ? 'field_template_ready' : 'no_field_template'
+    });
+  }
+  var history = (await all("SELECT * FROM source_census_runs WHERE repository_id = ? AND status IN ('done','failed') ORDER BY seq DESC LIMIT 10", [repo.id])).map(runSummary);
+  return {
+    mode: 'data',
+    source: { id: repo.id, name: repo.name, connector_type: repo.connector_type, status: repo.status, description: repo.description, path: cfg.path || null, system: rows.length ? null : null },
+    census: Object.assign(st, { history: history }),
+    totals: { kinds: kinds.length, rows: rowsKnown ? totalRows : null, fields: fieldCount, field_templates: withTemplate },
+    kinds: kinds
+  };
+}
+
+async function associateKind(repo, kindId, recordTypeId) {
+  var k = await get('SELECT * FROM census_kinds WHERE id = ? AND repository_id = ?', [kindId, repo.id]);
+  if (!k) return { status: 404, error: 'Record kind not found' };
+  if (recordTypeId) {
+    var rt = await get('SELECT id FROM record_types WHERE id = ?', [recordTypeId]);
+    if (!rt) return { status: 422, error: 'Choose an existing record type.' };
+    await run("UPDATE census_kinds SET record_type_id = ?, match_basis = 'by_hand' WHERE id = ?", [recordTypeId, kindId]);
+    var dup = await get('SELECT id FROM record_type_repositories WHERE record_type_id = ? AND repository_id = ?', [recordTypeId, repo.id]);
+    if (!dup) await run('INSERT INTO record_type_repositories (id, record_type_id, repository_id, format, filter_spec, sort_order) VALUES (?,?,?,?,?,?)', [nid('rr'), recordTypeId, repo.id, 'structured_data', '{}', 100]);
+  } else {
+    await run('UPDATE census_kinds SET record_type_id = NULL, match_basis = NULL WHERE id = ?', [kindId]);
+  }
+  return { status: 200 };
 }
 
 // ---------------------------------------------------------------- grouping: recognition first, then clusters
@@ -268,7 +400,7 @@ async function regroup(repo, runId) {
 // Cheap disk-vs-index comparison (names and sizes, no hashing): what a refresh would find.
 function drift(repo) {
   return (async function () {
-    var connector = connectorFor(repo); if (!connector) return null;
+    var connector = connectorFor(repo); if (!connector || !connector.listAll) return null;
     var cfg = cfgOf(repo); if (!cfg.path || !fs.existsSync(cfg.path)) return null;
     var files = connector.listAll(cfg);
     var idx = await all('SELECT filename, size_bytes FROM document_fingerprints WHERE repository_id = ?', [repo.id]);
@@ -300,9 +432,9 @@ function runSummary(r) {
 // Status for the card / polling: availability, the open run (queued/running) with progress, the last finished run, drift.
 async function status(repo, opts) {
   var av = availability(repo);
-  var open = await get("SELECT * FROM source_census_runs WHERE repository_id = ? AND status IN ('queued','running') ORDER BY requested_at DESC LIMIT 1", [repo.id]);
-  var last = await get("SELECT * FROM source_census_runs WHERE repository_id = ? AND status = 'done' ORDER BY finished_at DESC LIMIT 1", [repo.id]);
-  var out = { available: av.available, reason: av.reason || null, current: runSummary(open), last: runSummary(last), drift: null, queue_position: null };
+  var open = await get("SELECT * FROM source_census_runs WHERE repository_id = ? AND status IN ('queued','running') ORDER BY seq DESC LIMIT 1", [repo.id]);
+  var last = await get("SELECT * FROM source_census_runs WHERE repository_id = ? AND status = 'done' ORDER BY seq DESC LIMIT 1", [repo.id]);
+  var out = { available: av.available, reason: av.reason || null, kind: av.kind || (isKinds(repo) ? 'kinds' : 'documents'), current: runSummary(open), last: runSummary(last), drift: null, queue_position: null };
   if (open) {
     if (active === open.id) out.queue_position = 0;
     else { var qi = queue.indexOf(open.id); out.queue_position = qi >= 0 ? qi + (active ? 1 : 0) : null; }
@@ -327,6 +459,7 @@ async function redactionPosture(rt) {
 async function inventory(repo) {
   var cfg = cfgOf(repo);
   var st = await status(repo);
+  if (isKinds(repo)) return kindsInventory(repo, st);
   var files = await all('SELECT id, filename, kind, file_type, ocr, unreadable, size_bytes, page_count, grouping_id, matched_record_type_id FROM document_fingerprints WHERE repository_id = ? ORDER BY filename', [repo.id]);
   var totals = { files: files.length, fingerprinted: 0, text_layer: 0, ocr: 0, unreadable: 0, unsupported: 0, groupings: 0, ungrouped: 0 };
   var types = {}, unsupportedExt = {}, folders = {};
@@ -367,8 +500,9 @@ async function inventory(repo) {
   var linked = await all("SELECT rt.id, rt.name, rt.status, rt.parent_record_type_id, p.name AS parent_name FROM record_type_repositories rr JOIN record_types rt ON rt.id = rr.record_type_id LEFT JOIN record_types p ON p.id = rt.parent_record_type_id WHERE rr.repository_id = ? ORDER BY rt.name", [repo.id]);
   var counts = await all('SELECT matched_record_type_id AS id, count(*)::int AS n FROM document_fingerprints WHERE repository_id = ? AND matched_record_type_id IS NOT NULL GROUP BY matched_record_type_id', [repo.id]);
   var countBy = {}; counts.forEach(function (c) { countBy[c.id] = Number(c.n); });
-  var history = (await all("SELECT * FROM source_census_runs WHERE repository_id = ? AND status IN ('done','failed') ORDER BY requested_at DESC LIMIT 10", [repo.id])).map(runSummary);
+  var history = (await all("SELECT * FROM source_census_runs WHERE repository_id = ? AND status IN ('done','failed') ORDER BY seq DESC LIMIT 10", [repo.id])).map(runSummary);
   return {
+    mode: 'documents',
     source: { id: repo.id, name: repo.name, connector_type: repo.connector_type, status: repo.status, description: repo.description, path: cfg.path || null, sub_folders: Object.keys(folders).length },
     census: Object.assign(st, { history: history }),
     totals: totals,
@@ -393,7 +527,7 @@ async function fileOf(repo, fingerprintId) {
 
 module.exports = {
   request: request, awaitRun: awaitRun, recoverInterrupted: recoverInterrupted,
-  status: status, inventory: inventory, drift: drift, availability: availability, fileOf: fileOf,
+  status: status, inventory: inventory, drift: drift, availability: availability, fileOf: fileOf, associateKind: associateKind, renderRecord: renderRecord, typeField: typeField,
   execute: execute, regroup: regroup,
   _queueState: function () { return { active: active, queue: queue.slice() }; }
 };

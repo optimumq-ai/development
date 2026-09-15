@@ -233,6 +233,20 @@ router.delete('/:id/groupings/:gid/no-redaction', requireAuth, EDIT, async funct
   answer(res, out);
 });
 
+// ===== DATA-SYSTEM KINDS (inventory slice 5): associate a record kind with a record type, by hand =====
+router.post('/:id/kinds/:kid/associate', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  var out = await sourceCensus.associateKind(repo, req.params.kid, (req.body || {}).record_type_id || null);
+  if (out.status === 200) hubTouched(req);
+  answer(res, out);
+});
+router.delete('/:id/kinds/:kid/associate', requireAuth, EDIT, async function(req, res) {
+  var repo = await repoOr404(req, res); if (!repo) return;
+  var out = await sourceCensus.associateKind(repo, req.params.kid, null);
+  if (out.status === 200) hubTouched(req);
+  answer(res, out);
+});
+
 router.post('/ai-configure', requireAuth, EDIT, async function(req, res) {
   var b = req.body || {};
   var desc = (b.description || '').toString().trim();

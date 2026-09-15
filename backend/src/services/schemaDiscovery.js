@@ -55,7 +55,7 @@ async function discoverVariantGroupings(bucketId) {
   if (!repos.length) return { error: 'No censused documents: this type is linked to no source yet. Link a source, run its census from Record Sources › Inventory, then come back.' };
   var censused = [], notCensused = [], latest = null;
   for (var i = 0; i < repos.length; i++) {
-    var last = await get("SELECT finished_at FROM source_census_runs WHERE repository_id = ? AND status = 'done' ORDER BY finished_at DESC LIMIT 1", [repos[i].id]);
+    var last = await get("SELECT finished_at FROM source_census_runs WHERE repository_id = ? AND status = 'done' ORDER BY seq DESC LIMIT 1", [repos[i].id]);
     if (last) { censused.push(repos[i]); if (!latest || last.finished_at > latest) latest = last.finished_at; } else notCensused.push(repos[i].name);
   }
   if (!censused.length) return { error: 'No censused documents: none of the sources linked to this type has had a census yet (' + notCensused.join(', ') + '). Run one from Record Sources › Inventory first.' };

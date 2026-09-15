@@ -166,6 +166,13 @@ export default function SourceInventoryPage() {
   var groupingName = function (g) { return g.record_type ? g.record_type.name : 'Unnamed grouping ' + g.ordinal; };
   if (err && !inv) return <div style={{ padding: '24px', color: 'var(--oq-fg-991b1b)', fontSize: '14px' }}>{err}</div>;
   if (!inv) return <div style={{ padding: '24px', color: C.faint, fontSize: '14px' }}>Loading inventory…</div>;
+  var isData = inv.mode === 'data';
+  async function associateKind(k, recordTypeId) {
+    setBusy(k.id);
+    try { if (recordTypeId) await api.post('/repositories/' + id + '/kinds/' + k.id + '/associate', { record_type_id: recordTypeId }); else await api.delete('/repositories/' + id + '/kinds/' + k.id + '/associate'); await load(); }
+    catch (e) { alert(errText(e, 'Could not record that.')); }
+    setBusy(null);
+  }
 
   var src = inv.source, cz = inv.census, t = inv.totals, cur = cz.current, last = cz.last;
   var never = !last && !cur;
@@ -179,8 +186,8 @@ export default function SourceInventoryPage() {
 
   // Linked record types: buckets from the source links, variants from the groupings nested under their parent.
   var tree = {};
-  inv.linked_types.forEach(function (l) { if (!l.parent_name) tree[l.name] = tree[l.name] || { name: l.name, status: l.status, count: l.count_here, children: [], linked: true }; });
-  inv.groupings.forEach(function (g) {
+  (inv.linked_types || []).forEach(function (l) { if (!l.parent_name) tree[l.name] = tree[l.name] || { name: l.name, status: l.status, count: l.count_here, children: [], linked: true }; });
+  (inv.groupings || []).forEach(function (g) {
     if (!g.record_type) return;
     var pn = g.record_type.parent ? g.record_type.parent.name : g.record_type.name;
     tree[pn] = tree[pn] || { name: pn, status: null, count: 0, children: [], linked: false };
@@ -201,7 +208,7 @@ export default function SourceInventoryPage() {
         <div style={{ padding: '16px 20px', borderBottom: '1px solid ' + C.line, display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
           <div style={{ flexGrow: 1 }}>
             <div style={{ fontSize: '20px', fontWeight: '700', color: C.ink }}>{src.name}</div>
-            <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '3px' }}>{src.path || src.connector_type}{src.sub_folders ? ' · ' + src.sub_folders + ' sub-folder' + (src.sub_folders === 1 ? '' : 's') : ''}{src.description ? ' · ' + src.description : ''}</div>
+            <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '3px' }}>{isData ? 'Data system · enumerated through its connector' : (src.path || src.connector_type)}{src.sub_folders ? ' · ' + src.sub_folders + ' sub-folder' + (src.sub_folders === 1 ? '' : 's') : ''}{src.description ? ' · ' + src.description : ''}</div>
             <div style={{ display: 'flex', gap: '8px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               {src.status === 'active' ? pill('ok', 'Connected') : pill('grey', 'Inactive')}
               {last ? pill('grey', 'Census ' + when(last.finished_at) + (last.pass1_ms != null ? ' · took ' + secs((last.pass1_ms || 0) + (last.pass2_ms || 0)) : '')) : (cur ? pill('blue', cur.status === 'queued' ? 'Census queued' : 'Census running') : pill('warn', 'No census yet'))}
@@ -212,7 +219,7 @@ export default function SourceInventoryPage() {
             {cz.available ? (
               <button onClick={startCensus} disabled={!!cur || starting} style={Object.assign(btn(cur || starting ? 'dis' : 'pri'), { height: '36px', padding: '0 14px', fontSize: '13px' })}>{last ? 'Refresh census' : 'Perform census'}</button>
             ) : <span style={hint}>{cz.reason}</span>}
-            {cz.available ? <div style={Object.assign({}, hint, { marginTop: '6px' })}>{cur ? phaseText : (last ? <span>Re-reads only new or changed files. Fingerprints are kept.<br />This is the only place a census is started or refreshed.</span> : 'A census reads every file once. Nothing is sent anywhere.')}</div> : null}
+            {cz.available ? <div style={Object.assign({}, hint, { marginTop: '6px' })}>{cur ? phaseText : (last ? (isData ? <span>Re-reads the schema and counts; rows are never copied here.<br />This is the only place a census is started or refreshed.</span> : <span>Re-reads only new or changed files. Fingerprints are kept.<br />This is the only place a census is started or refreshed.</span>) : (isData ? 'A census enumerates the record kinds, their fields and counts. No rows are copied.' : 'A census reads every file once. Nothing is sent anywhere.'))}</div> : null}
             {cur ? <div style={{ height: '8px', width: '300px', marginTop: '8px', marginLeft: 'auto', background: 'var(--oq-bg-e8eef4)', borderRadius: '999px', overflow: 'hidden' }}><div style={{ height: '100%', width: pct + '%', background: C.pri }} /></div> : null}
             {err ? <div style={{ fontSize: '12px', color: 'var(--oq-fg-991b1b)', marginTop: '6px' }}>{err}</div> : null}
           </div>
@@ -222,13 +229,15 @@ export default function SourceInventoryPage() {
           <div style={{ padding: '40px 20px 44px', textAlign: 'center' }}>
             <div style={{ fontSize: '15px', fontWeight: '700', color: C.ink }}>The system does not know what this source holds.</div>
             <div style={{ fontSize: '13px', color: C.mute, marginTop: '6px', lineHeight: '1.55', maxWidth: '640px', margin: '6px auto 0' }}>
-              A census reads every file once — hashes it, extracts its text, and takes a layout fingerprint — then groups identical layouts and counts them. No AI is used and nothing is sent anywhere. Files with a text layer go first; scanned files are read by OCR (on this server) in a second pass and grouped like the rest. Until then nothing on this source can be associated to a record type or searched.
+              {isData ? 'A census of a data system asks the connector what record KINDS it holds — their fields, counts and date ranges where the system reports them. Nothing is copied; the kinds are the grouping. Until then nothing in this system can be associated to a record type or rendered for search.' : 'A census reads every file once — hashes it, extracts its text, and takes a layout fingerprint — then groups identical layouts and counts them. No AI is used and nothing is sent anywhere. Files with a text layer go first; scanned files are read by OCR (on this server) in a second pass and grouped like the rest. Until then nothing on this source can be associated to a record type or searched.'}
             </div>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '18px' }}>
-              {['files', 'fingerprinted', 'identical groupings'].map(function (l) { return <div key={l} style={{ width: '170px', textAlign: 'left', padding: '12px 14px', border: '1px solid ' + C.line, borderRadius: '9px' }}><div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--oq-fg-a9b7c2)' }}>—</div><div style={{ fontSize: '12px', color: C.mute, marginTop: '3px' }}>{l}</div></div>; })}
+              {(isData ? ['record kinds', 'rows', 'fields'] : ['files', 'fingerprinted', 'identical groupings']).map(function (l) { return <div key={l} style={{ width: '170px', textAlign: 'left', padding: '12px 14px', border: '1px solid ' + C.line, borderRadius: '9px' }}><div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--oq-fg-a9b7c2)' }}>—</div><div style={{ fontSize: '12px', color: C.mute, marginTop: '3px' }}>{l}</div></div>; })}
             </div>
             <div style={Object.assign({}, hint, { marginTop: '16px' })}>A first census takes a few seconds per hundred files, plus a few seconds per scanned page. Later refreshes re-read only new or changed files.</div>
           </div>
+        ) : isData ? (
+          <KindsView inv={inv} busy={busy} onAssociate={associateKind} navigate={navigate} />
         ) : (
           <div>
             <div style={{ display: 'flex', gap: '10px', padding: '16px 20px' }}>
@@ -475,5 +484,77 @@ function NoRedactionModal(props) {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}><button onClick={props.onClose} style={Object.assign(btn(), { height: '36px' })}>Cancel</button><button onClick={props.onConfirm} disabled={!allowed || !reasonOk || n.busy} style={Object.assign(btn(allowed && reasonOk && !n.busy ? 'pri' : 'dis'), { height: '36px' })}>{n.busy ? 'Recording…' : 'Confirm — no redaction needed'}</button></div>
       </div>
     </Backdrop>
+  );
+}
+
+
+// DATA SYSTEMS (slice 5): the same screen, kinds and fields instead of groupings and layouts. A data record is not read, it
+// is RENDERED — one honest sentence per row from a recipe; the field redaction template decides what is withheld before
+// anything is embedded. Embed tiers: 1 kind description always · 2 prose rows opt-in (priced, later) · 3 never (ids, dates, numbers).
+var KGRID = '1.8fr 0.8fr 0.6fr 1.2fr 1.7fr 1.9fr 1.1fr';
+var TIER = { 1: ['grey', 'Kind description only', 'tier 1 · no prose fields'], 2: ['grey', 'Kind description only', 'tier 2 eligible · prose fields — row embedding is a priced opt-in, later'], 3: ['grey', 'Never — ids, dates, numbers only', 'tier 3 · filters beat vectors here'] };
+function KindsView(props) {
+  var inv = props.inv, t = inv.totals;
+  var [open, setOpen] = useState({});
+  var [types, setTypes] = useState(null);
+  useEffect(function () { api.get('/taxonomy/record-types').then(function (r) { setTypes((r.data.record_types || []).filter(function (x) { return x.status === 'active'; })); }).catch(function () { setTypes([]); }); }, []);
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: '10px', padding: '16px 20px' }}>
+        <Stat n={t.kinds} l="record kinds — the kinds are the grouping" />
+        <Stat n={t.rows != null ? t.rows.toLocaleString() : '—'} l={t.rows != null ? 'rows across the kinds that report a count' : 'rows — this connector reports no counts'} />
+        <Stat n={t.fields} l="fields" />
+        <Stat n={t.field_templates + ' of ' + t.kinds} l="kinds have a field redaction template — the rest embed their description only" color={t.field_templates < t.kinds ? 'var(--oq-fg-9a6512)' : 'var(--oq-fg-1b8a5a)'} />
+      </div>
+      <div style={{ padding: '6px 20px 0' }}>
+        <div style={{ fontSize: '15px', fontWeight: '700', color: C.ink }}>Record kinds</div>
+        <div style={hint}>A data record is not read, it is rendered: one honest sentence per row from a recipe. The field redaction template (exempt columns marked once, covering every row) decides which values are withheld before anything is embedded.</div>
+      </div>
+      <div style={{ padding: '8px 20px 4px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: KGRID, gap: '10px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', color: C.faint, textTransform: 'uppercase', letterSpacing: '0.04em' }}><div>Kind</div><div style={{ textAlign: 'right' }}>Rows</div><div style={{ textAlign: 'right' }}>Fields</div><div>Date range</div><div>Field redaction template</div><div>Embedding</div><div /></div>
+        {inv.kinds.map(function (k) {
+          var tier = TIER[k.embed_tier] || TIER[1];
+          return (
+            <div key={k.id}>
+              <div style={{ display: 'grid', gridTemplateColumns: KGRID, gap: '10px', alignItems: 'center', padding: '10px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px' }}>
+                <div><b style={{ color: C.ink }}>{k.name}</b>
+                  <div style={Object.assign({}, hint, { margin: '2px 0 0' })}>
+                    {k.record_type ? <span>→ {k.record_type.name}{k.match_basis === 'by_name' ? ' · matched by name' : ''} · <span onClick={function () { props.onAssociate(k, null); }} style={{ color: C.priFg, cursor: 'pointer' }}>change ›</span></span>
+                      : <span style={{ color: 'var(--oq-fg-9a6512)' }}>Not yet associated · <select value="" onChange={function (e) { if (e.target.value) props.onAssociate(k, e.target.value); }} style={{ fontSize: '11.5px', border: '1px solid ' + C.edge, borderRadius: '5px', padding: '1px 4px', background: 'var(--oq-bg-ffffff)' }}><option value="">choose a record type…</option>{(types || []).map(function (x) { return <option key={x.id} value={x.id}>{x.name}</option>; })}</select></span>}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{k.row_count != null ? <b>{k.row_count.toLocaleString()}</b> : <span title="This connector does not report counts" style={{ color: C.faint }}>not reported</span>}</div>
+                <div style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{k.fields.length}</div>
+                <div>{k.date_range ? (k.date_range.from + ' → ' + k.date_range.to) : <span style={{ color: C.faint }}>—</span>}</div>
+                <div>{k.field_template ? <div>{pill('ok', 'Field redaction template ready')}<div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{k.field_template.withheld.join(', ').replace(/_/g, ' ')} withheld</div></div>
+                  : <div>{pill('warn', 'No field redaction template')}<div style={{ marginTop: '4px' }}><span onClick={function () { props.navigate('/mass-redaction'); }} style={{ fontSize: '12px', color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>Create one ›</span></div></div>}</div>
+                <div>{pill(tier[0], tier[1])}<div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{tier[2]}{k.embed_tier === 2 && k.prose_fields.length ? ' — ' + k.prose_fields.join(', ').replace(/_/g, ' ') : ''}</div></div>
+                <div style={{ textAlign: 'right' }}><button onClick={function () { setOpen(Object.assign({}, open, { [k.id]: !open[k.id] })); }} style={Object.assign(btn(), { height: '26px', fontSize: '12px' })}>{open[k.id] ? 'Hide record' : 'View a rendered record'}</button></div>
+              </div>
+              {open[k.id] ? (
+                <div style={{ margin: '0 12px 8px', padding: '12px 14px', border: '1px solid var(--oq-ln-eef2f5)', borderRadius: '8px', background: 'var(--oq-bg-f7f9fb)' }}>
+                  <div style={Object.assign({}, sect, { marginBottom: '6px' })}>A rendered record — {k.name}</div>
+                  <div style={{ fontSize: '13.5px', lineHeight: '1.6', color: C.ink }}>{k.rendered.text.split('████').map(function (seg, i, arr) { return <span key={i}>{seg}{i < arr.length - 1 ? <span style={{ background: 'var(--oq-bg-12232e)', color: 'var(--oq-fg-12232e)', borderRadius: '3px', padding: '0 4px' }}>████████</span> : null}</span>; })}</div>
+                  <div style={Object.assign({}, hint, { marginTop: '6px' })}>{k.field_template ? 'This sentence is what would be embedded. The blacked-out value is withheld by the field redaction template before the render leaves the system — the vector index never holds it.' : 'This sentence is what would be embedded once a field redaction template exists — today every non-id value shows, so only the kind description (tier 1) embeds.'}{k.description ? ' · Kind description: ' + k.description : ''}</div>
+                  <div style={Object.assign({}, hint, { marginTop: '4px' })}>Fields: {k.fields.map(function (f) { return f.name.replace(/_/g, ' ') + ' (' + f.type + ')'; }).join(' · ')}</div>
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', padding: '16px 20px', borderTop: '1px solid var(--oq-ln-eef2f5)' }}>
+        <div>
+          <div style={Object.assign({}, sect, { marginBottom: '8px' })}>How a data census works</div>
+          <div style={{ fontSize: '12.5px', lineHeight: '1.6', color: 'var(--oq-fg-374151)' }}>The connector reports its record kinds, fields and sample rows; counts and date ranges appear only where the system reports them — nothing is invented. A kind matching a record type by name is associated at census time (say so on the row); the rest you associate by hand. Row-level embedding of a kind is gated on its field redaction template existing (census → field template → then prose embedding, priced).</div>
+        </div>
+        <div>
+          <div style={Object.assign({}, sect, { marginBottom: '8px' })}>Census history</div>
+          <div style={{ fontSize: '12.5px', lineHeight: '1.7', color: 'var(--oq-fg-374151)' }}>
+            {inv.census.history.map(function (h, i) { return <div key={h.id}>{when(h.finished_at || h.requested_at)} — {h.status === 'failed' ? <span style={{ color: 'var(--oq-fg-991b1b)' }}>failed · {h.error}</span> : <span>{i === inv.census.history.length - 1 ? 'first census' : 'refresh'} · {h.total_files} kinds · {h.new_files} new, {h.changed_files} changed, {h.removed_files} removed · {secs(h.pass1_ms)}</span>}</div>; })}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

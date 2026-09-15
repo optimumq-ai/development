@@ -10900,3 +10900,36 @@ spurious reds); a fresh full suite is launched after this commit — verdict in 
 redaction template status) per the 2026-09-04 round-3 design and the DataSystem artboard; then the standing items (fixture-vs-live drift
 reconciliation; owner-less buckets; guided record-type/source removal; certified-copy SETS; inspection requests; Minimum-fee signal) and
 Kevin's markup of the built screens.
+
+## 2026-09-15 (j) — SLICE 5 BUILT: the data-system census (kinds, fields, render recipes, embed tiers, field redaction templates) — INVENTORY BUILD COMPLETE
+
+**Built:** `structured.listKinds` (kinds, fields, sample rows; counts/date ranges only when the definition carries them);
+`sourceCensus` kinds path (`census_kinds`, runs marked `census_kind='kinds'`, stable ids, name-match association `by_name` to active
+buckets, hand association `POST/DELETE /repositories/:id/kinds/:kid/associate` writing the type↔source link); field typing id · number ·
+date · text · prose from name + sample; embed tier per kind (1 description only · 2 prose present, opt-in later · 3 never); `renderRecord`
+— one honest sentence per row, ids never rendered, values a field redaction template (`layout_profiles.kind='fields'`) withholds blacked
+out BEFORE the render; inventory `mode:'data'` with kinds, totals (rows only where known), field-template status, rendered sample, history.
+UI: the DataSystem artboard — kinds table (rows "not reported" when unknown, fields, date range, field redaction template ready/withheld
+fields or "Create one ›" → Mass Redaction, embed tier + prose fields, "View a rendered record" expanding the rendered sentence with the
+blacked-out value), per-kind associate dropdown / "change", "How a data census works", history; source card says "N record kinds". Runs
+now carry a `seq` (BIGSERIAL) and every "last run"/history query orders by it — two runs finishing in the same second had made the
+refresh invisible (found by harness D3). Registry wording for structured updated. Spec: sources §6 (slice 4 + 5 paragraphs, "Not yet").
+**Evidence:** `verify_kind_census` **20/20** (censusable as kinds · status kind=kinds, no drift · 3 kinds enumerated · counts/date
+ranges honest (null when unreported) · totals.rows sums only the known · field typing · tiers 1/2/3 · by-name association · render without
+template shows non-id values and never ids · field template → template_ready + withheld field + blacked-out render keeping the rest ·
+hand association by_hand + link · unknown type 422 · refresh keeps ids + hand association, 3 kept 0 new · undo · card kind=kinds · Laserfiche
+still not censusable · cleanup) + `verify_source_census` 51/51 + `verify_census_association` 37/37 — live untouched. **Full suite after
+slice 4: 3036 passed / 2 failed (the two standing reds), LIVE UNTOUCHED.** Live: City Payroll System censused — 5 kinds, 28 fields, rows
+not reported by this definition, 2 kinds matched by name (Payroll registers, Direct deposit authorizations), tiers 3/1/1/3/3, 0 field
+templates; screenshot `~/exchange/inventory_live_10_data_system_inventory.png`. A final full suite is launched in the background after
+this commit — verdict in `/tmp/oq-shot/full5.status` / `full5.log`.
+**Findings:** (1) ids are never rendered (a tax id is an identifier AND PII) — the harness first tried to withhold one and learned the
+rule; (2) same-second run ties (above); (3) `timesheet`/`w2_form`/`direct_deposit_authorization` land in tier 3 because every field types
+as id/number/date — right for these; `earnings_statement` tier 1.
+**THE INVENTORY BUILD (item 6) IS COMPLETE — slices 1–5.** Live screenshots for Kevin: `~/exchange/inventory_live_1…10_*.png`.
+**NEXT:** Kevin's markup of the built screens (Record Sources cards · Inventory Information for a drive and for a data system · View sample
+· Associate · Redact by hand / No redaction needed · Find variants from the census · From a description); then the standing items —
+fixture-vs-live drift reconciliation (~1,100 lines; now also the new census tables to decide on), 10 owner-less buckets, guided
+record-type/source removal slice, "Open Records Office" test team row, certified-copy SETS (1e), inspection requests, Minimum-fee
+discretion signal (2); optional small backfill of variant source links from stamped fingerprints (slice 1 finding 3). Item 7 (estimate +
+redaction templates seeded from actual record samples) is next in Kevin's list once he has reviewed item 6.
