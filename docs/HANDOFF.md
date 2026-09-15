@@ -10710,3 +10710,16 @@ never-censused state with Perform census queued behind the running one); the "Ev
 monospace file list, no screen of its own. canvas.json annotation `open` now records the two decisions; (c) Not-needed semantics,
 (d) the no-census card for search-only systems, (e) OCR opt-in per source vs per grouping remain open. Nothing built.
 **NEXT:** Kevin's remaining markup (c–e) + the six flow-map decisions → slice the census build per the flow map §5.
+
+## 2026-09-15 — Inventory drawings: every "template" now says which kind (Kevin); source artboards copied to the exchange
+
+Kevin (a) asked for copies of the source drawings in the exchange folder → `~/exchange/inventory_census_mockups/` (the six
+`.dc.html` artboards + `canvas.json` + an `INDEX.html` that renders all six live on one page, notes first; verified: 6 frames
+load). (b) Noticed the PNGs said "template" without saying which: every mention now reads **redaction template** (document
+groupings: "Redaction template ready" / "Waiting for a redaction template" / "Start a redaction template" / "No redaction
+template needed"; column header "Redaction template") or **field redaction template** (data kinds; column header, pills, stat,
+the embedding gate and the rendered-record footnote). The two generic uses that were not about our templates were reworded
+("the fields the printed form owns"; "if a known layout had turned up"). New canvas annotation `templates`: estimate templates
+(item 7) are NOT on these screens yet — when item 7 is designed the grouping row would gain a second status column. All six PNGs
+re-rendered to `~/exchange/inventory_1…6_*.png`; exchange copies of the artboards, INDEX and guide refreshed. Nothing built.
+**NEXT:** unchanged — Kevin's remaining markup (c–e) + the six flow-map decisions → slice the census build.

@@ -72,17 +72,17 @@
       <div class="stat"><div class="n">3</div><div class="l">record kinds — the kinds are the grouping</div></div>
       <div class="stat"><div class="n">41,218</div><div class="l">rows across all kinds</div></div>
       <div class="stat"><div class="n">47</div><div class="l">fields</div></div>
-      <div class="stat" style="border-color:#E5C24A;background:#FFFBEB;"><div class="n" style="color:#9A6512">1 of 3</div><div class="l">kinds have a field template — the rest embed their description only</div></div>
+      <div class="stat" style="border-color:#E5C24A;background:#FFFBEB;"><div class="n" style="color:#9A6512">1 of 3</div><div class="l">kinds have a field redaction template — the rest embed their description only</div></div>
     </div>
 
-    <div style="padding:6px 20px 0;"><div class="h2">Record kinds</div><div class="sub">A data record is not read, it is rendered: one honest sentence per row from a recipe. The field template decides which values are withheld before anything is embedded.</div></div>
+    <div style="padding:6px 20px 0;"><div class="h2">Record kinds</div><div class="sub">A data record is not read, it is rendered: one honest sentence per row from a recipe. The field redaction template (exempt columns marked once, covering every row) decides which values are withheld before anything is embedded.</div></div>
     <div style="padding:8px 20px 4px;">
-      <div class="row head" style="grid-template-columns: 1.8fr 0.8fr 0.6fr 1.2fr 1.6fr 1.8fr 1.1fr;"><div>Kind</div><div class="num">Rows</div><div class="num">Fields</div><div>Date range</div><div>Field template</div><div>Embedding</div><div></div></div>
+      <div class="row head" style="grid-template-columns: 1.8fr 0.8fr 0.6fr 1.2fr 1.6fr 1.8fr 1.1fr;"><div>Kind</div><div class="num">Rows</div><div class="num">Fields</div><div>Date range</div><div>Field redaction template</div><div>Embedding</div><div></div></div>
 
       <div class="row" style="grid-template-columns: 1.8fr 0.8fr 0.6fr 1.2fr 1.6fr 1.8fr 1.1fr;">
         <div><b>Payroll register</b><div class="hint" style="margin:2px 0 0">→ Payroll registers (Finance)</div></div>
         <div class="num"><b>38,400</b></div><div class="num">19</div><div>2019-01 → 2026-08</div>
-        <div><span class="pill p-ok">Field template ready</span><div class="hint" style="margin:2px 0 0">SSN, bank account, home address withheld</div></div>
+        <div><span class="pill p-ok">Field redaction template ready</span><div class="hint" style="margin:2px 0 0">SSN, bank account, home address withheld</div></div>
         <div><span class="pill p-grey">Kind description only</span><div class="hint" style="margin:2px 0 0">tier 1 · no prose fields</div></div>
         <div style="text-align:right;"><button class="btn" style="height:26px;font-size:12px;">View a rendered record</button></div>
       </div>
@@ -90,15 +90,15 @@
       <div class="row" style="grid-template-columns: 1.8fr 0.8fr 0.6fr 1.2fr 1.6fr 1.8fr 1.1fr;">
         <div><b>Employee timesheets</b><div class="hint" style="margin:2px 0 0">→ Employee timesheets (HR) · <span style="color:#9A6512">no owner department</span></div></div>
         <div class="num"><b>2,600</b></div><div class="num">14</div><div>2024-01 → 2026-08</div>
-        <div><span class="pill p-warn">No field template</span><div style="margin-top:4px"><span class="link" style="font-size:12px">Create one ›</span></div></div>
-        <div><span class="pill p-grey">Kind description only</span><div class="hint" style="margin:2px 0 0">"Notes" is prose — row embedding available once a field template exists · est. $1.10</div></div>
+        <div><span class="pill p-warn">No field redaction template</span><div style="margin-top:4px"><span class="link" style="font-size:12px">Create one ›</span></div></div>
+        <div><span class="pill p-grey">Kind description only</span><div class="hint" style="margin:2px 0 0">"Notes" is prose — row embedding available once a field redaction template exists · est. $1.10</div></div>
         <div style="text-align:right;"><button class="btn" style="height:26px;font-size:12px;">View a rendered record</button></div>
       </div>
 
       <div class="row" style="grid-template-columns: 1.8fr 0.8fr 0.6fr 1.2fr 1.6fr 1.8fr 1.1fr;">
         <div><b>Direct deposit authorizations</b><div class="hint" style="margin:2px 0 0">→ Direct deposit authorizations (HR)</div></div>
         <div class="num"><b>218</b></div><div class="num">14</div><div>2021-06 → 2026-08</div>
-        <div><span class="pill p-warn">No field template</span><div style="margin-top:4px"><span class="link" style="font-size:12px">Create one ›</span></div></div>
+        <div><span class="pill p-warn">No field redaction template</span><div style="margin-top:4px"><span class="link" style="font-size:12px">Create one ›</span></div></div>
         <div><span class="pill p-grey">Never — ids, dates, numbers only</span><div class="hint" style="margin:2px 0 0">tier 3 · filters beat vectors here</div></div>
         <div style="text-align:right;"><button class="btn" style="height:26px;font-size:12px;">View a rendered record</button></div>
       </div>
@@ -110,7 +110,7 @@
         <div class="card" style="padding:12px 14px;font-size:13.5px;line-height:1.6;background:#F7F9FB;">
           Payroll register — pay period ending 2026-08-15 — Public Works — <span style="background:#12232E;color:#12232E;border-radius:3px;padding:0 4px;">████████</span> — gross $3,412.10 — net $2,588.40 — status paid
         </div>
-        <div class="hint">This sentence is what would be embedded. The blacked-out value is withheld by the field template <b>before</b> the render leaves the system — the vector index never holds it.</div>
+        <div class="hint">This sentence is what would be embedded. The blacked-out value is withheld by the field redaction template <b>before</b> the render leaves the system — the vector index never holds it.</div>
       </div>
       <div>
         <div class="sect" style="margin-bottom:8px;">Census history</div>
