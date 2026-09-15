@@ -49,56 +49,38 @@
     .doc .val { color: #8296A4; border-bottom: 1px dotted #BECAD3; }
   </style>
 </helmet>
-<div style="padding: 20px; width: 940px;">
-  <div class="card" style="padding:0;">
-    <div style="padding:14px 20px; border-bottom:1px solid #D2DCE3; display:flex; align-items:center; gap:12px;">
-      <div style="flex-grow:1;"><div class="h2">Certificate of Occupancy — a sample document</div>
-        <div class="sub">41 documents (counted) · uniform layout · Building permits › Certificate of Occupancy</div></div>
-      <button class="btn">‹ Previous</button><button class="btn">Next ›</button>
-      <span style="font-size:12px;color:#8296A4;">2 of 41 · CO-2023-0112.pdf</span>
-      <button class="btn" style="margin-left:6px;">✕</button>
+<div style="padding: 20px; width: 780px;">
+  <div class="card">
+    <div style="padding:14px 20px; border-bottom:1px solid #D2DCE3; display:flex; align-items:center;">
+      <div style="flex-grow:1;"><div class="h2">No redaction needed — Building Inspection Report</div>
+        <div class="sub">22 documents (counted) · Building permits › Building Inspection Report · Development Services Shared Drive</div></div>
+      <button class="btn">✕</button>
     </div>
-    <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:20px; padding:20px;">
+    <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px;">
+
+      <div class="note" style="background:#FFFBEB;border-color:#E5C24A;color:#374151;">This is a <b>release decision</b> about every document of this layout, not a shortcut around a template. It is written to the variant <b>Building Inspection Report</b>: public availability → <b>Releasable</b>, auto-release → <b>on</b>.</div>
+
       <div>
-        <div class="doc" style="min-height:520px;">
-          <div style="text-align:center;font-weight:700;font-size:13px;">CITY OF AUTUMN FALLS</div>
-          <div style="text-align:center;font-size:10px;">Department of Building &amp; Planning</div>
-          <div style="text-align:center;font-weight:700;margin:14px 0 10px;font-size:12px;letter-spacing:.06em;">CERTIFICATE OF OCCUPANCY</div>
-          <div><span class="lab">Permit No.</span> <span class="val">BP-2023-00412</span> &nbsp;&nbsp; <span class="lab">Issued</span> <span class="val">March 14, 2023</span></div>
-          <div style="margin-top:6px;"><span class="lab">Property address</span> <span class="val">1418 Maple Ridge Dr, Autumn Falls</span></div>
-          <div style="margin-top:6px;"><span class="lab">Owner</span> <span class="val">Halcyon Ridge LLC</span></div>
-          <div style="margin-top:6px;"><span class="lab">Occupancy type</span> <span class="val">R-3 Single family</span> &nbsp;&nbsp; <span class="lab">Use group</span> <span class="val">Residential</span></div>
-          <div style="margin-top:14px;line-height:1.6;">This certifies that the structure described above has been inspected and found to comply with the applicable provisions of the City Building Code and the approved plans, and may be occupied for the use stated.</div>
-          <div style="margin-top:22px;"><span class="lab">Building Official</span> <span class="val">______________________</span> &nbsp;&nbsp; <span class="lab">Inspector</span> <span class="val">J. Ortiz</span></div>
-          <div style="position:absolute;bottom:14px;right:22px;font-size:9px;color:#8296A4;">Form B&amp;P-CO rev. 2019 · page 1 of 1</div>
-        </div>
-        <div class="hint" style="margin-top:8px;">First page as stored on the drive. <span style="background:#FFF3C4;padding:0 3px;">Highlighted</span> text is what the layout owns — the fields the printed form owns; the dotted values change per document. Nothing is redacted in this view.</div>
+        <div class="sect" style="margin-bottom:6px;">What still happens</div>
+        <div style="font-size:13px;line-height:1.55;">Every responsive document still gets the automatic <b>clean read</b> before release. Only a read that finds <b>nothing</b> to redact releases the original as-is; a document where the read finds something — a Social Security number, a phone number, a minor's name — goes to a redaction task anyway. The second-eyes release review is unchanged.</div>
       </div>
+
       <div>
-        <div class="sect">Why these 41 are one grouping</div>
-        <div style="font-size:13px;line-height:1.6;margin:6px 0 14px;">Every document agrees on at least 8 of 10 layout features: page count, the first and last lines, the position of the text blocks, and the same set of <b>field labels</b> on page 1.</div>
-
-        <div class="sect">Fields this layout owns</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px;">
-          <span class="pill p-grey">Permit No.</span><span class="pill p-grey">Issued</span><span class="pill p-grey">Property address</span><span class="pill p-grey">Owner</span><span class="pill p-grey">Occupancy type</span><span class="pill p-grey">Use group</span><span class="pill p-grey">Building Official</span><span class="pill p-grey">Inspector</span>
+        <div class="sect" style="margin-bottom:6px;">Checks</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span class="pill p-ok" style="margin-top:1px">passes</span><div>Legal-redaction gate on the parent bucket <b>Building permits</b>: <b>off</b>. <span class="hint" style="display:inline">If it were on, this door would be closed — a legal gate never loosens at a more specific level; Senior Legal would have to change it on the bucket first.</span></div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span class="pill p-ok" style="margin-top:1px">passes</span><div>Public availability of the bucket: <b>Review required</b> → the variant may be set more open than its bucket. <span class="hint" style="display:inline">A bucket marked Restricted or Confidential closes this door.</span></div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;"><span class="pill p-warn" style="margin-top:1px">look first</span><div>You have viewed <b>3 of 22</b> sample documents in this grouping. <span class="link">View more samples ›</span></div></div>
         </div>
-
-        <div class="sect">Where they live</div>
-        <div style="font-size:13px;line-height:1.6;margin:6px 0 14px;">/Permits/CO — 38 documents<br>/Permits/2023 — 3 documents</div>
-
-        <div class="sect">Status</div>
-        <div style="font-size:13px;line-height:1.6;margin:6px 0 14px;">
-          Associated to <b>Building permits › Certificate of Occupancy</b> (draft variant, 2026-09-14).<br>
-          <span class="pill p-warn">Waiting for a redaction template</span> <span class="hint" style="display:inline">— a redaction template drawn on one of these covers all 41</span>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px;">
-          <button class="btn b-pri b-lg">Start a redaction template from this document</button>
-          <div style="display:flex;gap:8px;"><button class="btn b-lg" style="flex:1">Redact by hand</button><button class="btn b-lg" style="flex:1">No redaction needed</button></div>
-          <div style="text-align:center;font-size:12px;"><span class="link">Associate differently</span></div>
-        </div>
-        <div class="hint" style="margin-top:10px;">"Start a redaction template" opens the existing redaction-template workspace (zones drawn on the page) with this document staged — the same path as Mass Redaction's "Waiting for a redaction template" card. "Redact by hand" means each request's copies are reviewed one by one (no template, no nagging). "No redaction needed" is a release decision — it asks you to confirm.</div>
       </div>
+
+      <div class="field"><span class="lbl">Why no redaction is needed <span style="color:#B02A37">*</span></span>
+        <div class="in" style="height:auto;padding:9px 11px;align-items:flex-start;line-height:1.5;">Inspection reports carry no personal information — inspector name and permit number only — and the same reports are already published on the permit portal.</div>
+        <div class="hint">Required. Recorded with your name and the date in configuration history; shown on the grouping and on the variant's record-type page.</div></div>
+
+      <div class="note">On <b>Confirm</b>: the variant's release posture is written as above · the grouping shows <b>No redaction needed</b> · Mass Redaction stops listing it · the Technical Setup lane turns "changed since approval" for re-approval. Reversible from the grouping row at any time. Decided by <b>K. Russ (Director)</b> — this door is open to System Admin and Director, the same bar as redaction configuration.</div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;"><button class="btn b-lg">Cancel</button><button class="btn b-pri b-lg">Confirm — no redaction needed</button></div>
     </div>
   </div>
 </div>

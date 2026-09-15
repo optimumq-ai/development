@@ -10723,3 +10723,26 @@ the embedding gate and the rendered-record footnote). The two generic uses that 
 (item 7) are NOT on these screens yet — when item 7 is designed the grouping row would gain a second status column. All six PNGs
 re-rendered to `~/exchange/inventory_1…6_*.png`; exchange copies of the artboards, INDEX and guide refreshed. Nothing built.
 **NEXT:** unchanged — Kevin's remaining markup (c–e) + the six flow-map decisions → slice the census build.
+
+## 2026-09-15 (b) — "No redaction needed" on a grouping: DRAWN as a guarded release decision (Kevin's ask); the three doors
+
+Kevin: can a user designate a grouping "NO REDACTION NEEDED" instead of creating a template? Yes — drawn, and it resolves open
+item (c). A grouping without a redaction template now has THREE doors on the Inventory row and the Sample view: **Start a
+redaction template** · **Redact by hand** (the old Mass Redaction "Not needed" dismiss, honestly named: each request's copies
+reviewed one by one, no template, no nagging) · **No redaction needed**. The third is a RELEASE decision, not a template
+shortcut, so it gets its own confirmation (`NoRedaction.dc.html`, `~/exchange/inventory_7_no_redaction_needed.png`): written to
+the variant as public availability → Releasable + auto-release → on; checks shown — the parent bucket's legal-redaction gate
+must be OFF (a legal gate never loosens at a more specific level; Senior Legal changes it on the bucket), the bucket's
+availability must not be Restricted/Confidential, "you have viewed 3 of 22 samples"; a REQUIRED reason recorded in config
+history; role bar = redaction configuration (System Admin / Director); reversible from the row; setup lane goes "changed since
+approval". **Honest consequence, from the code:** `redactionBypass.recordCleanBypass` / `redactionDisposition` case (c) — an
+auto-release-eligible type releases the ORIGINAL as-is only when the automatic clean read finds NOTHING; a read that finds
+something still spawns a redaction task, and release review is unchanged. So the designation is a posture the existing
+record-type-clean bypass already honours — no new release path is implied. Inventory row for Building Inspection Report now
+shows the decided state ("No redaction needed · K. Russ, 2026-09-15 · releases as-is after a clean read"); the Certificate of
+Occupancy row shows the three links. canvas.json: artboard 7 added; `open` annotation records (c) as decided; `templates`
+annotation extended. PNGs 2, 3, 7 + artboards + INDEX + guide refreshed in the exchange. Nothing built.
+**NEXT:** Kevin's remaining markup — (d) the no-census card for search-only systems, (e) OCR opt-in per source vs per grouping —
+plus the six flow-map decisions → slice the census build. Build note for the slice: "No redaction needed" = a guarded PATCH on
+the variant's `public_availability` + `auto_release_eligible` with reason + history row, refused when the parent's legal gate is
+on; "Redact by hand" = the existing opportunities dismiss.
