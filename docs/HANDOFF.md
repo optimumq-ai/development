@@ -10767,3 +10767,11 @@ INDEX + guide refreshed in the exchange. Nothing built.
 rows record `ocr=1`; no OCR gating config.
 **NEXT:** the one remaining drawing question (d) the no-census card for search-only systems, plus the six flow-map decisions →
 slice the census build.
+
+## 2026-09-15 (d) — Last drawing question closed: the "no census" card for search-only systems is fine for now (Kevin)
+
+Kevin: "the no census card for laserfiche is fine for now." Recorded in canvas.json (`open` annotation), the exchange INDEX and
+guide. **All item-6 drawing questions are now closed** (a one door · b file list · c three doors incl. No redaction needed ·
+d no-census card · e OCR second pass). **The census build waits only on Kevin's six flow-map decisions**
+(`docs/DESIGN_setup_flow_map.md` §4: order/decoupling · retire Scan source · links on approval only · sub-folders as hint ·
+non-file sources · enterprise stores). When those land: slice per flow map §5 with the build notes recorded in the 09-15 entries.
