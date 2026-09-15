@@ -10746,3 +10746,24 @@ annotation extended. PNGs 2, 3, 7 + artboards + INDEX + guide refreshed in the e
 plus the six flow-map decisions → slice the census build. Build note for the slice: "No redaction needed" = a guarded PATCH on
 the variant's `public_availability` + `auto_release_eligible` with reason + history row, refused when the parent's legal gate is
 on; "Redact by hand" = the existing opportunities dismiss.
+
+## 2026-09-15 (c) — OCR is the census's SECOND PASS, not an opt-in (Kevin); drawing corrected; item (e) CLOSED
+
+Kevin questioned the "OCR per source vs per grouping" item: he assumed the census OCRs every file as it inventories a source.
+He is right, and the drawing was wrong. Facts checked in code: OCR is **local tesseract 4.1.1** via `pdftoppm` renders
+(`docProcessing.ocrPage`), already automatic in the request pipeline for pages with no text layer — no API, no fee, time only
+(a few seconds per scanned page). The 2026-09-04 record carried both "OCR-then-census" AND "per-pile opt-in OCR with visible
+cost"; the second cannot apply to image-only files (they have no pile until OCR'd), and pricing a free local step was an error.
+**Decision (Kevin): second pass.** The census reads text-layer files first (groupings appear early), then OCRs scans and folds
+them in; the progress line shows both passes. No button, no dollar figure. "Unreadable" is reserved for scans where OCR found
+no words. The only paid step left in the inventory flow is one small naming call per unrecognised grouping at association;
+row embedding of data kinds stays a separate, priced, opt-in tier. **Drawing changes:** Inventory stat cards → "159
+fingerprinted — 147 with a text layer, 12 scans read by OCR in the second pass" · "1 unreadable"; census history shows pass 1 /
+pass 2 timings; Main running card → "Pass 1 of 2 — files with a text layer: 49 of 62 · then pass 2 — OCR of 8 scans"; done card
+"12 scans read by OCR"; InventoryEmpty explains the two passes and the per-page cost in time. canvas.json `decided` / `open` /
+`cost` annotations corrected; the 2026-09-04 "opt-in with cost" line is SUPERSEDED by this entry. PNGs 1, 2, 6 + artboards +
+INDEX + guide refreshed in the exchange. Nothing built.
+**Build note for the slice:** census job = two phases (text-layer pass → OCR pass), progress reports phase + counts; fingerprint
+rows record `ocr=1`; no OCR gating config.
+**NEXT:** the one remaining drawing question (d) the no-census card for search-only systems, plus the six flow-map decisions →
+slice the census build.

@@ -75,9 +75,8 @@
 
     <div style="display:flex; gap:10px; padding:16px 20px;">
       <div class="stat"><div class="n">166</div><div class="l">files, every type counted</div></div>
-      <div class="stat"><div class="n" style="color:#1B8A5A">148</div><div class="l">readable — text extracted and fingerprinted</div></div>
-      <div class="stat" style="border-color:#E5C24A;background:#FFFBEB;"><div class="n" style="color:#9A6512">12</div><div class="l">image-only — need OCR to join a grouping</div>
-        <button class="btn b-soft" style="margin-top:8px;height:26px;font-size:12px;">Run OCR on these 12 · about $0.40</button></div>
+      <div class="stat"><div class="n" style="color:#1B8A5A">159</div><div class="l">fingerprinted — 147 with a text layer, 12 scans read by OCR in the second pass</div></div>
+      <div class="stat"><div class="n" style="color:#9A6512">1</div><div class="l">unreadable — a scan where OCR found no words<br><span class="hint">listed under Everything else</span></div></div>
       <div class="stat"><div class="n" style="color:#5C6F7C">6</div><div class="l">unsupported — counted, not read<br><span class="hint">.dwg 2 · .zip 1 · .msg 3</span></div></div>
       <div class="stat"><div class="n">4</div><div class="l">identical groupings · 23 ungrouped</div></div>
     </div>
@@ -89,7 +88,7 @@
     </div>
 
     <div style="padding:6px 20px 0; display:flex; justify-content:space-between; align-items:flex-end;">
-      <div><div class="h2">Identical groupings</div><div class="sub">Documents that share one layout: 8 of 10 layout features agree, 3 or more documents. Counts are exact — every readable file was fingerprinted. One redaction template drawn on a grouping covers every document in it. A grouping without one has three doors: draw a redaction template · redact by hand · no redaction needed.</div></div>
+      <div><div class="h2">Identical groupings</div><div class="sub">Documents that share one layout: 8 of 10 layout features agree, 3 or more documents. Counts are exact — every file with text, native or OCR'd, was fingerprinted. One redaction template drawn on a grouping covers every document in it. A grouping without one has three doors: draw a redaction template · redact by hand · no redaction needed.</div></div>
     </div>
     <div style="padding:8px 20px 4px;">
       <div class="row head" style="grid-template-columns: 2.2fr 0.9fr 1fr 2fr 1.5fr 1.2fr;"><div>Grouping</div><div class="num">Documents</div><div>Layout</div><div>Record type / variant</div><div>Redaction template</div><div></div></div>
@@ -152,8 +151,8 @@
       <div>
         <div class="sect" style="margin-bottom:8px;">Census history</div>
         <div style="font-size:12.5px;line-height:1.7;color:#374151;">
-          2026-09-14 07:02 — refresh · 166 files · 14 new, 0 changed, 0 removed · 2 min 10 s<br>
-          2026-09-04 22:15 — first census · 152 files · 9 min 40 s
+          2026-09-14 07:02 — refresh · 166 files · 14 new, 0 changed, 0 removed · pass 1 40 s · pass 2 (OCR, 3 scans) 1 min 30 s<br>
+          2026-09-04 22:15 — first census · 152 files · pass 1 2 min · pass 2 (OCR, 9 scans) 7 min 40 s
         </div>
         <div class="note" style="margin-top:10px;">The census reads <b>layout</b>, not meaning. It cannot tell which department a document belongs to; the person who associates a grouping is that check.</div>
       </div>

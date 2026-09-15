@@ -68,13 +68,13 @@
     </div>
     <div style="padding:40px 20px 44px; text-align:center;">
       <div style="font-size:15px;font-weight:700;">The system does not know what this drive holds.</div>
-      <div style="font-size:13px;color:#5C6F7C;margin-top:6px;line-height:1.55;max-width:620px;margin-left:auto;margin-right:auto;">A census reads every file once — hashes it, extracts its text, and takes a layout fingerprint — then groups identical layouts and counts them. No AI is used and nothing is sent anywhere; image-only files are counted and offered for OCR afterwards. Until then nothing on this drive can be associated to a record type or searched.</div>
+      <div style="font-size:13px;color:#5C6F7C;margin-top:6px;line-height:1.55;max-width:620px;margin-left:auto;margin-right:auto;">A census reads every file once — hashes it, extracts its text, and takes a layout fingerprint — then groups identical layouts and counts them. No AI is used and nothing is sent anywhere. Files with a text layer go first; scanned files are read by OCR (on this server) in a second pass and grouped like the rest, so early results appear while the scans are still being read. Until then nothing on this drive can be associated to a record type or searched.</div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;">
         <div class="stat" style="flex:none;width:170px;text-align:left;"><div class="n" style="color:#A9B7C2">—</div><div class="l">files</div></div>
-        <div class="stat" style="flex:none;width:170px;text-align:left;"><div class="n" style="color:#A9B7C2">—</div><div class="l">readable</div></div>
+        <div class="stat" style="flex:none;width:170px;text-align:left;"><div class="n" style="color:#A9B7C2">—</div><div class="l">fingerprinted</div></div>
         <div class="stat" style="flex:none;width:170px;text-align:left;"><div class="n" style="color:#A9B7C2">—</div><div class="l">identical groupings</div></div>
       </div>
-      <div class="hint" style="margin-top:16px;">A first census of a drive this size (about 2,000 files) takes roughly 15 minutes. Later refreshes re-read only new or changed files.</div>
+      <div class="hint" style="margin-top:16px;">A first census of a drive this size (about 2,000 files) takes roughly 15 minutes, plus a few seconds per scanned page. Later refreshes re-read only new or changed files.</div>
     </div>
   </div>
 </div>
