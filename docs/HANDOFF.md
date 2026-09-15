@@ -10933,3 +10933,10 @@ fixture-vs-live drift reconciliation (~1,100 lines; now also the new census tabl
 record-type/source removal slice, "Open Records Office" test team row, certified-copy SETS (1e), inspection requests, Minimum-fee
 discretion signal (2); optional small backfill of variant source links from stamped fingerprints (slice 1 finding 3). Item 7 (estimate +
 redaction templates seeded from actual record samples) is next in Kevin's list once he has reviewed item 6.
+
+## 2026-09-15 (k) — Final full suite after the inventory build: 3056 passed / 2 failed (the two standing reds), LIVE UNTOUCHED
+
+`/tmp/oq-shot/full5.log`: **3056 passed, 2 failed** — `verify_stage_bypass` #1 and `verify_bw9_golive` E1a, the same two standing reds
+recorded since 2026-09-01; not one row moved in the 12 live census tables. The three new harnesses (`verify_source_census` 51,
+`verify_census_association` 37, `verify_kind_census` 20) are in the suite order after `verify_fingerprint_discovery`. Nothing further to do
+on item 6 until Kevin's markup.
