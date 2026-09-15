@@ -1922,3 +1922,48 @@ ALTER TABLE setup_hub_signoffs ADD COLUMN IF NOT EXISTS content_hash TEXT;
 ALTER TABLE setup_hub_signoffs ADD COLUMN IF NOT EXISTS notified_hash TEXT;
 -- List-screen model (2026-08-31): 'Ready for approval' is the adder's declaration that the list is complete.
 CREATE TABLE IF NOT EXISTS setup_hub_ready (item_key TEXT PRIMARY KEY, ready_by TEXT, ready_by_name TEXT, ready_at TEXT);
+
+-- SOURCE CENSUS (2026-09-15, inventory build slice 1 — docs/DESIGN_setup_flow_map.md, mockups/inventory_census).
+-- A census reads EVERY file of a source once (two passes: text layer, then OCR of scans), fingerprints documents,
+-- groups identical layouts and counts them. Taxonomy-free: no record type needs to be linked first.
+ALTER TABLE document_fingerprints ADD COLUMN IF NOT EXISTS kind TEXT DEFAULT 'doc';        -- doc | unreadable | unsupported
+ALTER TABLE document_fingerprints ADD COLUMN IF NOT EXISTS file_type TEXT;                  -- lower-case extension
+ALTER TABLE document_fingerprints ADD COLUMN IF NOT EXISTS ocr INTEGER DEFAULT 0;           -- features came from OCR (pass 2)
+ALTER TABLE document_fingerprints ADD COLUMN IF NOT EXISTS unreadable INTEGER DEFAULT 0;    -- OCR found no words
+ALTER TABLE document_fingerprints ADD COLUMN IF NOT EXISTS size_bytes BIGINT;
+ALTER TABLE document_fingerprints ADD COLUMN IF NOT EXISTS last_seen_run_id TEXT;
+ALTER TABLE document_fingerprints ADD COLUMN IF NOT EXISTS grouping_id TEXT;
+CREATE INDEX IF NOT EXISTS idx_docfp_grouping ON document_fingerprints(grouping_id);
+CREATE TABLE IF NOT EXISTS source_census_runs (
+  id TEXT PRIMARY KEY,
+  repository_id TEXT NOT NULL,
+  status TEXT DEFAULT 'queued',            -- queued | running | done | failed
+  phase TEXT,                              -- text | ocr | grouping while running
+  requested_by TEXT, requested_by_name TEXT, requested_at TEXT,
+  started_at TEXT, finished_at TEXT,
+  total_files INTEGER DEFAULT 0, done_files INTEGER DEFAULT 0,
+  text_files INTEGER DEFAULT 0, ocr_files INTEGER DEFAULT 0, unreadable_files INTEGER DEFAULT 0, unsupported_files INTEGER DEFAULT 0,
+  new_files INTEGER DEFAULT 0, changed_files INTEGER DEFAULT 0, removed_files INTEGER DEFAULT 0, kept_files INTEGER DEFAULT 0,
+  groupings_count INTEGER DEFAULT 0, ungrouped_count INTEGER DEFAULT 0,
+  pass1_ms INTEGER, pass2_ms INTEGER,
+  error TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_census_runs_repo ON source_census_runs(repository_id, requested_at);
+-- Identical groupings per source. Stable across runs: a new run's clusters are matched to existing rows by
+-- signature, so a grouping keeps its id (and ordinal) while its documents are unchanged. An associated
+-- grouping is one whose documents are stamped to a record type (variant); its redaction posture derives
+-- from that type at read time — nothing about redaction is stored here.
+CREATE TABLE IF NOT EXISTS census_groupings (
+  id TEXT PRIMARY KEY,
+  repository_id TEXT NOT NULL,
+  ordinal INTEGER,
+  record_type_id TEXT,                     -- null = not yet associated
+  signature TEXT,                          -- consensus signature JSON
+  member_count INTEGER DEFAULT 0,
+  layout TEXT,                             -- uniform | few_layouts
+  folders TEXT,                            -- JSON [{folder, n}] — a hint, never a grouping rule
+  example_ids TEXT,                        -- JSON fingerprint ids (up to 5)
+  first_seen_run_id TEXT, last_seen_run_id TEXT,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE INDEX IF NOT EXISTS idx_census_groupings_repo ON census_groupings(repository_id);

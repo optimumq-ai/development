@@ -35,19 +35,54 @@ function toLines(words) {
   return lines;
 }
 
-// Extract the ~10-item feature vector from a PDF on disk. Returns null when the file has no
-// readable text layer on page 1 (scanned/image PDF) or cannot be read at all.
+// Extract the ~10-item feature vector from a PDF on disk via its text layer. Returns null when the file
+// has no readable text layer on page 1 (scanned/image PDF) or cannot be read at all — the census then
+// tries extractFeaturesOcr in its second pass.
 function extractFeatures(pdfPath) {
-  var pageCount = 0;
-  try {
-    var info = execFileSync('pdfinfo', [pdfPath], { encoding: 'utf8', timeout: 15000 });
-    pageCount = parseInt((info.match(/Pages:\s+(\d+)/) || [])[1]) || 0;
-  } catch (e) { return null; }
+  var pageCount = pageCountOf(pdfPath);
+  if (pageCount == null) return null;
   var bbox = '';
   try { bbox = execFileSync('pdftotext', ['-bbox', '-f', '1', '-l', '1', pdfPath, '-'], { encoding: 'utf8', timeout: 15000 }); } catch (e) { return null; }
   var parsed = docProcessing.parseBboxPage(bbox);
   if (!parsed || !parsed.words.length) return null;
-  var words = parsed.words;
+  return featuresFromWords(parsed.words, pageCount);
+}
+
+function pageCountOf(pdfPath) {
+  try {
+    var info = execFileSync('pdfinfo', [pdfPath], { encoding: 'utf8', timeout: 15000 });
+    return parseInt((info.match(/Pages:\s+(\d+)/) || [])[1]) || 0;
+  } catch (e) { return null; }
+}
+
+// OCR path (2026-09-15, the census's SECOND PASS — Kevin: scans are read like everything else, no opt-in):
+// render page 1, run tesseract for word boxes (docProcessing.ocrPage, the same OCR the request pipeline
+// uses), and build the SAME feature vector from those words. Local and free — time, not money. Returns
+// null when OCR finds no words (a blank or hopeless scan): the census records that file as unreadable.
+function extractFeaturesOcr(pdfPath) {
+  var pageCount = pageCountOf(pdfPath);
+  if (pageCount == null) return null;
+  var fs = require('fs'), os = require('os'), path = require('path');
+  var dir = fs.mkdtempSync(path.join(os.tmpdir(), 'oq-census-'));
+  var prefix = path.join(dir, 'p1');
+  try {
+    execFileSync('pdftoppm', ['-png', '-singlefile', '-r', '150', '-f', '1', '-l', '1', pdfPath, prefix], { timeout: 60000 });
+    var o = docProcessing.ocrPage(prefix + '.png');
+    if (!o || !o.words || !o.words.length) return null;
+    var f = featuresFromWords(o.words, pageCount);
+    // No title veto for OCR features: tesseract word boxes are GLYPH bounds (a line of capitals and digits
+    // measures taller than a mixed-case line of the same font size), while text-layer heights are uniform font
+    // metrics — so the "meaningfully taller line" test misfires on scans and would split a scan from its own
+    // template. titleLines = null disables the veto for this document (documented isMatch behaviour); the
+    // scored 8-of-10 match still applies in full.
+    f.titleLines = null;
+    return f;
+  } catch (e) { return null; }
+  finally { try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) {} }
+}
+
+// The feature vector from normalized (0-1) page-1 word boxes, whatever produced them (text layer or OCR).
+function featuresFromWords(words, pageCount) {
   var lines = toLines(words);
   var first = lines[0], last = lines[lines.length - 1];
   var mid = words.filter(function (w) { return w.y >= 0.42 && w.y <= 0.58; });
@@ -194,7 +229,7 @@ function layoutConsistency(featureList) {
 
 module.exports = {
   FEATURE_V: FEATURE_V,
-  extractFeatures: extractFeatures, matchScore: matchScore, isMatch: isMatch,
+  extractFeatures: extractFeatures, extractFeaturesOcr: extractFeaturesOcr, featuresFromWords: featuresFromWords, matchScore: matchScore, isMatch: isMatch,
   cluster: cluster, signature: signature, matchesSignature: matchesSignature,
   layoutConsistency: layoutConsistency, MATCH_THRESHOLD: MATCH_THRESHOLD
 };

@@ -14,6 +14,7 @@ const { requireAuth, requireRedactionWork, requirePermission } = require('../mid
 const EDIT = requirePermission('operations_config');   // S4: sources / record ownership = operations_config (Lane 3)
 const { all, get, run } = require('../db');
 const catalog = require('../services/connectors/registry');
+const sourceCensus = require('../services/sourceCensus');
 
 const fs = require('fs');
 const path = require('path');
@@ -76,6 +77,11 @@ router.get('/', requireAuth, async function(req, res){
   var paper = await all('SELECT repository_id, COUNT(*)::int AS n FROM paper_index_items GROUP BY repository_id');
   var paperBy = {}; paper.forEach(function(p){ paperBy[p.repository_id] = Number(p.n); });
   rows.forEach(function(r){ r.linked_types = byRepo[r.id] || []; r.paper_index_count = paperBy[r.id] || 0; });
+  // Census (2026-09-15): every card carries whether a census is possible, the open run's progress, the last
+  // finished run and a cheap disk-vs-index drift ("6 new, 2 changed since") — the source of the card's census line.
+  for (var ci = 0; ci < rows.length; ci++) {
+    try { rows[ci].census = await sourceCensus.status(rows[ci]); } catch (e) { rows[ci].census = { available: false, reason: 'census status unavailable', current: null, last: null, drift: null }; }
+  }
   res.json({ repositories: rows });
 });
 
@@ -119,6 +125,39 @@ router.patch('/:id', requireAuth, EDIT, async function(req, res){
 router.delete('/:id', requireAuth, EDIT, async function(req, res){
   await run('DELETE FROM record_repositories WHERE id = ?', [req.params.id]);
   res.json({ success: true });
+});
+
+// ===== SOURCE CENSUS (2026-09-15, inventory slice 1) =====
+// Start a census: one per source at a time, queued behind any running one, background job. Same bar as
+// source configuration (a census is setup work; it reads the city's files).
+router.post('/:id/census', requireAuth, EDIT, async function(req, res) {
+  var actor = { id: req.user && req.user.sub, name: req.user && (req.user.display_name || req.user.name || req.user.email) };
+  var out = await sourceCensus.request(req.params.id, actor);
+  if (out.error) return res.status(out.status || 400).json({ error: out.error, run_id: out.run_id || null });
+  res.status(202).json({ run_id: out.run_id, position: out.position, queued_behind: out.queued_behind });
+});
+// Poll: availability, the open run with progress, the last finished run, drift.
+router.get('/:id/census', requireAuth, async function(req, res) {
+  var repo = await get('SELECT * FROM record_repositories WHERE id = ?', [req.params.id]);
+  if (!repo) return res.status(404).json({ error: 'Source not found' });
+  res.json(await sourceCensus.status(repo));
+});
+// The Inventory Information payload.
+router.get('/:id/inventory', requireAuth, async function(req, res) {
+  var repo = await get('SELECT * FROM record_repositories WHERE id = ?', [req.params.id]);
+  if (!repo) return res.status(404).json({ error: 'Source not found' });
+  res.json(await sourceCensus.inventory(repo));
+});
+// Stream one indexed document (View sample). Only files the census indexed, only inside the source root.
+router.get('/:id/inventory/file/:fp', requireAuth, EDIT, async function(req, res) {
+  var repo = await get('SELECT * FROM record_repositories WHERE id = ?', [req.params.id]);
+  if (!repo) return res.status(404).json({ error: 'Source not found' });
+  var f = await sourceCensus.fileOf(repo, req.params.fp);
+  if (!f) return res.status(404).json({ error: 'That file is not in this source\'s inventory' });
+  if (f.row.file_type !== 'pdf') return res.status(415).json({ error: 'Only PDF documents can be previewed.' });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline; filename="' + path.basename(f.row.filename).replace(/"/g, '') + '"');
+  fs.createReadStream(f.fullPath).pipe(res);
 });
 
 router.post('/ai-configure', requireAuth, EDIT, async function(req, res) {

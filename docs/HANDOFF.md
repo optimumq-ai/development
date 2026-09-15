@@ -10787,3 +10787,34 @@ stable groupings store, run table, progress, one-at-a-time queue, incremental) +
 card (Inventory door, census line, running/empty states); S3 Associate + View sample + the three doors (redaction template /
 redact by hand / No redaction needed as a guarded PATCH); S4 Find variants rewired to the census store, Scan source retired, nav
 rename "Identical Grouping"; S5 data-system census (kinds) later. Starting S1.
+
+## 2026-09-15 (f) — SLICE 1 BUILT: the source census (two passes, OCR second, recursive, stable groupings, one at a time) + API
+
+**Built** (`backend/src/services/sourceCensus.js`, schema additions, `connectors/filestore.js` recursive `listFiles`/`listAll`,
+`docFingerprint.extractFeaturesOcr` + `featuresFromWords` refactor, `docProcessing.ocrPage` exported, routes on
+`/repositories/:id/census|inventory|inventory/file/:fp`, `GET /repositories` carries `census` per source, boot hook
+`recoverInterrupted`, taxonomy `preview-source-file` accepts sub-folder paths): one census per source, ONE at a time
+(in-process queue with position + "queued behind"), background job with phase/progress; pass 1 text-layer fingerprints,
+pass 2 local tesseract OCR of scans (no opt-in, no fee; OCR features carry no title veto — glyph-box heights are
+content-dependent and split a scan from its own template); every file counted (`kind` doc | unreadable | unsupported);
+incremental (hash-kept rows never re-read; new/changed/removed counted; drift by name+size for the card); groupings in
+`census_groupings` with STABLE ids (prior membership, then signature), exact counts, layout, folder hints, examples;
+recognition against every stored variant signature (associated groupings); redaction posture derived from the record type at
+read time; the census writes NOTHING into taxonomy. Spec: `SPEC_sources_imports_connectors.md` §6.
+**Evidence:** `verify_source_census` **51/51** (gates · 15-file drive with sub-folders, 2 scans OCR'd into their pile, blank scan
+unreadable, .docx/.txt unsupported · groupings exact · file streaming + traversal refusal · incremental refresh 1/1/1 with 12
+kept and ids stable · approval-then-census recognition (association is the approval's doing) · one-at-a-time queue · sources
+list census line · cleanup) + `verify_fingerprint_discovery` 24/24, `variant_discovery` 12, `sources_list` 3, `mass_handoff`
+14, `taxonomy_variants` 18 — live untouched. **Live:** API restarted on the new code; first real census on Development Services
+Shared Drive (`census-2bd5cf2c`): 160 files, 160 kept, 8 associated groupings = the 8 draft variants (25/25/25/25 uniform,
+20/20 few_layouts, 10/10 uniform), 0 ungrouped, all `waiting`, 1.3 s. Full suite launched in the background — verdict in
+`/tmp/oq-shot/full2.status` / `full2.log`.
+**Findings while building:** (1) `docProcessing.ocrPage` was never exported (only used internally) — fixed; (2) title veto vs OCR
+(above); (3) the 8 live draft variants have 0 `record_type_repositories` links (approved before 2026-09-14's link-on-approval),
+so the inventory's `linked_types` shows the buckets with `count_here 0` while the variants hold the counts — slice 2 shows
+variants under their bucket from the groupings; a one-off backfill of variant links from stamped fingerprints is a small
+option for Kevin.
+**NEXT: slice 2** — the screens: source card (Inventory door, census line, running/queued/never states), Inventory Information
+(stats · file types · groupings table · Everything-else file list · linked types · history), never-censused state, View sample
+(stream + label set). Then slice 3 (Associate + three doors), slice 4 (Find variants on the census store, Scan source retired,
+nav rename), slice 5 (data-system census).

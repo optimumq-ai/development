@@ -190,6 +190,7 @@ async function start() {
     require('./src/services/taskRouting').startReconciler();
     require('./src/services/effectiveConfig').startPromotionScheduler();
     require('./src/services/importIngest').startScheduler();
+    require('./src/services/sourceCensus').recoverInterrupted().catch(function(e){ console.error('[census recover]', e && e.message); });
   });
 }
 

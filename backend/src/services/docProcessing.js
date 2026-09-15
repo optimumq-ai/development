@@ -123,4 +123,4 @@ async function processFile(fileId) {
   return { fileId: fileId, pageCount: pageCount, needsOcr: needsOcr, ocrPages: ocrPages, pages: pages };
 }
 
-module.exports = { processFile: processFile, parseBboxPage: parseBboxPage, PROCESSED_DIR: PROCESSED_DIR, UPLOAD_DIR: UPLOAD_DIR };
+module.exports = { processFile: processFile, parseBboxPage: parseBboxPage, PROCESSED_DIR: PROCESSED_DIR, UPLOAD_DIR: UPLOAD_DIR, ocrPage };

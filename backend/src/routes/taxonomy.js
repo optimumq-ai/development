@@ -222,7 +222,8 @@ router.get('/preview-source-file', requireAuth, EDIT, async function(req, res) {
   var pathMod = require('path'), fsMod = require('fs');
   var repoId = String(req.query.repository_id || ''), filename = String(req.query.filename || '');
   if (!repoId || !filename) return res.status(400).json({ error: 'repository_id and filename are required' });
-  if (filename !== pathMod.basename(filename) || filename.indexOf('..') !== -1) return res.status(400).json({ error: 'Invalid filename' });
+  // Sub-folder paths are legitimate since the recursive census (2026-09-15); traversal segments and absolute paths are not.
+  if (pathMod.isAbsolute(filename) || filename.indexOf('..') !== -1 || filename.indexOf('\\') !== -1) return res.status(400).json({ error: 'Invalid filename' });
   if (!/\.pdf$/i.test(filename)) return res.status(415).json({ error: 'Only PDF examples can be previewed.' });
   var indexed = await get('SELECT id FROM document_fingerprints WHERE repository_id = ? AND filename = ?', [repoId, filename]);
   if (!indexed) return res.status(404).json({ error: 'That file is not in the discovery index for this source.' });
