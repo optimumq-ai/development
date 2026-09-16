@@ -2012,3 +2012,14 @@ CREATE TABLE IF NOT EXISTS ai_calls (
 );
 CREATE INDEX IF NOT EXISTS idx_ai_calls_at ON ai_calls(at);
 CREATE INDEX IF NOT EXISTS idx_ai_calls_caller ON ai_calls(caller);
+
+-- ===== ITEM 7 / S1 (2026-09-16): templates seeded from actual samples — substrate =====
+-- DESIGN_templates_from_samples.md §2–§4, §7. Nothing here changes behaviour for rows that carry NULLs.
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS layout_class TEXT;                 -- static | floating | adhoc | NULL = unknown (census proposes, human confirms)
+ALTER TABLE layout_profiles ADD COLUMN IF NOT EXISTS content_class TEXT;             -- simple | complex (recomputed when zones change)
+ALTER TABLE layout_profiles ADD COLUMN IF NOT EXISTS census_signature TEXT;          -- the grouping's consensus signature JSON: matching gates on isMatch (§7 rule)
+ALTER TABLE layout_profiles ADD COLUMN IF NOT EXISTS vocabulary_source TEXT;         -- pile | file — a file-only vocabulary is "provisional"
+ALTER TABLE layout_profiles ADD COLUMN IF NOT EXISTS rule_ids TEXT;                  -- kind='content': JSON list of the rules the sample's zones cited
+ALTER TABLE layout_profiles ADD COLUMN IF NOT EXISTS proposed_by TEXT;               -- status='proposed': who proposed (name)
+ALTER TABLE layout_profiles ADD COLUMN IF NOT EXISTS proposed_from_request_id TEXT;  -- status='proposed': the request whose document seeded it
+ALTER TABLE layout_profiles ADD COLUMN IF NOT EXISTS review_note TEXT;               -- status='returned': the supervisor's reason

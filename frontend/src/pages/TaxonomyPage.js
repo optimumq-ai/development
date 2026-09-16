@@ -308,6 +308,9 @@ export default function TaxonomyPage() {
                               {kidCount ? <span style={{ marginLeft: '8px' }}>{pill('var(--oq-bg-1f4e79)', 'var(--oq-fg-ffffff)', 'Bucket · ' + kidCount + ' variant' + (kidCount > 1 ? 's' : ''))}</span> : null}</div>
                             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                               {t.auto_release_eligible === 1 ? pill('var(--oq-bg-e1effe)', 'var(--oq-fg-1e429f)', 'Auto-release') : null}
+                              {/* Item 7 S1: which types still need an estimate template — visible without opening each one */}
+                              {t.estimate && t.estimate.state !== 'none' ? pill('var(--oq-bg-e1f2e9)', 'var(--oq-fg-1b8a5a)', t.estimate.state === 'seeded' ? 'Estimate: seeded' : 'Estimate: ' + t.estimate.n + ' request' + (t.estimate.n === 1 ? '' : 's') + (t.estimate.inherited ? ' (parent)' : '')) : pill('var(--oq-bg-f6ebd6)', 'var(--oq-fg-9a6512)', 'Estimate: none yet')}
+                              {t.layout_class ? pill('var(--oq-bg-f0f2f5)', 'var(--oq-fg-5b6b7a)', t.layout_class === 'adhoc' ? 'Free text' : (t.layout_class === 'floating' ? 'Floating layout' : 'Static layout')) : null}
                               {pill(av.bg, av.fg, av.label)}
                               {t.fulfillment_method && t.fulfillment_method !== 'electronic_search' ? pill('var(--oq-bg-f5f3ff)', 'var(--oq-fg-6d28d9)', t.fulfillment_method === 'paper_index' ? 'Paper \u00b7 on-site' : (t.fulfillment_method === 'bulk_export' ? 'Bulk export' : 'Manual collection')) : null}
                               {!isVariant ? <button onClick={function(){ findVariants(t); }} title="Scan this type's holdings and let the AI propose variants, with document counts"

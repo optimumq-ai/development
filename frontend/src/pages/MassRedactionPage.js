@@ -86,6 +86,14 @@ export default function MassRedactionPage() {
     try { await api.post('/redaction-templates/opportunities/' + o.record_type_id + '/dismiss'); load(); }
     catch (e) { alert('Could not remove the suggestion.'); }
   }
+  async function approve(t) {
+    if (!window.confirm('Approve "' + t.name + '"? Matching documents of its record type will be redacted automatically.')) return;
+    try { await api.post('/redaction-templates/' + t.id + '/approve'); await load(); } catch (e) { alert((e.response && e.response.data && e.response.data.error) || 'Could not approve.'); }
+  }
+  async function sendBack(t) {
+    var note = window.prompt('Return "' + t.name + '" to ' + (t.proposed_by || 'the proposer') + ' — what needs to change?'); if (note === null) return;
+    try { await api.post('/redaction-templates/' + t.id + '/return', { note: note }); await load(); } catch (e) { alert((e.response && e.response.data && e.response.data.error) || 'Could not return it.'); }
+  }
   async function remove(t) {
     if (!window.confirm('Delete the template "' + t.name + '"? This does not affect any documents already redacted with it.')) return;
     try { await api.delete('/redaction-templates/' + t.id); load(); } catch (e) { alert('Could not delete the template.'); }
@@ -310,7 +318,9 @@ export default function MassRedactionPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
                     <span style={{ fontWeight: '700', fontSize: '14.5px', color: 'var(--oq-fg-1f4e79)' }}>{t.name}</span>
-                    <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: t.kind === 'fields' ? 'var(--oq-fg-3730a3)' : 'var(--oq-fg-374151)', background: t.kind === 'fields' ? 'var(--oq-bg-e0e7ff)' : 'var(--oq-bg-f3f4f6)' }}>{t.kind === 'fields' ? 'FIELDS' : 'PAGES'}</span>
+                    <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: t.kind === 'fields' ? 'var(--oq-fg-3730a3)' : 'var(--oq-fg-374151)', background: t.kind === 'fields' ? 'var(--oq-bg-e0e7ff)' : 'var(--oq-bg-f3f4f6)' }}>{t.kind === 'fields' ? 'FIELDS' : (t.kind === 'content' ? 'CONTENT' : 'PAGES')}</span>
+                    {t.status === 'proposed' ? <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: 'var(--oq-fg-9a6512)', background: 'var(--oq-bg-f6ebd6)' }} title={'Proposed' + (t.proposed_by ? ' by ' + t.proposed_by : '') + (t.proposed_from_request_id ? ' from ' + t.proposed_from_request_id : '') + ' — awaiting a supervisor'}>PROPOSED</span> : null}
+                    {t.provisional && t.status === 'active' && t.kind === 'pages' ? <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: 'var(--oq-fg-6b7280)', background: 'var(--oq-bg-f3f4f6)' }} title="Fingerprinted from one file before a census existed — matches on vocabulary alone">PROVISIONAL</span> : null}
                   </div>
                   {t.description ? <div style={{ fontSize: '12.5px', color: 'var(--oq-fg-6b7280)', marginBottom: '3px' }}>{t.description}</div> : null}
                   <div style={{ fontSize: '12px', color: 'var(--oq-fg-9ca3af)' }}>
@@ -321,8 +331,10 @@ export default function MassRedactionPage() {
                   </div>
                 </div>
                 <button onClick={function () { openView(t); }} title="See what this template redacts" style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>View</button>
-                <button onClick={function () { scheduleJob(t); }} title="Queue a large batch for overnight processing" style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Schedule job</button>
-                <button onClick={function () { runBatch(t); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Run batch</button>
+                {t.status === 'proposed' ? <button onClick={function () { approve(t); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Approve</button> : null}
+                {t.status === 'proposed' ? <button onClick={function () { sendBack(t); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid var(--oq-ln-e5e7eb)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-374151)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Return</button> : null}
+                {t.status === 'proposed' || t.kind === 'content' ? null : <button onClick={function () { scheduleJob(t); }} title="Queue a large batch for overnight processing" style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--oq-ln-1f4e79)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-1f4e79)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Schedule job</button>}
+                {t.status === 'proposed' || t.kind === 'content' ? null : <button onClick={function () { runBatch(t); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--oq-bg-1f4e79)', color: 'var(--oq-fg-ffffff)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Run batch</button>}
                 <button onClick={function () { remove(t); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid var(--oq-ln-fca5a5)', background: 'var(--oq-bg-ffffff)', color: 'var(--oq-fg-dc2626)', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
               </div>
             );

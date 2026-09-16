@@ -15,6 +15,7 @@
 // association time (slice 3), never here.
 var fs = require('fs');
 var path = require('path');
+var seeding = require('./templateSeeding');
 var crypto = require('crypto');
 var { all, get, run } = require('../db');
 var { v4: uuidv4 } = require('uuid');
@@ -445,16 +446,27 @@ async function status(repo, opts) {
 }
 
 // Redaction posture of an associated grouping — derived from its record type, never stored on the grouping.
-async function redactionPosture(rt) {
+// Item 7 S1 widened the vocabulary (DESIGN_templates_from_samples §4, §6): an ACTIVE pages/fields template →
+// template_ready, unless the variant's layout class is floating → 'holds' (S4 pre-places, never burns); an active
+// 'content' profile → 'assisted' (redact by hand, AI pre-scoped — never mass-applies); a PROPOSED template →
+// 'proposed' (a supervisor approves from this row). Returned/deleted rows count for nothing.
+async function redactionDetail(rt) {
   if (!rt) return null;
-  var tpl = await get("SELECT 1 AS ok FROM layout_profiles WHERE record_type_id = ? AND status != 'deleted' LIMIT 1", [rt.id]);
-  if (tpl) return 'template_ready';
-  if (rt.auto_release_eligible && rt.public_availability === 'releasable') return 'no_redaction';
+  var rows = await all("SELECT id, name, kind, status, census_signature, vocabulary_source, content_class, proposed_by, proposed_from_request_id, created_at FROM layout_profiles WHERE record_type_id = ? AND status IN ('active','proposed') ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, created_at DESC", [rt.id]);
+  var active = rows.filter(function (r) { return r.status === 'active' && r.kind !== 'content'; });
+  var content = rows.filter(function (r) { return r.status === 'active' && r.kind === 'content'; });
+  var proposed = rows.filter(function (r) { return r.status === 'proposed'; });
+  function tpl(r) { return { id: r.id, name: r.name, kind: r.kind || 'pages', status: r.status, content_class: r.content_class || null, provisional: (r.kind || 'pages') === 'pages' && !r.census_signature, proposed_by: r.proposed_by || null, proposed_from_request_id: r.proposed_from_request_id || null }; }
+  if (active.length) return { posture: rt.layout_class === 'floating' ? 'holds' : 'template_ready', template: tpl(active[0]), proposed: proposed.map(tpl) };
+  if (content.length) return { posture: 'assisted', template: tpl(content[0]), proposed: proposed.map(tpl) };
+  if (proposed.length) return { posture: 'proposed', template: tpl(proposed[0]), proposed: proposed.map(tpl) };
+  if (rt.auto_release_eligible && rt.public_availability === 'releasable') return { posture: 'no_redaction', template: null, proposed: [] };
   var meta = parseJson(rt.discovery_meta, {});
-  if (meta && meta.redact_by_hand) return 'redact_by_hand';
-  if (rt.mass_redaction_candidate) return 'waiting';
-  return 'none';
+  if (meta && meta.redact_by_hand) return { posture: 'redact_by_hand', template: null, proposed: [] };
+  if (rt.mass_redaction_candidate) return { posture: 'waiting', template: null, proposed: [] };
+  return { posture: 'none', template: null, proposed: [] };
 }
+async function redactionPosture(rt) { var d = await redactionDetail(rt); return d ? d.posture : null; }
 
 async function inventory(repo) {
   var cfg = cfgOf(repo);
@@ -473,9 +485,9 @@ async function inventory(repo) {
   var grows = await all('SELECT * FROM census_groupings WHERE repository_id = ? ORDER BY member_count DESC, ordinal', [repo.id]);
   var groupings = [];
   for (var i = 0; i < grows.length; i++) {
-    var g = grows[i], rt = null, parent = null;
+    var g = grows[i], rt = null, parent = null, rdet = null;
     if (g.record_type_id) {
-      rt = await get('SELECT id, name, status, parent_record_type_id, public_availability, auto_release_eligible, mass_redaction_candidate, discovery_meta FROM record_types WHERE id = ?', [g.record_type_id]);
+      rt = await get('SELECT id, name, status, parent_record_type_id, public_availability, auto_release_eligible, mass_redaction_candidate, discovery_meta, layout_class FROM record_types WHERE id = ?', [g.record_type_id]);
       if (rt && rt.parent_record_type_id) parent = await get('SELECT id, name FROM record_types WHERE id = ?', [rt.parent_record_type_id]);
     }
     var exIds = parseJson(g.example_ids, []);
@@ -486,7 +498,11 @@ async function inventory(repo) {
       folders: parseJson(g.folders, []),
       labels: (gsig.labels || []).slice(0, 14),          // the field labels the layout owns (View sample)
       record_type: rt ? { id: rt.id, name: rt.name, status: rt.status, parent: parent ? { id: parent.id, name: parent.name } : null } : null,
-      redaction: await redactionPosture(rt),
+      redaction: (rdet = await redactionDetail(rt)) ? rdet.posture : null,
+      redaction_detail: rdet,                            // item 7 S1: the template behind the posture (proposed / provisional / holds / assisted)
+      layout_class: rt ? (rt.layout_class || null) : null,   // §2a: confirmed on the variant; null = unknown
+      layout_class_proposed: rt && !rt.layout_class ? (g.layout === 'uniform' ? 'static' : (g.layout === 'few_layouts' ? 'floating' : null)) : null,
+      estimate: rt ? await seeding.estimatePosture(rt.id, rt.parent_record_type_id) : null,   // §6 second status column (read-only until S3)
       decisions: (function () { var m = rt ? (parseJson(rt.discovery_meta, {}) || {}) : {}; return { no_redaction: m.no_redaction ? { by_name: m.no_redaction.by_name, at: m.no_redaction.at, reason: m.no_redaction.reason } : null, redact_by_hand: m.redact_by_hand || null }; })(),
       examples: examples.map(function (e) { return { fingerprint_id: e.id, filename: e.filename, ocr: !!e.ocr }; }),
       first_seen_run_id: g.first_seen_run_id, last_seen_run_id: g.last_seen_run_id
@@ -526,6 +542,7 @@ async function fileOf(repo, fingerprintId) {
 }
 
 module.exports = {
+  redactionPosture: redactionPosture, redactionDetail: redactionDetail,   // item 7 S1: the posture behind the inventory row
   request: request, awaitRun: awaitRun, recoverInterrupted: recoverInterrupted,
   status: status, inventory: inventory, drift: drift, availability: availability, fileOf: fileOf, associateKind: associateKind, renderRecord: renderRecord, typeField: typeField,
   execute: execute, regroup: regroup,

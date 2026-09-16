@@ -10999,3 +10999,49 @@ templates in censused sources (Kevin D5). Vocabulary-only stays for legacy templ
 **NEXT:** Kevin's seven decisions (§9) → S1 in a fresh session (substrate + the matching gate; harness
 `verify_templates_from_samples` with the §7 matrix as fixtures) → mockup session for the done card → S2–S4. Standing items
 unchanged (fixture-vs-live drift, owner-less buckets, guided removal, 1e/inspection/min-fee, Kevin's item-6 markup, billing).
+
+## 2026-09-16 (c) — ITEM 6 CLOSED (Kevin: no markup); Kevin took D1–D7; ITEM 7 SLICE S1 BUILT (`verify_templates_from_samples` 43/43)
+
+**Session shape:** Kevin's questions first (the trust prompt = launching from /home not /opt; item-6 status; "is there a view of
+all redaction templates" → Mass Redaction lists all; "which items need an estimate template" → nowhere, and the save-at-done
+pop-up → not built, it IS item 7). Kevin: "close item 6, take all seven recommendations, start S1." Built in this session
+(~150k context at the end). Full suite launched detached after the slice — verdict in the commit message / next entry.
+**Built (S1 substrate + safety, plus the two status views Kevin asked for):**
+- Schema: `record_types.layout_class`; `layout_profiles.content_class · census_signature · vocabulary_source · rule_ids ·
+  proposed_by · proposed_from_request_id · review_note`. New service `services/templateSeeding.js` (census context, proposed
+  layout class, pile vocabulary, content class, target fingerprint at match time, the signature gate, `adoptCensus` /
+  `backfillSignatures`, `estimatePosture`).
+- `POST /redaction-templates`: open to redaction workers → PROPOSE (status proposed, source sample, proposer + request kept);
+  supervisor saves directly; `kind='content'` (rule_ids, activates directly, never matches); `layout_class` in the body is the
+  human's confirmation and is written to the type (never silently — D7). `POST /:id/approve`, `POST /:id/return` (note).
+  `safetyScore` gates on the census signature FIRST (veto → score 0, `gate='fingerprint_veto'`) so match / match-batch /
+  apply-batch / massJobs all hold with no further change. Boot backfill (D5 retroactive) — on live it adopted the census for
+  Kevin's "Certificate of Occupancy Auto Redaction template" (now `pile`, signature, not provisional).
+- Census posture: `redactionDetail` → posture + template facts; new postures `proposed` · `holds` (floating) · `assisted`
+  (content); rows carry `layout_class`, `layout_class_proposed`, `estimate`. Taxonomy list: `attachEstimate` (own row, else
+  parent → inherited); PATCH accepts `layout_class` (422 on garbage).
+- UI (minimal, S2 restyles after the mockup session): task screen "Generate reusable template" carries `record_type_id` and
+  proposes (finding A fixed); Inventory row: new postures, layout chip ("Static?" while only proposed), **Estimate** column,
+  Approve › / Return › on a proposal, "provisional match" note; Taxonomy row: **Estimate: none yet / N requests / seeded**
+  chip + layout chip; Mass Redaction: PROPOSED / PROVISIONAL / CONTENT badges, Approve / Return, no batch on a proposal or a
+  content profile. Frontend built.
+**Evidence:** harness fixture = one long-form pile (6, filled-in words vary) + two short notices sharing letterhead and labels
+(5 + 5, title differs). Measured in the run: one-sample vocabulary **85** vs pile **100** on the same form (finding B);
+Standard-notice vocabulary **93 against the Extended notice** (would burn), gated → **0 fingerprint_veto**; another Standard →
+100 (finding C). Gates: no-menu user 403; worker direct save 403 PROPOSE_ONLY; worker approve 403; approve twice 409;
+proposed never matches; content never matches / apply-batch 400; returned rows count for nothing; legacy template listed
+provisional, backfill adopts the pile; never-censused type stays provisional (gate not applied); estimate inherited from the
+parent on both the row and the taxonomy list. Live untouched.
+**Findings:** (1) the engine's `safetyScore` scores text already extracted — the routes extract on demand, the harness must
+`processFile` first; (2) `pkill -f run_suite.js` from a Claude shell kills the shell itself (the pattern is in its own command
+line) — launch the full suite with `nohup setsid … & disown`, never pkill by that pattern.
+**NOT built (by design):** the done card + Inventory "Review ›" restyle (S2, mockup session first); floating HOLD mode (S4);
+estimate learning at close (S3 — the Estimate column is read-only until then); "3 clean completions → No-redaction door"
+(S2, needs a zone count at completion); the task screen still cannot ask the layout-class radio (the S2 card does).
+**NEXT:** mockup session for the done card (S2) → S3 (estimate at close) → S4. Standing items unchanged (fixture-vs-live drift,
+owner-less buckets, guided removal, 1e/inspection/min-fee, billing choice).
+**Full suite after S1: 3116 passed / 1 failed** — `verify_bw9_golive` E1a (standing red); `verify_stage_bypass` is 35/35 now.
+The runner's live census reported `request_history 1621 → 1622`: the row is the LIVE backend's own Tickler
+(`REQUEST_STALLED`, "No activity in more than 21 days", 03:52:55 UTC) firing at boot after the restart for this slice — not the
+suite, not S1. Restarting the backend right before a full suite will trip the census this way; restart first, wait for the
+tickler line in the log, then run the suite.

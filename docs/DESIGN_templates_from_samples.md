@@ -1,6 +1,6 @@
 # Estimate + redaction templates seeded from actual record samples
 
-**Status:** DESIGN for Kevin's decisions — 2026-09-16. Markup item 7 ("save a template at done when none exists for the
+**Status:** Kevin took all seven recommendations (D1–D7) on 2026-09-16; **S1 BUILT** the same day (`verify_templates_from_samples` 43/43, plus the Estimate chip on the taxonomy list and inventory row pulled forward from S3). S2–S4 open. Originally: DESIGN for Kevin's decisions — 2026-09-16. Markup item 7 ("save a template at done when none exists for the
 record type/variant; static vs floating vs ad-hoc layouts; simple vs complex redaction content"). Nothing built.
 **Authority:** this document > the item-6 canvas annotation `templates` > the two live screens. Binding specs once built:
 `SPEC_redaction.md` §5 (templates), `SPEC_fees_estimates_payments.md` §2 (estimate profiles),

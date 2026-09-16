@@ -23,6 +23,8 @@ const docProcessing = require('../services/docProcessing');
 const redactionApply = require('../services/redactionApply');
 const structuredRedaction = require('../services/structuredRedaction');
 const libraryShelf = require('../services/libraryShelf');
+const seeding = require('../services/templateSeeding');   // item 7 S1: census signature gate, pile vocabulary, classes
+const processingHistory = require('../services/processingHistory');
 
 function isElevatedReq(req) { return isElevated(req.user); }   // S4: authority-based (see middleware/auth ELEVATED)
 async function activeJurisdiction() {
@@ -40,15 +42,8 @@ async function fieldsScore(cols, fileId) {
   return { score: Math.round(100 * inter / cols.length), rowCount: pv.rowCount, file_columns: pv.columns };
 }
 
-// Tokenize text into the set of "structural" words (labels/captions), dropping pure numbers
-// (which are the variable filled-in values), so the fingerprint reflects the FORM, not the data.
-function tokenize(text) {
-  var set = {};
-  (text || '').toLowerCase().split(/[^a-z0-9]+/).forEach(function (w) {
-    if (w.length >= 3 && w.length <= 24 && /[a-z]/.test(w)) set[w] = 1;
-  });
-  return set;
-}
+// Tokenizer shared with templateSeeding (the pile vocabulary must use the SAME word rule as the target).
+var tokenize = seeding.tokenize;
 // Layout fingerprint = the form's static vocabulary + page count, stored as JSON so two docs can be compared.
 async function buildFingerprint(fileId) {
   if (!fileId) return null;
@@ -73,13 +68,19 @@ async function fileTokens(fileId) {
 }
 // Safety score 0-100 = what fraction of the template form's vocabulary appears in the target doc.
 // Same-form docs score high; a different form scores low (so we don't redact blind coordinates onto it).
+// ITEM 7 §7 RULE: a template that carries a census signature matches only when the target's census fingerprint
+// isMatch()es it AND the vocabulary clears the threshold. A veto returns score 0 with the reason, so every
+// consumer (match, apply-batch, the mass-job worker) HOLDS the document without knowing why. Legacy templates
+// (no signature) keep vocabulary-only matching and are labelled provisional on the inventory row.
 async function safetyScore(template, fileId) {
+  var gate = await seeding.signatureGate(template, fileId);
   var tt = tokensFromFingerprint(template.layout_fingerprint);
   var keys = Object.keys(tt);
   var ft = await fileTokens(fileId);
-  if (!keys.length) return { score: null, file_pages: ft.pages, template_pages: fpPages(template.layout_fingerprint), matched: 0, template_terms: 0 };
+  if (gate.applies && !gate.pass) return { score: 0, gate: gate.reason || 'fingerprint_veto', file_pages: ft.pages, template_pages: fpPages(template.layout_fingerprint), matched: 0, template_terms: keys.length };
+  if (!keys.length) return { score: null, file_pages: ft.pages, template_pages: fpPages(template.layout_fingerprint), matched: 0, template_terms: 0, gate: gate.applies ? 'fingerprint_match' : null };
   var inter = 0; keys.forEach(function (k) { if (ft.tokens[k]) inter++; });
-  return { score: Math.round(100 * inter / keys.length), file_pages: ft.pages, template_pages: fpPages(template.layout_fingerprint), matched: inter, template_terms: keys.length };
+  return { score: Math.round(100 * inter / keys.length), file_pages: ft.pages, template_pages: fpPages(template.layout_fingerprint), matched: inter, template_terms: keys.length, gate: gate.applies ? 'fingerprint_match' : null };
 }
 // Apply a template's zones to one file -> released redacted copy (shared by single + batch apply).
 async function applyTemplateToFile(t, file, zones, actorName, actorSub, destination) {
@@ -99,32 +100,100 @@ async function applyTemplateToFile(t, file, zones, actorName, actorSub, destinat
   return Object.assign({ jobId: jobId }, result);
 }
 
-// POST / -> create a template from zones (elevated)
-router.post('/', requireAuth, async function(req, res) {
-  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can create templates' });
+// POST / -> create a template. Three kinds: 'pages' (zones), 'fields' (a field map), 'content' (item 7 §3: no
+// zones, the rules an ad-hoc type's redactions cite — never mass-applies). Who may write what (Kevin D1):
+//   supervisor+ ............ saves directly (status 'active'), or 'proposed' if the body asks for it
+//   redaction worker ....... PROPOSES (status forced to 'proposed'; a supervisor approves from the inventory row)
+//   a 'content' profile .... activates directly for anyone allowed here (it burns nothing)
+// When the type has a census grouping the template takes the grouping's SIGNATURE and PILE VOCABULARY (§7);
+// otherwise it keeps the one-file vocabulary and is labelled provisional. `layout_class` in the body is the
+// human's confirmation of the census's proposal (§2a) and is written to the record type (Kevin D7).
+function redactionWorkOrElevated(req, res, next) { if (isElevatedReq(req)) return next(); return requireRedactionWork(req, res, next); }
+router.post('/', requireAuth, redactionWorkOrElevated, async function(req, res) {
+  var elevated = isElevatedReq(req);
   var b = req.body || {};
   if (!b.name) return res.status(400).json({ error: 'name is required' });
-  var kind = b.kind === 'fields' ? 'fields' : 'pages';
-  var zonesJson = '[]', fieldMapJson = null, fingerprint = null;
-  var srcFile = b.source_file_id ? await get('SELECT original_name, filename FROM request_files WHERE id = ?', [b.source_file_id]) : null;
+  var kind = b.kind === 'fields' ? 'fields' : (b.kind === 'content' ? 'content' : 'pages');
+  if (kind !== 'content' && !elevated && b.status !== 'proposed' && b.propose !== true) {
+    return res.status(403).json({ error: 'Only a supervisor can save a template directly — propose it instead (status "proposed") and a supervisor approves it from the inventory.', code: 'PROPOSE_ONLY' });
+  }
+  var rt = b.record_type_id ? await get('SELECT id, name, layout_class, parent_record_type_id FROM record_types WHERE id = ?', [b.record_type_id]) : null;
+  if (b.record_type_id && !rt) return res.status(422).json({ error: 'Record type not found' });
+  if (b.layout_class !== undefined && b.layout_class !== null && seeding.LAYOUT_CLASSES.indexOf(b.layout_class) === -1) return res.status(422).json({ error: 'layout_class must be static, floating or adhoc' });
+  var zonesJson = '[]', fieldMapJson = null, fingerprint = null, ruleIdsJson = null, contentClass = null, censusSig = null, vocab = null;
+  var srcFile = b.source_file_id ? await get('SELECT original_name, filename, request_id FROM request_files WHERE id = ?', [b.source_file_id]) : null;
+  var layoutClass = b.layout_class || (rt && rt.layout_class) || null;
   if (kind === 'fields') {
     if (!Array.isArray(b.field_map) || !b.field_map.length) return res.status(400).json({ error: 'field_map with at least one field is required' });
     fieldMapJson = JSON.stringify(b.field_map.map(function(f){ return { field: f.field, rule_id: f.rule_id || null }; }));
     var cols = [];
     if (b.source_file_id) { try { var pv = await structuredRedaction.preview(b.source_file_id); cols = pv.columns || []; } catch (e) {} }
     fingerprint = JSON.stringify({ v: 1, kind: 'fields', columns: cols });
+  } else if (kind === 'content') {
+    var rids = Array.isArray(b.rule_ids) ? b.rule_ids.filter(Boolean) : [];
+    if (!rids.length && Array.isArray(b.zones)) b.zones.forEach(function (z) { if (z.rule_id && rids.indexOf(z.rule_id) === -1) rids.push(z.rule_id); });
+    if (!rids.length) return res.status(400).json({ error: 'A content profile needs the rules the redactions cited (rule_ids)' });
+    ruleIdsJson = JSON.stringify(rids);
+    var titles = await seeding.ruleTitlesFor(rids.map(function (r) { return { rule_id: r }; }));
+    contentClass = seeding.contentClass(rids.map(function (r) { return { rule_id: r }; }), titles, null);
+    layoutClass = layoutClass || 'adhoc';
   } else {
     if (!Array.isArray(b.zones) || !b.zones.length) return res.status(400).json({ error: 'name and at least one zone are required' });
-    zonesJson = JSON.stringify(b.zones.map(function(z){ return { page_no: z.page_no || 1, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: z.label || null }; }));
-    fingerprint = await buildFingerprint(b.source_file_id);
+    var zones = b.zones.map(function(z){ return { page_no: z.page_no || 1, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: z.label || null }; });
+    zonesJson = JSON.stringify(zones);
+    if (!layoutClass && rt) layoutClass = (await seeding.proposedLayoutClass(rt.id)).layout_class;
+    contentClass = seeding.contentClass(zones, await seeding.ruleTitlesFor(zones), layoutClass);
+    var pile = rt ? await seeding.pileVocabulary(rt.id) : null;
+    if (pile) {
+      fingerprint = JSON.stringify({ v: 2, name: srcFile ? (srcFile.original_name || srcFile.filename) : 'pile', pages: pile.pages, tokens: pile.tokens, pile_members: pile.members, grouping_id: pile.grouping_id });
+      censusSig = pile.signature ? JSON.stringify(pile.signature) : null; vocab = 'pile';
+    } else {
+      fingerprint = await buildFingerprint(b.source_file_id);
+      var ctx = rt ? await seeding.censusContext(rt.id) : null;
+      censusSig = ctx && ctx.signature ? JSON.stringify(ctx.signature) : null; vocab = fingerprint ? 'file' : null;
+    }
   }
+  var status = kind === 'content' ? 'active' : ((!elevated || b.status === 'proposed' || b.propose === true) ? 'proposed' : 'active');
+  var source = b.source === 'sample' || status === 'proposed' ? 'sample' : 'manual';
   var id = uuidv4();
-  await run('INSERT INTO layout_profiles (id, name, record_type_id, description, zones, kind, field_map, source, status, source_file_id, source_filename, layout_fingerprint, safety_threshold, processing_manager_name, processing_manager_email, created_by, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
-    [id, b.name, b.record_type_id || null, b.description || null, zonesJson, kind, fieldMapJson, 'manual', 'active',
+  await run('INSERT INTO layout_profiles (id, name, record_type_id, description, zones, kind, field_map, source, status, source_file_id, source_filename, layout_fingerprint, safety_threshold, processing_manager_name, processing_manager_email, created_by, content_class, census_signature, vocabulary_source, rule_ids, proposed_by, proposed_from_request_id, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
+    [id, b.name, rt ? rt.id : null, b.description || null, zonesJson, kind, fieldMapJson, source, status,
      b.source_file_id || null, srcFile ? (srcFile.original_name || srcFile.filename) : null,
      fingerprint, b.safety_threshold != null ? b.safety_threshold : 80,
-     b.processing_manager_name || null, b.processing_manager_email || null, req.user.sub]);
-  res.json({ success: true, template: await get('SELECT * FROM layout_profiles WHERE id = ?', [id]) });
+     b.processing_manager_name || null, b.processing_manager_email || null, req.user.sub,
+     contentClass, censusSig, vocab, ruleIdsJson,
+     status === 'proposed' ? (req.user.name || req.user.email || req.user.sub) : null,
+     status === 'proposed' ? ((srcFile && srcFile.request_id) || b.request_id || null) : null]);
+  if (rt && b.layout_class !== undefined && (b.layout_class || null) !== (rt.layout_class || null)) {
+    await run("UPDATE record_types SET layout_class = ?, updated_at = to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS') WHERE id = ?", [b.layout_class || null, rt.id]);
+  }
+  var saved = await get('SELECT * FROM layout_profiles WHERE id = ?', [id]);
+  await processingHistory.record('layout_profile', id, status === 'proposed' ? 'template_proposed_from_sample' : 'template_created', req.user,
+    { kind: kind, record_type_id: rt ? rt.id : null, zones: kind === 'pages' ? JSON.parse(zonesJson).length : 0, content_class: contentClass, layout_class: layoutClass, vocabulary: vocab, request_id: saved.proposed_from_request_id || null });
+  res.json({ success: true, status: status, template: saved, layout_class: layoutClass, content_class: contentClass, provisional: kind === 'pages' && !censusSig });
+});
+
+// POST /:id/approve — a supervisor+ activates a proposed template (from the inventory row or Mass Redaction).
+router.post('/:id/approve', requireAuth, async function (req, res) {
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can approve a proposed template' });
+  var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
+  if (!t) return res.status(404).json({ error: 'Template not found' });
+  if (t.status !== 'proposed') return res.status(409).json({ error: 'Only a proposed template can be approved (this one is ' + t.status + ')' });
+  await run("UPDATE layout_profiles SET status = 'active', updated_at = datetime('now') WHERE id = ?", [t.id]);
+  await processingHistory.record('layout_profile', t.id, 'template_approved', req.user, { record_type_id: t.record_type_id, proposed_by: t.proposed_by });
+  try { require('../services/setupHub').afterChange('layout_templates', req.user && (req.user.name || req.user.email)).catch(function () {}); } catch (e) {}
+  res.json({ success: true, template: await get('SELECT * FROM layout_profiles WHERE id = ?', [t.id]) });
+});
+// POST /:id/return — a supervisor+ sends a proposal back with a note; the row stays for the record, never matches.
+router.post('/:id/return', requireAuth, async function (req, res) {
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can return a proposed template' });
+  var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
+  if (!t) return res.status(404).json({ error: 'Template not found' });
+  if (t.status !== 'proposed') return res.status(409).json({ error: 'Only a proposed template can be returned' });
+  var note = ((req.body || {}).note || '').trim();
+  await run("UPDATE layout_profiles SET status = 'returned', review_note = ?, updated_at = datetime('now') WHERE id = ?", [note || null, t.id]);
+  await processingHistory.record('layout_profile', t.id, 'template_returned', req.user, { record_type_id: t.record_type_id, note: note || null });
+  res.json({ success: true });
 });
 
 // GET / -> list templates
@@ -134,7 +203,7 @@ router.get('/', requireAuth, async function(req, res) {
     "COALESCE((SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'owner' ORDER BY sort_order LIMIT 1), " +
     "(SELECT department_id FROM record_type_departments WHERE record_type_id = rt.parent_record_type_id AND role = 'owner' ORDER BY sort_order LIMIT 1)) AS owner_department_id " +
     "FROM layout_profiles lp LEFT JOIN record_types rt ON rt.id = lp.record_type_id WHERE lp.status != 'deleted' ORDER BY lp.created_at DESC");
-  res.json({ templates: rows.map(function(t){ return { id: t.id, name: t.name, description: t.description, kind: t.kind || 'pages', record_type_id: t.record_type_id, record_type_name: t.record_type_name, owner_department_id: t.owner_department_id, zone_count: parseZones(t).length, field_count: parseFieldMap(t).length, source_filename: t.source_filename, safety_threshold: t.safety_threshold, status: t.status, created_at: t.created_at }; }) });
+  res.json({ templates: rows.map(function(t){ return { id: t.id, name: t.name, description: t.description, kind: t.kind || 'pages', record_type_id: t.record_type_id, record_type_name: t.record_type_name, owner_department_id: t.owner_department_id, zone_count: parseZones(t).length, field_count: parseFieldMap(t).length, source_filename: t.source_filename, safety_threshold: t.safety_threshold, status: t.status, created_at: t.created_at, content_class: t.content_class || null, provisional: (t.kind || 'pages') === 'pages' && !t.census_signature, vocabulary_source: t.vocabulary_source || null, proposed_by: t.proposed_by || null, proposed_from_request_id: t.proposed_from_request_id || null, review_note: t.review_note || null }; }) });
 });
 
 // GET /opportunities -> variants the discovery scan flagged as mass-redaction candidates that still
@@ -196,7 +265,11 @@ router.patch('/:id', requireAuth, async function(req, res) {
     if (b[k] !== undefined) { sets.push(k + ' = ?'); params.push(b[k]); }
   });
   if (b.safety_threshold !== undefined) { sets.push('safety_threshold = ?'); params.push(b.safety_threshold); }
-  if (Array.isArray(b.zones)) { sets.push('zones = ?'); params.push(JSON.stringify(b.zones)); }
+  if (Array.isArray(b.zones)) {
+    sets.push('zones = ?'); params.push(JSON.stringify(b.zones));
+    var rtl = t.record_type_id ? await get('SELECT layout_class FROM record_types WHERE id = ?', [t.record_type_id]) : null;
+    sets.push('content_class = ?'); params.push(seeding.contentClass(b.zones, await seeding.ruleTitlesFor(b.zones), rtl ? rtl.layout_class : null));
+  }
   if (!sets.length) return res.status(400).json({ error: 'nothing to update' });
   sets.push("updated_at = datetime('now')");
   params.push(req.params.id);
@@ -345,6 +418,7 @@ router.post('/match-batch', requireAuth, async function(req, res) {
     var ft = await fileTokens(fid);
     var best = null;
     for (var j = 0; j < withZones.length; j++) {
+      if (withZones[j].t.census_signature) { var g = await seeding.signatureGate(withZones[j].t, fid); if (g.applies && !g.pass) continue; }   // §7 gate
       var tt = tokensFromFingerprint(withZones[j].t.layout_fingerprint);
       var keys = Object.keys(tt); if (!keys.length) continue;
       var inter = 0; for (var k = 0; k < keys.length; k++) { if (ft.tokens[keys[k]]) inter++; }
@@ -413,5 +487,6 @@ module.exports.engine = {
   fieldsScore: fieldsScore,
   parseZones: parseZones,
   parseFieldMap: parseFieldMap,
-  fpColumns: fpColumns
+  fpColumns: fpColumns,
+  buildFingerprint: buildFingerprint
 };

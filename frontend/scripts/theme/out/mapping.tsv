@@ -57,8 +57,8 @@ value	uses	family	L.fg	L.bg	L.ln	D.fg	D.bg	D.ln
 #66717f	13	neutral	#0c0c0c	#555555	#0c0c0c	#b8b8b8	#777777	#777777
 #1a2230	12	neutral	#0c0c0c	#0c0c0c	#0c0c0c	#ffffff	#555555	#777777
 #17803d	11	green	#0c0c0c	#00cc05	#0c0c0c	#00cc05	#00cc05	#00cc05
-#becad3	11	neutral	#555555	#555555	#0c0c0c	#777777	#777777	#777777
 #1e6091	11	blue	#3c28bc	#3c28bc	#3c28bc	#ffffff	#8d33cc	#8d33cc
+#becad3	11	neutral	#555555	#555555	#0c0c0c	#777777	#777777	#777777
 #48535f	11	neutral	#0c0c0c	#555555	#0c0c0c	#ffffff	#777777	#777777
 #5b6b7a	10	neutral	#0c0c0c	#555555	#0c0c0c	#b8b8b8	#777777	#777777
 #86efac	10	green	#0c0c0c	#00cc05	#0c0c0c	#00cc05	#00cc05	#00cc05
@@ -166,12 +166,12 @@ value	uses	family	L.fg	L.bg	L.ln	D.fg	D.bg	D.ln
 #fbf0e1	2	amber	#0c0c0c	#ffe02c	#0c0c0c	#ffe02c	#0c0c0c	#777777
 #e3b6ba	2	red	#ba1428	#ba1428	#ba1428	#ff0206	#ff0206	#ff0206
 #fdecec	2	red	#ba1428	#ff0206	#0c0c0c	#ff0206	#0c0c0c	#777777
-#e1effe	2	blue	#3c28bc	#ffffff	#0c0c0c	#ffffff	#0c0c0c	#777777
-#1e429f	2	blue	#3c28bc	#3c28bc	#3c28bc	#ffffff	#8d33cc	#8d33cc
 #14532d	2	green	#0c0c0c	#00cc05	#0c0c0c	#00cc05	#00cc05	#00cc05
 #e3eaf0	2	neutral	#ffffff	#b8b8b8	#0c0c0c	#ffffff	#0c0c0c	#777777
 #fce7f3	2	purple	#8d33cc	#ffffff	#0c0c0c	#ffffff	#0c0c0c	#777777
 #9d174d	2	red	#0c0c0c	#ba1428	#ba1428	#ff0206	#ff0206	#ff0206
+#e1effe	2	blue	#3c28bc	#ffffff	#0c0c0c	#ffffff	#0c0c0c	#777777
+#1e429f	2	blue	#3c28bc	#3c28bc	#3c28bc	#ffffff	#8d33cc	#8d33cc
 #0c4a6e	1	blue	#3c28bc	#3c28bc	#3c28bc	#ffffff	#8d33cc	#8d33cc
 #b6d0e8	1	blue	#3c28bc	#3c28bc	#3c28bc	#ffffff	#8d33cc	#8d33cc
 #e5c98a	1	amber	#0c0c0c	#ffe02c	#0c0c0c	#ffe02c	#ffe02c	#ffe02c
@@ -224,8 +224,9 @@ value	uses	family	L.fg	L.bg	L.ln	D.fg	D.bg	D.ln
 #fffdf7	1	amber	#0c0c0c	#ffe02c	#0c0c0c	#ffe02c	#0c0c0c	#777777
 #bfd9f2	1	blue	#3c28bc	#3c28bc	#3c28bc	#ffffff	#8d33cc	#8d33cc
 #fcfcfd	1	neutral	#ffffff	#ffffff	#ffffff	#ffffff	#2a2a2a	#ffffff
-#fffdf5	1	amber	#0c0c0c	#ffe02c	#0c0c0c	#ffe02c	#0c0c0c	#777777
 #047857	1	green	#0c0c0c	#00cc05	#0c0c0c	#00cc05	#00cc05	#00cc05
 #eef0f2	1	neutral	#ffffff	#b8b8b8	#0c0c0c	#ffffff	#0c0c0c	#777777
 #fafcfe	1	neutral	#555555	#ffffff	#0c0c0c	#777777	#2a2a2a	#777777
 #f5f3ff	1	blue	#3c28bc	#ffffff	#0c0c0c	#ffffff	#0c0c0c	#777777
+#f5f9fc	0	blue	#3c28bc	#ffffff	#0c0c0c	#ffffff	#0c0c0c	#777777
+#e5c24a	0	amber	#0c0c0c	#ffe02c	#0c0c0c	#ffe02c	#ffe02c	#ffe02c

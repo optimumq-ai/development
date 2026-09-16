@@ -17,6 +17,25 @@ Job review stages: `pending_review → in_review → released`. **Apply = burn**
 ## 5. Templates & batch application `[BUILT]`
 Redaction **templates** (built from a sample document; `build_redaction_template` task from import ingest): create/edit/sample preview; **match** and **match-batch** (does a doc fit the template?); **apply** and **apply-batch** with candidate listing — the mechanism behind mass redaction of format-static groupings.
 
+**Seeded from actual samples — S1 substrate `[BUILT 2026-09-16 — item 7 slice S1; verify_templates_from_samples 43/43]`**
+(`DESIGN_templates_from_samples.md`; Kevin's D1–D7 all taken.) `POST /redaction-templates` is open to redaction workers, who
+**propose** (`status='proposed'`, `source='sample'`, `proposed_by`, `proposed_from_request_id`); a supervisor+ saves directly
+or approves (`POST /:id/approve`) / returns with a note (`POST /:id/return` → `status='returned'`, never matches). The task
+screen's "Generate reusable template" now carries `record_type_id` (finding A) and proposes. Three kinds: `pages`, `fields`,
+and **`content`** (no zones; `rule_ids`; activates directly for anyone allowed; never returned by match/match-batch; apply-batch
+refuses it). **Classes:** `record_types.layout_class` (static · floating · adhoc · NULL unknown) — the census PROPOSES from the
+grouping (`uniform`→static, `few_layouts`→floating), a human confirms by naming it in the save or on the taxonomy PATCH; never
+set silently (D7). `layout_profiles.content_class` (simple · complex) — simple when every cited rule is detector-backed
+(`redactionAudit.detectorForRule`) OR the layout is static; recomputed when zones change. **Matching rule (§7, D5):** when the
+record type has a census grouping the template stores the grouping's `census_signature` and takes its **pile vocabulary**
+(tokens common to the grouping's example members, `vocabulary_source='pile'`); `safetyScore` first requires the target's census
+fingerprint (`docFingerprint.extractFeatures`, OCR second, computed at match time) to `isMatch` the signature — a veto returns
+score 0 with `gate='fingerprint_veto'`, so match, match-batch, apply-batch and the mass-job worker all HOLD without change. A
+template with no signature matches on vocabulary alone and is labelled **provisional** (list + inventory row). Retroactive:
+`templateSeeding.backfillSignatures()` at boot adopts the census for existing templates whose type has a grouping. Measured in
+the harness fixture: one-sample vocabulary 85 vs pile 100 on the same form; Standard-notice vocabulary 93 against the Extended
+notice, vetoed to 0 by the fingerprint. NOT YET (S2–S4): the done card, floating HOLD mode, the estimate write-back at close.
+
 ## 6. Mass jobs `[BUILT]`
 Durable, resumable, **chunked** background queue (`mass_redaction_jobs`): worker ticks every 60s; runs only inside a configured **work window** (start/end time); respects a **daily budget** cap; per-item error isolation with a merged error log. Feeds the review pipeline (§4). **Library destination `[2026-08-14]`:** each job carries `record_type_id`/`department_id` — where its request-less outputs shelve in the public library (defaulted from the template's linked type + owner department, human-editable at compose; request-attached files keep the request's own shelf). Binding detail: `SPEC_public_library.md` §2a.
 

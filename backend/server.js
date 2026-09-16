@@ -183,6 +183,8 @@ async function start() {
   app.listen(PORT, function() {
     console.log('Optimum Q API running on port ' + PORT);
     require('./src/services/massJobs').startWorker();
+    // Item 7 D5 (retroactive): templates whose record type has a census grouping adopt its signature + pile vocabulary.
+    require('./src/services/templateSeeding').backfillSignatures().then(function (r) { if (r.adopted) console.log('[templates] census signatures adopted: ' + r.adopted + '/' + r.candidates); }).catch(function (e) { console.error('[templates backfill]', e && e.message); });
     require('./src/services/connectors/nena911').ensureSetup().catch(function(e){ console.error('[nena911 setup]', e && e.message); });
     require('./src/services/connectors/nena911').startScheduler();
     require('./src/db').run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, classification, department_id, stage, status, created_at) VALUES ('req-template-samples','SYS-TEMPLATE-SAMPLES','Template Samples','system@optimumq.ai','Holding area for sample records used to build redaction templates.','standard',null,'intake','active',datetime('now')) ON CONFLICT (id) DO NOTHING").catch(function(e){ console.error('[template-samples ensure]', e && e.message); });

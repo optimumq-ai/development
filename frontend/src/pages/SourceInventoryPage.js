@@ -27,13 +27,22 @@ function btn(kind, extra) {
 function when(x) { return x ? String(x).slice(0, 16) : ''; }
 function secs(ms) { if (ms == null) return ''; var s = Math.round(ms / 1000); return s < 60 ? s + ' s' : Math.floor(s / 60) + ' min ' + (s % 60) + ' s'; }
 function errText(e, fb) { return (e && e.response && e.response.data && e.response.data.error) || fb; }
-var GRID = '2.2fr 0.8fr 1fr 2fr 1.7fr 1.1fr';
+var GRID = '2fr 0.7fr 1fr 1.8fr 1.7fr 1.2fr 1fr';
 var REDACTION = {
   template_ready: { kind: 'ok', label: 'Redaction template ready' },
   waiting: { kind: 'warn', label: 'Waiting for a redaction template' },
   no_redaction: { kind: 'ok', label: 'No redaction needed' },
   redact_by_hand: { kind: 'grey', label: 'Redact by hand' },
-  none: { kind: 'grey', label: 'No redaction template' }
+  none: { kind: 'grey', label: 'No redaction template' },
+  proposed: { kind: 'warn', label: 'Redaction template proposed' },          // item 7: a worker's proposal awaits a supervisor
+  holds: { kind: 'warn', label: 'Redaction template (holds for review)' },   // floating layout: pre-places, never burns (S4)
+  assisted: { kind: 'ok', label: 'Redact by hand · assisted' }                // content profile: AI pre-scoped, never mass-applies
+};
+var LAYOUT_CLASS = { static: ['ok', 'Static'], floating: ['warn', 'Floating'], adhoc: ['grey', 'Free text'] };
+var ESTIMATE = function (e) {
+  if (!e || e.state === 'none') return ['warn', 'Estimate: none yet'];
+  var t = e.state === 'seeded' ? 'Estimate: seeded (expert)' : 'Estimate: learned from ' + e.n + ' request' + (e.n === 1 ? '' : 's');
+  return ['ok', t + (e.inherited ? ' · parent' : '')];
 };
 var LAYOUT = { uniform: ['ok', 'Uniform'], few_layouts: ['grey', 'Few layouts'] };
 
@@ -56,6 +65,15 @@ export default function SourceInventoryPage() {
     catch (e) { setErr(errText(e, 'The inventory could not be loaded.')); }
   }, [id]);
   useEffect(function () { load(); }, [load]);
+  // Item 7 S1: the approval door on the row (supervisor+). S2 restyles this after the mockup session.
+  async function approveTemplate(t) {
+    if (!window.confirm('Approve "' + t.name + '" as the redaction template? Documents of this variant that match it will be redacted automatically.')) return;
+    setBusy(t.id); try { await api.post('/redaction-templates/' + t.id + '/approve'); await load(); } catch (e) { alert(errText(e, 'Could not approve.')); } setBusy(null);
+  }
+  async function returnTemplate(t) {
+    var note = window.prompt('Return "' + t.name + '" to the proposer — what needs to change?'); if (note === null) return;
+    setBusy(t.id); try { await api.post('/redaction-templates/' + t.id + '/return', { note: note }); await load(); } catch (e) { alert(errText(e, 'Could not return it.')); } setBusy(null);
+  }
   // Poll while a census is queued or running.
   useEffect(function () {
     if (!inv || !inv.census || !inv.census.current) return;
@@ -263,14 +281,16 @@ export default function SourceInventoryPage() {
               <div style={hint}>Documents that share one layout: 8 of 10 layout features agree, 3 or more documents. Counts are exact — every file with text, native or OCR'd, was fingerprinted. One redaction template drawn on a grouping covers every document in it. A grouping without one has three doors: draw a redaction template · redact by hand · no redaction needed.</div>
             </div>
             <div style={{ padding: '8px 20px 4px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: GRID, gap: '10px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', color: C.faint, textTransform: 'uppercase', letterSpacing: '0.04em' }}><div>Grouping</div><div style={{ textAlign: 'right' }}>Documents</div><div>Layout</div><div>Record type / variant</div><div>Redaction template</div><div /></div>
+              <div style={{ display: 'grid', gridTemplateColumns: GRID, gap: '10px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', color: C.faint, textTransform: 'uppercase', letterSpacing: '0.04em' }}><div>Grouping</div><div style={{ textAlign: 'right' }}>Documents</div><div>Layout</div><div>Record type / variant</div><div>Redaction template</div><div>Estimate</div><div /></div>
               {inv.groupings.map(function (g) {
                 var rt = g.record_type, red = REDACTION[g.redaction] || null, lay = LAYOUT[g.layout] || ['grey', g.layout || '—'];
+                var lc = g.layout_class ? LAYOUT_CLASS[g.layout_class] : (g.layout_class_proposed ? ['grey', (LAYOUT_CLASS[g.layout_class_proposed] || ['', g.layout_class_proposed])[1] + '?'] : null);
+                var det = g.redaction_detail, est = rt ? ESTIMATE(g.estimate) : null;
                 return (
                   <div key={g.id} style={{ display: 'grid', gridTemplateColumns: GRID, gap: '10px', alignItems: 'center', padding: '10px 12px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontSize: '12.5px', background: rt ? 'transparent' : 'var(--oq-bg-fffbeb)' }}>
                     <div><b style={{ color: C.ink }}>{groupingName(g)}</b><div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{g.folders.map(function (f) { return f.folder + ' (' + f.n + ')'; }).join(' · ')}</div></div>
                     <div style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}><b>{g.member_count}</b></div>
-                    <div>{pill(lay[0], lay[1])}</div>
+                    <div>{pill(lay[0], lay[1])}{lc ? <div style={{ marginTop: '4px' }} title={g.layout_class ? 'Layout class confirmed on the variant' : 'Layout class the census proposes — confirmed at the first redaction'}>{pill(lc[0], lc[1])}</div> : null}</div>
                     <div>
                       {rt ? <div>{rt.parent ? <span style={{ color: C.mute }}>{rt.parent.name} › </span> : null}<b style={{ color: C.ink }}>{rt.name}</b><div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{rt.status === 'draft' ? 'draft variant — activate on the Taxonomy page' : rt.status}</div></div>
                         : <div><span style={{ color: 'var(--oq-fg-9a6512)', fontWeight: '600' }}>Not yet associated</span><div style={{ marginTop: '4px' }}><button onClick={function () { openAssociate(g); }} style={Object.assign(btn('soft'), { height: '26px', fontSize: '12px' })}>Associate ›</button></div></div>}
@@ -278,6 +298,14 @@ export default function SourceInventoryPage() {
                     </div>
                     <div>
                       {red ? pill(red.kind, red.label) : <span style={{ color: 'var(--oq-fg-a9b7c2)' }}>—</span>}
+                      {det && det.template && det.template.provisional && g.redaction === 'template_ready' ? <div style={Object.assign({}, hint, { margin: '2px 0 0' })} title="This template was fingerprinted from one file before the census existed; it matches on vocabulary alone">provisional match</div> : null}
+                      {g.redaction === 'proposed' && det && det.template ? (
+                        <div style={Object.assign({}, hint, { margin: '2px 0 0', lineHeight: '1.7' })}>
+                          {det.template.proposed_by ? 'by ' + det.template.proposed_by : 'proposed'}{det.template.proposed_from_request_id ? ' · from ' + det.template.proposed_from_request_id : ''}<br />
+                          <span onClick={function () { approveTemplate(det.template); }} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>{busy === det.template.id ? 'Working…' : 'Approve ›'}</span>
+                          {' · '}<span onClick={function () { returnTemplate(det.template); }} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>Return ›</span>
+                        </div>
+                      ) : null}
                       {g.redaction === 'waiting' || g.redaction === 'none' ? (
                         <div style={{ marginTop: '4px', fontSize: '12px', lineHeight: '1.7' }}>
                           <span onClick={function () { startTemplate(g); }} style={{ color: C.priFg, fontWeight: '600', cursor: 'pointer' }}>{staging === g.id ? 'Staging a document…' : 'Start a redaction template ›'}</span><br />
@@ -288,6 +316,7 @@ export default function SourceInventoryPage() {
                       {g.redaction === 'redact_by_hand' ? <div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{g.decisions && g.decisions.redact_by_hand && g.decisions.redact_by_hand.by ? g.decisions.redact_by_hand.by + ', ' + when(g.decisions.redact_by_hand.at) + ' · ' : ''}each request's copies reviewed one by one · <span onClick={function () { redactByHand(g, false); }} style={{ color: C.priFg, cursor: 'pointer' }}>Undo ›</span></div> : null}
                       {g.redaction === 'no_redaction' ? <div style={Object.assign({}, hint, { margin: '2px 0 0' })}>{g.decisions && g.decisions.no_redaction ? (g.decisions.no_redaction.by_name || 'staff') + ', ' + when(g.decisions.no_redaction.at) + ' · ' : ''}releases as-is after a clean read · <span onClick={function () { undoNoRedaction(g); }} style={{ color: C.priFg, cursor: 'pointer' }}>Undo ›</span></div> : null}
                     </div>
+                    <div>{est ? pill(est[0], est[1]) : <span style={{ color: 'var(--oq-fg-a9b7c2)' }}>—</span>}</div>
                     <div style={{ textAlign: 'right' }}>{g.examples.length ? <button onClick={function () { openSample(g, 0); }} style={Object.assign(btn(), { height: '26px', fontSize: '12px' })}>View sample</button> : null}</div>
                   </div>
                 );

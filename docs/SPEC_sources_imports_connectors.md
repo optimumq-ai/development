@@ -103,6 +103,14 @@ paper index) remain not censusable until their APIs enumerate.
 **Not yet:** row-level (tier 2) embedding of data kinds; extractor registry beyond PDF (docx/xlsx/images/CAD metadata) — every other file
 type is counted as unsupported today; a census for search-only systems.
 
+**Inventory row — item 7 S1 `[BUILT 2026-09-16]`.** Each associated grouping row now also carries: `redaction` widened to
+`proposed` (a worker's template awaits a supervisor — Approve › / Return › on the row), `holds` (active template on a
+`floating` variant; S4 pre-places, never burns), `assisted` (an active `content` profile); `redaction_detail` (the template
+behind the posture: id, kind, `provisional`, proposer, request); `layout_class` (confirmed on the variant) and
+`layout_class_proposed` (what the census would say, shown as "Static?" until confirmed); and `estimate` — the second status
+column (`none` · `seeded` · `learned` n, `inherited` from the parent when the variant has no row). The Taxonomy list carries the
+same `estimate` chip on every row (`attachEstimate`) so "which types still need an estimate" needs no click-through.
+
 ## 5. Known gaps / decisions
 - **Source deletion is unguarded** (found 2026-09-14, `docs/DESIGN_setup_interdependencies.md` §2/§5): `DELETE /repositories/:id` is a bare row delete — `record_type_repositories`, `document_fingerprints`, `paper_index_items`, `request_files.repository_id` and `import_ingest_log` are left dangling. Proposed: the `orgRemoval` pattern (check → delete when clean, refuse/retire otherwise). Awaiting Kevin's go.
 - ~~**Import-vs-connector presentation**~~ `[REDESIGNED 2026-08-13 — Kevin approved from before/after mockups (`exchange/sources_current.png` / `sources_redesign_mock.png`); verify_sources_list 3/3]`. The Sources screen now groups every source by BEHAVIOR, in plain sentences: **Searched the moment someone asks** (live systems) · **Watched folders — files brought in on a schedule** (imports, with "Checked nightly / Watching / Checked by hand" from config.schedule, last-run line, and a "Check now" button) · **Counted only — never opened** (email, the privacy stance stated on the group) · **Paper & physical — findable, not fetchable** (index size shown; "No index yet" warns). Every card says what the source HOLDS (linked record types by name) — `GET /repositories` now carries `linked_types` + `paper_index_count` via two grouped queries. Same data, same buttons; the editor and its config surface are untouched. NOT shown deliberately: "last searched" timestamps for live systems — no search-activity tracking exists, and the screen never invents data (recorded as a possible follow-on).

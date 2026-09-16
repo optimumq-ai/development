@@ -549,13 +549,18 @@ export default function RedactionTaskPage() {
     </div>
   );
 
-  // ---- save-template (simple prompt-based; mirrors the workspace) ----
+  // ---- save-template (item 7 S1: the save CARRIES THE RECORD TYPE — finding A — and is a PROPOSAL unless the
+  // user is a supervisor; the S2 mockup session replaces this prompt with the done card) ----
   async function saveTpl() {
-    var name = window.prompt('Name this reusable template (saves the current boxes + rules for the same form type):');
+    var rtName = (task && task.record_type_name) || 'this record type';
+    var name = window.prompt('Name the redaction template for ' + rtName + ' (saves the current boxes + rules for the same form; a supervisor approves it from the source inventory):', rtName + ' — redaction template');
     if (!name || !name.trim()) return;
     try {
-      await api.post('/redaction-templates', { name: name.trim(), source_file_id: fileId, zones: zones.map(function (z) { var r = ruleOf(z.rule_id); return { page_no: z.page_no, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: r ? r.title : null }; }) });
+      var r = await api.post('/redaction-templates', { name: name.trim(), source_file_id: fileId, record_type_id: (task && task.record_type_id) || null, source: 'sample', propose: true, request_id: task && task.request_id,
+        zones: zones.map(function (z) { var rr = ruleOf(z.rule_id); return { page_no: z.page_no, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: rr ? rr.title : null }; }) });
       setError('');
+      var d = r && r.data ? r.data : {};
+      window.alert(d.status === 'proposed' ? 'Proposed. A supervisor approves it from the source inventory row for ' + rtName + '.' : 'Saved as the redaction template for ' + rtName + '.');
     } catch (e) { setError('Could not save template. ' + msg(e)); }
   }
 }

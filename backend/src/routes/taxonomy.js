@@ -37,6 +37,21 @@ function hydrate(rt) {
   return rt;
 }
 
+// Item 7 S1 — the estimate chip: seeded (expert) · learned from N requests · none yet; a variant with no
+// profile of its own reads its parent (inherited). One query, not one per row.
+async function attachEstimate(list) {
+  if (!list || !list.length) return;
+  var prows = await all('SELECT record_type_id, sample_size, has_expert_seed, updated_at FROM record_type_estimate_profiles');
+  var by = {}; prows.forEach(function (p) { by[p.record_type_id] = p; });
+  function state(p) { if (!p) return null; var n = Number(p.sample_size) || 0, seeded = Number(p.has_expert_seed) === 1; if (!n && !seeded) return null; return { state: seeded && !n ? 'seeded' : 'learned', n: n, seeded: seeded, updated_at: p.updated_at || null }; }
+  list.forEach(function (rt) {
+    var own = state(by[rt.id]);
+    if (own) { rt.estimate = Object.assign(own, { inherited: false }); return; }
+    var par = rt.parent_record_type_id ? state(by[rt.parent_record_type_id]) : null;
+    rt.estimate = par ? Object.assign(par, { inherited: true }) : { state: 'none', n: 0, inherited: false };
+  });
+}
+
 async function attachRouting(list) {
   if (!list || !list.length) return;
   var links = await all("SELECT record_type_id, department_id, role FROM record_type_departments WHERE role IN ('owner','fulfiller') ORDER BY sort_order");
@@ -126,6 +141,7 @@ router.get('/record-types', requireAuth, async function(req, res) {
   var rows = await all('SELECT rt.*, c.name AS category_name FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id' + where + ' ORDER BY rt.sort_order, rt.name', params);
   var out = rows.map(hydrate);
   await attachRouting(out);
+  await attachEstimate(out);   // item 7 S1: 'which types still need an estimate' without opening each one
   res.json({ record_types: out });
 });
 
@@ -193,6 +209,10 @@ router.patch('/record-types/:id', requireAuth, EDIT, async function(req, res) {
   var fields = ['category_id','name','code','description','intent','expected_content','typical_request_reason','public_availability','redaction_profile_id','fee_estimate_note','status','source','confidence','sort_order','fee_estimate_low','fee_estimate_high','fulfillment_method','medium'];
   var sets = [], params = [];
   // #14 — parent changes are validated, never blind-set; a variant follows its parent's category.
+  if (b.layout_class !== undefined) {   // item 7 §2a: editable on the variant; NULL = unknown
+    if (b.layout_class !== null && ['static','floating','adhoc'].indexOf(b.layout_class) === -1) return res.status(422).json({ error: 'layout_class must be static, floating, adhoc or null' });
+    sets.push('layout_class = ?'); params.push(b.layout_class || null);
+  }
   try {
     var parent = await resolveParent(b, rt.id);
     if (parent !== undefined) {
