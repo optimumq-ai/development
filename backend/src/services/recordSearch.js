@@ -109,7 +109,7 @@ function scoreTypesByKeyword(query, rts) {
 
 async function aiClassifyType(query, rts) {
   var Anthropic = require('@anthropic-ai/sdk');
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('recordSearch:aiClassifyType');
   var catalog = rts.map(function(rt, i){
     var aka = flatTokens(rt.synonyms).slice(0, 6).join(', ');
     return (i + 1) + '. ' + rt.name + (aka ? ' (' + aka + ')' : '');
@@ -268,7 +268,7 @@ async function judgeResults(query, results) {
     var enabled = !flag || flag.value === '1' || flag.value === 'true'; // default ON
     if (!enabled) return results;
     var Anthropic = require('@anthropic-ai/sdk');
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('./aiClient').clientFor('recordSearch:judgeResults');
     var catalog = results.map(function(r, i){
       return (i + 1) + '. ' + (r.title || 'untitled') + ' | type: ' + (r.docType || 'unknown') + ' | ' + ((r.summary || '').slice(0, 160));
     }).join('\n');

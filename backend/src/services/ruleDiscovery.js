@@ -42,7 +42,7 @@ async function discoverRules(jurisdictionId) {
     '{"title":"short name","description":"plain-language explanation of what to redact and under what circumstances","category":"<code>","legal_sources":[{"name":"short label","citation":"formal statutory or regulatory citation","source_type":"statute|regulation|case_law","statute_text":"a concise, accurate summary of what the provision says (for the reviewer; it will be verified)"}]}\n\n' +
     'Be accurate and specific with ' + jur.name + ' citations. Include 5 to 12 of the most operationally common exemptions not already covered. These are DRAFTS that the agency\'s legal counsel will verify before use, so prefer well-established exemptions. Return ONLY the JSON array.';
 
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('ruleDiscovery:discoverRules');
   var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] });
   var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
   var arr = extractFirstArray(text);

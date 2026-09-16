@@ -24,6 +24,26 @@ async function catalogRows() {
     "WHERE rt.status = 'active' ORDER BY c.sort_order, rt.sort_order");
 }
 
+// PROMPT CACHING (2026-09-16): the instructions, the ~8k-token record-type catalog and the department list are the
+// same for every request, so they form ONE stable system block marked as a cache breakpoint; only the request text
+// changes and it rides in the user message AFTER the breakpoint. Sonnet 5 caches prefixes ≥ 1,024 tokens; the catalog
+// alone is ~8k, so repeat classifications within the cache window read the catalog from cache instead of paying for it
+// again. Verified through `ai_calls.cache_read_input_tokens`. Exported so the suite can lock the shape without a model.
+function buildPrompt(description, parts) {
+  var stable = 'You are a public records classification assistant for ' + parts.agency + '. Analyze the request and return ONLY a JSON object.\n\n'
+    + 'STEP 1 - Match to the agency record-type catalog below. Pick the ONE record type whose meaning best fits the request. Use the record type names and their "also called" terms together with your understanding of what the request is asking for. Some entries are variants of a broader type, shown as "Broader type — Variant": pick the variant when the request clearly indicates it, and the broader type when the request does not say which variant. If nothing in the catalog is a reasonable fit, set record_type_code to null.\n\n'
+    + 'RECORD TYPE CATALOG (code | name | category | also called):\n' + parts.taxoLines + '\n\n'
+    + 'STEP 2 - Independently, using general knowledge of how a city is organized, say which department this request belongs to. If the request is off-topic, nonsensical, or too vague to place with any confidence, set department_code to null instead of guessing. Departments: ' + parts.deptList + '\n\n'
+    + 'Classifications: simple (single clean digital record, 5d), standard (1-3 items, 10d), complex (4+ items or complex, 20d), redaction_required (any redaction review needed, 30d).\n\n'
+    + 'Return ONLY this JSON:\n{\n'
+    + '  "record_type_code": "code from the catalog, or null",\n'
+    + '  "record_type_confidence": 0-100,\n'
+    + '  "department_code": "two-letter code from the department list, or null if no department reasonably fits",\n'
+    + '  "classification": "simple|standard|complex|redaction_required",\n'
+    + '  "redaction_flag": true|false,\n  "mrr_flag": true|false,\n  "fee_waiver_signal": true|false,\n'
+    + '  "reasoning": "one sentence",\n  "flags": ["LEGAL_HOLD|SENSITIVE|ONGOING_INVESTIGATION if any"]\n}';  return { system: require('./aiClient').cachedSystem(stable), messages: [{ role: 'user', content: 'Request: "' + description + '"' }] };
+}
+
 async function classifyAndRoute(description) {
   if (!description || description.trim().length < 10) throw new Error('Description too short to classify');
 
@@ -45,22 +65,8 @@ async function classifyAndRoute(description) {
   var agencyRow = await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
   var agency = agencyRow ? agencyRow.value : 'City';
 
-  var prompt = 'You are a public records classification assistant for ' + agency + '. Analyze the request and return ONLY a JSON object.\n\n'
-    + 'Request: "' + description + '"\n\n'
-    + 'STEP 1 - Match to the agency record-type catalog below. Pick the ONE record type whose meaning best fits the request. Use the record type names and their "also called" terms together with your understanding of what the request is asking for. Some entries are variants of a broader type, shown as "Broader type — Variant": pick the variant when the request clearly indicates it, and the broader type when the request does not say which variant. If nothing in the catalog is a reasonable fit, set record_type_code to null.\n\n'
-    + 'RECORD TYPE CATALOG (code | name | category | also called):\n' + taxoLines + '\n\n'
-    + 'STEP 2 - Independently, using general knowledge of how a city is organized, say which department this request belongs to. If the request is off-topic, nonsensical, or too vague to place with any confidence, set department_code to null instead of guessing. Departments: ' + deptList + '\n\n'
-    + 'Classifications: simple (single clean digital record, 5d), standard (1-3 items, 10d), complex (4+ items or complex, 20d), redaction_required (any redaction review needed, 30d).\n\n'
-    + 'Return ONLY this JSON:\n{\n'
-    + '  "record_type_code": "code from the catalog, or null",\n'
-    + '  "record_type_confidence": 0-100,\n'
-    + '  "department_code": "two-letter code from the department list, or null if no department reasonably fits",\n'
-    + '  "classification": "simple|standard|complex|redaction_required",\n'
-    + '  "redaction_flag": true|false,\n  "mrr_flag": true|false,\n  "fee_waiver_signal": true|false,\n'
-    + '  "reasoning": "one sentence",\n  "flags": ["LEGAL_HOLD|SENSITIVE|ONGOING_INVESTIGATION if any"]\n}';
-
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 600, messages: [{ role: 'user', content: prompt }] });
+  var built = buildPrompt(description, { agency: agency, taxoLines: taxoLines, deptList: deptList });
+  var message = await require('./aiClient').clientFor('classifier:classifyAndRoute').messages.create({ model: 'claude-sonnet-5', max_tokens: 600, system: built.system, messages: built.messages });
   var text = require('./aiText').textOf(message);
   var result = JSON.parse(text.replace(/```json|```/g, '').trim());
 
@@ -105,4 +111,4 @@ async function classifyAndRoute(description) {
   };
 }
 
-module.exports = { classifyAndRoute: classifyAndRoute, catalogRows: catalogRows, DEADLINE_DAYS: DEADLINE_DAYS, TAXONOMY_CONFIDENCE: TAXONOMY_CONFIDENCE };
+module.exports = { buildPrompt: buildPrompt, classifyAndRoute: classifyAndRoute, catalogRows: catalogRows, DEADLINE_DAYS: DEADLINE_DAYS, TAXONOMY_CONFIDENCE: TAXONOMY_CONFIDENCE };

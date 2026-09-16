@@ -36,7 +36,7 @@ var SYSTEM = 'You are the in-app help assistant for Optimum Q, a public-records 
   + '- You are a help guide, not an operator: explain how to do something; do not claim to perform actions yourself.\n\n'
   + 'App context:\n' + APP_CONTEXT;
 
-function client() { return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }); }
+function client() { return require('./aiClient').clientFor('helpAgent:client'); }
 
 async function answer(messages, page) {
   var hist = (Array.isArray(messages) ? messages : []).slice(-10)

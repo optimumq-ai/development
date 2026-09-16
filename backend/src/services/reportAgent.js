@@ -28,7 +28,7 @@ var SPEC_SCHEMA = [
   '- If the question cannot be answered from this catalog, return {"error":"<one short sentence saying what is not supported and suggest a rephrase>"}.'
 ].join('\n');
 
-function client() { return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }); }
+function client() { return require('./aiClient').clientFor('reportAgent:client'); }
 
 async function ask(question) {
   var q = String(question || '').slice(0, 500).trim();

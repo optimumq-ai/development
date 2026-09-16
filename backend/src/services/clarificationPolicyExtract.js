@@ -68,7 +68,7 @@ async function extract(text, opts) {
   var clean = String(text || '').slice(0, 60000);
   if (!clean.trim()) throw new Error('No policy text provided.');
   var currentCfg = opts.currentCfg || CP.defaults();
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('clarificationPolicyExtract:extract');
   var msg = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1500, messages: [{ role: 'user', content: buildPrompt(clean, opts.jurName, currentCfg) }] });
   var raw = (msg.content || []).map(function (b) { return b.text || ''; }).join('\n');
   var parsed = parseJSONObject(raw) || {};

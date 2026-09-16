@@ -88,7 +88,7 @@ router.post('/rules/draft', requireAuth, requirePermission('operations_config'),
     + '  "priority": 50,\n'
     + '  "warnings": ["anything the system cannot actually observe or do, or ambiguity the author should confirm"]\n}';
   try {
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('../services/aiClient').clientFor('workflow:/rules/draft');
     var msg = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 700, messages: [{ role:'user', content: prompt }] });
     var raw = require('../services/aiText').textOf(msg).replace(/```json|```/g,'').trim();
     var draft = JSON.parse(raw);

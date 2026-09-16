@@ -84,7 +84,7 @@ async function suggest(repo, gid) {
     + 'BUCKETS (id | name — intent):\n' + catText + '\n\nEXISTING VARIANTS (id | name):\n' + (varText || '(none)') + '\n\n'
     + 'Form field labels the layout owns: ' + (labels || '(none)') + '\n\nEXAMPLE DOCUMENTS:\n' + examples;
   var Anthropic = require('@anthropic-ai/sdk');
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('censusAssociate:suggest');
   var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
   var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
   var p = null; try { p = JSON.parse(raw); } catch (e) { return { status: 502, error: 'The AI answer could not be read — try again.' }; }

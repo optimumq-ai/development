@@ -43,7 +43,7 @@ async function extract(text, opts) {
   var context = opts.context === 'SS' ? 'SS' : 'FR';
   var clean = String(text || '').slice(0, 16000);
   if (!clean.trim()) throw new Error('No policy text provided.');
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('feePolicyExtract:extract');
   var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 2500, messages: [{ role: 'user', content: buildPrompt(clean, context) }] });
   var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
   var parsed = JSON.parse(raw);

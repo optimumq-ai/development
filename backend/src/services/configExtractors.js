@@ -55,7 +55,7 @@ async function fetchSource(source, rawText) {
   return { ok: false, error: 'No pasted text and no source URL to fetch' };
 }
 
-function client() { return new Anthropic(); }
+function client() { return require('./aiClient').clientFor('configExtractors:client'); }
 function parseJSONObject(s) {
   var t = String(s || '').replace(/```json/gi, '').replace(/```/g, '').trim();
   var a = t.indexOf('{'); if (a === -1) return null;

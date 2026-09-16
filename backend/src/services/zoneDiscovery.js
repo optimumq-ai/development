@@ -62,7 +62,7 @@ async function discoverZones(fileId) {
     'Return ONLY a JSON array. Each element: {"page": <page number>, "text": "<the exact text substring as it appears in the document>", "rule_id": "<id from the list or null>", "reason": "<short why>"}. ' +
     'The "text" must match the document exactly so it can be located. Split distinct items (e.g. each address line, name, number) into separate elements. Return ONLY the JSON array.';
 
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('zoneDiscovery:discoverZones');
   var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] });
   var txt = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
   var arr = extractFirstArray(txt); if (!arr) return { suggestions: [], scanned_pages: pages.length };
@@ -97,7 +97,7 @@ async function suggestRule(label) {
     'Choose the single best-matching redaction rule for this field from the list below, or null if none reasonably fits. ' +
     'Match on the meaning of the field (e.g. a driver\'s license or license plate maps to a motor vehicle record rule; a home phone maps to a home address/telephone rule).\n\n' +
     'Rules:\n' + menu + '\n\nReturn ONLY JSON: {"rule_id": "<id from the list, or null>"}.';
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('zoneDiscovery:suggestRule');
   var resp = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 200, messages: [{ role: 'user', content: prompt }] });
   var txt = resp.content.map(function (b) { return b.type === 'text' ? b.text : ''; }).join('');
   var m = txt.match(/\{[\s\S]*\}/); var obj = {}; try { obj = JSON.parse(m ? m[0] : '{}'); } catch (e) {}

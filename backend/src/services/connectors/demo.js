@@ -18,7 +18,7 @@ async function search(query) {
     'Score guidance: 90+ = exact match, 70-89 = strong match, 40-69 = possibly relevant, <40 = exclude.';
 
   try {
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('../aiClient').clientFor('demo:search');
     var response = await client.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 1024,

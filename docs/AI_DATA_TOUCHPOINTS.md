@@ -44,3 +44,19 @@ This audit is presented interactively at **Administration → Settings and Confi
 - The sensitive tasks (document extraction, zone discovery) are the **hardest**, so a weaker local model hurts most there — but they're optional assists, so disabling is a viable fallback.
 - Classification and the internal search judge are **core** and sensitive-ish; these are the ones that most need a good local model in a strict deployment.
 - Verify per prospect: "records STORED on our servers" (Standard profile satisfies) vs. "NO data leaves our network" (Strict/Air-gapped). Most mean the former.
+
+## AI call log and the classifier's prompt cache `[BUILT 2026-09-16 — verify_ai_calls 15/15]`
+**One door to the model.** Every application call to Claude goes through `services/aiClient.clientFor(caller)`, which returns the SDK's
+`messages.create` shape (call sites unchanged) and logs one row per call to `ai_calls`: caller (`service:function`), model, the usage
+the API reports (`input_tokens` · `cache_creation_input_tokens` · `cache_read_input_tokens` · `output_tokens`), duration, ok/error, the
+API message id, an optional short context tag. Never the prompt or the answer. 25 call sites in 21 files; the only raw SDK client left
+is `routes/integrations.js` (it tests a key the user just typed). `GET /api/ai-usage?days=N` (system_admin) aggregates by caller and
+by day; the AI configuration screen has an **AI Usage** tab. Purpose: the platform usage report's *application key* is now explainable
+feature by feature, and prompt caches can be verified from `cache_read_input_tokens`.
+**Classifier prompt cache.** `classifier.buildPrompt` puts the stable part — instructions, the record-type catalog (~6k tokens on
+Sonnet 5's tokenizer), the department list, the JSON shape — into ONE system block marked `cache_control: {type:'ephemeral'}` (5-minute
+TTL); only the request text rides in the user message, after the breakpoint. Sonnet 5 caches prefixes ≥ 1,024 tokens. Live proof
+2026-09-16: first classification `cache_creation_input_tokens 5977`, the next one `cache_read_input_tokens 5977` with 38 fresh input
+tokens. Where it pays: bursts — the test suites (dozens of submissions in minutes) and intake spikes; a lone submission hours after the
+last one still writes the cache (1.25× on that block) and reads nothing. `aiClient._setCacheTtl('1h')` switches to hour-long entries
+(2× write price) if live submissions turn out to cluster 5–60 minutes apart — decide from the AI Usage tab, not in advance.

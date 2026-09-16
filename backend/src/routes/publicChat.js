@@ -232,7 +232,7 @@ router.post('/chat', async function(req, res) {
         systemPrompt += '\n\nIMPORTANT: These records are already included in the request. You do NOT need to search for them again. When the citizen says they are done selecting ("submit", "done", "that\'s all", "continue", "proceed", "I have enough", "ready to submit", or similar), DO NOT run another search. Acknowledge what they\'ve selected and move the conversation forward — confirm any remaining required information (fee waiver, delivery method, etc.) and then finalize the request with the SUBMIT_READY marker.';
       }
     } catch(e) { console.error('[publicChat] failed to inject selectedRecords:', e.message); }
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('../services/aiClient').clientFor('publicChat:/chat');
     var response = await client.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 1024,

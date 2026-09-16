@@ -76,6 +76,7 @@ app.use('/api/agent-rules', require('./src/routes/agentRules'));
 app.use('/api/help', require('./src/routes/help'));
 app.use('/api/reports', require('./src/routes/reports'));
 app.use('/api/integrations', require('./src/routes/integrations'));
+app.use('/api/ai-usage', require('./src/routes/aiUsage'));
 app.use('/api/taxonomy', require('./src/routes/taxonomy'));
 app.use('/api/redaction', require('./src/routes/redactionRules'));
 app.use('/api/redaction-jobs', require('./src/routes/redactionJobs'));

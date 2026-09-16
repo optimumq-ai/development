@@ -33,7 +33,7 @@ function buildPrompt(text, ctx) {
 async function extractRecordMeta(text, ctx) {
   var clean = String(text || '').slice(0, 16000);
   if (!clean.trim()) return null;
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('./aiClient').clientFor('recordMetaExtract:extractRecordMeta');
   var msg = await client.messages.create({
     model: 'claude-sonnet-5', max_tokens: 700,
     messages: [{ role: 'user', content: buildPrompt(clean, ctx) }]

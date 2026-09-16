@@ -362,7 +362,7 @@ router.post('/discover', requireAuth, EDIT, async function(req, res) {
   if (!text) return res.status(400).json({ error: 'text is required' });
   if (text.length > 16000) text = text.substring(0, 16000);
   var Anthropic = require('@anthropic-ai/sdk');
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('../services/aiClient').clientFor('taxonomy:/discover');
   var cats = await all('SELECT id, name FROM categories WHERE active = 1 ORDER BY sort_order');
   var existing = await all('SELECT code, name FROM record_types ORDER BY name');
   var catList = cats.map(function(c){ return c.id + ' = ' + c.name; }).join('\n');

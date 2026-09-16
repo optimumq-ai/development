@@ -121,7 +121,7 @@ async function discoverVariantGroupings(bucketId) {
       + 'Element shape:\n'
       + '{"cluster": 0, "name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "confidence": 0, "reasoning": ""}\n\n'
       + 'CLUSTERS:\n' + clusterDigest;
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('./aiClient').clientFor('schemaDiscovery:discoverVariantGroupings');
     var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] });
     var raw = require('./aiText').textOf(message).replace(/```json|```/g, '').trim();
     var names = [];

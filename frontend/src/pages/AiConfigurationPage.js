@@ -13,7 +13,7 @@ import PortalSecurityInfo from '../components/setup/PortalSecurityInfo';
 // POST /api/integrations/test/:service · GET /api/integrations/touchpoint-code/:id. Tab 4 "AI Portal
 // Security Information" (C13) is the retired Portal Agent Security admin page — static reference content.
 
-var TABS = [['keys', 'AI Service Keys'], ['deployment', 'Deployment Model'], ['touchpoints', 'AI Touchpoints Information'], ['security', 'AI Portal Security Information']];
+var TABS = [['keys', 'AI Service Keys'], ['deployment', 'Deployment Model'], ['touchpoints', 'AI Touchpoints Information'], ['usage', 'AI Usage'], ['security', 'AI Portal Security Information']];
 var TOUCHPOINTS = [
   { id: 'zone-discovery', feature: 'Redaction zone discovery', fn: 'services/zoneDiscovery.js → discoverZones()', data: 'Full unredacted page text of the document', sensitive: true, core: false, kind: 'llm' },
   { id: 'intake-extract', feature: 'Intake document extraction', fn: 'routes/extract.js', data: 'Raw uploaded request letter (PDF / image)', sensitive: true, core: false, kind: 'llm' },
@@ -226,10 +226,55 @@ export default function AiConfigurationPage() {
               </div>
             ) : null}
 
+            {tab === 'usage' ? <AiUsage /> : null}
             {tab === 'security' ? <PortalSecurityInfo /> : null}
           </div>
         );
       }}
     </SetupScreen>
+  );
+}
+
+
+// AI USAGE (2026-09-16): what this installation's own model calls cost, by feature and by day, from the `ai_calls` log
+// every call writes. This is the app's half of the platform usage report — the Claude Code sessions are the other half.
+function AiUsage() {
+  var [days, setDays] = useState(30);
+  var [data, setData] = useState(null);
+  var [err, setErr] = useState('');
+  useEffect(function () { var alive = true; api.get('/ai-usage', { params: { days: days } }).then(function (r) { if (alive) setData(r.data); }).catch(function (e) { if (alive) setErr((e.response && e.response.data && e.response.data.error) || 'Could not load usage.'); }); return function () { alive = false; }; }, [days]);
+  function k(n) { n = Number(n || 0); return n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(n); }
+  var th = { textAlign: 'right', fontSize: '11px', fontWeight: '700', color: 'var(--oq-fg-8296a4)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '6px 10px' };
+  var td = { textAlign: 'right', fontSize: '12.5px', padding: '8px 10px', borderTop: '1px solid var(--oq-ln-eef2f5)', fontVariantNumeric: 'tabular-nums', color: 'var(--oq-fg-12232e)' };
+  if (err) return <div style={{ color: 'var(--oq-fg-991b1b)', fontSize: '13px' }}>{err}</div>;
+  if (!data) return <div style={{ color: 'var(--oq-fg-9ca3af)', fontSize: '13px' }}>Loading usage…</div>;
+  var t = data.totals;
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+        <div style={{ fontSize: '13px', color: 'var(--oq-fg-5c6f7c)', flex: 1 }}>Every model call the application makes is logged — who called, which model, the tokens the API reported, and failures. Never the prompt or the answer. Use this next to the platform usage report: the report's <b>application key</b> should match these totals; anything above them is Claude Code.</div>
+        <select value={days} onChange={function (e) { setDays(Number(e.target.value)); }} style={{ fontSize: '12.5px', border: '1px solid var(--oq-ln-becad3)', borderRadius: '7px', padding: '5px 8px', background: 'var(--oq-bg-ffffff)' }}>
+          {[7, 30, 90].map(function (d) { return <option key={d} value={d}>last {d} days</option>; })}
+        </select>
+      </div>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+        {[['Calls', t.calls, t.errors ? t.errors + ' failed' : 'no failures'], ['Fresh input', k(t.input_tokens), 'tokens paid at full price'], ['Cache write', k(t.cache_write), 'written to the prompt cache'], ['Cache read', k(t.cache_read), t.cache_hit_share + '% of input served from cache'], ['Output', k(t.output_tokens), 'tokens generated']].map(function (s) {
+          return <div key={s[0]} style={{ flex: 1, padding: '12px 14px', border: '1px solid var(--oq-ln-d2dce3)', borderRadius: '9px', background: 'var(--oq-bg-ffffff)' }}><div style={{ fontSize: '22px', fontWeight: '800', color: 'var(--oq-fg-12232e)', fontVariantNumeric: 'tabular-nums' }}>{s[1]}</div><div style={{ fontSize: '12px', color: 'var(--oq-fg-5c6f7c)', marginTop: '2px' }}>{s[0]} · {s[2]}</div></div>;
+        })}
+      </div>
+      <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-12232e)', marginBottom: '4px' }}>By feature</div>
+      <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-8296a4)', marginBottom: '8px' }}>The caller is the service and function that made the call. "Cache read" is the proof a prompt cache works — the classifier's record-type catalog (about 8k tokens) is cached, so repeat classifications within the cache window read it instead of paying for it again.</div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '18px' }}>
+        <thead><tr><th style={Object.assign({}, th, { textAlign: 'left' })}>Caller</th><th style={Object.assign({}, th, { textAlign: 'left' })}>Model</th><th style={th}>Calls</th><th style={th}>Fresh input</th><th style={th}>Cache write</th><th style={th}>Cache read</th><th style={th}>Output</th><th style={th}>Errors</th><th style={th}>Avg ms</th><th style={Object.assign({}, th, { textAlign: 'left' })}>Last</th></tr></thead>
+        <tbody>{data.by_caller.length ? data.by_caller.map(function (r) {
+          return <tr key={r.caller + r.model}><td style={Object.assign({}, td, { textAlign: 'left', fontWeight: '600' })}>{r.caller}</td><td style={Object.assign({}, td, { textAlign: 'left', color: 'var(--oq-fg-5c6f7c)' })}>{r.model}</td><td style={td}>{r.calls}</td><td style={td}>{k(r.input_tokens)}</td><td style={td}>{k(r.cache_write)}</td><td style={Object.assign({}, td, { color: r.cache_read ? 'var(--oq-fg-1b8a5a)' : 'var(--oq-fg-9ca3af)' })}>{k(r.cache_read)}</td><td style={td}>{k(r.output_tokens)}</td><td style={Object.assign({}, td, { color: r.errors ? 'var(--oq-fg-991b1b)' : 'var(--oq-fg-9ca3af)' })}>{r.errors}</td><td style={td}>{r.avg_ms}</td><td style={Object.assign({}, td, { textAlign: 'left', color: 'var(--oq-fg-8296a4)' })}>{String(r.last_at || '').slice(0, 16)}</td></tr>;
+        }) : <tr><td colSpan={10} style={Object.assign({}, td, { textAlign: 'left', color: 'var(--oq-fg-9ca3af)' })}>No model calls logged in this window.</td></tr>}</tbody>
+      </table>
+      <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-12232e)', marginBottom: '8px' }}>By day</div>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead><tr><th style={Object.assign({}, th, { textAlign: 'left' })}>Day (UTC)</th><th style={Object.assign({}, th, { textAlign: 'left' })}>Model</th><th style={th}>Calls</th><th style={th}>Fresh input</th><th style={th}>Cache write</th><th style={th}>Cache read</th><th style={th}>Output</th></tr></thead>
+        <tbody>{data.by_day.map(function (r) { return <tr key={r.day + r.model}><td style={Object.assign({}, td, { textAlign: 'left' })}>{r.day}</td><td style={Object.assign({}, td, { textAlign: 'left', color: 'var(--oq-fg-5c6f7c)' })}>{r.model}</td><td style={td}>{r.calls}</td><td style={td}>{k(r.input_tokens)}</td><td style={td}>{k(r.cache_write)}</td><td style={td}>{k(r.cache_read)}</td><td style={td}>{k(r.output_tokens)}</td></tr>; })}</tbody>
+      </table>
+    </div>
   );
 }

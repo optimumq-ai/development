@@ -10940,3 +10940,34 @@ redaction templates seeded from actual record samples) is next in Kevin's list o
 recorded since 2026-09-01; not one row moved in the 12 live census tables. The three new harnesses (`verify_source_census` 51,
 `verify_census_association` 37, `verify_kind_census` 20) are in the suite order after `verify_fingerprint_discovery`. Nothing further to do
 on item 6 until Kevin's markup.
+
+## 2026-09-16 — Token usage investigated (Kevin's 264% question) → the AI call log + classifier prompt cache slice BUILT
+
+**Investigation (Kevin's platform CSV, `~/exchange/claude_api_tokens_2026_08_18_to_2026_09_16.csv`):** two API keys. `second` (workspace
+Default) is the application's key — the only thing in the report until 8 Sep (Sonnet 4.5 → Sonnet 5 on 31 Aug, 0.06–1.55M input/day, no
+caching). `console` (workspace "Claude Code") appears on **8 Sep** — the day this CLI's credentials changed (Kevin chose the Console
+account at the login prompt): since then every Claude Code turn bills API credits instead of the subscription, which is why the report
+jumped and why Claude Code Desktop lost the live link (its sessions no longer belong to the Claude.ai account). Inside that: 86% of the
+Fable tokens were in the 200k–1M long-context tier (this session averaged ~321k tokens/turn); Claude Code's auxiliary Sonnet calls read
+the same oversized context; the app key's 1.06M on 15 Sep was five full suites in one day. Transcripts on disk show August (2.9B cached
+reads, the 19 Aug fan-out day) far above September — the increase is accounting + long sessions, not more work. Advice given: `/login`
+to the subscription account if Claude Code should not spend credits (Kevin's call — nothing changed); one session per slice to stay under
+200k; model per task; full suite once per slice.
+**Built:** `services/aiClient.js` (the one door: `clientFor(caller)` logs every call to `ai_calls` — usage fields, duration, ok/error,
+message id, context; never content; `cachedSystem()`; `summary(days)`; test transport seam), codemod of all 25 call sites (only
+`integrations.js`'s key test stays raw), `GET /api/ai-usage` (system_admin), **AI Usage** tab on AI configuration (totals · by feature ·
+by day · cache-hit share), `classifier.buildPrompt` — stable instructions + catalog + departments in one cached system block, request
+text in the user message (wording restored verbatim from git; only the Request line moved). Spec: `AI_DATA_TOUCHPOINTS.md`.
+**Evidence:** `verify_ai_calls` **15/15** (row per call with all fields · failure logged with ok=0 and rethrown · classifier shape: catalog in
+the cached block, request text outside it, byte-identical prefix across requests · no raw SDK client left · usage read 403/200 + sums) +
+`request_gates` 44 · `theme_tokens` 13 · `search_intents` 29 · `request_create` 29 — live untouched. **Live proof:** two classifications a
+second apart → `cache_creation 5977 / cache_read 0`, then `cache_creation 0 / cache_read 5977`, 38 fresh tokens. Screenshot
+`~/exchange/ai_usage_tab_2026-09-16.png`.
+**Findings:** (1) the codemod rewrote the wrapper's own SDK constructor (infinite recursion) — caught before any run, fixed; (2) a
+zero-millisecond stub call logged `duration_ms NULL` (`0 || null`) — fixed; (3) the catalog is ~6k tokens on Sonnet 5's tokenizer (the
+earlier 8.2k figure was a chars/4 estimate); (4) `verify_request_create` failed once in a small subset (request numbering "algorithm B")
+and passed on rerun — order/time-dependent, not touched by this slice.
+**NEXT:** Kevin's decision on Claude Code billing (subscription vs credits); item 7 design session (estimate + redaction templates seeded
+from actual samples) — the current-state reading was started (redaction templates = `layout_profiles` pages/fields with token-vocabulary
+match; estimate profiles = `record_type_estimate_profiles` with actuals write-back at manual reconcile; anchor-relative zones parked in
+SPEC_redaction §6b) and is the input to that session; then the standing items.

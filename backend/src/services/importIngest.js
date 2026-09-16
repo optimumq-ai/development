@@ -119,7 +119,7 @@ async function enrichRecordType(typeId, fids){
     + '- intent: one sentence on why someone requests these\n'
     + '- expected_content: one sentence on what these records contain';
   try {
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('./aiClient').clientFor('importIngest:enrichRecordType');
     var msg = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
     var raw = require('./aiText').textOf(msg);
     raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();

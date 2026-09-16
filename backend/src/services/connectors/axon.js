@@ -45,7 +45,7 @@ async function search(query, config) {
     '[{"id":"INC-XXXXXXXX","match_score":85,"relevance_note":"one sentence why this matches"}]';
 
   try {
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('../aiClient').clientFor('axon:search');
     var response = await client.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 1024,

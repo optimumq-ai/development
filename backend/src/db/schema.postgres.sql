@@ -1991,3 +1991,24 @@ CREATE TABLE IF NOT EXISTS census_kinds (
 CREATE INDEX IF NOT EXISTS idx_census_kinds_repo ON census_kinds(repository_id);
 -- Runs can finish within the same second (small sources); order by insertion sequence, not timestamp alone.
 ALTER TABLE source_census_runs ADD COLUMN IF NOT EXISTS seq BIGSERIAL;
+
+-- AI CALL LOG (2026-09-16, Kevin's usage question). One row per model call the application makes: who called, which
+-- model, the usage the API reported (fresh input · cache write · cache read · output), how long, and whether it failed.
+-- Never the prompt or the answer. This is what makes the platform usage report explainable from inside the app.
+CREATE TABLE IF NOT EXISTS ai_calls (
+  id TEXT PRIMARY KEY,
+  at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
+  caller TEXT NOT NULL,                    -- service:function that made the call
+  model TEXT,
+  input_tokens INTEGER DEFAULT 0,          -- uncached input
+  cache_creation_input_tokens INTEGER DEFAULT 0,
+  cache_read_input_tokens INTEGER DEFAULT 0,
+  output_tokens INTEGER DEFAULT 0,
+  duration_ms INTEGER,
+  ok INTEGER DEFAULT 1,
+  error TEXT,
+  message_id TEXT,                         -- the API's message id, for tracing against the platform report
+  context TEXT                             -- optional short tag (a request id, a repository id) — never content
+);
+CREATE INDEX IF NOT EXISTS idx_ai_calls_at ON ai_calls(at);
+CREATE INDEX IF NOT EXISTS idx_ai_calls_caller ON ai_calls(caller);

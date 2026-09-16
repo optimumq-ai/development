@@ -9,7 +9,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 
 router.post('/', requireAuth, upload.single('document'), async function(req, res) {
   if (!req.file) return res.status(400).json({ error: 'No document uploaded' });
 
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('../services/aiClient').clientFor('extract:/');
   var agencyRow = await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
   var agency = agencyRow ? agencyRow.value : 'City';
   var depts = await all('SELECT id, name, code FROM departments WHERE active = 1 ORDER BY sort_order');

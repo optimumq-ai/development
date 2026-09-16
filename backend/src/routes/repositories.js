@@ -257,7 +257,7 @@ router.post('/ai-configure', requireAuth, EDIT, async function(req, res) {
   var prompt = 'You help configure a data-source connector for a public-records system. Based on the description and any documentation of the system, choose the best connector type from the catalog and propose a configuration. Return ONLY a JSON object, no other text.\n\nConnector catalog:\n' + catalogText + '\n\nReturn JSON: {"connector_type":"<key>","name":"<suggested name>","config":{},"reasoning":"<one or two sentences>","missing":[]}\n\nRules:\n- connector_type MUST be one of: ' + keys.join(', ') + '.\n- Fill config fields you can infer; leave unknown ones out and list their keys in missing.\n- NEVER invent credentials or secrets; leave api_key or password-like fields empty and list them in missing.\n\nSystem description:\n' + desc + (docs ? ('\n\nDocumentation:\n' + docs) : '');
   try {
     var Anthropic = require('@anthropic-ai/sdk');
-    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var client = require('../services/aiClient').clientFor('repositories:/ai-configure');
     var message = await client.messages.create({ model: 'claude-sonnet-5', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] });
     var raw = require('../services/aiText').textOf(message).replace(/```json|```/g, '').trim();
     var p = JSON.parse(raw);

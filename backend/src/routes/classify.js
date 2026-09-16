@@ -8,7 +8,7 @@ router.post('/', requireAuth, async function(req, res) {
   var description = req.body.description;
   if (!description || description.length < 10) return res.status(400).json({ error: 'Description too short' });
 
-  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var client = require('../services/aiClient').clientFor('classify:/');
 
   var depts = await all("SELECT id, name, code, processed_by FROM departments WHERE active = 1 AND (kind <> 'team' OR kind IS NULL) ORDER BY sort_order");
   var fallbackTeam = await get("SELECT id, name FROM departments WHERE kind = 'team' AND is_open_records = 1 ORDER BY sort_order LIMIT 1");
