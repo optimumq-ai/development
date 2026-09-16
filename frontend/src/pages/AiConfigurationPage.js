@@ -263,7 +263,7 @@ function AiUsage() {
         })}
       </div>
       <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--oq-fg-12232e)', marginBottom: '4px' }}>By feature</div>
-      <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-8296a4)', marginBottom: '8px' }}>The caller is the service and function that made the call. "Cache read" is the proof a prompt cache works — the classifier's record-type catalog (about 8k tokens) is cached, so repeat classifications within the cache window read it instead of paying for it again.</div>
+      <div style={{ fontSize: '11.5px', color: 'var(--oq-fg-8296a4)', marginBottom: '8px' }}>The caller is the service and function that made the call. "Cache read" is the proof a prompt cache works — the classifier's record-type catalog (about 6k tokens) is cached, so repeat classifications within the cache window read it instead of paying for it again.</div>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '18px' }}>
         <thead><tr><th style={Object.assign({}, th, { textAlign: 'left' })}>Caller</th><th style={Object.assign({}, th, { textAlign: 'left' })}>Model</th><th style={th}>Calls</th><th style={th}>Fresh input</th><th style={th}>Cache write</th><th style={th}>Cache read</th><th style={th}>Output</th><th style={th}>Errors</th><th style={th}>Avg ms</th><th style={Object.assign({}, th, { textAlign: 'left' })}>Last</th></tr></thead>
         <tbody>{data.by_caller.length ? data.by_caller.map(function (r) {
