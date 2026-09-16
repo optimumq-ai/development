@@ -10971,3 +10971,31 @@ and passed on rerun — order/time-dependent, not touched by this slice.
 from actual samples) — the current-state reading was started (redaction templates = `layout_profiles` pages/fields with token-vocabulary
 match; estimate profiles = `record_type_estimate_profiles` with actuals write-back at manual reconcile; anchor-relative zones parked in
 SPEC_redaction §6b) and is the input to that session; then the standing items.
+
+## 2026-09-16 (b) — ITEM 7 DESIGNED: estimate + redaction templates seeded from actual samples (`docs/DESIGN_templates_from_samples.md`)
+
+**Session shape:** fresh session (the previous one ended on token burn); one Explore agent for the current-state reading
+(file:line facts), two read-only measurements on live, then the design. Nothing built; live untouched; no Kevin markup of
+item 6 had arrived (exchange folder unchanged since the item-6 screenshots).
+**The design:** done becomes the teaching moment — the redaction task's completion modal offers the finished zones as the
+variant's redaction template (worker PROPOSES, supervisor+ approves from the Inventory row; supervisors save directly), and
+request close teaches the estimate profile from measured actuals through the existing Welford write-back (ladder unchanged:
+n ≥ 3, CV ≤ 0.5, ≤ $200). Two classifications: **layout class** on the variant (static · floating · ad-hoc — census proposes,
+human confirms at done) and **content class** on the template (simple · complex — deterministic from the §6a rule→detector
+map). The pair selects the automation (§2c matrix): static → absolute zones (built); floating → propose + HOLD until the §6b
+anchor UI; ad-hoc → a new `kind='content'` profile (rule set; AI suggestion pre-scoped; never mass-applies). Inventory row
+gains an **Estimate** column + a layout chip. Zero zones at done → no offer; the No-redaction door surfaces after 3 clean
+completions. Slices S1 (substrate + matching safety) → S2 (done card, after a mockup session) → S3 (estimate at close) →
+S4 (floating HOLD mode). Seven decisions for Kevin (§9). HTML copy: `~/exchange/DESIGN_templates_from_samples.html`.
+**Findings (measured on live, Development Services Shared Drive, 8 piles × 5 examples, production `tokenize`/score):**
+(A) the redaction task screen's "Generate reusable template" posts NO `record_type_id` → its templates are invisible to the
+census posture (fix in S1). (B) a template fingerprinted from ONE sample keeps that sample's filled-in words: a second document
+of the SAME form scores 58–92 against it — below the 80 threshold much of the time, so same-form documents would be HELD;
+the pile-intersection vocabulary scores 94–100. (C) short forms (15–16 terms) are letterhead + a few labels: Correction Notice
+(Standard)'s pile vocabulary scores **100** against Correction Notice (Extended) — vocabulary cannot separate the two layouts
+the census split correctly by `titleLines`. RULE: sample-seeded templates carry the grouping's `census_signature` and match
+only when the target's census fingerprint `isMatch`es it AND the vocabulary clears the threshold; retroactive for existing
+templates in censused sources (Kevin D5). Vocabulary-only stays for legacy templates, labelled provisional.
+**NEXT:** Kevin's seven decisions (§9) → S1 in a fresh session (substrate + the matching gate; harness
+`verify_templates_from_samples` with the §7 matrix as fixtures) → mockup session for the done card → S2–S4. Standing items
+unchanged (fixture-vs-live drift, owner-less buckets, guided removal, 1e/inspection/min-fee, Kevin's item-6 markup, billing).
